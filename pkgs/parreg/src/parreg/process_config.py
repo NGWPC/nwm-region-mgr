@@ -5,50 +5,49 @@ import re
 from pathlib import Path
 from . import config_schema as cs
 
-def recursive_substitute(model: Any, context: dict[str, Any]) -> Any:
+def expand_with_vpu(string_with_vpu: str, context: dict) -> list:
     """
-    Recursively substitute placeholders in a Pydantic model, dictionary, or string.
+    Expand a string with {vpu_list} placeholders using a list of VPU codes from the context.
+    """
     
+    if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
+        return [string_with_vpu.format(**context)]
+    return [string_with_vpu.format(**{**context, "vpu_list": vpu}) for vpu in context["vpu_list"]]
+
+
+def recursive_substitute(obj: Any, context: dict) -> Any:
+    """
+    Recursively substitute placeholders in config, be it a Pydantic model, dictionary, or string.
     Args:
-        model: A Pydantic model instance, a dictionary, or a string.
+        obj: A Pydantic model instance, a dictionary, or a string.
         context: A dictionary of substitution variables.
-    
-    Return:
+
+    Returns:
         The Pydantic model instance, dictionary or string after substitution
-
     """
+    
+    if isinstance(obj, BaseModel):
+        # Convert Pydantic model to dict, substitute, then reconstruct the model
+        data = obj.model_dump()
+        substituted = recursive_substitute(data, context)
+        return obj.__class__(**substituted)
+    
+    elif isinstance(obj, dict):
+        return {k: recursive_substitute(v, context) for k, v in obj.items()}
+    
+    elif isinstance(obj, str):
+        try:
+            if '{vpu_list}' in obj and 'vpu_list' in context:
+                # If the string contains {vpu} and vpu_list is in context, expand it and substitute the placeholders
+                return expand_with_vpu(obj, context)            
+            else: # Otherwise, just substitute the placeholders
+                return obj.format(**context)
+        except KeyError:
+            return obj  # leave unchanged if context is incomplete
 
-    if isinstance(model, BaseModel):
-        # For Pydantic models, iterate over their fields
-        items = model.__dict__.items()
-    elif isinstance(model, dict):
-        # For dictionaries, iterate over the keys and values
-        items = model.items()
-    elif isinstance(model, str):
-        # For strings, perform the substitution directly
-        pattern = r'\{([^}]+)\}'
-        matches = re.findall(pattern, model)
-        new_value = model
-        for match in matches:
-            if match in context:
-                new_value = new_value.replace(f'{{{match}}}', str(context[match]))
-        return new_value  # Return the modified string if it's just a string
     else:
-        # If the model is not a dictionary, string, or BaseModel, return it unchanged
-        return model
-
-    # Iterate over items in the model (whether it's a BaseModel or dictionary)
-    for field_name, value in items:
-        if isinstance(value, (BaseModel, dict, str)):
-            # Recursively substitute for nested models, dictionaries, or strings
-            new_value = recursive_substitute(value, context)
-            if isinstance(model, BaseModel):
-                setattr(model, field_name, new_value)
-            else:
-                model[field_name] = new_value
-
-    return model
-
+        return obj  # return as-is if not str, dict, or BaseModel
+    
 
 def validate_by_section(config:dict) -> dict:
     """
@@ -62,13 +61,16 @@ def validate_by_section(config:dict) -> dict:
         Dictionary of config after validation
 
     """
-
+    # Define the mapping of section names to Pydantic models
     section_map = {
         'general': cs.GeneralConfig,
-        'file_io': cs.FileIOConfig,
-        'algorithms': cs.Algorithm,
+        'donor': cs.DonorConfig,
+        'attr_datasets': cs.AttrDatasets,
+        'output': cs.OutputConfig,
+        'algorithms': cs.AlgorithmConfig,
     }
 
+    # Define the mapping of algorithm names to Pydantic models
     algorithm_map = {
         'general': cs.AlgoGeneral,
         'gower': cs.Gower,
@@ -108,6 +110,39 @@ def validate_by_section(config:dict) -> dict:
 
     return valid_config       
 
+def find_occurrences(obj, target, path=""):
+    """
+    Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
+    
+    Args:
+        obj: The object to search (can be a Pydantic model, dictionary, or list).
+        target: The target string to find. 
+    
+    returns:
+        A list of paths where the target string occurs.
+    """
+    occurrences = []
+
+    if isinstance(obj, BaseModel):
+        obj = obj.model_dump(exclude_unset=True)
+
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            new_path = f"{path}.{k}" if path else k
+            occurrences.extend(find_occurrences(v, target, new_path))
+    
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            new_path = f"{path}[{i}]"
+            occurrences.extend(find_occurrences(item, target, new_path))
+    
+    elif isinstance(obj, str):
+        if target in obj:
+            occurrences.append(path)
+    
+    return occurrences
+
+
 def load_and_validate_config(file_path: str):
     """
     Load a YAML file, validate its structure using Pydantic, and substitue placeholders in the config.
@@ -124,13 +159,17 @@ def load_and_validate_config(file_path: str):
         validated_config = validate_by_section(data)
         config = cs.Config(**validated_config)
 
-        # substitute placeholders in the config
+        # resolve placeholders in the config
         context = {
             "domain": config.general.domain,
             "run_name": config.general.run_name,
-            "base_dir": config.file_io.base_dir,
-        }        
-        config = recursive_substitute(config, context) 
+            "base_dir": config.general.base_dir,
+            "vpu_list": config.general.vpu_list,
+        }
+        config = recursive_substitute(config, context)
+
+        # additional validation after substitution
+        config.donor.check_files()
 
         return config
         

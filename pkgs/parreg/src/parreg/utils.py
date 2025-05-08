@@ -5,7 +5,39 @@ import yaml
 from pathlib import Path
 from typing import Union
 from pydantic import BaseModel
+from typing import Optional, List, Dict, Set, Union, Any
+import pyarrow.parquet as pq
 
+
+def remove_nulls(d):
+    """
+    Recursively remove None values from a dictionary or list.
+    This function traverses the input data structure and removes any keys with None values
+    or any elements that are None in lists. It also removes empty dictionaries.
+    
+    Parameters
+    ----------
+    d : dict or list
+        The input data structure to clean. It can be a dictionary or a list. 
+    
+    Returns 
+    -------
+    dict or list
+        The cleaned data structure with None values and empty dictionaries removed.
+
+    """
+    
+    if isinstance(d, dict):
+        return {
+            k: remove_nulls(v)
+            for k, v in d.items()
+            if v is not None and remove_nulls(v) != {}
+        }
+    elif isinstance(d, list):
+        return [remove_nulls(v) for v in d if v is not None]
+    else:
+        return d
+    
 
 def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path]):
     """
@@ -63,9 +95,29 @@ def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path])
         
         with open(file_path, "w") as f:
             InlineListDumper.add_representer(list, represent_inline_list)
-            yaml.dump(data.model_dump(), f, Dumper=InlineListDumper, sort_keys=False)
+            yaml.dump(remove_nulls(data.model_dump()), f, Dumper=InlineListDumper, sort_keys=False)
     
     else:
         raise ValueError("Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel")
     
+def check_columns(file: Path | str, columns: Set[str]):
+    """Check if the required columns are present in the file."""
 
+    if isinstance(file, str):
+        file = Path(file)
+
+    if not file.exists():
+        raise FileNotFoundError(f"File not found: {file}")
+    
+    suffix = file.suffix.lower()
+    if suffix == ".csv":
+        columns_present = [col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()]
+    elif suffix == ".parquet":
+        #df = pq.ParquetFile(file).read().to_pandas(nrows=0)
+        columns_present = [col.lower() for col in pq.ParquetFile(file).schema.names]
+    else:
+        raise ValueError("Only .csv and .parquet files are supported")
+
+    missing_cols = set(columns) - set(columns_present)
+    if missing_cols:
+        raise ValueError(f"Missing columns in {file}: {missing_cols}")

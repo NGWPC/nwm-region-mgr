@@ -9,6 +9,7 @@ import yaml
 import re
 import pandas as pd
 import pyarrow.parquet as pq
+from .utils import check_columns
 
 class GeneralConfig(BaseModel):
 
@@ -29,6 +30,84 @@ class GeneralConfig(BaseModel):
     algorithm_list: List[str] = Field()
     """Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch')."""
 
+    base_dir: Path | str = Field()
+    """Base directory for the regionalization run. All output files will be saved here. Recommended to store all inputs here too."""
+
+    hydrofabric_file: Path | str | List[Path] | List[str] = Field()
+    """Path to the hydrofabric file(s) of the domain/vpu(s). This file is used to determine the spatial structure of the data."""
+
+class MetricEvalPeriod(BaseModel):
+    col_name: str
+    value: str
+    """Configuration for the evaluation period of metrics to be used for screening donors."""
+
+class MetricThreshold(BaseModel):
+    min: Optional[float] = None
+    max: Optional[float] = None
+    absolute: Optional[bool] = None
+
+    @model_validator(mode="after")
+    def validate_either_field_exists(self):
+        if not self.min and not self.max:
+            raise ValueError(f"At least one of 'min' or 'max' must be provided.")
+        return self
+
+class DonorConfig(BaseModel):
+    id_name: str
+    donor_ngen_cwt_file: Path | str
+    donor_gage_file: Path | str
+    donor_stats_file: Optional[Path | str] = None
+    metric_eval_period: Optional[MetricEvalPeriod] = None
+    metric_threshold: Optional[Dict[str, MetricThreshold]] = None
+
+        
+    def check_files(self):
+        """ Validate that the required columns are present in donor files. """
+
+        check_columns(self.donor_ngen_cwt_file, [self.id_name])
+        check_columns(self.donor_gage_file, [self.id_name])    
+
+        # Skip metric validation if metric_threshold is empty or None
+        if not self.metric_threshold:
+            return self
+        
+        # Check if donor_stats_file is provided and exists
+        if not self.donor_stats_file or not Path(self.donor_stats_file).exists():
+            raise ValueError(f"donor_stats_file not found at: {self.donor_stats_file}")
+
+        # Check if donor_stats_file has the required columns
+        cols_metric = {k.lower() for k in self.metric_threshold.keys()}
+        col_period = {self.metric_eval_period.col_name.lower()}
+        cols_all = cols_metric.union(col_period | {self.id_name.lower()})        
+        check_columns(self.donor_stats_file, cols_all)
+
+    
+    def screen_donors(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Screen donors based on the metric thresholds and evaluation period."""
+        
+        if not self.metric_threshold:
+            return df
+        
+        # Filter based on the evaluation period
+        if self.metric_eval_period:
+            periods = df[self.metric_eval_period.col_name].unique()
+            if self.metric_eval_period.value not in periods:
+                raise ValueError(f"Column {self.metric_eval_period.value} not found in {self.donor_stats_file}.")
+            else:
+                # Filter the DataFrame based on the evaluation period
+                df = df[df[self.metric_eval_period.col_name] == self.metric_eval_period.value]
+
+        # Apply metric thresholds
+        for col, threshold in self.metric_threshold.items():
+            if threshold.absolute:
+                df[col] = df[col].abs()
+            if threshold.min is not None:
+                df = df[df[col] >= threshold.min]
+            if threshold.max is not None:
+                df = df[df[col] <= threshold.max]
+
+        return df['gage_id'].unique().tolist()
+    
 class AttrDatasetConfig(BaseModel):
     attr_list: Optional[list] = None
     attr_select_file: Optional[Path | str] = None
@@ -37,9 +116,8 @@ class AttrDatasetConfig(BaseModel):
     @model_validator(mode="after")
     def validate_either_field_exists(self):
         if not self.attr_list and not self.attr_select_file:
-            raise ValueError(
-                f"At least one of 'attr_list' or 'attr_select_file' must be provided."
-            )
+            raise ValueError(f"At least one of 'attr_list' or 'attr_select_file' must be provided."
+                             " If both are provided, 'attr_list' takes priority.")
         return self
     
     
@@ -91,10 +169,18 @@ class AttrDatasetConfig(BaseModel):
 
         return df_data[['divide_id'] + self.attr_list]             
 
-class OutputConfig(BaseModel):
+class AttrDatasets(BaseModel):
+    hlr: Optional[AttrDatasetConfig] = None
+    ngen: Optional[AttrDatasetConfig] = None
+    hydroatlas: Optional[AttrDatasetConfig] = None
+    streamcat: Optional[AttrDatasetConfig] = None
+    nhdplus: Optional[AttrDatasetConfig] = None
+    camels: Optional[AttrDatasetConfig] = None
+
+class OutputSection(BaseModel):
     save: bool
     path: Path | str
-    format: Optional[str]
+    format: Optional[str] = None
 
     @model_validator(mode='after')
     def check_format_if_dir(cls, values):
@@ -102,14 +188,11 @@ class OutputConfig(BaseModel):
             raise ValueError(f"'format' must be specified if 'path' is a directory: {Path(values.path)}")
 
         return values
-    
 
-class FileIOConfig(BaseModel):
-    base_dir: Path | str
-    crosswalk_dir: Optional[Path]
-    donor_gage_file: Optional[Path]
-    attr_datasets: Dict[str, AttrDatasetConfig]
-    output: Dict[str, OutputConfig]
+class OutputConfig(BaseModel):
+    pairs: OutputSection
+    attr_data_final: OutputSection
+    config_final: OutputSection
 
 
 class AlgoGeneral(BaseModel):
@@ -165,7 +248,7 @@ class Birch(AlgoGeneral):
     max_resample: int
 
 
-class Algorithm(BaseModel):
+class AlgorithmConfig(BaseModel):
     general: AlgoGeneral
     gower: Optional[Gower] = None
     urf: Optional[URF] = None
@@ -177,5 +260,33 @@ class Algorithm(BaseModel):
 
 class Config(BaseModel):
     general: GeneralConfig
-    file_io: FileIOConfig
-    algorithms: Algorithm
+    donor: DonorConfig
+    attr_datasets: AttrDatasets
+    output: OutputConfig
+    algorithms: AlgorithmConfig
+
+    @model_validator(mode='after')
+    def check_required_algorithms_present(self):
+        required = set(self.general.algorithm_list)
+        defined = set(self.algorithms.model_dump(exclude_unset=True).keys())
+
+        missing = required - defined
+        if missing:
+            raise ValueError(
+                f"The following algorithms are listed in 'general.algorithm_list' "
+                f"but missing from the 'algorithms' section: {missing}"
+            )
+        return self
+
+    @model_validator(mode='after')
+    def check_required_attr_datasets_present(self):
+        required = set(self.general.attr_dataset_list)
+        defined = set(self.attr_datasets.model_dump(exclude_unset=True).keys())
+
+        missing = required - defined
+        if missing:
+            raise ValueError(
+                f"The following attribute datasets are listed in 'general.attr_dataset_list' "
+                f"but missing from the 'attr_datasets' section: {missing}"
+            )
+        return self
