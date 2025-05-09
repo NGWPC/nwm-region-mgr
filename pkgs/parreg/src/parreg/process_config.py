@@ -4,16 +4,24 @@ from pydantic import BaseModel,ValidationError
 import re
 from pathlib import Path
 from . import config_schema as cs
+from . import utils
+import logging
+logger = logging.getLogger(__name__)
 
-def expand_with_vpu(string_with_vpu: str, context: dict) -> list:
+def expand_with_vpu(string_with_vpu: str, context: dict) -> dict:
+    
     """
     Expand a string with {vpu_list} placeholders using a list of VPU codes from the context.
+    Returns a dictionary where keys are vpu codes and values are the formatted strings.
     """
-    
-    if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
-        return [string_with_vpu.format(**context)]
-    return [string_with_vpu.format(**{**context, "vpu_list": vpu}) for vpu in context["vpu_list"]]
 
+    if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
+        return {"default": string_with_vpu.format(**context)}
+
+    return {
+        vpu: string_with_vpu.format(**{**context, "vpu_list": vpu})
+        for vpu in context["vpu_list"]
+    }
 
 def recursive_substitute(obj: Any, context: dict) -> Any:
     """
@@ -169,8 +177,15 @@ def load_and_validate_config(file_path: str):
         config = recursive_substitute(config, context)
 
         # additional validation after substitution
-        config.donor.check_files()
-
+        #config.donor.check_files()
+        out = config.output.config_final
+        if out.save:
+            logger.info(f"Saving config to {out.path}")
+            if Path(out.path).is_file():
+                utils.save_data(config, Path(out.path))
+            elif Path(out.path).is_dir():                
+                utils.save_data(config, Path(out.path, 'config_final.' + out.format))
+        
         return config
         
     except ValidationError as e:

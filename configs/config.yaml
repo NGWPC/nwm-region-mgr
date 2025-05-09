@@ -2,16 +2,16 @@
 general:
   run_name: 'run_ngen_hlr'
   domain: 'conus'
-  vpu_list: ['01', '02']
+  vpu_list: ['01']
   attr_dataset_list: ['ngen', 'hlr']
-  algorithm_list: ['gower', 'urf']
+  algorithm_list: ['gower']
   base_dir: '/home/yuqiong.liu/work/data/ngen_reg'
   hydrofabric_file: '{base_dir}/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
 
 donor:
   id_name: 'gage_id'
-  donor_ngen_cwt_file: '{base_dir}/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
   donor_gage_file: '{base_dir}/gages_nwm4_calib_all.csv'
+  donor_ngen_cwt_file: '{base_dir}/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
   donor_stats_file:  '{base_dir}/donor_stats/stats_calib_valid_{domain}.csv'
   metric_eval_period:
     col_name: 'evalPeriod'
@@ -50,6 +50,10 @@ output:
       save: True
       path: '{base_dir}/outputs/{run_name}/config_final.yaml'
       format: 
+    spatial_distance:
+      save: True
+      path: '{base_dir}/outputs/{run_name}/spatial_distance'
+      format: 'parquet'
 
 ### algorithm parameters
 algorithms:

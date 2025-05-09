@@ -113,7 +113,6 @@ def check_columns(file: Path | str, columns: Set[str]):
     if suffix == ".csv":
         columns_present = [col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()]
     elif suffix == ".parquet":
-        #df = pq.ParquetFile(file).read().to_pandas(nrows=0)
         columns_present = [col.lower() for col in pq.ParquetFile(file).schema.names]
     else:
         raise ValueError("Only .csv and .parquet files are supported")
@@ -121,3 +120,16 @@ def check_columns(file: Path | str, columns: Set[str]):
     missing_cols = set(columns) - set(columns_present)
     if missing_cols:
         raise ValueError(f"Missing columns in {file}: {missing_cols}")
+
+def read_table(file_path):
+    file_path = Path(file_path)
+    if not file_path.exists():
+        raise FileNotFoundError(f"{file_path} does not exist")
+
+    suffix = file_path.suffix.lower()
+    if suffix == ".csv":
+        return pd.read_csv(file_path)
+    elif suffix == ".parquet":
+        return pd.read_parquet(file_path)
+    else:
+        raise ValueError(f"Unsupported file format: {suffix}")

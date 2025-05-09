@@ -9,7 +9,9 @@ import yaml
 import re
 import pandas as pd
 import pyarrow.parquet as pq
-from .utils import check_columns
+from .utils import check_columns, read_table
+import logging
+logger = logging.getLogger(__name__)
 
 class GeneralConfig(BaseModel):
 
@@ -33,18 +35,30 @@ class GeneralConfig(BaseModel):
     base_dir: Path | str = Field()
     """Base directory for the regionalization run. All output files will be saved here. Recommended to store all inputs here too."""
 
-    hydrofabric_file: Path | str | List[Path] | List[str] = Field()
+    hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
     """Path to the hydrofabric file(s) of the domain/vpu(s). This file is used to determine the spatial structure of the data."""
 
 class MetricEvalPeriod(BaseModel):
-    col_name: str
-    value: str
     """Configuration for the evaluation period of metrics to be used for screening donors."""
 
+    col_name: str
+    """Name of the column in the donor stats file that contains the evaluation period."""
+
+    value: str
+    """Value of the evaluation period to filter the donor stats file."""
+
+
 class MetricThreshold(BaseModel):
+    """Configuration for the thresholds of metrics to be used for screening donors."""
+
     min: Optional[float] = None
+    """Minimum threshold for the metric. If None, no minimum threshold is applied."""
+
     max: Optional[float] = None
-    absolute: Optional[bool] = None
+    """Maximum threshold for the metric. If None, no maximum threshold is applied."""
+
+    absolute: Optional[bool] = False
+    """If True, apply the absolute value of the metric before applying the thresholds."""
 
     @model_validator(mode="after")
     def validate_either_field_exists(self):
@@ -54,14 +68,26 @@ class MetricThreshold(BaseModel):
 
 class DonorConfig(BaseModel):
     id_name: str
+    """Name of the column in the donor files that contains the unique identifier for each gage."""
+
+    donor_gage_file: Optional[Path | str] = None
+    """Path to the gage file containing the gage IDs to be used as donors. 
+    When not provided, initial donor gages will be inferred from donor_ngen_cwt_file instead."""
+
     donor_ngen_cwt_file: Path | str
-    donor_gage_file: Path | str
+    """Path to the crosswalk file mapping the donor gage_id with NextGen catchment divide_id."""
+ 
     donor_stats_file: Optional[Path | str] = None
+    """Optional: Path to the donor stats file containing the metrics to be used for screening donors."""
+
     metric_eval_period: Optional[MetricEvalPeriod] = None
+    """Optional: evaluation period of metrics to be used for screening donors."""
+
     metric_threshold: Optional[Dict[str, MetricThreshold]] = None
+    """Optional: dictionary of metric thresholds to be used for screening donors."""
 
         
-    def check_files(self):
+    def _check_files(self):
         """ Validate that the required columns are present in donor files. """
 
         check_columns(self.donor_ngen_cwt_file, [self.id_name])
@@ -82,13 +108,56 @@ class DonorConfig(BaseModel):
         check_columns(self.donor_stats_file, cols_all)
 
     
-    def screen_donors(self, df: pd.DataFrame) -> pd.DataFrame:
+    def get_qualified_donors(self, vpu: str = None, donors:list = None) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
         
-        if not self.metric_threshold:
-            return df
+        # check if the required files/columns are present
+        self._check_files()
         
-        # Filter based on the evaluation period
+        # determine inital donor gages
+        df_cwt = read_table(self.donor_ngen_cwt_file) 
+        if not donors:
+            if self.donor_gage_file:
+                logger.info(f"Initial donors based on all gages in {self.donor_gage_file}")
+                df = read_table(self.donor_gage_file)
+                donors = df[self.id_name].unique().tolist()
+            else:
+                logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")                
+                donors = df_cwt[self.id_name].unique().tolist()
+        
+        donor_cats = df_cwt['divide_id'].unique().tolist()
+        
+        # filter by vpu if provided
+        if vpu:
+            if 'vpuid' in df_cwt.columns:
+                df_cwt = df_cwt[df_cwt['vpuid'] == vpu] 
+                donors = df_cwt[self.id_name].unique().tolist()
+                donor_cats = df_cwt['divide_id'].unique().tolist()
+                logger.info(f"Number of initial donors for vpu {vpu}: {len(donors)} gages, {len(donor_cats)} divides")
+            else:
+                raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")    
+        else:
+            logger.info(f"Number of initial donors from all vpus: {len(donors)} gages, {len(donor_cats)} divides")
+
+        # if no metric thresholds are provided, return all gage_ids
+        if not self.metric_threshold:
+            logger.info("No metric thresholds provided. Using all gages in the initial list as donors.")
+            return {'gage_id': donors, 'divide_id': donor_cats}
+
+        # read the donor stats file
+        df = read_table(self.donor_stats_file)
+
+        # filter based on initial donors
+        df = df[df[self.id_name].isin(donors)]
+        if df.empty:
+            logger.warning(f"No matching gages found in {self.donor_stats_file} for the initial donors. Returning the initial list.")
+            return {'gage_id': donors, 'divide_id': donor_cats}
+        else:
+            if len(df) < len(donors):
+                logger.warning(f"Some gages in the initial list are not found in {self.donor_stats_file}. "
+                               f"Only {len(df)} gages are found. Using these as donors.")                
+                
+        # filter based on the evaluation period
         if self.metric_eval_period:
             periods = df[self.metric_eval_period.col_name].unique()
             if self.metric_eval_period.value not in periods:
@@ -96,8 +165,10 @@ class DonorConfig(BaseModel):
             else:
                 # Filter the DataFrame based on the evaluation period
                 df = df[df[self.metric_eval_period.col_name] == self.metric_eval_period.value]
+        else:
+            logger.warning("No evaluation period provided. Using all periods in {self.donor_stats_file}.")
 
-        # Apply metric thresholds
+        # filter based on metric thresholds
         for col, threshold in self.metric_threshold.items():
             if threshold.absolute:
                 df[col] = df[col].abs()
@@ -106,7 +177,16 @@ class DonorConfig(BaseModel):
             if threshold.max is not None:
                 df = df[df[col] <= threshold.max]
 
-        return df['gage_id'].unique().tolist()
+        donors =  df[self.id_name].unique().tolist()
+        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)]['divide_id'].unique().tolist()
+
+        logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} divides")
+
+        # check if any donors are left after filtering
+        if not donors:
+            raise ValueError("No donors left after filtering. Check the metric thresholds and evaluation period.")
+        
+        return {'gage_id': donors, 'divide_id': donor_cats}
     
 class AttrDatasetConfig(BaseModel):
     attr_list: Optional[list] = None
@@ -193,6 +273,7 @@ class OutputConfig(BaseModel):
     pairs: OutputSection
     attr_data_final: OutputSection
     config_final: OutputSection
+    spatial_distance: OutputSection
 
 
 class AlgoGeneral(BaseModel):
@@ -290,3 +371,4 @@ class Config(BaseModel):
                 f"but missing from the 'attr_datasets' section: {missing}"
             )
         return self
+    
