@@ -8,7 +8,6 @@ from pyproj import CRS
 from joblib import Parallel, delayed
 
 
-
 def ensure_projected(gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070") -> gpd.GeoDataFrame:
     """Reprojects a GeoDataFrame to a projected CRS if currently in geographic CRS."""
     crs = CRS.from_user_input(gdf.crs)
@@ -51,12 +50,10 @@ def compute_pairwise_centroid_distances(
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing the IDs from both groups and their corresponding centroid distances.
-        The DataFrame will have the following columns:
-            - id_col_a_id_return: ID from group_a
-            - id_col_b_id_return: ID from group_b
-            - centroid_distance: Distance between centroids of the two geometries in km.  
+        A DataFrame containing the centroid distances between each pair of polygons from the two GeoDataFrames in (km),
+        where the columns are indexed by polygon ids from group_a, and the rows are indexed by polygon ids from group_b.
     """
+
     # Precompute centroids to speed up
     centroids_a = group_a.geometry.centroid
     centroids_b = group_b.geometry.centroid
@@ -84,14 +81,26 @@ def compute_pairwise_centroid_distances(
     
     # Flatten the results
     flat_results = [item for sublist in results for item in sublist]
-    return pd.DataFrame(flat_results)
+    #return pd.DataFrame(flat_results)
+
+    df_long = pd.DataFrame(flat_results)
+    #print(df_long.head())
+    df_wide = df_long.pivot(
+        index=id_col_b_return, 
+        columns=id_col_a_return, 
+        values="centroid_distance"
+    )
+
+
+    return df_wide
+    
 
 
 # get the valid attributes to be processed based on the valid attributes of the first receiver
 def get_valid_attrs(recs0, recs1, dfAttr0, attrs, config):
    
-    dt1 = dfAttr0.query("tag == 'receiver'")
-    dt1 = dt1[dt1.id.isin(recs0) & ~dt1.id.isin(recs1)].iloc[0]
+    dt1 = dfAttr0[~dfAttr0['is_donor']]
+    dt1 = dt1[dt1.divide_id.isin(recs0) & ~dt1.divide_id.isin(recs1)].iloc[0]
     dt1 = dt1[~dt1.index.isin(config['non_attr_cols'])]
     vars = config['non_attr_cols'] + dt1.index[~dt1.isna()].tolist()
     dfAttr = dfAttr0[vars]      
@@ -147,35 +156,38 @@ def apply_pca(data0, min_var=0.8):
 def apply_donor_constraints(rec, donors, dists, pars, dfAttr):
   
     # 1. narrow down to donors with the same snowiness category
-    snowy = dfAttr.query("id == @rec & tag=='receiver'")['snowy']
-    snowy1 = dfAttr.query("id in @donors & tag=='donor'")['snowy']
-    ix1 = snowy1.isin(snowy)
+    #snowy = dfAttr.query("id == @rec & tag=='receiver'")['snowy']
+    #snowy1 = dfAttr.query("id in @donors & tag=='donor'")['snowy']
+    snowy = dfAttr[dfAttr['divide_id'] == rec]['snowy'].values[0]
+    snowy1 = dfAttr[dfAttr['divide_id'].isin(donors)]['snowy'].values
+    #ix1 = snowy1.isin(snowy)
+    ix1 = np.isin(snowy1, snowy)
     if sum(ix1) > 0:
         dists = np.array(dists)[ix1]
         donors = np.array(donors)[ix1]
   
     # 2. further narrow down to those donors within maximum spatial distance defined
-    ix1 = dists <= pars['maxSpaDist']
+    ix1 = dists <= pars['max_spa_dist']
     if sum(ix1) > 0:
         dists = np.array(dists)[ix1]
         donors = np.array(donors)[ix1]  
   
     # 3. further narrow down based on screening attributes
-    for att1 in pars['maxAttrDiff'].keys():
-        ix1 = abs(np.array(dfAttr.query("id==@rec & tag=='receiver'")[att1]) - \
-            np.array(dfAttr.query("id in @donors & tag=='donor'")[att1])) \
-                <= pars['maxAttrDiff'][att1]
-        if sum(ix1) > 0:
-            dists = np.array(dists)[ix1]
-            donors = np.array(donors)[ix1]  
+    # for att1 in pars['max_attr_diff'].keys():
+    #     ix1 = abs(np.array(dfAttr[~dfAttr['is_donor']][att1]) - \
+    #         np.array(dfAttr[dfAttr['is_donor']][att1])) \
+    #             <= pars['max_attr_diff'][att1]
+    #     if sum(ix1) > 0:
+    #         dists = np.array(dists)[ix1]
+    #         donors = np.array(donors)[ix1]  
         
     # 4. further narrow down to donors in the same HSG
-    hsg = dfAttr.query("id==@rec & tag=='receiver'")['hsg']
-    hsg1 = dfAttr.query("id in @donors & tag=='donor'")['hsg']
-    ix1 = hsg1.isin(hsg)
-    if sum(ix1) > 0:
-        dists = np.array(dists)[ix1]
-        donors = np.array(donors)[ix1]
+    # hsg = dfAttr.query("id==@rec & tag=='receiver'")['hsg']
+    # hsg1 = dfAttr.query("id in @donors & tag=='donor'")['hsg']
+    # ix1 = hsg1.isin(hsg)
+    # if sum(ix1) > 0:
+    #     dists = np.array(dists)[ix1]
+    #     donors = np.array(donors)[ix1]
   
     return donors, dists
 
@@ -196,25 +208,26 @@ def assign_donors(scenario, donors, receivers,pars, dist_attr, dist_spatial, dfA
         # if applicable, choose donor with the smallest attribute distances
         if dist_attr is not None:
             ix0 = [donors.index(i) for i in donors1]
-            dist_attr = [dist_attr[i] for i in ix0]
-            ix1 = np.argsort(dist_attr)[range(min(len(dist_attr),pars['nDonorMax']))] 
+            dist_attr = [dist_attr.iloc[i] for i in ix0]
+            ix1 = np.argsort(dist_attr)[range(min(len(dist_attr),pars['n_donor_max']))] 
             dist_attr1 = np.array(dist_attr)[ix1]
             dists1 = dists1[ix1]
             donors1 = np.array(donors1)[ix1] 
                        
         # order donors by spatial distance
         ix1 = np.argsort(dists1)
-        dists1 = dists1[ix1]        
+        #dists1 = dists1.iloc[ix1]
+        dists1 = dists1[ix1]         
         donors1 = np.array(donors1)[ix1]
         
         # if the number of donors is greater than nDonorMax, ignore the additional donors
-        nd_max = min(len(dists1),pars['nDonorMax'])
+        nd_max = min(len(dists1),pars['n_donor_max'])
         dists1 = dists1[range(nd_max)]
         donors1 = donors1[range(nd_max)]        
 
         # add the donor/receiver pair to the pairing table    
         if len(donors1)>0:
-            pair1 = {'id': rec1, 'tag': scenario, 'donor': donors1[0],
+            pair1 = {'divide_id': rec1, 'tag': scenario, 'donor': donors1[0],
                 'distSpatial': dists1[0],
                 'donors': ','.join(donors1), 
                 'distSpatials': ','.join(map(str,pd.Series(dists1)))}

@@ -9,7 +9,7 @@ import yaml
 import re
 import pandas as pd
 import pyarrow.parquet as pq
-from .utils import check_columns, read_table
+from .utils import check_columns, read_table, save_data
 import logging
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,9 @@ class GeneralConfig(BaseModel):
 
     vpu_list: Optional[Union[List[str], str]] = Field()
     """List of VPU codes to include. Can be a list or a single string (e.g., '01', ['01','02'])."""
+
+    n_procs: int = Field()
+    """Number of processors to use for parallel processing. Default is 1. Set to -1 to use all available processors."""
 
     attr_dataset_list: List[str] = Field()
     """List of attribute dataset names to use. Valid options include 'ngen', 'hlr'."""
@@ -268,6 +271,29 @@ class OutputSection(BaseModel):
             raise ValueError(f"'format' must be specified if 'path' is a directory: {Path(values.path)}")
 
         return values
+
+    def get_file_path(self, file_name: Optional[str] = None) -> Path:
+        """Get the file path for saving the output."""
+
+        file_path = Path(self.path)
+        if file_name:
+            file_path = file_path / file_name
+        if not file_path.suffix and self.format:
+            file_path = file_path.with_suffix(f".{self.format}")
+
+        return file_path
+    
+    def save_data(self, data: Any, file_name: Optional[str] = None):
+        """Save the data to the specified path and format."""
+        if not self.save:
+            return
+
+        if not self.format:
+            raise ValueError(f"'format' must be specified if 'save' is True: {self.path}")
+
+        file_path = self.get_file_path(file_name)
+
+        save_data(data, file_path)
 
 class OutputConfig(BaseModel):
     pairs: OutputSection

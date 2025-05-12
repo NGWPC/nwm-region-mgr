@@ -39,7 +39,7 @@ def remove_nulls(d):
         return d
     
 
-def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path]):
+def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path], index=False):
     """
     Save data to disk in an appropriate format based on its type and file extension.
 
@@ -83,9 +83,9 @@ def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path])
     
     if isinstance(data, pd.DataFrame):
         if file_path.suffix == ".csv":
-            data.to_csv(file_path, index=False)
+            data.to_csv(file_path, index=index)
         elif file_path.suffix == '.parquet':
-            data.to_parquet(file_path, index=False,)
+            data.to_parquet(file_path, index=index)
         else:
             raise Exception('Only csv and parquet formats are supported for saving DataFrame')
     

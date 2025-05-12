@@ -3,8 +3,9 @@ general:
   run_name: 'run_ngen_hlr'
   domain: 'conus'
   vpu_list: ['01']
+  n_procs: 3
   attr_dataset_list: ['ngen', 'hlr']
-  algorithm_list: ['gower']
+  algorithm_list: ['kmeans']
   base_dir: '/home/yuqiong.liu/work/data/ngen_reg'
   hydrofabric_file: '{base_dir}/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
 
