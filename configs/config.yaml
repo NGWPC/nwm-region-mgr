@@ -5,9 +5,10 @@ general:
   vpu_list: ['01']
   n_procs: 3
   attr_dataset_list: ['ngen', 'hlr']
-  algorithm_list: ['kmeans']
+  algorithm_list: ['hdbscan']
   base_dir: '/home/yuqiong.liu/work/data/ngen_reg'
   hydrofabric_file: '{base_dir}/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
+  id_name: 'divide_id'
 
 donor:
   id_name: 'gage_id'

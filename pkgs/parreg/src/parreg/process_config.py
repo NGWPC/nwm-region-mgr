@@ -1,10 +1,14 @@
 import yaml
-from typing import Any
+import pandas as pd
+import geopandas as gpd
+import time
+from typing import Any, Tuple
 from pydantic import BaseModel,ValidationError
 import re
 from pathlib import Path
+from functools import reduce
 from . import config_schema as cs
-from . import utils
+from . import utils, utils_algo
 import logging
 logger = logging.getLogger(__name__)
 
@@ -192,3 +196,171 @@ def load_and_validate_config(file_path: str):
         raise Exception(f'Validation Error: {e}')
     except Exception as e:
         raise Exception(f'Error loading YAML file: {e}')
+
+def get_donors_receivers(config:cs.Config, vpu: str) -> Tuple[list, list, pd.DataFrame]:
+    """
+    Get the donors and receivers for a given VPU from the config.
+    Args:
+        config: the config object
+        vpu: the VPU code
+    Returns:
+        donors: list of donors
+        receivers: list of receivers
+        df_spatial_dist: dataframe of pairwise spatial distances between donors and receivers
+    """
+
+    # get id_name from the config
+    id_name = config.general.id_name
+
+    # first get the qualified donors
+    donors_dict = config.donor.get_qualified_donors(vpu)
+    donors0 = donors_dict[id_name]
+
+    # read the hydrofabric file and get the donors and receivers    
+    gdf = gpd.read_file(config.general.hydrofabric_file[vpu], layer = 'divides')
+    gdf_donors = gdf[gdf[id_name].isin(donors0)]
+    donors = gdf_donors[id_name].tolist()
+   
+    # check if all donors are in the hydrofabric
+    donors_missing = set(donors0) - set(donors)
+    if len(donors_missing) > 0:
+        logger.warning(f"Missing donors in hydrofabric: {donors_missing}")
+    
+    gdf_receivers = gdf[~gdf[id_name].isin(donors0)]
+    # randomly sample a small number of receivers to speed up testing
+    gdf_receivers = gdf_receivers.sample(n=500, replace=False)    
+    receivers = gdf_receivers[id_name].tolist()
+    logger.info(f"Total number of donors in vpu {vpu}: {len(donors)}")
+    logger.info(f"Total number of receivers in vpu {vpu}: {len(receivers)}")
+
+    # compute the donor-receiver spatial distance
+    out = config.output.spatial_distance
+    dist_file = Path(out.path, 'donor_receiver_dist_' + config.general.domain + '_vpu' + vpu + '.' + out.format)
+    if dist_file.exists():
+        logger.info(f"Spatial distance file already exists: {dist_file}\nSkip computing.")
+        df_spatial_dist = utils.read_table(dist_file)
+        #TODO: check if the spatial distance data includes all pairs of donors and receivers
+        # if not, identify the missing pairs and compute the distance for them
+    else:
+        logger.info(f'Compute donor-receiver spatial distance ...')
+        start_time = time.time()
+        df_spatial_dist = utils_algo.compute_pairwise_centroid_distances(gdf_donors, gdf_receivers, id_name, id_name)
+        end_time = time.time()
+        logger.info(f"Spatial distance comptued in {end_time - start_time:.4f} seconds")
+
+        # save the spatial distance data
+        if out.save:
+            if not dist_file.parent.is_dir():
+                dist_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            utils.save_data(df_spatial_dist, dist_file, index=True)
+            logger.info(f"Spatial distance data saved to {dist_file}")  
+    
+    return donors, receivers, df_spatial_dist
+
+def process_attr_data(
+        config:cs.Config, 
+        vpu: str, 
+        donors: list, 
+        receivers: list, 
+        df_spatial_dist:pd.DataFrame,
+) -> Tuple[list, list, pd.DataFrame]:
+
+    """
+    Process the attribute data for a given VPU from the config.
+    Args:
+        config: the config object
+        vpu: the VPU code
+        donors: list of donors
+        receivers: list of receivers
+        df_spatial_dist: dataframe of pairwise spatial distances between donors and receivers
+    Returns:
+        donors: new list of donors (after screening wtih the attribute data) 
+        receivers: new list of receivers (after screening wtih the attribute data)
+        df_attrs_all: dataframe of all attribute data for the donors and receivers
+    """
+    id_name = config.general.id_name
+    datasets = config.general.attr_dataset_list
+    logger.info(f"Processing attribute data for VPU {vpu} ... datasets: {datasets}")
+
+    df_attrs_all = []
+    for dataset_name in datasets:
+
+        dataset = getattr(config.attr_datasets, dataset_name)
+        df_attrs = dataset.get_attr_data()
+        
+        df_attrs = df_attrs.rename(columns=lambda x: x if x == id_name else f"{dataset_name}_{x}")
+
+        # subset the attribute data to only include donors and receivers for the current VPU
+        #TODO: add functionality to add additional donors from neighboring VPUs
+        df_attrs = df_attrs[df_attrs[id_name].isin(donors + receivers)]
+
+        df_attrs_all.append(df_attrs)
+
+    # Merge all attribute data frames column-wise, based on divide_id
+    df_attrs_all= reduce(
+        lambda left, right: pd.merge(left, right, on=id_name, how='outer'),
+        df_attrs_all
+    )
+
+    # add a column to indicate whether the divide_id is a donor or receiver
+    df_attrs_all['is_donor'] = df_attrs_all[id_name].isin(donors)
+    # move the is_donor column to be the second column
+    df_attrs_all = df_attrs_all[[id_name, 'is_donor'] + [col for col in df_attrs_all.columns if col not in [id_name, 'is_donor']]]
+
+    # check if all donors have attribute data
+    if not set(donors).issubset(df_attrs_all[id_name]):
+        logger.warning(f"Not all donors are included in the attribute data for VPU {vpu}.")
+        missing_donors = [x for x in donors if x not in df_attrs_all[id_name].values]
+        print("Missing donors:")
+        print(missing_donors)
+
+    # check if all receivers have attribute data
+    if not set(receivers).issubset(df_attrs_all[id_name]):
+        logger.warning(f"Not all receivers are included in the attribute data for VPU {vpu}.")
+        missing_receivers = [x for x in receivers if x not in df_attrs_all[id_name].values]
+        print("Missing receivers:")
+        print(missing_receivers)
+
+    # reset donor and receiver lists based on the attribute data
+    donors = df_attrs_all[df_attrs_all['is_donor']][id_name].tolist()
+    receivers = df_attrs_all[~df_attrs_all['is_donor']][id_name].tolist()
+
+    print(f'Number of donors with attribute data: {len(donors)}')
+    print(f'Number of receivers with attribute data: {len(receivers)}')
+
+    # check if all donors in attribute data are inlcuded in the columns of the spatial distance data
+    if not set(donors).issubset(df_spatial_dist.columns):
+        logger.warning(f"Not all donors in the attribute data are present in the spatial distance data for VPU {vpu}.")
+        missing_donor_ids = [x for x in donors if x not in df_spatial_dist.columns]
+        print("Missing donors:")
+        print(missing_donor_ids)
+
+    # check if all receivers in attribute data are inlcuded in the indices of the spatial distance data
+    if not set(receivers).issubset(df_spatial_dist.index):
+        logger.warning(f"Not all receivers in the attribute data are present in the spatial distance data for VPU {vpu}.")
+        missing_receiver_ids = [x for x in receivers if x not in df_spatial_dist.index]
+        print("Missing receivers:")
+        print(missing_receiver_ids)
+
+    # sort the attribute data by is_donor and divide_id
+    df_attrs_all = df_attrs_all.sort_values(by=['is_donor', id_name], ascending=[False, True])
+
+    # check percentage of missing data
+    df_missing = df_attrs_all.isna().mean()*100
+    if df_missing.sum()>0:
+        logger.warning(f"There are missing data for attributes in vpu {vpu}")
+        print("Missing data percentage for each attribute:")
+        print(df_missing.loc[df_missing > 0])
+
+    # save the attribute data
+    out1 = config.output.attr_data_final
+    if out1.save:
+        if not Path(out1.path).is_dir():
+            Path(out1.path).mkdir(parents=True, exist_ok=True)
+        out_file = Path(out1.path, 'attr_' + config.general.domain + '_vpu' + vpu + '.' + out1.format)
+
+        logger.info(f"Saving attribute data to {out_file}")
+        utils.save_data(df_attrs_all, out_file)
+
+    return donors, receivers, df_attrs_all

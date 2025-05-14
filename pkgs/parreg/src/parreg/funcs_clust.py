@@ -42,7 +42,7 @@ def func(config, dfAttrAll, dist_spatial, method):
     
         recs = list()
         if dfDonorAll.shape[0]>0:
-            recs = np.unique(dfDonorAll['id'])
+            recs = np.unique(dfDonorAll['divide_id'])
             
         # when all receivers are paired with donors, exit
         if len([x for x in recs0 if x in recs]) == len(recs0):
@@ -72,7 +72,7 @@ def func(config, dfAttrAll, dist_spatial, method):
             recs1 = receivers.copy()
             if dfDonorAll.shape[0]>0:
                 recs1 = [x for x in recs1 if x not in dfDonorAll['divide_id'].tolist()]
-            print("\n======= " + str(len(recs1)) + ' ' + str1 + " basins ========")           
+            print("\n======= " + str(len(recs1)) + ' ' + str1 + " catchments ========")           
             if len(recs1)==0:
                 continue
 
@@ -82,7 +82,7 @@ def func(config, dfAttrAll, dist_spatial, method):
             
             # for those already processed, assign "label_done"
             if dfDonorAll.shape[0]>0:
-                labels[[len(donors)+receivers.index(x) for x in receivers if x in dfDonorAll['id'].tolist()]] = label_done
+                labels[[len(donors)+receivers.index(x) for x in receivers if x in dfDonorAll['divide_id'].tolist()]] = label_done
             
             # identify donors iteratively
             dfDonorSnow = pd.DataFrame() # data frame to hold donor table for the current snowy group
@@ -137,7 +137,7 @@ def func(config, dfAttrAll, dist_spatial, method):
                         if dfDonorSnow.shape[0] == 0:
                             recs2 = recs1.copy()
                         else:
-                            recs2 = [x for x in recs1 if x not in dfDonorSnow['id'].tolist()]
+                            recs2 = [x for x in recs1 if x not in dfDonorSnow['divide_id'].tolist()]
                         if len(recs2) > 0:
                             print("\nAlgorithm converged without donors identified for " + str(len(recs2)) + " receivers ... use proximity for these receivers")
                             dfDonorSnow = pd.concat((dfDonorSnow, utils_algo.assign_donors('proximity', donors, recs2, config, None, dist_spatial, dfAttrAll)),axis=0) 
@@ -159,7 +159,7 @@ def func(config, dfAttrAll, dist_spatial, method):
             # add to the final donor table
             dfDonorAll = pd.concat((dfDonorAll, dfDonorSnow),axis=0)
             
-        # end of loop snow1 (to separate processing for snow and non-snow dominated receivers)
+        # end of loop snow1 (to separately processing for snow and non-snow dominated receivers)
     # end of loop kround (to use valid attributes)
 
     return dfDonorAll
@@ -246,7 +246,7 @@ def identify_donor_by_cluster(donors, ll, labels, receivers, dfDonorAll, dfDonor
                 labels1[[receivers.index(x)+len(donors) for x in recs3]] = label_done
                                     
         else:
-            # for receivers in clusters with number of donors smaller than 'nDonorMax', no further clustering is needed
+            # for receivers in clusters with number of donors smaller than 'n_donor_max', no further clustering is needed
             # identify donors from the current cluster
             dfDonor = pd.concat((dfDonor, utils_algo.assign_donors('main', donors1, recs2, config, None, dist_spatial, dfAttrAll)),axis=0)
             labels1[labels == ll] = label_done  

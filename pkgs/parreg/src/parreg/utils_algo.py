@@ -58,6 +58,10 @@ def compute_pairwise_centroid_distances(
     centroids_a = group_a.geometry.centroid
     centroids_b = group_b.geometry.centroid
     
+    # Ensure projected centroids_a and centroids_b so that pairwise distance can be properly calculated
+    centroids_a = ensure_projected(centroids_a)
+    centroids_b = ensure_projected(centroids_b)
+
     a_ids = group_a[id_col_a].values
     b_ids = group_b[id_col_b].values
     

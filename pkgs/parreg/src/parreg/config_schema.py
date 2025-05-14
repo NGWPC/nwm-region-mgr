@@ -41,6 +41,10 @@ class GeneralConfig(BaseModel):
     hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
     """Path to the hydrofabric file(s) of the domain/vpu(s). This file is used to determine the spatial structure of the data."""
 
+    id_name: Optional[str] = Field(default='divide_id')
+    """Name of the id column of catchment divide in the hydrofabric file. Default is 'divide_id'. 
+    id_name is used to identify catchments in the attribute datasets and the output files.""" 
+
 class MetricEvalPeriod(BaseModel):
     """Configuration for the evaluation period of metrics to be used for screening donors."""
 
@@ -70,8 +74,9 @@ class MetricThreshold(BaseModel):
         return self
 
 class DonorConfig(BaseModel):
-    id_name: str
-    """Name of the column in the donor files that contains the unique identifier for each gage."""
+    id_name: str = Field(default='gage_id')
+    """Name of the column in the donor files that contains the unique identifier for each gage. Default is 'gage_id'.
+    id_name is used to identify gages in the donor files."""
 
     donor_gage_file: Optional[Path | str] = None
     """Path to the gage file containing the gage IDs to be used as donors. 
@@ -111,7 +116,7 @@ class DonorConfig(BaseModel):
         check_columns(self.donor_stats_file, cols_all)
 
     
-    def get_qualified_donors(self, vpu: str = None, donors:list = None) -> list:
+    def get_qualified_donors(self, vpu: str = None, donors:list = None, id_name:str = 'divide_id') -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
         
         # check if the required files/columns are present
@@ -128,14 +133,14 @@ class DonorConfig(BaseModel):
                 logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")                
                 donors = df_cwt[self.id_name].unique().tolist()
         
-        donor_cats = df_cwt['divide_id'].unique().tolist()
+        donor_cats = df_cwt[id_name].unique().tolist()
         
         # filter by vpu if provided
         if vpu:
             if 'vpuid' in df_cwt.columns:
                 df_cwt = df_cwt[df_cwt['vpuid'] == vpu] 
                 donors = df_cwt[self.id_name].unique().tolist()
-                donor_cats = df_cwt['divide_id'].unique().tolist()
+                donor_cats = df_cwt[id_name].unique().tolist()
                 logger.info(f"Number of initial donors for vpu {vpu}: {len(donors)} gages, {len(donor_cats)} divides")
             else:
                 raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")    
@@ -145,7 +150,7 @@ class DonorConfig(BaseModel):
         # if no metric thresholds are provided, return all gage_ids
         if not self.metric_threshold:
             logger.info("No metric thresholds provided. Using all gages in the initial list as donors.")
-            return {'gage_id': donors, 'divide_id': donor_cats}
+            return {'gage_id': donors, id_name: donor_cats}
 
         # read the donor stats file
         df = read_table(self.donor_stats_file)
@@ -154,7 +159,7 @@ class DonorConfig(BaseModel):
         df = df[df[self.id_name].isin(donors)]
         if df.empty:
             logger.warning(f"No matching gages found in {self.donor_stats_file} for the initial donors. Returning the initial list.")
-            return {'gage_id': donors, 'divide_id': donor_cats}
+            return {'gage_id': donors, id_name: donor_cats}
         else:
             if len(df) < len(donors):
                 logger.warning(f"Some gages in the initial list are not found in {self.donor_stats_file}. "
@@ -181,7 +186,7 @@ class DonorConfig(BaseModel):
                 df = df[df[col] <= threshold.max]
 
         donors =  df[self.id_name].unique().tolist()
-        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)]['divide_id'].unique().tolist()
+        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
 
         logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} divides")
 
@@ -189,7 +194,7 @@ class DonorConfig(BaseModel):
         if not donors:
             raise ValueError("No donors left after filtering. Check the metric thresholds and evaluation period.")
         
-        return {'gage_id': donors, 'divide_id': donor_cats}
+        return {'gage_id': donors, id_name: donor_cats}
     
 class AttrDatasetConfig(BaseModel):
     attr_list: Optional[list] = None
@@ -226,7 +231,7 @@ class AttrDatasetConfig(BaseModel):
             
             self.attr_list = df_attrs[df_attrs['select'] == 1]['attr_name'].to_list()
 
-    def get_attr_data(self) -> pd.DataFrame:
+    def get_attr_data(self, id_name:str = 'divide_id') -> pd.DataFrame:
         """load attribute data filtered by selected attributes."""
 
         self._get_selected_attrs()
@@ -250,7 +255,7 @@ class AttrDatasetConfig(BaseModel):
         if missing_cols:
             raise ValueError(f"Missing attributes in data file: {missing_cols}")
 
-        return df_data[['divide_id'] + self.attr_list]             
+        return df_data[[id_name] + self.attr_list]             
 
 class AttrDatasets(BaseModel):
     hlr: Optional[AttrDatasetConfig] = None
