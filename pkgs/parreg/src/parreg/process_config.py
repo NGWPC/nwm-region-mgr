@@ -9,6 +9,7 @@ from pathlib import Path
 from functools import reduce
 from . import config_schema as cs
 from . import utils, utils_algo
+from . import funcs_clust, funcs_dist
 import logging
 logger = logging.getLogger(__name__)
 
@@ -364,3 +365,95 @@ def process_attr_data(
         utils.save_data(df_attrs_all, out_file)
 
     return donors, receivers, df_attrs_all
+
+def set_snow_flag(df_attrs: pd.DataFrame, min_snow_frac: float) -> pd.DataFrame:
+    """
+    Add a boolean 'snowy' column to existing attributes dataframe to indicate whether a catchment is snow-driven or not
+
+    Args:
+        df_attrs: DataFrame of attributes for donors and receivers
+        min_snow_frac: minimum snow_frac value for a catchment to be considered snow-driven
+    
+    Returns:
+        New DataFrame of attributes with a new boolean column added to indicate whether the catchment is snow-driven
+
+    """
+
+    # detemine whether the catchments are snowy (as snowy and non-snowy catchments are processed separately)
+    if 'snow_frac' in [col.lower() for col in df_attrs.columns]:
+        # check if the snow_frac column is present in the attribute data
+        n1 = df_attrs['snow_frac'].isna().sum()
+        if n1 > 0:
+            logger.warning(f"There are {n1} missing values in the snow_frac column. Setting them to non-snowy.")
+            df_attrs['snow_frac'] = df_attrs['snow_frac'].fillna(0.0)
+        
+        # create a new column to indicate whether the catchment is snowy
+        df_attrs['snowy'] = df_attrs['snow_frac'].apply(lambda x: True if x >= min_snow_frac else False)
+
+    else:
+        # if the snow_frac column is not present, set all catchments to non-snowy
+        df_attrs['snowy'] = False
+        logger.warning(f"The snow_frac column is not present in the attribute data. All catchments are set to non-snowy.")    
+    
+    return df_attrs
+
+
+def generate_pairing(conf: cs.Config, vpu: str, df_attrs_all:pd.DataFrame, df_dist_spatial:pd.DataFrame):
+    """
+    For a given VPU, generate donor-receiver pairing results for each algorithm selected in the configuration, 
+    based on the attributes and spatial distance DataFrame
+
+    Args:
+        conf: configuration
+        vpu: VPU to conduct pairing algorithms for
+        df_attrs_all: dataframe containing the full attribute data for all receivers and donors
+        df_dist_spatail: dataframe containing the pair-wise spatial distance between donors and receivers
+    
+    Returns:
+        None. The pairing results are saved to desgined locations based on the configurations
+        
+    """
+
+    # pairing/regionalization algorithms
+    functions = {
+                'proximity': funcs_dist,
+                'gower': funcs_dist,
+                'urf': funcs_dist,
+                'kmeans': funcs_clust,
+                'kmedoids': funcs_clust,
+                'hdbscan': funcs_clust,
+                'birch': funcs_clust,
+                }
+    funcs = functions.keys()
+
+    # run only those methods specified to run in the config file
+    funcs = [x for x in funcs if x in conf.general.algorithm_list]
+
+    print(f"Algorithms to run: {funcs}")    
+
+    # loop through regionalization algorithms and scenarios to generate donor-receiver pairings for each algorithm/scenario combination
+    for func1 in funcs:
+        file_name_str = 'pairs_' + func1 + '_' + conf.general.domain + '_vpu' + vpu
+        outfile = conf.output.pairs.get_file_path(file_name_str)
+        
+        if outfile.exists():
+            logger.info(f'Pair file already exist: {outfile}')
+            logger.info(f'Skip the current run: {func1}')
+            continue
+
+        logger.info(f'\nIdentify donors for VPU {vpu} using: {func1}\n') 
+        df_donor_all  = pd.DataFrame()   
+        start_time = time.time()
+        config1 = conf.model_dump()['algorithms'][func1]
+        config1['njobs'] = conf.model_dump()['general']['n_procs']
+        config1['non_attr_cols'] = ['divide_id', 'is_donor', 'snowy']
+        config1['attrs'] = {'main': [x for x in df_attrs_all.columns if x not in config1['non_attr_cols']],
+                            'base': ['ngen_elevation','ngen_slope', 'ngen_aspect']}
+        df_donor_all = functions[func1].func(config1, df_attrs_all, df_dist_spatial, func1)  
+                       
+        # save donor receiver pairing to csv file    
+        conf.output.pairs.save_data(df_donor_all, outfile)
+        logger.info(f'Pairing results saved to {outfile}')  
+
+        end_time = time.time()
+        logger.info(f"Execution time: {end_time - start_time:.4f} seconds")  
