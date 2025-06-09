@@ -228,9 +228,9 @@ def get_donors_receivers(config:cs.Config, vpu: str) -> Tuple[list, list, pd.Dat
         logger.warning(f"Missing donors in hydrofabric: {donors_missing}")
     
     gdf_receivers = gdf[~gdf[id_name].isin(donors0)]
-    # randomly sample a small number of receivers to speed up testing
-    gdf_receivers = gdf_receivers.sample(n=500, replace=False)    
+    #gdf_receivers = gdf_receivers.sample(n=500, replace=False) # randomly sample a small number of receivers for testing   
     receivers = gdf_receivers[id_name].tolist()
+
     logger.info(f"Total number of donors in vpu {vpu}: {len(donors)}")
     logger.info(f"Total number of receivers in vpu {vpu}: {len(receivers)}")
 
@@ -313,36 +313,32 @@ def process_attr_data(
     if not set(donors).issubset(df_attrs_all[id_name]):
         logger.warning(f"Not all donors are included in the attribute data for VPU {vpu}.")
         missing_donors = [x for x in donors if x not in df_attrs_all[id_name].values]
-        print("Missing donors:")
-        print(missing_donors)
+        logger.info(f"Missing donors: {missing_donors}")
 
     # check if all receivers have attribute data
     if not set(receivers).issubset(df_attrs_all[id_name]):
         logger.warning(f"Not all receivers are included in the attribute data for VPU {vpu}.")
         missing_receivers = [x for x in receivers if x not in df_attrs_all[id_name].values]
-        print("Missing receivers:")
-        print(missing_receivers)
+        logger.info(f"Missing receivers: {missing_receivers}")
 
     # reset donor and receiver lists based on the attribute data
     donors = df_attrs_all[df_attrs_all['is_donor']][id_name].tolist()
     receivers = df_attrs_all[~df_attrs_all['is_donor']][id_name].tolist()
 
-    print(f'Number of donors with attribute data: {len(donors)}')
-    print(f'Number of receivers with attribute data: {len(receivers)}')
+    logger.info(f'Number of donors with attribute data: {len(donors)}')
+    logger.info(f'Number of receivers with attribute data: {len(receivers)}')
 
     # check if all donors in attribute data are inlcuded in the columns of the spatial distance data
     if not set(donors).issubset(df_spatial_dist.columns):
         logger.warning(f"Not all donors in the attribute data are present in the spatial distance data for VPU {vpu}.")
         missing_donor_ids = [x for x in donors if x not in df_spatial_dist.columns]
-        print("Missing donors:")
-        print(missing_donor_ids)
+        logger.info(f"Missing donors: {missing_donor_ids}")
 
     # check if all receivers in attribute data are inlcuded in the indices of the spatial distance data
     if not set(receivers).issubset(df_spatial_dist.index):
         logger.warning(f"Not all receivers in the attribute data are present in the spatial distance data for VPU {vpu}.")
         missing_receiver_ids = [x for x in receivers if x not in df_spatial_dist.index]
-        print("Missing receivers:")
-        print(missing_receiver_ids)
+        logger.info(f"Missing receivers: {missing_receiver_ids}")
 
     # sort the attribute data by is_donor and divide_id
     df_attrs_all = df_attrs_all.sort_values(by=['is_donor', id_name], ascending=[False, True])
@@ -351,8 +347,7 @@ def process_attr_data(
     df_missing = df_attrs_all.isna().mean()*100
     if df_missing.sum()>0:
         logger.warning(f"There are missing data for attributes in vpu {vpu}")
-        print("Missing data percentage for each attribute:")
-        print(df_missing.loc[df_missing > 0])
+        logger.info(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
 
     # save the attribute data
     out1 = config.output.attr_data_final
@@ -426,12 +421,12 @@ def generate_pairing(conf: cs.Config, vpu: str, df_attrs_all:pd.DataFrame, df_di
                 }
     funcs = functions.keys()
 
-    # run only those methods specified to run in the config file
+    # run only those algorithms specified to run in the config file
     funcs = [x for x in funcs if x in conf.general.algorithm_list]
 
-    print(f"Algorithms to run: {funcs}")    
+    logger.info(f"Algorithms to run: {funcs}")    
 
-    # loop through regionalization algorithms and scenarios to generate donor-receiver pairings for each algorithm/scenario combination
+    # loop through regionalization algorithms to generate donor-receiver pairings for each algorithm/scenario combination
     for func1 in funcs:
         file_name_str = 'pairs_' + func1 + '_' + conf.general.domain + '_vpu' + vpu
         outfile = conf.output.pairs.get_file_path(file_name_str)
