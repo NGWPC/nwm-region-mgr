@@ -1,25 +1,24 @@
-"""
-This module defines classes for validating the configuration
-"""
+"""Defines classes for validating the configuration."""
 
-from typing import Optional, List, Dict, Union, Any
-from pydantic import BaseModel, model_validator, ValidationError, Field, ConfigDict
+import logging
 from pathlib import Path
-import yaml
-import re
+from typing import Any, Dict, List, Optional, Union
+
 import pandas as pd
 import pyarrow.parquet as pq
+from pydantic import BaseModel, Field, model_validator
+
 from .utils import check_columns, read_table, save_data
-import logging
+
 logger = logging.getLogger(__name__)
 
-class GeneralConfig(BaseModel):
 
+class GeneralConfig(BaseModel):
     """Configuration for the general section of the regionalization pipeline."""
-    
+
     run_name: str = Field()
     """User-defined name for the run, used to name the output directory."""
-   
+
     domain: str = Field()
     """NWM domain to run regionalization. Valid options include 'conus', 'ak', 'hi', 'prvi'."""
 
@@ -36,14 +35,17 @@ class GeneralConfig(BaseModel):
     """Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch')."""
 
     base_dir: Path | str = Field()
-    """Base directory for the regionalization run. All output files will be saved here. Recommended to store all inputs here too."""
+    """Base directory for the regionalization run. All output files will be saved here. 
+    Recommended to store all inputs here too."""
 
     hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
-    """Path to the hydrofabric file(s) of the domain/vpu(s). This file is used to determine the spatial structure of the data."""
+    """Path to the hydrofabric file(s) of the domain/vpu(s). 
+    This file is used to determine the spatial structure of the data."""
 
-    id_name: Optional[str] = Field(default='divide_id')
+    id_name: Optional[str] = Field(default="divide_id")
     """Name of the id column of catchment divide in the hydrofabric file. Default is 'divide_id'. 
-    id_name is used to identify catchments in the attribute datasets and the output files.""" 
+    id_name is used to identify catchments in the attribute datasets and the output files."""
+
 
 class MetricEvalPeriod(BaseModel):
     """Configuration for the evaluation period of metrics to be used for screening donors."""
@@ -69,12 +71,16 @@ class MetricThreshold(BaseModel):
 
     @model_validator(mode="after")
     def validate_either_field_exists(self):
+        """Validate that at least one of 'min' or 'max' is provided."""
         if not self.min and not self.max:
-            raise ValueError(f"At least one of 'min' or 'max' must be provided.")
+            raise ValueError("At least one of 'min' or 'max' must be provided.")
         return self
 
+
 class DonorConfig(BaseModel):
-    id_name: str = Field(default='gage_id')
+    """Configuration for donor selection."""
+
+    id_name: str = Field(default="gage_id")
     """Name of the column in the donor files that contains the unique identifier for each gage. Default is 'gage_id'.
     id_name is used to identify gages in the donor files."""
 
@@ -84,7 +90,7 @@ class DonorConfig(BaseModel):
 
     donor_ngen_cwt_file: Path | str
     """Path to the crosswalk file mapping the donor gage_id with NextGen catchment divide_id."""
- 
+
     donor_stats_file: Optional[Path | str] = None
     """Optional: Path to the donor stats file containing the metrics to be used for screening donors."""
 
@@ -97,17 +103,15 @@ class DonorConfig(BaseModel):
     metric_threshold: Optional[Dict[str, MetricThreshold]] = None
     """Optional: dictionary of metric thresholds to be used for screening donors."""
 
-        
     def _check_files(self):
-        """ Validate that the required columns are present in donor files. """
-
+        """Validate that the required columns are present in donor files."""
         check_columns(self.donor_ngen_cwt_file, [self.id_name])
-        check_columns(self.donor_gage_file, [self.id_name])    
+        check_columns(self.donor_gage_file, [self.id_name])
 
         # Skip metric validation if metric_threshold is empty or None
         if not self.metric_threshold:
             return self
-        
+
         # Check if donor_stats_file is provided and exists
         if not self.donor_stats_file or not Path(self.donor_stats_file).exists():
             raise ValueError(f"donor_stats_file not found at: {self.donor_stats_file}")
@@ -115,47 +119,47 @@ class DonorConfig(BaseModel):
         # Check if donor_stats_file has the required columns
         cols_metric = {k.lower() for k in self.metric_threshold.keys()}
         col_period = {self.metric_eval_period.col_name.lower()}
-        cols_all = cols_metric.union(col_period | {self.id_name.lower()})        
+        cols_all = cols_metric.union(col_period | {self.id_name.lower()})
         check_columns(self.donor_stats_file, cols_all)
 
-    
-    def get_qualified_donors(self, vpu: str = None, donors:list = None, id_name:str = 'divide_id') -> list:
+    def get_qualified_donors(self, vpu: str = None, donors: list = None, id_name: str = "divide_id") -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
-        
         # check if the required files/columns are present
         self._check_files()
-        
+
         # determine inital donor gages
-        df_cwt = read_table(self.donor_ngen_cwt_file) 
+        df_cwt = read_table(self.donor_ngen_cwt_file)
         if not donors:
             if self.donor_gage_file:
                 logger.info(f"Initial donors based on all gages in {self.donor_gage_file}")
                 df = read_table(self.donor_gage_file)
                 donors = df[self.id_name].unique().tolist()
             else:
-                logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")                
+                logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")
                 donors = df_cwt[self.id_name].unique().tolist()
-        
-        #donor_cats = df_cwt[id_name].unique().tolist()
+
+        # donor_cats = df_cwt[id_name].unique().tolist()
         donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
-        
+
         # filter by vpu if provided
         if vpu:
-            if 'vpuid' in df_cwt.columns:
-                df_cwt = df_cwt[df_cwt['vpuid'] == vpu] 
+            if "vpuid" in df_cwt.columns:
+                df_cwt = df_cwt[df_cwt["vpuid"] == vpu]
                 donors0 = df_cwt[self.id_name].unique().tolist()
                 donors = [d for d in donors if d in donors0]
                 donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
-                logger.info(f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments")
+                logger.info(
+                    f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments"
+                )
             else:
-                raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")    
+                raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")
         else:
             logger.info(f"Number of initial donors from all VPUs: {len(donors)} gages, {len(donor_cats)} catchments")
 
         # if no metric thresholds are provided, return all gage_ids
         if not self.metric_threshold:
             logger.info("No metric thresholds provided. Using all gages in the initial list as donors.")
-            return {'gage_id': donors, id_name: donor_cats}
+            return {"gage_id": donors, id_name: donor_cats}
 
         # read the donor stats file
         df = read_table(self.donor_stats_file)
@@ -163,13 +167,18 @@ class DonorConfig(BaseModel):
         # filter based on initial donors
         df = df[df[self.id_name].isin(donors)]
         if df.empty:
-            logger.warning(f"No matching gages found in {self.donor_stats_file} for the initial donors. Returning the initial list.")
-            return {'gage_id': donors, id_name: donor_cats}
+            logger.warning(
+                f"No matching gages found in {self.donor_stats_file} for the initial donors. "
+                f"Returning the initial list."
+            )
+            return {"gage_id": donors, id_name: donor_cats}
         else:
             if len(df) < len(donors):
-                logger.warning(f"Some gages in the initial list are not found in {self.donor_stats_file}. "
-                               f"Only {len(df)} gages are found. Using these as donors.")                
-                
+                logger.warning(
+                    f"Some gages in the initial list are not found in {self.donor_stats_file}. "
+                    f"Only {len(df)} gages are found. Using these as donors."
+                )
+
         # filter based on the evaluation period
         if self.metric_eval_period:
             periods = df[self.metric_eval_period.col_name].unique()
@@ -190,7 +199,7 @@ class DonorConfig(BaseModel):
             if threshold.max is not None:
                 df = df[df[col] <= threshold.max]
 
-        donors =  df[self.id_name].unique().tolist()
+        donors = df[self.id_name].unique().tolist()
         donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
 
         logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments")
@@ -198,60 +207,65 @@ class DonorConfig(BaseModel):
         # check if any donors are left after filtering
         if not donors:
             logger.info("No donors left after filtering. Check the metric thresholds and evaluation period.")
-        
-        return {'gage_id': donors, id_name: donor_cats}
-    
+
+        return {"gage_id": donors, id_name: donor_cats}
+
+
 class AttrDatasetConfig(BaseModel):
+    """Configuration for attribute datasets used in the regionalization process."""
+
     attr_list: Optional[list] = None
     attr_select_file: Optional[Path | str] = None
     attr_data_file: Optional[Path | str] = None
 
     @model_validator(mode="after")
     def validate_either_field_exists(self):
+        """Validate that at least one of 'attr_list' or 'attr_select_file' is provided."""
         if not self.attr_list and not self.attr_select_file:
-            raise ValueError(f"At least one of 'attr_list' or 'attr_select_file' must be provided."
-                             " If both are provided, 'attr_list' takes priority.")
+            raise ValueError(
+                "At least one of 'attr_list' or 'attr_select_file' must be provided."
+                " If both are provided, 'attr_list' takes priority."
+            )
         return self
-    
-    
-    def _get_selected_attrs(self):        
-        """Private method to load the list of selected attributes."""
 
+    def _get_selected_attrs(self):
+        """Private method to load the list of selected attributes."""
         # determine list of attributes to use from either attr_list or attr_select_file
         # if both are provided, attr_list takes priority
-        if self.attr_list:            
+        if self.attr_list:
             # make sure attr_list is valid
             attrs1 = [x for x in self.attr_list if x not in pq.ParquetFile(self.attr_data_file).schema.names]
             if attrs1:
-                raise ValueError(f'These attributes {attrs1} are not found in {self.attr_data_file}')
+                raise ValueError(f"These attributes {attrs1} are not found in {self.attr_data_file}")
         else:
             attr_select_path = Path(self.attr_select_file)
             if not attr_select_path.exists():
                 raise FileNotFoundError(f"Select file not found: {self.attr_select_file}")
 
             df_attrs = pd.read_csv(attr_select_path)
-            
-            if 'select' not in df_attrs.columns or 'attr_name' not in df_attrs.columns:
-                raise ValueError(f"Missing required columns 'select' and/or 'attr_name' in file: {self.attr_select_file}")
-            
-            self.attr_list = df_attrs[df_attrs['select'] == 1]['attr_name'].to_list()
 
-    def get_attr_data(self, id_name:str = 'divide_id') -> pd.DataFrame:
-        """load attribute data filtered by selected attributes."""
+            if "select" not in df_attrs.columns or "attr_name" not in df_attrs.columns:
+                raise ValueError(
+                    f"Missing required columns 'select' and/or 'attr_name' in file: {self.attr_select_file}"
+                )
 
+            self.attr_list = df_attrs[df_attrs["select"] == 1]["attr_name"].to_list()
+
+    def get_attr_data(self, id_name: str = "divide_id") -> pd.DataFrame:
+        """Load attribute data filtered by selected attributes."""
         self._get_selected_attrs()
 
         if not self.attr_data_file:
             raise FileNotFoundError("No attr_data_file provided.")
-        
+
         attr_data_path = Path(self.attr_data_file)
         if not attr_data_path.exists():
             raise FileNotFoundError(f"Attribute data file not found: {self.attr_data_file}")
 
         suffix = attr_data_path.suffix.lower()
-        if suffix == '.csv':
+        if suffix == ".csv":
             df_data = pd.read_csv(attr_data_path)
-        elif suffix == '.parquet':
+        elif suffix == ".parquet":
             df_data = pd.read_parquet(attr_data_path)
         else:
             raise ValueError(f"Unsupported file format: {suffix}")
@@ -260,9 +274,12 @@ class AttrDatasetConfig(BaseModel):
         if missing_cols:
             raise ValueError(f"Missing attributes in data file: {missing_cols}")
 
-        return df_data[[id_name] + self.attr_list]             
+        return df_data[[id_name] + self.attr_list]
+
 
 class AttrDatasets(BaseModel):
+    """Configuration for attribute datasets that can be used in the regionalization process."""
+
     hlr: Optional[AttrDatasetConfig] = None
     ngen: Optional[AttrDatasetConfig] = None
     hydroatlas: Optional[AttrDatasetConfig] = None
@@ -270,12 +287,13 @@ class AttrDatasets(BaseModel):
     nhdplus: Optional[AttrDatasetConfig] = None
     camels: Optional[AttrDatasetConfig] = None
 
+
 class OutputSection(BaseModel):
     save: bool
     path: Path | str
     format: Optional[str] = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_format_if_dir(cls, values):
         if not Path(values.path).suffix and not values.format:
             raise ValueError(f"'format' must be specified if 'path' is a directory: {Path(values.path)}")
@@ -292,7 +310,7 @@ class OutputSection(BaseModel):
             file_path = file_path.with_suffix(f".{self.format}")
 
         return file_path
-    
+
     def save_data(self, data: Any, file_name: Optional[str] = None):
         """Save the data to the specified path and format."""
         if not self.save:
@@ -304,6 +322,7 @@ class OutputSection(BaseModel):
         file_path = self.get_file_path(file_name)
 
         save_data(data, file_path)
+
 
 class OutputConfig(BaseModel):
     pairs: OutputSection
@@ -382,7 +401,7 @@ class Config(BaseModel):
     output: OutputConfig
     algorithms: AlgorithmConfig
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_required_algorithms_present(self):
         required = set(self.general.algorithm_list)
         defined = set(self.algorithms.model_dump(exclude_unset=True).keys())
@@ -395,7 +414,7 @@ class Config(BaseModel):
             )
         return self
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_required_attr_datasets_present(self):
         required = set(self.general.attr_dataset_list)
         defined = set(self.attr_datasets.model_dump(exclude_unset=True).keys())
@@ -407,4 +426,3 @@ class Config(BaseModel):
                 f"but missing from the 'attr_datasets' section: {missing}"
             )
         return self
-    
