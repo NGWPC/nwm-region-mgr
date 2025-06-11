@@ -1,10 +1,11 @@
 import yaml
 import pandas as pd
 import geopandas as gpd
+from shapely.geometry import Point
+from shapely.ops import unary_union 
 import time
 from typing import Any, Tuple
 from pydantic import BaseModel,ValidationError
-import re
 from pathlib import Path
 from functools import reduce
 from . import config_schema as cs
@@ -198,6 +199,140 @@ def load_and_validate_config(file_path: str):
     except Exception as e:
         raise Exception(f'Error loading YAML file: {e}')
 
+def get_donor_basins(gage_file:Path, hydrofabric_file:Path, buffer: float) -> list:
+    """
+    Get the donor basins for a given VPU from the config.
+    Args:
+        gage_file: path to the donor gage file
+        hydrofabric_file: path to the hydrofabric file
+        buffer: buffer distance in km around the VPU polygon to search for donors
+    Returns:
+        donor_basins: list of donor basins (gage_ids) within the buffered VPU polygon
+    """
+
+    # read in lat/lon of all donors
+    donors = utils.read_table(gage_file)
+    if donors.empty:
+        raise ValueError(f"No donors found in the donor gage file: {gage_file}")
+    if 'longitude' not in donors.columns or 'latitude' not in donors.columns:
+        raise ValueError(f"Donor gage file must contain 'longitude' and 'latitude' columns: {gage_file}")
+    if 'gage_id' not in donors.columns:
+        raise ValueError(f"Donor gage file must contain 'gage_id' column: {gage_file}")
+    
+    # create a GeoDataFrame of donors with geometry as points
+    donor_gdf = gpd.GeoDataFrame(donors, geometry=[Point(xy) for xy in zip(donors['longitude'], donors['latitude'])], crs="EPSG:4326")
+
+    # read the hydrofabric file
+    gdf = gpd.read_file(hydrofabric_file, layer='divides')
+
+    # Project to meters for accurate distance calculations
+    donor_gdf = donor_gdf.to_crs(epsg=3857)
+    gdf = gdf.to_crs(epsg=3857)
+
+    # remove invalid geometries
+    gdf = gdf[gdf.is_valid]
+
+    # dissolve all polygons into one before bufferring
+    combined_geom = unary_union(gdf.geometry)
+
+    # Create a buffer around the VPU polygon 
+    gdf_buffered = combined_geom.buffer(buffer * 1000)
+
+    # Find donors in the buffered VPU
+    donor_basins = donor_gdf[donor_gdf.geometry.within(gdf_buffered)]['gage_id'].tolist()
+
+    if not donor_basins:
+        logger.warning("No donor basins found. Please check the donor gage file and hydrofabric file.")
+
+    return donor_basins
+
+def update_spatial_distance_donors(id_name: str,
+                                   donors_gdf: gpd.GeoDataFrame, 
+                                   receivers_gdf: gpd.GeoDataFrame, 
+                                   dist_df: pd.DataFrame,
+) -> Tuple[pd.DataFrame, bool]:
+    """
+    Update existing dataframe for pairwise spatial distance to include new donors (if any).
+    Args:
+        id_name: the name of the identifier column in the GeoDataFrames
+        donors_gdf: GeoDataFrame of new donors
+        receivers_gdf: GeoDataFrame of receivers
+        dist_df: existing pairwise spatial distance dataframe between donors and receivers
+    Returns:
+        df_spatial_dist: new dataframe of pairwise spatial distances with new donors (if any) included
+        file_changed: boolean indicating whether the file has been changed
+    """
+
+    # get new donor list
+    new_donor_ids = set(donors_gdf[id_name].values)
+
+    # filter existing distance dataframe columns to keep only new donors
+    filtered_df = dist_df.loc[:, dist_df.columns.intersection(new_donor_ids)]
+
+    # find donor IDs missing in the existing dataframe
+    missing_donors = new_donor_ids - set(filtered_df.columns)
+
+    if missing_donors:
+        # Subset new donors GeoDataFrame to only missing donors
+        missing_donors_gdf = donors_gdf[donors_gdf["divide_id"].isin(missing_donors)]
+        
+        # Compute distances for missing donors
+        missing_distances_df = utils_algo.compute_pairwise_centroid_distances(missing_donors_gdf, receivers_gdf, id_name, id_name)
+
+        # Horizontally concatenate missing donor columns to filtered dataframe
+        updated_df = pd.concat([filtered_df, missing_distances_df], axis=1)
+    else:
+        updated_df = filtered_df
+
+    # Check if the updated dataframe has changed
+    file_changed = not updated_df.equals(dist_df)
+
+    return updated_df, file_changed
+
+
+def update_spatial_distance_receivers(id_name: str,
+                                   donors_gdf: gpd.GeoDataFrame, 
+                                   receivers_gdf: gpd.GeoDataFrame, 
+                                   dist_df: pd.DataFrame,
+) -> Tuple[pd.DataFrame, bool]:
+    """
+    Update existing dataframe for pairwise spatial distance to include new receivers (if any).
+    Args:
+        id_name: the name of the identifier column in the GeoDataFrames
+        donors_gdf: GeoDataFrame of donors
+        receivers_gdf: GeoDataFrame of receivers
+        dist_df: existing pairwise spatial distance dataframe between donors and receivers
+    Returns:
+        df_spatial_dist: new dataframe of pairwise spatial distances with new donors (if any) included
+        file_changed: boolean indicating whether the file has been changed
+    """
+    # get new receiver list
+    new_receiver_ids = set(receivers_gdf[id_name].values)
+
+    # filter existing distance dataframe columns to keep only new receivers
+    filtered_df = dist_df.loc[dist_df.index.intersection(new_receiver_ids), :]
+
+    # find receiver IDs missing in the existing dataframe
+    missing_receivers = new_receiver_ids - set(filtered_df.index)
+
+    if missing_receivers:
+        # Subset new receivers GeoDataFrame to only missing receivers
+        missing_receivers_gdf = receivers_gdf[receivers_gdf["divide_id"].isin(missing_receivers)]
+
+        # Compute distances for missing receivers
+        missing_distances_df = utils_algo.compute_pairwise_centroid_distances(donors_gdf, missing_receivers_gdf, id_name, id_name)
+
+        # Vertically concatenate missing receiver rows to filtered dataframe
+        updated_df = pd.concat([filtered_df, missing_distances_df], axis=0)
+    else:
+        updated_df = filtered_df
+
+    # Check if the updated dataframe has changed
+    file_changed = not updated_df.equals(dist_df)
+
+    return updated_df, file_changed
+
+
 def get_donors_receivers(config:cs.Config, vpu: str) -> Tuple[list, list, pd.DataFrame]:
     """
     Get the donors and receivers for a given VPU from the config.
@@ -213,51 +348,103 @@ def get_donors_receivers(config:cs.Config, vpu: str) -> Tuple[list, list, pd.Dat
     # get id_name from the config
     id_name = config.general.id_name
 
-    # first get the qualified donors
-    donors_dict = config.donor.get_qualified_donors(vpu)
-    donors0 = donors_dict[id_name]
+    # get donor basins for the VPU
+    donor_basins = get_donor_basins(
+        config.donor.donor_gage_file, 
+        config.general.hydrofabric_file[vpu],
+        config.donor.buffer_km
+    )
+  
+    # determine the VPUs of the donor basins
+    df_cwt = utils.read_table(config.donor.donor_ngen_cwt_file) 
+    donor_vpus = df_cwt[df_cwt['gage_id'].isin(donor_basins)]['vpuid'].unique().tolist()
 
-    # read the hydrofabric file and get the donors and receivers    
-    gdf = gpd.read_file(config.general.hydrofabric_file[vpu], layer = 'divides')
-    gdf_donors = gdf[gdf[id_name].isin(donors0)]
-    donors = gdf_donors[id_name].tolist()
-   
-    # check if all donors are in the hydrofabric
-    donors_missing = set(donors0) - set(donors)
-    if len(donors_missing) > 0:
-        logger.warning(f"Missing donors in hydrofabric: {donors_missing}")
+    # loop through the VPUs of the donor basins to get donor & receiver catchments
+    # note that the donor basins may be from multiple VPUs, but receivers are only from the current VPU
+    gdf_donors = gpd.GeoDataFrame()
+    gdf_receivers = gpd.GeoDataFrame()
+    donor_basin_all = []
+    for vpu1 in donor_vpus:
+
+        # first get the qualified donors
+        donor_dict = config.donor.get_qualified_donors(vpu1, donor_basins)
+        donors0 = donor_dict[id_name]
+        donor_basin_all.extend(donor_dict[config.donor.id_name])
+
+        # read the hydrofabric file for the VPU
+        file1 = config.general.hydrofabric_file[vpu]
+        if vpu1 != vpu:
+            # rename the hydrofabric file to match the current VPU
+            file1 = config.general.hydrofabric_file[vpu].replace('vpu_' + vpu, 'vpu_' +vpu1)
+            # make sure the file exists
+            if not Path(file1).is_file():
+                raise FileNotFoundError(f"Hydrofabric file for VPU {vpu1} not found: {file1}")
+
+        gdf = gpd.read_file(file1, layer='divides')
+        gdf1 = gdf[gdf[id_name].isin(donors0)]
+        donors = gdf1[id_name].tolist()
     
-    gdf_receivers = gdf[~gdf[id_name].isin(donors0)]
+        # check if all donors are in the hydrofabric
+        donors_missing = set(donors0) - set(donors)
+        if len(donors_missing) > 0:
+            logger.warning(f"Missing donors in hydrofabric: {donors_missing}")
+        
+        # gather donors and receivers in GeoDataFrame
+        gdf_donors = pd.concat([gdf_donors, gdf1])
+        if vpu1 == vpu:
+            gdf_receivers = gdf[~gdf[id_name].isin(donors)]
+
+    
+    if gdf_receivers.empty:
+        raise ValueError(f"No receivers found in VPU {vpu}. Please check the hydrofabric file and donor gage file.")
+    
     #gdf_receivers = gdf_receivers.sample(n=500, replace=False) # randomly sample a small number of receivers for testing   
     receivers = gdf_receivers[id_name].tolist()
+    donors = gdf_donors[id_name].tolist()
 
-    logger.info(f"Total number of donors in vpu {vpu}: {len(donors)}")
-    logger.info(f"Total number of receivers in vpu {vpu}: {len(receivers)}")
+    logger.info(f"Total number of donor basins in VPU {vpu}: {len(donor_basin_all)}")
+    logger.info(f"Total number of donor catchments in vpu {vpu}: {len(donors)}")
+    logger.info(f"Total number of receiver catchments in vpu {vpu}: {len(receivers)}")
 
     # compute the donor-receiver spatial distance
     out = config.output.spatial_distance
     dist_file = Path(out.path, 'donor_receiver_dist_' + config.general.domain + '_vpu' + vpu + '.' + out.format)
     if dist_file.exists():
-        logger.info(f"Spatial distance file already exists: {dist_file}\nSkip computing.")
+        logger.info(f"Spatial distance file already exists: {dist_file}")
         df_spatial_dist = utils.read_table(dist_file)
-        #TODO: check if the spatial distance data includes all pairs of donors and receivers
-        # if not, identify the missing pairs and compute the distance for them
+
+        # check if the spatial distance data includes all donors and receivers
+        # if not, identify the missing donors and receivers, compute the distance for them and add to the existing dataframe
+        logger.info('Updating existing spatial distance file (if needed) to include all donors and receivers ...')
+        df_spatial_dist, file_changed1 = update_spatial_distance_donors(id_name, gdf_donors, gdf_receivers, df_spatial_dist)
+        df_spatial_dist, file_changed2 = update_spatial_distance_receivers(id_name, gdf_donors, gdf_receivers, df_spatial_dist)
+        file_changed = file_changed1 or file_changed2
+
     else:
-        logger.info(f'Compute donor-receiver spatial distance ...')
+        logger.info('Compute donor-receiver spatial distance ...')
         start_time = time.time()
         df_spatial_dist = utils_algo.compute_pairwise_centroid_distances(gdf_donors, gdf_receivers, id_name, id_name)
         end_time = time.time()
-        logger.info(f"Spatial distance comptued in {end_time - start_time:.4f} seconds")
+        logger.info(f"Spatial distance computed in {end_time - start_time:.4f} seconds")
+        file_changed = True
 
+    # save the spatial distance data
+    if out.save and file_changed:
+        if not dist_file.parent.is_dir():
+            dist_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        # if the file already exists, make a backup
+        if dist_file.is_file():
+            backup_file = dist_file.with_suffix('.bak')
+            dist_file.rename(backup_file)
+            logger.info(f"Backup of existing spatial distance file created: {backup_file}")
+        
         # save the spatial distance data
-        if out.save:
-            if not dist_file.parent.is_dir():
-                dist_file.parent.mkdir(parents=True, exist_ok=True)
-            
-            utils.save_data(df_spatial_dist, dist_file, index=True)
-            logger.info(f"Spatial distance data saved to {dist_file}")  
+        utils.save_data(df_spatial_dist, dist_file, index=True)
+        logger.info(f"Spatial distance data saved to {dist_file}")  
     
     return donors, receivers, df_spatial_dist
+
 
 def process_attr_data(
         config:cs.Config, 

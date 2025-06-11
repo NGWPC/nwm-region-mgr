@@ -88,6 +88,9 @@ class DonorConfig(BaseModel):
     donor_stats_file: Optional[Path | str] = None
     """Optional: Path to the donor stats file containing the metrics to be used for screening donors."""
 
+    buffer_km: Optional[float] = 0.0
+    """Optional: size of buffer (in km) around current VPU to identify qualified donors"""
+
     metric_eval_period: Optional[MetricEvalPeriod] = None
     """Optional: evaluation period of metrics to be used for screening donors."""
 
@@ -133,19 +136,21 @@ class DonorConfig(BaseModel):
                 logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")                
                 donors = df_cwt[self.id_name].unique().tolist()
         
-        donor_cats = df_cwt[id_name].unique().tolist()
+        #donor_cats = df_cwt[id_name].unique().tolist()
+        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
         
         # filter by vpu if provided
         if vpu:
             if 'vpuid' in df_cwt.columns:
                 df_cwt = df_cwt[df_cwt['vpuid'] == vpu] 
-                donors = df_cwt[self.id_name].unique().tolist()
-                donor_cats = df_cwt[id_name].unique().tolist()
-                logger.info(f"Number of initial donors for vpu {vpu}: {len(donors)} gages, {len(donor_cats)} divides")
+                donors0 = df_cwt[self.id_name].unique().tolist()
+                donors = [d for d in donors if d in donors0]
+                donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+                logger.info(f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments")
             else:
                 raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")    
         else:
-            logger.info(f"Number of initial donors from all vpus: {len(donors)} gages, {len(donor_cats)} divides")
+            logger.info(f"Number of initial donors from all VPUs: {len(donors)} gages, {len(donor_cats)} catchments")
 
         # if no metric thresholds are provided, return all gage_ids
         if not self.metric_threshold:
@@ -188,11 +193,11 @@ class DonorConfig(BaseModel):
         donors =  df[self.id_name].unique().tolist()
         donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
 
-        logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} divides")
+        logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments")
 
         # check if any donors are left after filtering
         if not donors:
-            raise ValueError("No donors left after filtering. Check the metric thresholds and evaluation period.")
+            logger.info("No donors left after filtering. Check the metric thresholds and evaluation period.")
         
         return {'gage_id': donors, id_name: donor_cats}
     
