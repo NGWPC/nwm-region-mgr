@@ -15,6 +15,7 @@ donor:
   donor_gage_file: '{base_dir}/gages_nwm4_calib_all.csv'
   donor_ngen_cwt_file: '{base_dir}/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
   donor_stats_file:  '{base_dir}/donor_stats/stats_calib_valid_{domain}.csv'
+  buffer_km: 200
   metric_eval_period:
     col_name: 'evalPeriod'
     value: 'full'
