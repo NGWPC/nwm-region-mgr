@@ -648,6 +648,7 @@ def generate_pairing(conf: cs.Config, vpu: str, df_attrs_all: pd.DataFrame, df_d
         df_donor_all = pd.DataFrame()
         start_time = time.time()
         config1 = conf.model_dump()["algorithms"][func1]
+        config1["max_spa_dist"] = conf.model_dump()["algorithms"]["general"]["max_spa_dist"]
         config1["njobs"] = conf.model_dump()["general"]["n_procs"]
         config1["non_attr_cols"] = ["divide_id", "is_donor", "snowy"]
         config1["attrs"] = {
