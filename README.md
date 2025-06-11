@@ -1,4 +1,4 @@
-# ngen-reginoalization
+# ngen-regionalization
 
 ## Name
 NGEN Regionalization
