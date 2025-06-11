@@ -1,7 +1,7 @@
-# ngen-verf
+# ngen-reginoalization
 
 ## Name
-ngen regionalization
+NGEN Regionalization
 
 ## Description
 This repository includes packages for conducting formulation and parameter regionalizations for NextGen modules.
