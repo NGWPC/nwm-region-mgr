@@ -55,7 +55,7 @@ def func(config, dfAttrAll, dist_spatial, method="gower"):
                 else:
                     myscores, weights = utils_algo.apply_pca(dfAttr.drop(config["non_attr_cols"], axis=1))
 
-                myscores.to_csv("myscores_1.csv", index=False, float_format="%.3f")
+                # myscores.to_csv("myscores_1.csv", index=False, float_format="%.3f")
 
                 # donors and receivers for this round
                 donorsAll1 = dfAttr[dfAttr["is_donor"]]["divide_id"].tolist()
