@@ -13,6 +13,7 @@ from shapely.ops import unary_union
 
 from . import config_schema as cs
 from . import funcs_clust, funcs_dist, utils, utils_algo
+from . import plot_outputs as po
 
 logger = logging.getLogger(__name__)
 
@@ -614,7 +615,7 @@ def generate_pairing(conf: cs.Config, vpu: str, df_attrs_all: pd.DataFrame, df_d
         df_dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
 
     Returns:
-        None. The pairing results are saved to desgined locations based on the configurations.
+        None, but saves the pairing results to a file.
 
     """
     # pairing/regionalization algorithms
@@ -642,24 +643,26 @@ def generate_pairing(conf: cs.Config, vpu: str, df_attrs_all: pd.DataFrame, df_d
         if outfile.exists():
             logger.info(f"Pair file already exist: {outfile}")
             logger.info(f"Skip the current run: {func1}")
-            continue
+        else:
+            logger.info(f"\nIdentify donors for VPU {vpu} using: {func1}\n")
+            df_donor_all = pd.DataFrame()
+            start_time = time.time()
+            config1 = conf.model_dump()["algorithms"][func1]
+            config1["max_spa_dist"] = conf.model_dump()["algorithms"]["general"]["max_spa_dist"]
+            config1["njobs"] = conf.model_dump()["general"]["n_procs"]
+            config1["non_attr_cols"] = ["divide_id", "is_donor", "snowy"]
+            config1["attrs"] = {
+                "main": [x for x in df_attrs_all.columns if x not in config1["non_attr_cols"]],
+                "base": ["ngen_elevation", "ngen_slope", "ngen_aspect"],
+            }
+            df_donor_all = functions[func1].func(config1, df_attrs_all, df_dist_spatial, func1)
 
-        logger.info(f"\nIdentify donors for VPU {vpu} using: {func1}\n")
-        df_donor_all = pd.DataFrame()
-        start_time = time.time()
-        config1 = conf.model_dump()["algorithms"][func1]
-        config1["max_spa_dist"] = conf.model_dump()["algorithms"]["general"]["max_spa_dist"]
-        config1["njobs"] = conf.model_dump()["general"]["n_procs"]
-        config1["non_attr_cols"] = ["divide_id", "is_donor", "snowy"]
-        config1["attrs"] = {
-            "main": [x for x in df_attrs_all.columns if x not in config1["non_attr_cols"]],
-            "base": ["ngen_elevation", "ngen_slope", "ngen_aspect"],
-        }
-        df_donor_all = functions[func1].func(config1, df_attrs_all, df_dist_spatial, func1)
+            # save donor receiver pairing to csv file
+            conf.output.pairs.save_data(df_donor_all, outfile)
+            logger.info(f"Pairing results saved to {outfile}")
+            logger.info(f"Donor-receiver pairing for VPU {vpu} using {func1} completed.")
+            end_time = time.time()
+            logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
 
-        # save donor receiver pairing to csv file
-        conf.output.pairs.save_data(df_donor_all, outfile)
-        logger.info(f"Pairing results saved to {outfile}")
-
-        end_time = time.time()
-        logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
+        # plot the results if requested
+        po.plot_pairing_outputs(conf, vpu, func1, outfile)
