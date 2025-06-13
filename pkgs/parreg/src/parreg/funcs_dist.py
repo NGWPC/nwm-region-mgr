@@ -17,7 +17,11 @@ from .unsupervised_random_forest import URF
 
 
 def func(config, df_attr_all, dist_spatial, method="gower"):
-    """Apply distance based method."""
+    """Perform donor-receiver pairing.
+
+    Perform donor-receiver pairing using either Gower's distance (method = "gower") or
+    the distance computed by unsurpervised random forest classification (method = "urf").
+    """
     print("calling function funcs_dist using the " + str(method) + " approach ...")
 
     if method == "proximity":

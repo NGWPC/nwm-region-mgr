@@ -1,16 +1,21 @@
-"""Distance based alogrithms."""
+"""Function to create donor-receiver paringing using distance methods.
+
+This function performs donor-receiver pairing using either Gower's distance (method = "gower") or
+  the distance computed by unsurpervised random forest classification (method = "urf")
+
+"""
 
 import sys
 import time
 
 import numpy as np
 import pandas as pd
-import utils_algo
 from joblib import Parallel, delayed
-from unsupervised_random_forest import urf
+
+from . import utils_algo
+from .unsupervised_random_forest import URF
 
 
-#
 def func(config, df_attr_all, scenario, dist_spatial, method="gower"):
     """Perform donor-receiver pairing.
 
@@ -110,7 +115,7 @@ def func(config, df_attr_all, scenario, dist_spatial, method="gower"):
 
                 elif method == "urf":
                     # compute attribute distance using unsupervised random forecast classification
-                    rf1 = urf(
+                    rf1 = URF(
                         n_trees=config["pars"][method]["nTrees"],
                         max_depth=config["pars"][method]["maxDepth"],
                     )
@@ -162,19 +167,17 @@ def func(config, df_attr_all, scenario, dist_spatial, method="gower"):
     return df_donor_all
 
 
-# function for calculating Gower's distance between donors and receivers (to be used in parallel computing)
 def compute_gower_distance_slow(r1, myscores, scores_receiver, rng2, wgt2, nr1):
-    """Compute gower distance."""
+    """Calculate Gower's distance between donors and receivers (to be used in parallel computing)."""
     scores_donor = np.repeat(np.matrix(myscores.iloc[r1]), nr1, axis=0)
     df1 = ((scores_donor - scores_receiver).abs() / rng2 * wgt2).sum(axis=1)
     return df1
 
 
-# function to identify donors (to be used in parallel computing)
 def identify_donor_slow(
     rec1, config, method, df_attr, df_attr_all, dist_spatial, dist_attr0, run1
 ):
-    """Identify donor."""
+    """Identify donors (to be used in parallel computing)."""
     df_donor = pd.DataFrame()
     donors_all1 = df_attr.query("tag=='donor'")["id"].tolist()
 
