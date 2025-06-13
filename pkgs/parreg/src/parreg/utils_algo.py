@@ -87,6 +87,13 @@ def compute_pairwise_centroid_distances(
                         "centroid_distance": round(dist / 1000),  # Convert to km
                     }
                 )
+                result.append(
+                    {
+                        f"{id_col_a_return}": a_ids[i],
+                        f"{id_col_b_return}": b_ids[j],
+                        "centroid_distance": round(dist / 1000),  # Convert to km
+                    }
+                )
         return result
 
     results = Parallel(n_jobs=n_jobs, backend="threading")(
@@ -95,6 +102,7 @@ def compute_pairwise_centroid_distances(
 
     # Flatten the results
     flat_results = [item for sublist in results for item in sublist]
+    # return pd.DataFrame(flat_results)
     # return pd.DataFrame(flat_results)
 
     df_long = pd.DataFrame(flat_results)
@@ -136,7 +144,6 @@ def get_valid_attrs(recs0, recs1, df_attr0, attrs, config):
     return df_attr
 
 
-# apply Principal Componenet Analysis to the attributes
 def apply_pca(data0, min_var=0.8):
     """Apply Principal Componenet Analysis to the attributes."""
     # standardize the data
@@ -215,6 +222,7 @@ def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, df
     for rec1 in receivers:
         # get spatial distances
         dists1 = dist_spatial.loc[rec1, donors]
+        dists1 = dist_spatial.loc[rec1, donors].to_numpy()
 
         # apply additional donor constraints
         if df_attr is None:
@@ -275,13 +283,22 @@ def plot_clusters(data1, labels, ndonor):
     """Plot the clusters (using the first 6 components)."""
     fig = plt.figure(figsize=(20, 14))
     cols_all = [[0, 1], [0, 2], [3, 4], [3, 5]]
+    cols_all = [[0, 1], [0, 2], [3, 4], [3, 5]]
     for i1, cols in enumerate(cols_all):
         if max(cols) > data1.shape[1]:
             break
         _ = fig.add_subplot(2, 2, i1 + 1)
 
+        _ = fig.add_subplot(2, 2, i1 + 1)
+
         # receiver - noise
         d1 = labels[ndonor:] == -1
+        plt.scatter(
+            data1.iloc[:, cols[0]][ndonor:][d1],
+            data1.iloc[:, cols[1]][ndonor:][d1],
+            c="grey",
+            marker=".",
+        )
         plt.scatter(
             data1.iloc[:, cols[0]][ndonor:][d1],
             data1.iloc[:, cols[1]][ndonor:][d1],
@@ -298,10 +315,24 @@ def plot_clusters(data1, labels, ndonor):
             cmap="rainbow",
             marker=".",
         )
+        plt.scatter(
+            data1.iloc[:, cols[0]][ndonor:][d1],
+            data1.iloc[:, cols[1]][ndonor:][d1],
+            c=labels[ndonor:][d1],
+            cmap="rainbow",
+            marker=".",
+        )
         plt.colorbar()
 
         # donor - noise
         d1 = labels[:ndonor] == -1
+        plt.scatter(
+            data1.iloc[:, cols[0]][:ndonor][d1],
+            data1.iloc[:, cols[1]][:ndonor][d1],
+            c="black",
+            marker="x",
+            s=100,
+        )
         plt.scatter(
             data1.iloc[:, cols[0]][:ndonor][d1],
             data1.iloc[:, cols[1]][:ndonor][d1],
@@ -325,7 +356,23 @@ def plot_clusters(data1, labels, ndonor):
             fontsize=20,
             fontweight="bold",
         )
+        plt.scatter(
+            data1.iloc[:, cols[0]][:ndonor][d1],
+            data1.iloc[:, cols[1]][:ndonor][d1],
+            c="green",
+            marker="x",
+            s=100,
+        )
 
+        plt.title(
+            data1.columns[cols[1]] + " vs " + data1.columns[cols[0]],
+            fontsize=20,
+            fontweight="bold",
+        )
+
+    plt.subplots_adjust(
+        left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
+    )
     plt.subplots_adjust(
         left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
     )
@@ -333,16 +380,20 @@ def plot_clusters(data1, labels, ndonor):
 
 
 def calculate_spatial_distance(shp_file, donors, receivers):
-    """Calculate spatial distance between all donors and receivers."""
+    """Calculate spatial distances."""
     print("compute donor-receiver spatial distance ...")
 
     # read in shapefile as GeoDataFrame
+    shps = gpd.read_file(shp_file, layer="divides")
     shps = gpd.read_file(shp_file, layer="divides")
 
     # reproject from geodetic coordinates to meters (for distance calculation)
     shps = shps.to_crs(crs=3857)
 
     # narrow down donors and receiver GeoDataFrames to those needed
+    id1 = "id"
+    if "divide_id" in shps.columns:
+        id1 = "divide_id"
     id1 = "id"
     if "divide_id" in shps.columns:
         id1 = "divide_id"
@@ -358,6 +409,8 @@ def calculate_spatial_distance(shp_file, donors, receivers):
     # calculate centroids of donor and receiver catchments
     cent_don = shps_don["geometry"].centroid
     cent_rec = shps_rec["geometry"].centroid
+    cent_don = shps_don["geometry"].centroid
+    cent_rec = shps_rec["geometry"].centroid
 
     # convert centroids from GeoSeries to GeoDataFrame
     cent_don = gpd.GeoDataFrame(geometry=cent_don)
@@ -366,6 +419,8 @@ def calculate_spatial_distance(shp_file, donors, receivers):
     # calcualte distance between all receiver and donor centroids
     def calculate_distances(row):
         return cent_don.distance(row.geometry)
+
+    distances = cent_rec.apply(calculate_distances, axis=1)
 
     distances = cent_rec.apply(calculate_distances, axis=1)
 

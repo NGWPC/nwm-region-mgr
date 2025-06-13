@@ -80,7 +80,7 @@ def func(config, df_attr_all, dist_spatial, method="gower"):
                         df_attr.drop(config["non_attr_cols"], axis=1)
                     )
 
-                myscores.to_csv("myscores_1.csv", index=False, float_format="%.3f")
+                # myscores.to_csv("myscores_1.csv", index=False, float_format="%.3f")
 
                 # donors and receivers for this round
                 donors_all1 = df_attr[df_attr["is_donor"]]["divide_id"].tolist()
