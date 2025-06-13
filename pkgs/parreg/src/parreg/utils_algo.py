@@ -1,5 +1,7 @@
 """Utils for algorithms."""
 
+import warnings
+
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,6 +10,8 @@ from joblib import Parallel, delayed
 from pyproj import CRS
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 
 def ensure_projected(

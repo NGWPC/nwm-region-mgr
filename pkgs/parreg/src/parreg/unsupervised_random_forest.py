@@ -10,12 +10,16 @@ The key output is a similarity/dissimilarity matrix, which will be used by the r
 
 """
 
+import warnings
+
 import numpy
 from joblib import Parallel, delayed
 from numba import njit
 from sklearn.ensemble import RandomForestClassifier
 
 from . import synthetic_data
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 
 class URF(object):

@@ -14,6 +14,8 @@ Notes:
 
 """
 
+import warnings
+
 import hdbscan
 import numpy as np
 import pandas as pd
@@ -22,6 +24,8 @@ from sklearn.cluster import Birch, KMeans
 from sklearn_extra.cluster import KMedoids
 
 from . import utils_algo
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 
 def func(config, df_attr_all, dist_spatial, method):

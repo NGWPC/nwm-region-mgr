@@ -1,22 +1,30 @@
-# This function performs donor-receiver pairing based on clustering using
-#   k-means clustering (method = "kmeans")
-#   k-medoids clustering (method = "kmedoids")
-#   HDBSCAN (method = "hdbscan") - Hierarchical Density-Based Spatial Clustering of Applications with Noise.
-#      Finds core samples of high density and expands clusters from them.
-#   BIRCH (method = "birch") - Balanced Iterative Reducing & Clustering with Hierarchy. Scalable for large datasets.
-#      Order of points in the dataset influences the outcome. Hence interative resampling is implemented here.
+"""Clustering functions.
 
-# Notes:
-#   1) the clustering is done in multiple rounds to handle data gaps in attributes
-#   2) snow and non-snow basins are processed separately
+This function performs donor-receiver pairing based on clustering using
+  k-means clustering (method = "kmeans")
+  k-medoids clustering (method = "kmedoids")
+  HDBSCAN (method = "hdbscan") - Hierarchical Density-Based Spatial Clustering of Applications with Noise.
+     Finds core samples of high density and expands clusters from them.
+  BIRCH (method = "birch") - Balanced Iterative Reducing & Clustering with Hierarchy. Scalable for large datasets.
+     Order of points in the dataset influences the outcome. Hence interative resampling is implemented here.
+
+Notes:
+  1) the clustering is done in multiple rounds to handle data gaps in attributes
+  2) snow and non-snow basins are processed separately
+
+"""
+
+import warnings
 
 import hdbscan
-import my_utils
 import numpy as np
 import pandas as pd
+import utils_algo
 from joblib import Parallel, delayed
 from sklearn.cluster import Birch, KMeans
 from sklearn_extra.cluster import KMedoids
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 
 def func(config, df_attr_all, scenario, dist_spatial, method):
@@ -57,10 +65,12 @@ def func(config, df_attr_all, scenario, dist_spatial, method):
         )
 
         # figure out valid attributes to use this round
-        df_attr = my_utils.get_valid_attrs(recs0, recs, df_attr0, attrs1, config)
+        df_attr = utils_algo.get_valid_attrs(recs0, recs, df_attr0, attrs1, config)
 
         # apply principal component analysis
-        myscores, _ = my_utils.apply_pca(df_attr.drop(config["non_attr_cols"], axis=1))
+        myscores, _ = utils_algo.apply_pca(
+            df_attr.drop(config["non_attr_cols"], axis=1)
+        )
 
         # process snowy and non-snowy catchments sparately
         for snow1 in np.unique(df_attr["snowy"]):
@@ -194,7 +204,7 @@ def func(config, df_attr_all, scenario, dist_spatial, method):
                             df_donor_snow = pd.concat(
                                 (
                                     df_donor_snow,
-                                    my_utils.assign_donors(
+                                    utils_algo.assign_donors(
                                         "proximity",
                                         donors,
                                         recs2,
@@ -372,7 +382,7 @@ def identify_donor_by_cluster_slow(
                 df_donor = pd.concat(
                     (
                         df_donor,
-                        my_utils.assign_donors(
+                        utils_algo.assign_donors(
                             scenario,
                             donors1,
                             recs3,
@@ -392,7 +402,7 @@ def identify_donor_by_cluster_slow(
             df_donor = pd.concat(
                 (
                     df_donor,
-                    my_utils.assign_donors(
+                    utils_algo.assign_donors(
                         scenario,
                         donors1,
                         recs2,
@@ -412,7 +422,7 @@ def identify_donor_by_cluster_slow(
         df_donor = pd.concat(
             (
                 df_donor,
-                my_utils.assign_donors(
+                utils_algo.assign_donors(
                     "proximity",
                     donors,
                     recs2,
