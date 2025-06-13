@@ -1,32 +1,32 @@
-"""This module defines utility or help functions"""
+"""Dfine utilities and/or help functions."""
+
+from pathlib import Path
+from typing import Set, Union
 
 import pandas as pd
-import yaml
-from pathlib import Path
-from typing import Union
-from pydantic import BaseModel
-from typing import Optional, List, Dict, Set, Union, Any
 import pyarrow.parquet as pq
+import yaml
+from pydantic import BaseModel
 
 
-def remove_nulls(d):
-    """
+def remove_nulls(d: dict | list):
+    """Remove nulls.
+
     Recursively remove None values from a dictionary or list.
     This function traverses the input data structure and removes any keys with None values
     or any elements that are None in lists. It also removes empty dictionaries.
-    
+
     Parameters
     ----------
     d : dict or list
-        The input data structure to clean. It can be a dictionary or a list. 
-    
-    Returns 
+        The input data structure to clean. It can be a dictionary or a list.
+
+    Returns
     -------
     dict or list
         The cleaned data structure with None values and empty dictionaries removed.
 
     """
-    
     if isinstance(d, dict):
         return {
             k: remove_nulls(v)
@@ -37,11 +37,14 @@ def remove_nulls(d):
         return [remove_nulls(v) for v in d if v is not None]
     else:
         return d
-    
 
-def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path], index=False):
-    """
-    Save data to disk in an appropriate format based on its type and file extension.
+
+def save_data(
+    data: Union[pd.DataFrame, BaseModel],
+    file_path: Union[str, Path],
+    index: bool = False,
+):
+    """Save data to disk in an appropriate format based on its type and file extension.
 
     Parameters
     ----------
@@ -69,49 +72,61 @@ def save_data(data: Union[pd.DataFrame, BaseModel], file_path: Union[str, Path],
     -----
     - If the directory for the specified file path does not exist, it will be created.
     - YAML files for Pydantic models are written with custom inline list formatting (if configured).
+
     """
 
     class InlineListDumper(yaml.Dumper):
         pass
 
     def represent_inline_list(dumper, data):
-        return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
+        return dumper.represent_sequence("tag:yaml.org,2002:seq", data, flow_style=True)
 
     file_path = Path(file_path)
     if not file_path.parent.exists():
         file_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     if isinstance(data, pd.DataFrame):
         if file_path.suffix == ".csv":
             data.to_csv(file_path, index=index)
-        elif file_path.suffix == '.parquet':
+        elif file_path.suffix == ".parquet":
             data.to_parquet(file_path, index=index)
         else:
-            raise Exception('Only csv and parquet formats are supported for saving DataFrame')
-    
+            raise Exception(
+                "Only csv and parquet formats are supported for saving DataFrame"
+            )
+
     elif isinstance(data, BaseModel):
-        if file_path.suffix != '.yaml':
-            raise Exception(f'Only yaml format is supported for saving {type(data)}')
-        
+        if file_path.suffix != ".yaml":
+            raise Exception(f"Only yaml format is supported for saving {type(data)}")
+
         with open(file_path, "w") as f:
             InlineListDumper.add_representer(list, represent_inline_list)
-            yaml.dump(remove_nulls(data.model_dump()), f, Dumper=InlineListDumper, sort_keys=False)
-    
+            yaml.dump(
+                remove_nulls(data.model_dump()),
+                f,
+                Dumper=InlineListDumper,
+                sort_keys=False,
+            )
+
     else:
-        raise ValueError("Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel")
-    
+        raise ValueError(
+            "Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel"
+        )
+
+
 def check_columns(file: Path | str, columns: Set[str]):
     """Check if the required columns are present in the file."""
-
     if isinstance(file, str):
         file = Path(file)
 
     if not file.exists():
         raise FileNotFoundError(f"File not found: {file}")
-    
+
     suffix = file.suffix.lower()
     if suffix == ".csv":
-        columns_present = [col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()]
+        columns_present = [
+            col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()
+        ]
     elif suffix == ".parquet":
         columns_present = [col.lower() for col in pq.ParquetFile(file).schema.names]
     else:
@@ -121,7 +136,9 @@ def check_columns(file: Path | str, columns: Set[str]):
     if missing_cols:
         raise ValueError(f"Missing columns in {file}: {missing_cols}")
 
-def read_table(file_path):
+
+def read_table(file_path: Path | str):
+    """Read table."""
     file_path = Path(file_path)
     if not file_path.exists():
         raise FileNotFoundError(f"{file_path} does not exist")

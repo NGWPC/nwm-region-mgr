@@ -122,7 +122,9 @@ class DonorConfig(BaseModel):
         cols_all = cols_metric.union(col_period | {self.id_name.lower()})
         check_columns(self.donor_stats_file, cols_all)
 
-    def get_qualified_donors(self, vpu: str = None, donors: list = None, id_name: str = "divide_id") -> list:
+    def get_qualified_donors(
+        self, vpu: str = None, donors: list = None, id_name: str = "divide_id"
+    ) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
         # check if the required files/columns are present
         self._check_files()
@@ -131,15 +133,21 @@ class DonorConfig(BaseModel):
         df_cwt = read_table(self.donor_ngen_cwt_file)
         if not donors:
             if self.donor_gage_file:
-                logger.info(f"Initial donors based on all gages in {self.donor_gage_file}")
+                logger.info(
+                    f"Initial donors based on all gages in {self.donor_gage_file}"
+                )
                 df = read_table(self.donor_gage_file)
                 donors = df[self.id_name].unique().tolist()
             else:
-                logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")
+                logger.info(
+                    f"Initial donors based on all gages in {self.donor_ngen_cwt_file}"
+                )
                 donors = df_cwt[self.id_name].unique().tolist()
 
         # donor_cats = df_cwt[id_name].unique().tolist()
-        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+        donor_cats = (
+            df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+        )
 
         # filter by vpu if provided
         if vpu:
@@ -147,18 +155,26 @@ class DonorConfig(BaseModel):
                 df_cwt = df_cwt[df_cwt["vpuid"] == vpu]
                 donors0 = df_cwt[self.id_name].unique().tolist()
                 donors = [d for d in donors if d in donors0]
-                donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+                donor_cats = (
+                    df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+                )
                 logger.info(
                     f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments"
                 )
             else:
-                raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")
+                raise ValueError(
+                    f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU."
+                )
         else:
-            logger.info(f"Number of initial donors from all VPUs: {len(donors)} gages, {len(donor_cats)} catchments")
+            logger.info(
+                f"Number of initial donors from all VPUs: {len(donors)} gages, {len(donor_cats)} catchments"
+            )
 
         # if no metric thresholds are provided, return all gage_ids
         if not self.metric_threshold:
-            logger.info("No metric thresholds provided. Using all gages in the initial list as donors.")
+            logger.info(
+                "No metric thresholds provided. Using all gages in the initial list as donors."
+            )
             return {"gage_id": donors, id_name: donor_cats}
 
         # read the donor stats file
@@ -183,12 +199,19 @@ class DonorConfig(BaseModel):
         if self.metric_eval_period:
             periods = df[self.metric_eval_period.col_name].unique()
             if self.metric_eval_period.value not in periods:
-                raise ValueError(f"Column {self.metric_eval_period.value} not found in {self.donor_stats_file}.")
+                raise ValueError(
+                    f"Column {self.metric_eval_period.value} not found in {self.donor_stats_file}."
+                )
             else:
                 # Filter the DataFrame based on the evaluation period
-                df = df[df[self.metric_eval_period.col_name] == self.metric_eval_period.value]
+                df = df[
+                    df[self.metric_eval_period.col_name]
+                    == self.metric_eval_period.value
+                ]
         else:
-            logger.warning("No evaluation period provided. Using all periods in {self.donor_stats_file}.")
+            logger.warning(
+                "No evaluation period provided. Using all periods in {self.donor_stats_file}."
+            )
 
         # filter based on metric thresholds
         for col, threshold in self.metric_threshold.items():
@@ -200,13 +223,19 @@ class DonorConfig(BaseModel):
                 df = df[df[col] <= threshold.max]
 
         donors = df[self.id_name].unique().tolist()
-        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+        donor_cats = (
+            df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+        )
 
-        logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments")
+        logger.info(
+            f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments"
+        )
 
         # check if any donors are left after filtering
         if not donors:
-            logger.info("No donors left after filtering. Check the metric thresholds and evaluation period.")
+            logger.info(
+                "No donors left after filtering. Check the metric thresholds and evaluation period."
+            )
 
         return {"gage_id": donors, id_name: donor_cats}
 
@@ -234,13 +263,21 @@ class AttrDatasetConfig(BaseModel):
         # if both are provided, attr_list takes priority
         if self.attr_list:
             # make sure attr_list is valid
-            attrs1 = [x for x in self.attr_list if x not in pq.ParquetFile(self.attr_data_file).schema.names]
+            attrs1 = [
+                x
+                for x in self.attr_list
+                if x not in pq.ParquetFile(self.attr_data_file).schema.names
+            ]
             if attrs1:
-                raise ValueError(f"These attributes {attrs1} are not found in {self.attr_data_file}")
+                raise ValueError(
+                    f"These attributes {attrs1} are not found in {self.attr_data_file}"
+                )
         else:
             attr_select_path = Path(self.attr_select_file)
             if not attr_select_path.exists():
-                raise FileNotFoundError(f"Select file not found: {self.attr_select_file}")
+                raise FileNotFoundError(
+                    f"Select file not found: {self.attr_select_file}"
+                )
 
             df_attrs = pd.read_csv(attr_select_path)
 
@@ -260,7 +297,9 @@ class AttrDatasetConfig(BaseModel):
 
         attr_data_path = Path(self.attr_data_file)
         if not attr_data_path.exists():
-            raise FileNotFoundError(f"Attribute data file not found: {self.attr_data_file}")
+            raise FileNotFoundError(
+                f"Attribute data file not found: {self.attr_data_file}"
+            )
 
         suffix = attr_data_path.suffix.lower()
         if suffix == ".csv":
@@ -289,20 +328,24 @@ class AttrDatasets(BaseModel):
 
 
 class OutputSection(BaseModel):
+    """Output Manager."""
+
     save: bool
     path: Path | str
     format: Optional[str] = None
 
     @model_validator(mode="after")
     def check_format_if_dir(cls, values):
+        """Check if path is a diretory. If so require a 'format'."""
         if not Path(values.path).suffix and not values.format:
-            raise ValueError(f"'format' must be specified if 'path' is a directory: {Path(values.path)}")
+            raise ValueError(
+                f"'format' must be specified if 'path' is a directory: {Path(values.path)}"
+            )
 
         return values
 
     def get_file_path(self, file_name: Optional[str] = None) -> Path:
         """Get the file path for saving the output."""
-
         file_path = Path(self.path)
         if file_name:
             file_path = file_path / file_name
@@ -317,7 +360,9 @@ class OutputSection(BaseModel):
             return
 
         if not self.format:
-            raise ValueError(f"'format' must be specified if 'save' is True: {self.path}")
+            raise ValueError(
+                f"'format' must be specified if 'save' is True: {self.path}"
+            )
 
         file_path = self.get_file_path(file_name)
 
@@ -325,6 +370,8 @@ class OutputSection(BaseModel):
 
 
 class OutputConfig(BaseModel):
+    """Output Configueer."""
+
     pairs: OutputSection
     attr_data_final: OutputSection
     config_final: OutputSection
@@ -332,6 +379,8 @@ class OutputConfig(BaseModel):
 
 
 class AlgoGeneral(BaseModel):
+    """General algorithm class."""
+
     min_snow_frac: float
     max_spa_dist: float
     max_attr_diff: Dict[str, float]
@@ -340,6 +389,8 @@ class AlgoGeneral(BaseModel):
 
 
 class Gower(AlgoGeneral):
+    """Gower algorithm class."""
+
     min_attr_dist: float
     max_attr_dist: float
     min_spa_dist: float
@@ -348,6 +399,8 @@ class Gower(AlgoGeneral):
 
 
 class URF(AlgoGeneral):
+    """Unsupervised Rand Forest (URF) algorithm class."""
+
     pca: bool
     n_trees: int
     max_depth: int
@@ -359,6 +412,8 @@ class URF(AlgoGeneral):
 
 
 class KMeans(AlgoGeneral):
+    """K-means algorithm class."""
+
     n_donor_max: int
     n_iter_max: int
     init: str
@@ -366,17 +421,23 @@ class KMeans(AlgoGeneral):
 
 
 class KMedoids(AlgoGeneral):
+    """K-medoids algorithm class."""
+
     n_donor_max: int
     n_iter_max: int
     init: str
 
 
 class HDBSCAN(AlgoGeneral):
+    """Hierarchical Density Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm class."""
+
     n_donor_max: int
     min_cluster_size: int
 
 
 class Birch(AlgoGeneral):
+    """Balanced Iterative Reducing and Clustering using Hierarchies (BIRCH) algorithm class."""
+
     n_donor_max: int
     branching_factor: int
     min_thresh: float
@@ -385,6 +446,8 @@ class Birch(AlgoGeneral):
 
 
 class AlgorithmConfig(BaseModel):
+    """Algorithm configuration class."""
+
     general: AlgoGeneral
     gower: Optional[Gower] = None
     urf: Optional[URF] = None
@@ -395,6 +458,8 @@ class AlgorithmConfig(BaseModel):
 
 
 class Config(BaseModel):
+    """Configuration class."""
+
     general: GeneralConfig
     donor: DonorConfig
     attr_datasets: AttrDatasets
@@ -403,6 +468,7 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def check_required_algorithms_present(self):
+        """Check if required algorithms are present."""
         required = set(self.general.algorithm_list)
         defined = set(self.algorithms.model_dump(exclude_unset=True).keys())
 
@@ -416,6 +482,7 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def check_required_attr_datasets_present(self):
+        """Check that the required attributes are present."""
         required = set(self.general.attr_dataset_list)
         defined = set(self.attr_datasets.model_dump(exclude_unset=True).keys())
 
