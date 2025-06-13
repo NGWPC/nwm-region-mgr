@@ -1,9 +1,9 @@
 """Main function to run regionalization."""
 
 import logging
-import time
 from contextlib import contextmanager
 from pathlib import Path
+from time import time
 
 import parreg.process_config as pc
 from parreg.logging_config import setup_logging
@@ -26,9 +26,7 @@ def timing_block(step_str: str):
 
 if __name__ == "__main__":
     # read and validate config
-    config_file = Path(
-        "/home/yuqiong.liu/work/Gitlab/ngen-regionalization/configs/config.yaml"
-    )
+    config_file = Path("configs/config.yaml")
     if not config_file.exists():
         raise FileNotFoundError(config_file)
 
