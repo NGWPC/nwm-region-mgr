@@ -188,7 +188,7 @@ def load_and_validate_config(file_path: str):
         # config.donor.check_files()
         out = config.output.config_final
         if out.save:
-            logger.info(f"Saving config to {out.path}")
+            logger.info(f"Saving final config to {out.path}")
             if Path(out.path).is_file():
                 utils.save_data(config, Path(out.path))
             elif Path(out.path).is_dir():
@@ -202,18 +202,22 @@ def load_and_validate_config(file_path: str):
         raise Exception(f"Error loading YAML file: {e}")
 
 
-def get_donor_basins(gage_file: Path, hydrofabric_file: Path, buffer: float) -> list:
+def get_donor_basins(config: cs.Config, vpu: str) -> list:
     """Get the donor basins for a given VPU from the config.
 
     Args:
-        gage_file: path to the donor gage file
-        hydrofabric_file: path to the hydrofabric file
-        buffer: buffer distance in km around the VPU polygon to search for donors
+        config: the config object
+        vpu: the VPU code
 
     Returns:
         donor_basins: list of donor basins (gage_ids) within the buffered VPU polygon
 
     """
+    # get configs
+    gage_file = config.donor.donor_gage_file
+    hydrofabric_file = config.general.hydrofabric_file[vpu]
+    buffer = config.donor.buffer_km
+
     # read in lat/lon of all donors
     donors = utils.read_table(gage_file)
     if donors.empty:
@@ -250,7 +254,10 @@ def get_donor_basins(gage_file: Path, hydrofabric_file: Path, buffer: float) -> 
     if not donor_basins:
         logger.warning("No donor basins found. Please check the donor gage file and hydrofabric file.")
 
-    return donor_basins
+    # plot donor basin spatial map
+    po.plot_donor_spatial_map(config, vpu, donor_basins, gdf_buffered, combined_geom)
+
+    return donor_basins, gdf_buffered
 
 
 def update_spatial_distance_donors(
@@ -366,9 +373,7 @@ def get_donors_receivers(config: cs.Config, vpu: str) -> Tuple[list, list, pd.Da
     id_name = config.general.id_name
 
     # get donor basins for the VPU
-    donor_basins = get_donor_basins(
-        config.donor.donor_gage_file, config.general.hydrofabric_file[vpu], config.donor.buffer_km
-    )
+    donor_basins, gdf_buffered = get_donor_basins(config, vpu)
 
     # determine the VPUs of the donor basins
     df_cwt = utils.read_table(config.donor.donor_ngen_cwt_file)
@@ -553,6 +558,12 @@ def process_attr_data(
     if df_missing.sum() > 0:
         logger.warning(f"There are missing data for attributes in vpu {vpu}")
         logger.info(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
+
+    # plot spatial map of attribute data
+    po.plot_attribute_spatial_map(config, vpu, df_attrs_all)
+
+    # plot the missing attribute counts
+    po.plot_missing_attr_counts(config, vpu, df_attrs_all)
 
     # save the attribute data
     out1 = config.output.attr_data_final

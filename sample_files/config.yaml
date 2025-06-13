@@ -45,10 +45,20 @@ output:
       save: True
       path: '{base_dir}/outputs/{run_name}/pairs'
       format: 'parquet'
+      plots:
+        donor_spatial_map: True
+        pair_spatial_distance_histogram: True
+        pair_attribute_distance_histogram: True        
     attr_data_final:
       save: True
       path: '{base_dir}/outputs/{run_name}/attr_data_final'
       format: 'parquet'
+      plots:
+        attr_missing_count: True
+        attr_spatial_distribution: True
+        attrs_to_plot:
+          hlr: ['PMPE', 'SAND']
+          ngen: ['dksat', 'smcmax']
     config_final:
       save: True
       path: '{base_dir}/outputs/{run_name}/config_final.yaml'
