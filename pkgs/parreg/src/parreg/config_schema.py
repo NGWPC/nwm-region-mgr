@@ -333,6 +333,7 @@ class OutputSection(BaseModel):
     save: bool
     path: Path | str
     format: Optional[str] = None
+    plots: Optional[dict] = None
 
     @model_validator(mode="after")
     def check_format_if_dir(cls, values):
