@@ -48,7 +48,10 @@ output:
       plots:
         donor_spatial_map: True
         pair_spatial_distance_histogram: True
-        pair_attribute_distance_histogram: True        
+        pair_attribute_distance_histogram: True
+        pair_spatial_distance_map: True
+        pair_attribute_distance_map: True 
+        top10_pair_group_map: True       
     attr_data_final:
       save: True
       path: '{base_dir}/outputs/{run_name}/attr_data_final'
