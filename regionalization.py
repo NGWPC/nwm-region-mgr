@@ -17,7 +17,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-# function to timing the execution of code blocks
+# function to timing the execution of various steps
 @contextmanager
 def timing_block(step_str: str):
     """Context manager for timing code execution."""
@@ -32,7 +32,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Add arguments
-    parser.add_argument("config_file", type=str, help="Path to the config yaml file for parameter regionalization")
+    parser.add_argument(
+        "config_file",
+        type=str,
+        help="Path to the config yaml file for parameter regionalization",
+    )
 
     # Parse the arguments
     args = parser.parse_args()
@@ -40,6 +44,7 @@ if __name__ == "__main__":
 
     # read and validate config
     config_file = Path(args.config_file)
+    config_file = Path("configs/config.yaml")
     if not config_file.exists():
         raise FileNotFoundError(config_file)
 
@@ -53,10 +58,14 @@ if __name__ == "__main__":
 
         # assemble the attribute data for donors and receivers
         with timing_block("process_attr_data"):
-            donors, receivers, df_attrs_all = pc.process_attr_data(config, vpu, donors, receivers, df_dist_spatial)
+            donors, receivers, df_attrs_all = pc.process_attr_data(
+                config, vpu, donors, receivers, df_dist_spatial
+            )
 
         # detemine whether the catchments are snowy (as snowy and non-snowy catchments are processed separately)
-        df_attrs_all = pc.set_snow_flag(df_attrs_all, config.algorithms.general.min_snow_frac)
+        df_attrs_all = pc.set_snow_flag(
+            df_attrs_all, config.algorithms.general.min_snow_frac
+        )
 
         # loop through regionalization algorithms to generate donor-receiver pairings
         with timing_block("generate_pairing"):

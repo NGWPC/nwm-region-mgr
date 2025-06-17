@@ -1,3 +1,7 @@
+"""Utils for algorithms."""
+
+import warnings
+
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,8 +11,12 @@ from pyproj import CRS
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
-def ensure_projected(gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070") -> gpd.GeoDataFrame:
+
+def ensure_projected(
+    gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070"
+) -> gpd.GeoDataFrame:
     """Reprojects a GeoDataFrame to a projected CRS if currently in geographic CRS."""
     crs = CRS.from_user_input(gdf.crs)
     if crs.is_geographic:
@@ -26,8 +34,7 @@ def compute_pairwise_centroid_distances(
     distance_threshold: float = None,
     n_jobs: int = -1,  # Use all available cores
 ) -> pd.DataFrame:
-    """
-    Compute pairwise distances between centroids of two GeoDataFrames.
+    """Compute pairwise distances between centroids of two GeoDataFrames.
 
     Parameters
     ----------
@@ -53,8 +60,8 @@ def compute_pairwise_centroid_distances(
     pd.DataFrame
         A DataFrame containing the centroid distances between each pair of polygons from the two GeoDataFrames in (km),
         where the columns are indexed by polygon ids from group_a, and the rows are indexed by polygon ids from group_b.
-    """
 
+    """
     # Precompute centroids to speed up
     centroids_a = group_a.geometry.centroid
     centroids_b = group_b.geometry.centroid
@@ -80,6 +87,13 @@ def compute_pairwise_centroid_distances(
                         "centroid_distance": round(dist / 1000),  # Convert to km
                     }
                 )
+                result.append(
+                    {
+                        f"{id_col_a_return}": a_ids[i],
+                        f"{id_col_b_return}": b_ids[j],
+                        "centroid_distance": round(dist / 1000),  # Convert to km
+                    }
+                )
         return result
 
     results = Parallel(n_jobs=n_jobs, backend="threading")(
@@ -89,23 +103,30 @@ def compute_pairwise_centroid_distances(
     # Flatten the results
     flat_results = [item for sublist in results for item in sublist]
     # return pd.DataFrame(flat_results)
+    # return pd.DataFrame(flat_results)
 
     df_long = pd.DataFrame(flat_results)
     # print(df_long.head())
-    df_wide = df_long.pivot(index=id_col_b_return, columns=id_col_a_return, values="centroid_distance")
+    df_wide = df_long.pivot(
+        index=id_col_b_return, columns=id_col_a_return, values="centroid_distance"
+    )
 
     return df_wide
 
 
-# get the valid attributes to be processed based on the valid attributes of the first receiver
-def get_valid_attrs(recs0, recs1, dfAttr0, attrs, config):
-    dt1 = dfAttr0[~dfAttr0["is_donor"]]
+def get_valid_attrs(recs0, recs1, df_attr0, attrs, config):
+    """Get the valid attributes to be processed based on the valid attributes of the first receiver."""
+    dt1 = df_attr0[~df_attr0["is_donor"]]
     dt1 = dt1[dt1.divide_id.isin(recs0) & ~dt1.divide_id.isin(recs1)].iloc[0]
     dt1 = dt1[~dt1.index.isin(config["non_attr_cols"])]
     vars = config["non_attr_cols"] + dt1.index[~dt1.isna()].tolist()
-    dfAttr = dfAttr0[vars]
-    vars = [value for value in vars if value in attrs]  # attrs included for current round
-    vars0 = [value for value in attrs if value not in vars]  # attrs excluded for current round
+    df_attr = df_attr0[vars]
+    vars = [
+        value for value in vars if value in attrs
+    ]  # attrs included for current round
+    vars0 = [
+        value for value in attrs if value not in vars
+    ]  # attrs excluded for current round
 
     if len(vars) > 0:
         if len(vars0) > 0:
@@ -114,17 +135,17 @@ def get_valid_attrs(recs0, recs1, dfAttr0, attrs, config):
             print("Using all attributes")
 
     # ignore donors & receivers with NA attribute values
-    dfAttr = dfAttr.dropna(subset=[x for x in attrs if x not in vars0], inplace=False)
+    df_attr = df_attr.dropna(subset=[x for x in attrs if x not in vars0], inplace=False)
 
-    if dfAttr.shape[0] == 0:
+    if df_attr.shape[0] == 0:
         print("WARNING: no valid attributes found for the following receivers: ")
-        print(dfAttr["id"].tolist())
+        print(df_attr["id"].tolist())
 
-    return dfAttr
+    return df_attr
 
 
-# apply Principal Componenet Analysis to the attributes
 def apply_pca(data0, min_var=0.8):
+    """Apply Principal Componenet Analysis to the attributes."""
     # standardize the data
     scaled_data = StandardScaler().fit_transform(data0)
 
@@ -134,7 +155,10 @@ def apply_pca(data0, min_var=0.8):
     n1 = pca.n_components_
 
     print("Number of PCs selected: " + str(n1))
-    print("PCA total portion of variance explained ... " + str(sum(pca.explained_variance_ratio_)))
+    print(
+        "PCA total portion of variance explained ... "
+        + str(sum(pca.explained_variance_ratio_))
+    )
     x_pca = pca.transform(scaled_data)
 
     # standardize the reduced data (comment out because it is not necessary)
@@ -153,13 +177,13 @@ def apply_pca(data0, min_var=0.8):
     return x_pca, w1
 
 
-# apply a few additional constraints to donors identified (e.g., via Gower's distance or other techniques)
-def apply_donor_constraints(rec, donors, dists, pars, dfAttr):
+def apply_donor_constraints(rec, donors, dists, pars, df_attr):
+    """Apply a few additional constraints to donors identified (e.g., via Gower's distance or other techniques)."""
     # 1. narrow down to donors with the same snowiness category
-    # snowy = dfAttr.query("id == @rec & tag=='receiver'")['snowy']
-    # snowy1 = dfAttr.query("id in @donors & tag=='donor'")['snowy']
-    snowy = dfAttr[dfAttr["divide_id"] == rec]["snowy"].values[0]
-    snowy1 = dfAttr[dfAttr["divide_id"].isin(donors)]["snowy"].values
+    # snowy = df_attr.query("id == @rec & tag=='receiver'")['snowy']
+    # snowy1 = df_attr.query("id in @donors & tag=='donor'")['snowy']
+    snowy = df_attr[df_attr["divide_id"] == rec]["snowy"].values[0]
+    snowy1 = df_attr[df_attr["divide_id"].isin(donors)]["snowy"].values
     # ix1 = snowy1.isin(snowy)
     ix1 = np.isin(snowy1, snowy)
     if sum(ix1) > 0:
@@ -174,16 +198,16 @@ def apply_donor_constraints(rec, donors, dists, pars, dfAttr):
 
     # 3. further narrow down based on screening attributes
     # for att1 in pars['max_attr_diff'].keys():
-    #     ix1 = abs(np.array(dfAttr[~dfAttr['is_donor']][att1]) - \
-    #         np.array(dfAttr[dfAttr['is_donor']][att1])) \
+    #     ix1 = abs(np.array(df_attr[~df_attr['is_donor']][att1]) - \
+    #         np.array(df_attr[df_attr['is_donor']][att1])) \
     #             <= pars['max_attr_diff'][att1]
     #     if sum(ix1) > 0:
     #         dists = np.array(dists)[ix1]
     #         donors = np.array(donors)[ix1]
 
     # 4. further narrow down to donors in the same HSG
-    # hsg = dfAttr.query("id==@rec & tag=='receiver'")['hsg']
-    # hsg1 = dfAttr.query("id in @donors & tag=='donor'")['hsg']
+    # hsg = df_attr.query("id==@rec & tag=='receiver'")['hsg']
+    # hsg1 = df_attr.query("id in @donors & tag=='donor'")['hsg']
     # ix1 = hsg1.isin(hsg)
     # if sum(ix1) > 0:
     #     dists = np.array(dists)[ix1]
@@ -192,18 +216,21 @@ def apply_donor_constraints(rec, donors, dists, pars, dfAttr):
     return donors, dists
 
 
-# assign donors based on clusters and spatial distance and apply additional constrains
-def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, dfAttr):
+def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, df_attr):
+    """Assign donors based on clusters and spatial distance and apply additional constrains."""
     df_donor = pd.DataFrame()
     for rec1 in receivers:
         # get spatial distances
+        dists1 = dist_spatial.loc[rec1, donors]
         dists1 = dist_spatial.loc[rec1, donors].to_numpy()
 
         # apply additional donor constraints
-        if dfAttr is None:
+        if df_attr is None:
             donors1 = donors.copy()
         else:
-            donors1, dists1 = apply_donor_constraints(rec1, donors, dists1, pars, dfAttr)
+            donors1, dists1 = apply_donor_constraints(
+                rec1, donors, dists1, pars, df_attr
+            )
 
         # if applicable, choose donor with the smallest attribute distances
         if dist_attr is not None:
@@ -238,7 +265,9 @@ def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, df
 
             # add attribute distance if applicable (e.g., for Gower & URF)
             if dist_attr is not None:
-                dist_attr1 = np.array(dist_attr1)[ix1]  # sort according to spatial distance
+                dist_attr1 = np.array(dist_attr1)[
+                    ix1
+                ]  # sort according to spatial distance
                 dist_attr1 = dist_attr1[
                     range(nd_max)
                 ]  # ignore unneeded donor (likely not necessary given the treatment above)
@@ -250,21 +279,42 @@ def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, df
     return df_donor
 
 
-# plot the clusters (using the first 6 components)
 def plot_clusters(data1, labels, ndonor):
+    """Plot the clusters (using the first 6 components)."""
     fig = plt.figure(figsize=(20, 14))
+    cols_all = [[0, 1], [0, 2], [3, 4], [3, 5]]
     cols_all = [[0, 1], [0, 2], [3, 4], [3, 5]]
     for i1, cols in enumerate(cols_all):
         if max(cols) > data1.shape[1]:
             break
-        ax = fig.add_subplot(2, 2, i1 + 1)
+        _ = fig.add_subplot(2, 2, i1 + 1)
+
+        _ = fig.add_subplot(2, 2, i1 + 1)
 
         # receiver - noise
         d1 = labels[ndonor:] == -1
-        plt.scatter(data1.iloc[:, cols[0]][ndonor:][d1], data1.iloc[:, cols[1]][ndonor:][d1], c="grey", marker=".")
+        plt.scatter(
+            data1.iloc[:, cols[0]][ndonor:][d1],
+            data1.iloc[:, cols[1]][ndonor:][d1],
+            c="grey",
+            marker=".",
+        )
+        plt.scatter(
+            data1.iloc[:, cols[0]][ndonor:][d1],
+            data1.iloc[:, cols[1]][ndonor:][d1],
+            c="grey",
+            marker=".",
+        )
 
         # receiver non-noise
         d1 = labels[ndonor:] != -1
+        plt.scatter(
+            data1.iloc[:, cols[0]][ndonor:][d1],
+            data1.iloc[:, cols[1]][ndonor:][d1],
+            c=labels[ndonor:][d1],
+            cmap="rainbow",
+            marker=".",
+        )
         plt.scatter(
             data1.iloc[:, cols[0]][ndonor:][d1],
             data1.iloc[:, cols[1]][ndonor:][d1],
@@ -277,32 +327,73 @@ def plot_clusters(data1, labels, ndonor):
         # donor - noise
         d1 = labels[:ndonor] == -1
         plt.scatter(
-            data1.iloc[:, cols[0]][:ndonor][d1], data1.iloc[:, cols[1]][:ndonor][d1], c="black", marker="x", s=100
+            data1.iloc[:, cols[0]][:ndonor][d1],
+            data1.iloc[:, cols[1]][:ndonor][d1],
+            c="black",
+            marker="x",
+            s=100,
+        )
+        plt.scatter(
+            data1.iloc[:, cols[0]][:ndonor][d1],
+            data1.iloc[:, cols[1]][:ndonor][d1],
+            c="black",
+            marker="x",
+            s=100,
         )
 
         # donor non-noise
         d1 = labels[:ndonor] != -1
         plt.scatter(
-            data1.iloc[:, cols[0]][:ndonor][d1], data1.iloc[:, cols[1]][:ndonor][d1], c="green", marker="x", s=100
+            data1.iloc[:, cols[0]][:ndonor][d1],
+            data1.iloc[:, cols[1]][:ndonor][d1],
+            c="green",
+            marker="x",
+            s=100,
         )
 
-        plt.title(data1.columns[cols[1]] + " vs " + data1.columns[cols[0]], fontsize=20, fontweight="bold")
+        plt.title(
+            data1.columns[cols[1]] + " vs " + data1.columns[cols[0]],
+            fontsize=20,
+            fontweight="bold",
+        )
+        plt.scatter(
+            data1.iloc[:, cols[0]][:ndonor][d1],
+            data1.iloc[:, cols[1]][:ndonor][d1],
+            c="green",
+            marker="x",
+            s=100,
+        )
 
-    plt.subplots_adjust(left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03)
+        plt.title(
+            data1.columns[cols[1]] + " vs " + data1.columns[cols[0]],
+            fontsize=20,
+            fontweight="bold",
+        )
+
+    plt.subplots_adjust(
+        left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
+    )
+    plt.subplots_adjust(
+        left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
+    )
     plt.show()
 
 
-# calculate spatial distance between all donors and receivers
 def calculate_spatial_distance(shp_file, donors, receivers):
+    """Calculate spatial distances."""
     print("compute donor-receiver spatial distance ...")
 
     # read in shapefile as GeoDataFrame
+    shps = gpd.read_file(shp_file, layer="divides")
     shps = gpd.read_file(shp_file, layer="divides")
 
     # reproject from geodetic coordinates to meters (for distance calculation)
     shps = shps.to_crs(crs=3857)
 
     # narrow down donors and receiver GeoDataFrames to those needed
+    id1 = "id"
+    if "divide_id" in shps.columns:
+        id1 = "divide_id"
     id1 = "id"
     if "divide_id" in shps.columns:
         id1 = "divide_id"
@@ -318,6 +409,8 @@ def calculate_spatial_distance(shp_file, donors, receivers):
     # calculate centroids of donor and receiver catchments
     cent_don = shps_don["geometry"].centroid
     cent_rec = shps_rec["geometry"].centroid
+    cent_don = shps_don["geometry"].centroid
+    cent_rec = shps_rec["geometry"].centroid
 
     # convert centroids from GeoSeries to GeoDataFrame
     cent_don = gpd.GeoDataFrame(geometry=cent_don)
@@ -326,6 +419,8 @@ def calculate_spatial_distance(shp_file, donors, receivers):
     # calcualte distance between all receiver and donor centroids
     def calculate_distances(row):
         return cent_don.distance(row.geometry)
+
+    distances = cent_rec.apply(calculate_distances, axis=1)
 
     distances = cent_rec.apply(calculate_distances, axis=1)
 
