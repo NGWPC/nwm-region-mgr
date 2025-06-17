@@ -557,13 +557,13 @@ def process_attr_data(
     df_missing = df_attrs_all.isna().mean() * 100
     if df_missing.sum() > 0:
         logger.warning(f"There are missing data for attributes in vpu {vpu}")
-        logger.info(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
+        # logger.info(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
+
+        # plot the missing attribute counts
+        po.plot_missing_attr_counts(config, vpu, df_attrs_all)
 
     # plot spatial map of attribute data
     po.plot_attribute_spatial_map(config, vpu, df_attrs_all)
-
-    # plot the missing attribute counts
-    po.plot_missing_attr_counts(config, vpu, df_attrs_all)
 
     # save the attribute data
     out1 = config.output.attr_data_final

@@ -1,6 +1,17 @@
-"""Functions for generating plots from the output data of regionalization."""
+"""Functions for generating plots from the output data of regionalization.
+
+plot_outputs.py
+
+Functions:
+- plot_attribute_spatial_map: Plots spatial maps of selected attributes for catchments in a VPU.
+- plot_missing_attr_counts: Plots the number of catchments with missing values for each selected attribute.
+- plot_donor_spatial_map: Plots the spatial distribution of donors within a VPU and its buffer zone.
+- plot_pairing_outputs: Generates plots for the donor-receiver pairings, including histograms and spatial maps.
+
+"""
 
 import logging
+import re
 from pathlib import Path
 
 import geopandas as gpd
@@ -9,6 +20,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.lines import Line2D
 from shapely.geometry import Point
+from shapely.ops import unary_union
 
 from parreg.logging_config import setup_logging
 
@@ -17,6 +29,76 @@ from . import utils
 
 setup_logging()
 logger = logging.getLogger(__name__)
+
+
+def _contruct_outfile_name(d1: dict) -> Path:
+    """Construct the output filename based on the provided dictionary.
+
+    Args:
+        d1: dict
+            Dictionary containing information needed to construct the filename.
+
+    Returns:
+        Path
+            The constructed output filename.
+
+    """
+    fn_parts = [
+        d1["plot_type"],
+        d1["var_str"],
+    ]
+    if d1.get("algorithm"):
+        fn_parts.append(d1["algorithm"])
+    fn_parts.extend([d1["domain"], f"vpu{d1['vpu']}.png"])
+    filename = "_".join(fn_parts)
+
+    outfile = Path(d1["out_path"], d1["plot_subdir"], filename)
+    outfile.parent.mkdir(parents=True, exist_ok=True)
+
+    return outfile
+
+
+def _plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
+    """Generate a spatial map plot for the given data.
+
+    Args:
+        gdf : gpd.GeoDataFrame
+            GeoDataFrame containing the data to be plotted.
+        d1: dict
+            Information needed for creating the plot
+
+    """
+    # check if the required column exists
+    if d1["column"] not in gdf:
+        logger.warning(f"Column '{d1['column']}' not found in gdf. Skipping spatial map plot.")
+        return
+
+    _, ax = plt.subplots(figsize=(8, 6))
+
+    # project the GeoDataFrame to lat/lon for plotting
+    gdf = gdf.to_crs(epsg=4326)
+
+    # create spatial map
+    gdf.plot(ax=ax, column=d1["column"], cmap="viridis", legend=True, edgecolor=None)
+
+    # add outer boundary of the VPU
+    combined_polygon = unary_union(gdf.geometry)
+    boundary = combined_polygon.boundary
+    gpd.GeoSeries(boundary).plot(ax=ax, color="black", linewidth=0.8)
+
+    d1["title"] = d1.get("title", f"Spatial map of {d1['column']} for VPU {d1['vpu']}")
+    plt.title(d1["title"])
+    plt.xlabel(d1.get("xlab", "Longitude"))
+    plt.ylabel(d1.get("ylab", "Latitude"))
+
+    # define the output filename (and create the directory if it does not exist)
+    outfile = _contruct_outfile_name(d1)
+
+    # save the figure
+    plt.savefig(outfile, bbox_inches="tight")
+    plt.close()
+
+    logger.info(f"Spatial map plot of {d1['var_str']} saved to {outfile}")
 
 
 def plot_attribute_spatial_map(config: cs.Config, vpu: str, df_attrs_all: pd.DataFrame) -> None:
@@ -46,25 +128,22 @@ def plot_attribute_spatial_map(config: cs.Config, vpu: str, df_attrs_all: pd.Dat
     hydrofabric_file = Path(config.general.hydrofabric_file[vpu])
     gdf0 = gpd.read_file(hydrofabric_file, layer="divides")
 
-    # project the GeoDataFrame to lat/lon for plotting
-    gdf0 = gdf0.to_crs(epsg=4326)
+    figure_dict = {
+        "domain": config.general.domain,
+        "vpu": vpu,
+        "out_path": Path(config.output.attr_data_final.path).parent,
+        "plot_subdir": "plots/attrs",
+        "plot_type": "map",
+        "algorithm": None,
+    }
 
     for col in attrs:
-        # check if the column exists in the DataFrame
         if col in df_attrs_all.columns:
-            plt.figure(figsize=(8, 6))
             gdf = gpd.GeoDataFrame(df_attrs_all[[col]], geometry=gdf0.geometry)
-            gdf.plot(column=col, cmap="viridis", legend=True, edgecolor=None)
-            plt.title(f"Spatial distribution of attribute {col}")
-
-            outfile = Path(
-                Path(config.output.attr_data_final.path).parent,
-                f"plots/map_attr_{col}_{config.general.domain}_vpu{vpu}.png",
-            )
-            outfile.parent.mkdir(parents=True, exist_ok=True)
-            plt.savefig(outfile, bbox_inches="tight")
-            logger.info(f"Attribute spatial map saved to {outfile}")
-            plt.close()
+            figure_dict["column"] = figure_dict["var_str"] = col
+            _plot_spatial_map(gdf, figure_dict)
+        else:
+            logger.warning(f"Column '{col}' not found in df_attrs_all. Skipping spatial map plot for this attribute.")
 
 
 def plot_missing_attr_counts(config: cs.Config, vpu: str, df_attrs_all: pd.DataFrame) -> None:
@@ -215,8 +294,132 @@ def plot_donor_spatial_map(
     plt.close(fig)
 
 
+def _plot_distance_hist(df_pair: pd.DataFrame, d1: dict) -> None:
+    """Generate histogram plot for the spatial or attribute distance between donors and receivers.
+
+    Args:
+        df_pair : pd.DataFrame
+            DataFrame containg the donor-receiver pairing results.
+        d1: dict
+            Infomation needed for creating the plot
+
+    """
+    # check if the required column exists
+    if d1["column"] not in df_pair:
+        logger.warning(f"Column '{d1['column']}' not found in df_pairing. Skipping spatial distance histogram plot.")
+        return
+
+    plt.figure(figsize=(8, 4))
+    sns.histplot(
+        df_pair[d1["column"]],
+        kde=True,
+        bins=30,
+        color="lightblue",
+        edgecolor="grey",
+        stat="density",
+    )
+    sns.kdeplot(df_pair[d1["column"]], color="darkblue", linewidth=1.5)
+    plt.title(d1["title"])
+    plt.xlabel(d1["xlab"])
+    plt.ylabel(d1["ylab"])
+
+    # define the output filename (and create the directory if it does not exist)
+    outfile = _contruct_outfile_name(d1)
+    plt.savefig(outfile, bbox_inches="tight")
+    plt.close()
+
+    logger.info(f"Histogram plot of ({d1['var_str']}) saved to {outfile}")
+
+
+def _plot_pair_groups(config: cs.Config, plot_str: str, gdf: gpd.GeoDataFrame, d1: dict) -> None:
+    """Plot donor-receiver pairing maps.
+
+    This function generates plots for the donor-receiver pairings for the biggest categories in the dataset.
+
+    Args:
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+        plot_str : str
+            A string indicating the type of plot to generate.
+        gdf : gpd.GeoDataFrame
+            GeoDataFrame containing the geometries and attributes for the catchments.
+        d1: dict
+            Information needed for creating the plot
+
+    """
+    # get the number of top categories to plot from plot_str, default to 10 if not specified
+    match = re.search(r"\d+", plot_str)
+    if match:
+        top_n = int(match.group())
+    else:
+        top_n = 10
+    logger.info(f"Plotting top {top_n} categories for donor-receiver pairings.")
+
+    # check if the required column exists
+    col_basin = config.donor.id_name
+    col_divide = config.general.id_name
+    if col_basin not in gdf.columns:
+        # get col_basin from the crosswalk file
+        crosswalk_file = Path(config.donor.donor_ngen_cwt_file)
+        if not crosswalk_file.exists():
+            logger.error(f"Crosswalk file {crosswalk_file} does not exist. Cannot determine {col_basin}.")
+            return
+        crosswalk_df = utils.read_table(crosswalk_file)
+        if col_basin not in crosswalk_df.columns:
+            logger.error(
+                f"Column '{col_basin}' not found in crosswalk file {crosswalk_file}. Cannot determine {col_basin}."
+            )
+            return
+        # gdf[col_basin] = gdf[col_divide].map(crosswalk_df.set_index(col_divide)[col_basin])
+        mapping = (
+            crosswalk_df[[col_divide, col_basin]].drop_duplicates(subset=col_divide).set_index(col_divide)[col_basin]
+        )
+        gdf[col_basin] = gdf[col_divide].map(mapping)
+
+    top_basins = gdf[col_basin].value_counts().nlargest(top_n).index
+
+    # Create a new column with 'Other' as fallback
+    gdf["pair_group"] = gdf[col_basin].where(gdf[col_basin].isin(top_basins), "Other")
+
+    # project the GeoDataFrame to lat/lon for plotting
+    gdf = gdf.to_crs(epsg=4326)
+
+    # Plot the pairing groups
+    fig, ax = plt.subplots(figsize=(8, 6))
+    # gdf.plot(ax=ax, column="pair_group", legend=True, categorical=True)
+    gdf.plot(
+        ax=ax,
+        column="pair_group",
+        legend=True,
+        categorical=True,
+        legend_kwds={
+            "loc": "center left",
+            "bbox_to_anchor": (1, 0.5),  # Place legend outside right
+        },
+    )
+
+    # add outer boundary of the VPU
+    combined_polygon = unary_union(gdf.geometry)
+    boundary = combined_polygon.boundary
+    gdf1 = gpd.GeoSeries(boundary, crs=gdf.crs).to_crs(epsg=4326)
+    gdf1.plot(ax=ax, color="black", linewidth=0.8)
+
+    plt.title(d1["title"])
+    plt.xlabel(d1["xlab"])
+    plt.ylabel(d1["ylab"])
+
+    # define the output filename (and create the directory if it does not exist)
+    outfile = _contruct_outfile_name(d1)
+
+    # save the figure
+    plt.savefig(outfile, bbox_inches="tight")
+    logger.info(f"Map of donor-receiver pair groups saved to {outfile}")
+
+    plt.close(fig)
+
+
 def plot_pairing_outputs(config: cs.Config, vpu: str, algorithm: str, outfile: Path) -> None:
-    """Generate plots for the donor-receiver pairings.
+    """Generate plots for the donor-receiver pairing results.
 
     Args:
         config : cs.Config
@@ -229,13 +432,19 @@ def plot_pairing_outputs(config: cs.Config, vpu: str, algorithm: str, outfile: P
             Path to the output file containing the pairing results.
 
     """
-    # get plotting flags from the config
+    # check if any pairing plots are requested
     plot_flag = getattr(config.output.pairs, "plots", {}) or {}
-    plot_flag1 = plot_flag.get("pair_spatial_distance_histogram", False)
-    plot_flag2 = plot_flag.get("pair_attribute_distance_histogram", False)
+    if not any(plot_flag.values()):
+        logger.info("No pairing plots requested. Skipping pairing outputs plotting.")
+        return
+    else:
+        logger.info("Creating pairing plots as requested in the configuration.")
+
+    # determine which plots to create based on plot_flag disctionary
+    plots = [p1 for p1, v1 in plot_flag.items() if v1]
 
     # read the pairing data
-    if plot_flag1 or plot_flag2:
+    if any(plots):
         try:
             df_pairing = pd.read_parquet(outfile)
         except Exception as e:
@@ -245,62 +454,88 @@ def plot_pairing_outputs(config: cs.Config, vpu: str, algorithm: str, outfile: P
             logger.warning(f"No pairing data found in {outfile}. Skipping creation of pairing plots.")
             return
 
-    # plot the spatial distance distribution of donor-receiver pairings
-    if plot_flag1:
-        # check if the required column exists
-        if "distSpatial" not in df_pairing.columns:
-            logger.warning("Column 'distSpatial' not found in df_pairing. Skipping spatial distance histogram plot.")
-            return
-        plt.figure(figsize=(8, 4))
-        sns.histplot(
-            df_pairing["distSpatial"],
-            kde=True,
-            bins=30,
-            color="lightblue",
-            edgecolor="grey",
-            stat="density",
-        )
-        sns.kdeplot(df_pairing["distSpatial"], color="darkblue", linewidth=1.5)
-        plt.title("Spatial distance distribution of donor-receiver pairings")
-        plt.xlabel("Spatial distance (km)")
-        plt.ylabel("Frequency")
+    if any("map" in v for v in plots):
+        # read the hydrofabric file
+        hydrofabric_file = Path(config.general.hydrofabric_file[vpu])
+        gdf0 = gpd.read_file(hydrofabric_file, layer="divides")
 
-        outfile = Path(
-            Path(config.output.pairs.path).parent,
-            f"plots/hist_spatial_dist_{algorithm}_{config.general.domain}_vpu{vpu}.png",
-        )
-        outfile.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(outfile, bbox_inches="tight")
-        plt.close()
+        # Ensure df_pairing and gdf0 share a common divide_id column
+        id_col = config.general.id_name
+        assert id_col in df_pairing.columns
+        assert id_col in gdf0.columns
 
-        logger.info(f"Spatial distance histogram saved to {outfile}")
+        # Merge df_pairing with geometries from gdf0 based on divide_id
+        gdf_pairing = df_pairing.merge(gdf0[[id_col, "geometry"]], on=id_col, how="right")
 
-    # plot the attribute distance distribution of donor-receiver pairings
-    if plot_flag2:
-        if "distAttr" not in df_pairing.columns:
-            logger.warning("Column 'distAttr' not found in df_pairing. Skipping attribute distance histogram plot.")
-            return
+        # Convert to GeoDataFrame
+        gdf_pairing = gpd.GeoDataFrame(gdf_pairing, geometry="geometry", crs=gdf0.crs)
 
-        plt.figure(figsize=(8, 4))
-        sns.histplot(
-            df_pairing["distAttr"],
-            kde=True,
-            bins=30,
-            color="lightblue",
-            edgecolor="grey",
-            stat="density",
-        )
-        sns.kdeplot(df_pairing["distAttr"], color="darkblue", linewidth=1.5)
-        plt.title("Attribute distance distribution of donor-receiver pairings")
-        plt.xlabel("Attribute distance")
-        plt.ylabel("Frequency")
+        # identify rows with divide_id in gdf_pairing but not in df_pairing (those would be the donors)
+        donor_ids = gdf_pairing[~gdf_pairing[id_col].isin(df_pairing[id_col])][id_col].unique()
+        if donor_ids.size > 0:
+            # assign zero spatial and attribute distances to these rows
+            gdf_pairing.loc[gdf_pairing[id_col].isin(donor_ids), ["distSpatial", "distAttr"]] = 0
 
-        outfile = Path(
-            Path(config.output.pairs.path).parent,
-            f"plots/hist_attr_dist_{algorithm}_{config.general.domain}_vpu{vpu}.png",
-        )
-        outfile.parent.mkdir(parents=True, exist_ok=True)
-        plt.savefig(outfile, bbox_inches="tight")
-        plt.close()
+    # common configuration for figure plotting
+    figure_dict0 = {
+        "domain": config.general.domain,
+        "vpu": vpu,
+        "algorithm": algorithm,
+        "xlab": "Longitude",
+        "ylab": "Latitude",
+        "out_path": Path(config.output.pairs.path).parent,
+        "plot_subdir": "plots/pairing",
+        "plot_type": "map",
+    }
 
-        logger.info(f"Attribute distance histogram saved to {outfile}")
+    if "pair_spatial_distance_histogram" in plots:
+        # plot the spatial distance histogram
+        figure_dict = {
+            "column": "distSpatial",
+            "title": "Spatial distance distribution of donor-receiver pairings",
+            "xlab": "Spatial distance (km)",
+            "ylab": "Frequency",
+            "plot_type": "hist",
+            "var_str": "spatial_dist",
+        }
+        _plot_distance_hist(df_pairing, {**figure_dict0, **figure_dict})
+
+    if "pair_attribute_distance_histogram" in plots:
+        # plot the attribute distance histogram
+        figure_dict = {
+            "column": "distAttr",
+            "title": "Attribute distance distribution of donor-receiver pairings",
+            "xlab": "Attribute distance",
+            "ylab": "Frequency",
+            "plot_type": "hist",
+            "var_str": "attr_dist",
+        }
+        _plot_distance_hist(df_pairing, {**figure_dict0, **figure_dict})
+
+    if "pair_spatial_distance_map" in plots:
+        # plot the spatial distance map
+        figure_dict = {
+            "column": "distSpatial",
+            "title": "Spatial distance (km) of donor-receiver pairings",
+            "var_str": "spatial_dist",
+        }
+        _plot_spatial_map(gdf_pairing, {**figure_dict0, **figure_dict})
+
+    if "pair_attribute_distance_map" in plots:
+        # plot the attribute distance map
+        figure_dict = {
+            "column": "distAttr",
+            "title": "Attribute distance of donor-receiver pairings",
+            "var_str": "attr_dist",
+        }
+        _plot_spatial_map(gdf_pairing, {**figure_dict0, **figure_dict})
+
+    plot_string = next((s for s in plots if "pair_group_map" in s), None)
+    if plot_string:
+        # plot the pairing groups map
+        figure_dict = {
+            "column": None,
+            "title": f"Top Donor-receiver pair groups in vpu {vpu}",
+            "var_str": plot_string.split("_")[0] + "_pair_group",
+        }
+        _plot_pair_groups(config, plot_string, gdf_pairing, {**figure_dict0, **figure_dict})
