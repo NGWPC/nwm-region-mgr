@@ -4,6 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="parreg",
+    name="parreg",
     version="0.0.1",
     author="Yuqiong.Liu, Matthew.Deshotel",
     author_email="yuqiong.liu@ertcorp.com",

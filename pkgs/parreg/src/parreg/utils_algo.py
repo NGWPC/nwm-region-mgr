@@ -8,15 +8,15 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 from pyproj import CRS
+from scipy.spatial import cKDTree
+from shapely.geometry import Point
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 
-def ensure_projected(
-    gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070"
-) -> gpd.GeoDataFrame:
+def ensure_projected(gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070") -> gpd.GeoDataFrame:
     """Reprojects a GeoDataFrame to a projected CRS if currently in geographic CRS."""
     crs = CRS.from_user_input(gdf.crs)
     if crs.is_geographic:
@@ -32,7 +32,7 @@ def compute_pairwise_centroid_distances(
     id_col_a_return: str = "donor_id",
     id_col_b_return: str = "receiver_id",
     distance_threshold: float = None,
-    n_jobs: int = -1,  # Use all available cores
+    n_jobs: int = -1,  # default to using 2 cores
 ) -> pd.DataFrame:
     """Compute pairwise distances between centroids of two GeoDataFrames.
 
@@ -87,13 +87,6 @@ def compute_pairwise_centroid_distances(
                         "centroid_distance": round(dist / 1000),  # Convert to km
                     }
                 )
-                result.append(
-                    {
-                        f"{id_col_a_return}": a_ids[i],
-                        f"{id_col_b_return}": b_ids[j],
-                        "centroid_distance": round(dist / 1000),  # Convert to km
-                    }
-                )
         return result
 
     results = Parallel(n_jobs=n_jobs, backend="threading")(
@@ -102,14 +95,173 @@ def compute_pairwise_centroid_distances(
 
     # Flatten the results
     flat_results = [item for sublist in results for item in sublist]
-    # return pd.DataFrame(flat_results)
-    # return pd.DataFrame(flat_results)
 
     df_long = pd.DataFrame(flat_results)
-    # print(df_long.head())
-    df_wide = df_long.pivot(
-        index=id_col_b_return, columns=id_col_a_return, values="centroid_distance"
-    )
+    df_wide = df_long.pivot(index=id_col_b_return, columns=id_col_a_return, values="centroid_distance")
+
+    return df_wide
+
+
+def compute_pairwise_centroid_distances_ckdtree(
+    group_a: gpd.GeoDataFrame,
+    group_b: gpd.GeoDataFrame,
+    id_col_a: str = "divide_id",
+    id_col_b: str = "divide_id",
+    id_col_a_return: str = "donor_id",
+    id_col_b_return: str = "receiver_id",
+    distance_threshold: float = None,  # in meters
+) -> pd.DataFrame:
+    """Efficiently compute pairwise centroid distances of two GeoDataFrames using cKDTree.
+
+    Parameters
+    ----------
+    group_a : gpd.GeoDataFrame
+        The first GeoDataFrame containing geometries and IDs.
+    group_b : gpd.GeoDataFrame
+        The second GeoDataFrame containing geometries and IDs.
+    id_col_a : str, optional
+        The name of the ID column in group_a. Default is "id".
+    id_col_b : str, optional
+        The name of the ID column in group_b. Default is "id".
+    id_col_a_return : str, optional
+        The name of the ID column to return from group_a. Default is "donor_id".
+    id_col_b_return : str, optional
+        The name of the ID column to return from group_b. Default is "receiver_id".
+    distance_threshold : float, optional
+        If provided, only distances less than or equal to this value will be included in the output.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the centroid distances between each pair of polygons from the two GeoDataFrames in (km),
+        where the columns are indexed by polygon ids from group_a, and the rows are indexed by polygon ids from group_b.
+
+    """
+    # Ensure both GeoDataFrames have a valid CRS
+    if group_a.crs is None or group_b.crs is None:
+        raise ValueError("Both group_a and group_b must have a valid CRS")
+
+    # Reproject to a projected CRS (e.g., EPSG:5070) for distance calculations
+    group_a = group_a.to_crs(epsg=5070)
+    group_b = group_b.to_crs(epsg=5070)
+
+    # Extract centroids
+    centroids_a = group_a.geometry.centroid
+    centroids_b = group_b.geometry.centroid
+
+    # Extract coordinates
+    coords_a = np.array([[pt.x, pt.y] for pt in centroids_a])
+    coords_b = np.array([[pt.x, pt.y] for pt in centroids_b])
+
+    # Build KDTree
+    tree_b = cKDTree(coords_b)
+
+    # Get pairs of indices
+    if distance_threshold is not None:
+        pairs = tree_b.query_ball_point(coords_a, r=distance_threshold)
+    else:
+        pairs = [list(range(len(coords_b))) for _ in range(len(coords_a))]  # All pairs if no threshold
+
+    # loop through pairs and calculate distances
+    records = []
+    for i, js in enumerate(pairs):
+        for j in js:
+            dist = np.linalg.norm(coords_a[i] - coords_b[j])
+            if distance_threshold is None or dist <= distance_threshold:
+                records.append(
+                    {
+                        id_col_a_return: group_a.iloc[i][id_col_a],
+                        id_col_b_return: group_b.iloc[j][id_col_b],
+                        "centroid_distance": round(dist / 1000, 0),  # in kilometers
+                    }
+                )
+
+    df_long = pd.DataFrame(records)
+    df_wide = df_long.pivot(index=id_col_b_return, columns=id_col_a_return, values="centroid_distance")
+
+    return df_wide
+
+
+def compute_pairwise_centroid_distances_ckdtree_parallel(
+    group_a: gpd.GeoDataFrame,
+    group_b: gpd.GeoDataFrame,
+    id_col_a: str = "divide_id",
+    id_col_b: str = "divide_id",
+    id_col_a_return: str = "donor_id",
+    id_col_b_return: str = "receiver_id",
+    distance_threshold: float = None,
+    n_jobs: int = -1,
+) -> pd.DataFrame:
+    """Efficiently compute pairwise centroid distances of two GeoDataFrames using cKDTree and parallelization.
+
+    Parameters
+    ----------
+    group_a : gpd.GeoDataFrame
+        The first GeoDataFrame containing geometries and IDs.
+    group_b : gpd.GeoDataFrame
+        The second GeoDataFrame containing geometries and IDs.
+    id_col_a : str, optional
+        The name of the ID column in group_a. Default is "id".
+    id_col_b : str, optional
+        The name of the ID column in group_b. Default is "id".
+    id_col_a_return : str, optional
+        The name of the ID column to return from group_a. Default is "donor_id".
+    id_col_b_return : str, optional
+        The name of the ID column to return from group_b. Default is "receiver_id".
+    distance_threshold : float, optional
+        If provided, only distances less than or equal to this value will be included in the output.
+    n_jobs : int, optional
+        The number of jobs to run in parallel. Default is -1, which uses all available cores.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the centroid distances between each pair of polygons from the two GeoDataFrames in (km),
+        where the columns are indexed by polygon ids from group_a, and the rows are indexed by polygon ids from group_b.
+
+    """
+    # Project to a CRS with meters
+    group_a = group_a.to_crs(epsg=3857)
+    group_b = group_b.to_crs(epsg=3857)
+
+    centroids_a = group_a.geometry.centroid
+    centroids_b = group_b.geometry.centroid
+
+    coords_a = np.array([[pt.x, pt.y] for pt in centroids_a])
+    coords_b = np.array([[pt.x, pt.y] for pt in centroids_b])
+
+    a_ids = group_a[id_col_a].values
+    b_ids = group_b[id_col_b].values
+
+    tree_b = cKDTree(coords_b)
+
+    def process_one(i):
+        coord = coords_a[i]
+        a_id = a_ids[i]
+
+        if distance_threshold is not None:
+            indices = tree_b.query_ball_point(coord, r=distance_threshold)
+        else:
+            indices = range(len(coords_b))
+
+        result = []
+        for j in indices:
+            b_id = b_ids[j]
+            dist = np.linalg.norm(coord - coords_b[j])
+            result.append(
+                {
+                    id_col_a_return: a_id,
+                    id_col_b_return: b_id,
+                    "centroid_distance": round(dist / 1000, 0),  # km
+                }
+            )
+        return result
+
+    results = Parallel(n_jobs=n_jobs)(delayed(process_one)(i) for i in range(len(coords_a)))
+    flat_results = [item for sublist in results for item in sublist]
+
+    df_long = pd.DataFrame(flat_results)
+    df_wide = df_long.pivot(index=id_col_b_return, columns=id_col_a_return, values="centroid_distance")
 
     return df_wide
 
@@ -121,12 +273,8 @@ def get_valid_attrs(recs0, recs1, df_attr0, attrs, config):
     dt1 = dt1[~dt1.index.isin(config["non_attr_cols"])]
     vars = config["non_attr_cols"] + dt1.index[~dt1.isna()].tolist()
     df_attr = df_attr0[vars]
-    vars = [
-        value for value in vars if value in attrs
-    ]  # attrs included for current round
-    vars0 = [
-        value for value in attrs if value not in vars
-    ]  # attrs excluded for current round
+    vars = [value for value in vars if value in attrs]  # attrs included for current round
+    vars0 = [value for value in attrs if value not in vars]  # attrs excluded for current round
 
     if len(vars) > 0:
         if len(vars0) > 0:
@@ -155,10 +303,7 @@ def apply_pca(data0, min_var=0.8):
     n1 = pca.n_components_
 
     print("Number of PCs selected: " + str(n1))
-    print(
-        "PCA total portion of variance explained ... "
-        + str(sum(pca.explained_variance_ratio_))
-    )
+    print("PCA total portion of variance explained ... " + str(sum(pca.explained_variance_ratio_)))
     x_pca = pca.transform(scaled_data)
 
     # standardize the reduced data (comment out because it is not necessary)
@@ -228,9 +373,7 @@ def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, df
         if df_attr is None:
             donors1 = donors.copy()
         else:
-            donors1, dists1 = apply_donor_constraints(
-                rec1, donors, dists1, pars, df_attr
-            )
+            donors1, dists1 = apply_donor_constraints(rec1, donors, dists1, pars, df_attr)
 
         # if applicable, choose donor with the smallest attribute distances
         if dist_attr is not None:
@@ -265,9 +408,7 @@ def assign_donors(scenario, donors, receivers, pars, dist_attr, dist_spatial, df
 
             # add attribute distance if applicable (e.g., for Gower & URF)
             if dist_attr is not None:
-                dist_attr1 = np.array(dist_attr1)[
-                    ix1
-                ]  # sort according to spatial distance
+                dist_attr1 = np.array(dist_attr1)[ix1]  # sort according to spatial distance
                 dist_attr1 = dist_attr1[
                     range(nd_max)
                 ]  # ignore unneeded donor (likely not necessary given the treatment above)
@@ -370,12 +511,8 @@ def plot_clusters(data1, labels, ndonor):
             fontweight="bold",
         )
 
-    plt.subplots_adjust(
-        left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
-    )
-    plt.subplots_adjust(
-        left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
-    )
+    plt.subplots_adjust(left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03)
+    plt.subplots_adjust(left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03)
     plt.show()
 
 

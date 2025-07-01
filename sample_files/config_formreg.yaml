@@ -1,0 +1,151 @@
+# User configuration for formulation regionalization
+ 
+# General settings for the formulation regionalization application
+general:
+  # Name of the run, used to create output folders and files
+  run_name: test1
+
+  # Define NWM domain. Supported options: CONUS, Alaska, Hawaii, and PuertoRico
+  domain: CONUS
+ 
+  # List of VPUs within the defined NWM domain to process during the current run.
+  # The VPUs provided must be within the chosen domain.
+  # If vpu is set to 'all', all vpus within the chosen domain will be processed
+  vpu: ['01','02']
+ 
+  # Catchments to be excluded from formulation regionalization.different formuladifferent formula
+  # For these catchments, no formulation regionalization will be performed at this stage; instead,
+  # formulations and parameters will be regionalized together in the next step.
+  # This field can be left blank, or set to 'all', or a list of catchment ids,
+  # or the path to a csv file listing all catchment ids (via the divide_id column)
+  catchments_to_exclude:
+ 
+  # List  of competing formulations to be considered in the selection process
+  # If left blank, all available formulations (inferred from the file names of the stats) will be considered
+  formulation_to_include:
+ 
+  # List of formulation to exclude from the selection process
+  # If left blank, no specific formulation will be excluded from the selection process
+  formulation_to_exlcude:
+ 
+  # Path to the base directory where all input and output files are stored.
+  base_dir: /home/yuqiong.liu/data/ngen_reg/
+  
+  # Path to folder where statistics from calibration and validation for each formulation are stored in
+  # parquet files with a specific naming convention (stat_calval_[formulation]_[domain]_[vpu].parquet,
+  # e.g., stat_calval_nom-cfes_CONUS_vpu01.parquet, or stat_calval_nom-cfes_CONUS.parquet)
+  dir_stats: '{base_dir}/formulation_stats'
+ 
+  # whether to consider computational cost of each formulation in the selection process
+  # If set to True, the computational costs of all formulations must be provided in the formulation_cost section below
+  consider_cost: True
+
+  # Strategy for assigning formulations to calibrated basins
+  # Currently two options are supported: 
+  #  1) regionalization: use the global formulation identified for the spatial unit. In this case, all catchments 
+  #     within the spatial unit will use the same formulation, regardless of their calibration performance.
+  #  2) calval_stat: use the locally best performing formulation for each calibrated basin, based on summary score 
+  #     computed from cal/val statistics of the basin (as defined in summary_score section). In this case, some
+  #     calibrated basins within a given spatial unit may use different formulations, depending on their performance.
+  approach_calib_basins: regionalization
+
+# Define configurations for the output of the formulation regionalization
+output:
+  # Path to output folder where the formulation selected for each catchment is stored, in either parquet or csv format
+  path: '{base_dir}/outputs/{run_name}/formulations/form_{domain}_vpu{vpu_list}.parquet'
+ 
+  # Whether to create spatial map or histograms showing the spatial distribution of formulations identified
+  plots: 
+    spatial_map: True
+    histogram: True
+
+ 
+# Define configurations for the spatial discretization for formulation regionalization
+# For each spatial unit, a single formulation will be identified and applied to all catchments within the unit
+spatial_unit: 
+ 
+  # The USGS HUC (hydrologic unit code) level to be used for spatial discretization.
+  # For example, if huc-8 is specified, a formulation will be identified for each HUC-8 basin
+  huc_level: huc-8
+ 
+  # Path to the crosswalk file that defines the mapping between the USGS HUC12 basins and NextGen catchments. 
+  # The file should be a csv file with two columns: huc12 and divide_id, where huc12 is the USGS HUC12 basin id
+  # and divide_id is the NextGen catchment id. The file should contain all HUC12 basins within the chosen domain.
+  crosswalk_file: '{base_dir}/inputs/cwt_ngen_huc12/cwt_huc12_divide_{domain}.csv'
+
+  # Define the minimum number of calibration basins contained in each spatial unit
+  min_no_calib_basin: 5
+ 
+  # Define the method to find more calibration basins for a spatial unit if the criteria of minimum number of calibration basins is not met
+  # Currently two options are supported: 1) upscaling: iteratively upscale the HUC level until enough calibration basins are found, and
+  # 2) nearest-neighbor: find additional calibration basins from surrounding spatial units based on the nearest-neighbor approach
+  basin_fill_method: upscaling
+ 
+# Define configurations to compute the summary score for each competing formulation in each calibration basin
+# The summary score is calculated as the weighted average of selected metrics (each normalized to be between 0 and 1).
+# The final summary score is a number between 0 and 1, and the higher the score, the better the performance
+summary_score:
+
+  # Evaluation period to be used. Currently three options are supported (inherited from ngen-cal):
+  # 1) calib: statistics from the calibration period will be used
+  # 2) valid: statistics from the validation period will be used
+  # 3) full: statistics from the full period (i.e., calibration + validation) will be used
+  # default to "valid"
+  eval_period: valid
+
+  # List of metrics to be used in computing the summary score (as the weighted average of the normalized metrics).
+  # For each metric, the upper and lower bounds for normalization must be defined, as well as the orientation 
+  # (positive or negative), and the weight of the metric in the summary score.
+  #
+  # For positive orientation metrics, the higher the value, the better the performance. 
+  #   The normalized value is computed as: normalized_value = (value - lower) / (upper - lower)
+  # For negative orientation metrics, the lower the value, the better the performance.
+  #   The normalized value is computed as: normalized_value = (upper - value) / (upper - lower)
+  # Note that the upper and lower bounds are also used to scale the metrics before normalization. 
+  #   If the value is outside the bounds, it will be set to the upper or lower bound, respectively.
+  #
+  # The sum of all weights must equal 1.0. If undefined, the weight will be set to 0 and the metric will not be used.
+  metrics:
+    corr:
+      upper: 1.0
+      lower: -0.5
+      orientation: positive
+      weight: 0.25
+    kge:
+      upper: 1.0
+      lower: -0.5
+      orientation: positive
+      weight: 0.25
+    nse:
+      upper: 1.0
+      lower: -0.5
+      orientation: positive
+      weight: 0.25
+    pbias:
+      upper: 300.0
+      lower: 0.0
+      orientation: negative
+      weight: 0.25
+    far:
+      upper: 1.0
+      lower: 0.0
+      orientation: negative
+      weight: 0.25
+
+
+# Define the computational cost of each formulation to assist in the selection process.
+# If consider_cost in general section is set to True, the computational cost of each formulation must be provided,
+# either via the formulation_cost file or costs dictionary below. 
+# If both are provided, the costs in the file will be used.
+# The costs need be defined in a consistent way across all formulations (e.g., as the number of seconds required 
+#    to run the formulation for a single catchment)
+# If not provided, the computational cost will not be considered in the selection process
+formulation_cost:
+  # Path to the file containing the computational cost of each formulation
+  # The file should be a csv file with two columns: formulation and cost
+  file: /home/yuqiong.liu/data/ngen_form_reg/cost/formulation_cost.csv
+  costs:
+    # List of formulations and their corresponding computational costs
+    # Example: ['nom-cfes': 10, 'nom-cfes-2': 20]
+    nom-cfes: 10
+    nom-cfex: 20

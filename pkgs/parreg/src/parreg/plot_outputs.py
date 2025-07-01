@@ -276,7 +276,7 @@ def plot_donor_spatial_map(
     ax.legend(handles=legend_elements, loc="center left", bbox_to_anchor=(1, 0.5))
 
     # title
-    plt.title(f"Donors available for VPU {vpu} regionalization")
+    plt.title(f"Donor basins available for VPU {vpu} regionalization")
 
     # tidy up plot
     ax.set_axis_off()
