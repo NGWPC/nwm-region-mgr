@@ -137,7 +137,7 @@ def check_columns(file: Path | str, columns: Set[str]):
         raise ValueError(f"Missing columns in {file}: {missing_cols}")
 
 
-def read_table(file_path: Path | str):
+def read_table(file_path: Path | str) -> pd.DataFrame:
     """Read table."""
     file_path = Path(file_path)
     if not file_path.exists():
