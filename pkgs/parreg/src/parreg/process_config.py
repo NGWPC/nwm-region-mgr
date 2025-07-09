@@ -1,4 +1,22 @@
-"""Process configuration."""
+"""Process configuration to perform parameter regionalization.
+
+process_config.py
+
+Functions:
+- expand_with_vpu: Expand a string with {vpu_list} placeholders using a list of VPU codes.
+- recursive_substitute: Recursively substitute placeholders in a Pydantic model, dictionary, or string.
+- validate_by_section: Validate different sections of the config file using Pydantic models.
+- find_occurrences: Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
+- load_and_validate_config: Load a YAML file, validate its structure, and substitute placeholders.
+- get_donor_basins: Get the donor basins for a given VPU from the config.
+- update_spatial_distance_donors: Update existing dataframe for pairwise spatial distance to include new donors.
+- update_spatial_distance_receivers: Update existing dataframe for pairwise spatial distance to include new receivers.
+- get_donors_receivers: Get the donors and receivers for a given VPU from the config.
+- process_attr_data: Process attribute data for donors and receivers, including spatial distances.
+- set_snow_flag: Set a flag indicating whether the catchments are snowy based on the snow fraction.
+- generate_pairings: Generate donor-receiver pairings using specified algorithms.
+
+"""
 
 import logging
 import time
@@ -29,10 +47,7 @@ def expand_with_vpu(string_with_vpu: str, context: dict) -> dict:
     if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
         return {"default": string_with_vpu.format(**context)}
 
-    return {
-        vpu: string_with_vpu.format(**{**context, "vpu_list": vpu})
-        for vpu in context["vpu_list"]
-    }
+    return {vpu: string_with_vpu.format(**{**context, "vpu_list": vpu}) for vpu in context["vpu_list"]}
 
 
 def recursive_substitute(obj: Any, context: dict) -> Any:
@@ -189,8 +204,7 @@ def load_and_validate_config(file_path: str):
         }
         config = recursive_substitute(config, context)
 
-        # additional validation after substitution
-        # config.donor.check_files()
+        # save final config after validation and substitution
         out = config.output.config_final
         if out.save:
             logger.info(f"Saving final config to {out.path}")
@@ -228,9 +242,7 @@ def get_donor_basins(config: cs.Config, vpu: str) -> list:
     if donors.empty:
         raise ValueError(f"No donors found in the donor gage file: {gage_file}")
     if "longitude" not in donors.columns or "latitude" not in donors.columns:
-        raise ValueError(
-            f"Donor gage file must contain 'longitude' and 'latitude' columns: {gage_file}"
-        )
+        raise ValueError(f"Donor gage file must contain 'longitude' and 'latitude' columns: {gage_file}")
     if "gage_id" not in donors.columns:
         raise ValueError(f"Donor gage file must contain 'gage_id' column: {gage_file}")
 
@@ -258,9 +270,7 @@ def get_donor_basins(config: cs.Config, vpu: str) -> list:
     gdf_buffered = combined_geom.buffer(buffer * 1000)
 
     # Find donors in the buffered VPU
-    donor_basins = donor_gdf[donor_gdf.geometry.within(gdf_buffered)][
-        "gage_id"
-    ].tolist()
+    donor_basins = donor_gdf[donor_gdf.geometry.within(gdf_buffered)]["gage_id"].tolist()
 
     if not donor_basins:
         logger.warning("No donor basins found. Please check the donor gage file and hydrofabric file.")
@@ -349,9 +359,7 @@ def update_spatial_distance_receivers(
 
     if missing_receivers:
         # Subset new receivers GeoDataFrame to only missing receivers
-        missing_receivers_gdf = receivers_gdf[
-            receivers_gdf["divide_id"].isin(missing_receivers)
-        ]
+        missing_receivers_gdf = receivers_gdf[receivers_gdf["divide_id"].isin(missing_receivers)]
 
         # Compute distances for missing receivers
         missing_distances_df = utils_algo.compute_pairwise_centroid_distances(
@@ -369,9 +377,7 @@ def update_spatial_distance_receivers(
     return updated_df, file_changed
 
 
-def get_donors_receivers(
-    config: cs.Config, vpu: str
-) -> Tuple[list, list, pd.DataFrame]:
+def get_donors_receivers(config: cs.Config, vpu: str) -> Tuple[list, list, pd.DataFrame]:
     """Get the donors and receivers for a given VPU from the config.
 
     Args:
@@ -409,14 +415,10 @@ def get_donors_receivers(
         file1 = config.general.hydrofabric_file[vpu]
         if vpu1 != vpu:
             # rename the hydrofabric file to match the current VPU
-            file1 = config.general.hydrofabric_file[vpu].replace(
-                "vpu_" + vpu, "vpu_" + vpu1
-            )
+            file1 = config.general.hydrofabric_file[vpu].replace("vpu_" + vpu, "vpu_" + vpu1)
             # make sure the file exists
             if not Path(file1).is_file():
-                raise FileNotFoundError(
-                    f"Hydrofabric file for VPU {vpu1} not found: {file1}"
-                )
+                raise FileNotFoundError(f"Hydrofabric file for VPU {vpu1} not found: {file1}")
 
         gdf = gpd.read_file(file1, layer="divides")
         gdf1 = gdf[gdf[id_name].isin(donors0)]
@@ -433,9 +435,7 @@ def get_donors_receivers(
             gdf_receivers = gdf[~gdf[id_name].isin(donors)]
 
     if gdf_receivers.empty:
-        raise ValueError(
-            f"No receivers found in VPU {vpu}. Please check the hydrofabric file and donor gage file."
-        )
+        raise ValueError(f"No receivers found in VPU {vpu}. Please check the hydrofabric file and donor gage file.")
 
     # gdf_receivers = gdf_receivers.sample(n=500, replace=False) # randomly sample a small number of receivers for testing
     receivers = gdf_receivers[id_name].tolist()
@@ -449,12 +449,7 @@ def get_donors_receivers(
     out = config.output.spatial_distance
     dist_file = Path(
         out.path,
-        "donor_receiver_dist_"
-        + config.general.domain
-        + "_vpu"
-        + vpu
-        + "."
-        + out.format,
+        "donor_receiver_dist_" + config.general.domain + "_vpu" + vpu + "." + out.format,
     )
     if dist_file.exists():
         logger.info(f"Spatial distance file already exists: {dist_file}")
@@ -462,9 +457,7 @@ def get_donors_receivers(
 
         # check if the spatial distance data includes all donors and receivers
         # if not, identify the missing donors and receivers, compute the distance for them and add to the existing dataframe
-        logger.info(
-            "Updating existing spatial distance file (if needed) to include all donors and receivers ..."
-        )
+        logger.info("Updating existing spatial distance file (if needed) to include all donors and receivers ...")
         df_spatial_dist, file_changed1 = update_spatial_distance_donors(
             id_name, gdf_donors, gdf_receivers, df_spatial_dist
         )
@@ -476,9 +469,7 @@ def get_donors_receivers(
     else:
         logger.info("Compute donor-receiver spatial distance ...")
         start_time = time.time()
-        df_spatial_dist = utils_algo.compute_pairwise_centroid_distances(
-            gdf_donors, gdf_receivers, id_name, id_name
-        )
+        df_spatial_dist = utils_algo.compute_pairwise_centroid_distances(gdf_donors, gdf_receivers, id_name, id_name)
         end_time = time.time()
         logger.info(f"Spatial distance computed in {end_time - start_time:.4f} seconds")
         file_changed = True
@@ -492,9 +483,7 @@ def get_donors_receivers(
         if dist_file.is_file():
             backup_file = dist_file.with_suffix(".bak")
             dist_file.rename(backup_file)
-            logger.info(
-                f"Backup of existing spatial distance file created: {backup_file}"
-            )
+            logger.info(f"Backup of existing spatial distance file created: {backup_file}")
 
         # save the spatial distance data
         utils.save_data(df_spatial_dist, dist_file, index=True)
@@ -534,9 +523,7 @@ def process_attr_data(
         dataset = getattr(config.attr_datasets, dataset_name)
         df_attrs = dataset.get_attr_data()
 
-        df_attrs = df_attrs.rename(
-            columns=lambda x: x if x == id_name else f"{dataset_name}_{x}"
-        )
+        df_attrs = df_attrs.rename(columns=lambda x: x if x == id_name else f"{dataset_name}_{x}")
 
         # subset the attribute data to only include donors and receivers for the current VPU
         # TODO: add functionality to add additional donors from neighboring VPUs
@@ -545,34 +532,25 @@ def process_attr_data(
         df_attrs_all.append(df_attrs)
 
     # Merge all attribute data frames column-wise, based on divide_id
-    df_attrs_all = reduce(
-        lambda left, right: pd.merge(left, right, on=id_name, how="outer"), df_attrs_all
-    )
+    df_attrs_all = reduce(lambda left, right: pd.merge(left, right, on=id_name, how="outer"), df_attrs_all)
 
     # add a column to indicate whether the divide_id is a donor or receiver
     df_attrs_all["is_donor"] = df_attrs_all[id_name].isin(donors)
     # move the is_donor column to be the second column
     df_attrs_all = df_attrs_all[
-        [id_name, "is_donor"]
-        + [col for col in df_attrs_all.columns if col not in [id_name, "is_donor"]]
+        [id_name, "is_donor"] + [col for col in df_attrs_all.columns if col not in [id_name, "is_donor"]]
     ]
 
     # check if all donors have attribute data
     if not set(donors).issubset(df_attrs_all[id_name]):
-        logger.warning(
-            f"Not all donors are included in the attribute data for VPU {vpu}."
-        )
+        logger.warning(f"Not all donors are included in the attribute data for VPU {vpu}.")
         missing_donors = [x for x in donors if x not in df_attrs_all[id_name].values]
         logger.info(f"Missing donors: {missing_donors}")
 
     # check if all receivers have attribute data
     if not set(receivers).issubset(df_attrs_all[id_name]):
-        logger.warning(
-            f"Not all receivers are included in the attribute data for VPU {vpu}."
-        )
-        missing_receivers = [
-            x for x in receivers if x not in df_attrs_all[id_name].values
-        ]
+        logger.warning(f"Not all receivers are included in the attribute data for VPU {vpu}.")
+        missing_receivers = [x for x in receivers if x not in df_attrs_all[id_name].values]
         logger.info(f"Missing receivers: {missing_receivers}")
 
     # reset donor and receiver lists based on the attribute data
@@ -584,9 +562,7 @@ def process_attr_data(
 
     # check if all donors in attribute data are inlcuded in the columns of the spatial distance data
     if not set(donors).issubset(df_spatial_dist.columns):
-        logger.warning(
-            f"Not all donors in the attribute data are present in the spatial distance data for VPU {vpu}."
-        )
+        logger.warning(f"Not all donors in the attribute data are present in the spatial distance data for VPU {vpu}.")
         missing_donor_ids = [x for x in donors if x not in df_spatial_dist.columns]
         logger.info(f"Missing donors: {missing_donor_ids}")
 
@@ -599,9 +575,7 @@ def process_attr_data(
         logger.info(f"Missing receivers: {missing_receiver_ids}")
 
     # sort the attribute data by is_donor and divide_id
-    df_attrs_all = df_attrs_all.sort_values(
-        by=["is_donor", id_name], ascending=[False, True]
-    )
+    df_attrs_all = df_attrs_all.sort_values(by=["is_donor", id_name], ascending=[False, True])
 
     # check percentage of missing data
     df_missing = df_attrs_all.isna().mean() * 100
@@ -650,15 +624,11 @@ def set_snow_flag(df_attrs: pd.DataFrame, min_snow_frac: float) -> pd.DataFrame:
         # check if the snow_frac column is present in the attribute data
         n1 = df_attrs["snow_frac"].isna().sum()
         if n1 > 0:
-            logger.warning(
-                f"There are {n1} missing values in the snow_frac column. Setting them to non-snowy."
-            )
+            logger.warning(f"There are {n1} missing values in the snow_frac column. Setting them to non-snowy.")
             df_attrs["snow_frac"] = df_attrs["snow_frac"].fillna(0.0)
 
         # create a new column to indicate whether the catchment is snowy
-        df_attrs["snowy"] = df_attrs["snow_frac"].apply(
-            lambda x: True if x >= min_snow_frac else False
-        )
+        df_attrs["snowy"] = df_attrs["snow_frac"].apply(lambda x: True if x >= min_snow_frac else False)
 
     else:
         # if the snow_frac column is not present, set all catchments to non-snowy
@@ -670,9 +640,7 @@ def set_snow_flag(df_attrs: pd.DataFrame, min_snow_frac: float) -> pd.DataFrame:
     return df_attrs
 
 
-def generate_pairing(
-    conf: cs.Config, vpu: str, df_attrs_all: pd.DataFrame, df_dist_spatial: pd.DataFrame
-):
+def generate_pairing(conf: cs.Config, vpu: str, df_attrs_all: pd.DataFrame, df_dist_spatial: pd.DataFrame):
     """Conduct donor-receiver pairing for a given VPU based on the configuration.
 
     For a given VPU, generate donor-receiver pairing results for each algorithm selected in the configuration,
@@ -719,27 +687,21 @@ def generate_pairing(
         df_donor_all = pd.DataFrame()
         start_time = time.time()
         config1 = conf.model_dump()["algorithms"][func1]
-        config1["max_spa_dist"] = conf.model_dump()["algorithms"]["general"][
-            "max_spa_dist"
-        ]
+        config1["max_spa_dist"] = conf.model_dump()["algorithms"]["general"]["max_spa_dist"]
         config1["njobs"] = conf.model_dump()["general"]["n_procs"]
         config1["non_attr_cols"] = ["divide_id", "is_donor", "snowy"]
         config1["attrs"] = {
-            "main": [
-                x for x in df_attrs_all.columns if x not in config1["non_attr_cols"]
-            ],
+            "main": [x for x in df_attrs_all.columns if x not in config1["non_attr_cols"]],
             "base": ["ngen_elevation", "ngen_slope", "ngen_aspect"],
         }
-        df_donor_all = functions[func1].func(
-            config1, df_attrs_all, df_dist_spatial, func1
-        )
+        df_donor_all = functions[func1].func(config1, df_attrs_all, df_dist_spatial, func1)
 
-            # save donor receiver pairing to csv file
-            conf.output.pairs.save_data(df_donor_all, outfile)
-            logger.info(f"Pairing results saved to {outfile}")
-            logger.info(f"Donor-receiver pairing for VPU {vpu} using {func1} completed.")
-            end_time = time.time()
-            logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
+        # save donor receiver pairing to csv file
+        conf.output.pairs.save_data(df_donor_all, outfile)
+        logger.info(f"Pairing results saved to {outfile}")
+        logger.info(f"Donor-receiver pairing for VPU {vpu} using {func1} completed.")
+        end_time = time.time()
+        logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
 
         # plot the results if requested
         po.plot_pairing_outputs(conf, vpu, func1, outfile)

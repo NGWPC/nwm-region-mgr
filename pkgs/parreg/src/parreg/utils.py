@@ -9,7 +9,7 @@ import yaml
 from pydantic import BaseModel
 
 
-def remove_nulls(d: dict | list):
+def remove_nulls(d: dict | list) -> dict | list:
     """Remove nulls.
 
     Recursively remove None values from a dictionary or list.
@@ -28,11 +28,7 @@ def remove_nulls(d: dict | list):
 
     """
     if isinstance(d, dict):
-        return {
-            k: remove_nulls(v)
-            for k, v in d.items()
-            if v is not None and remove_nulls(v) != {}
-        }
+        return {k: remove_nulls(v) for k, v in d.items() if v is not None and remove_nulls(v) != {}}
     elif isinstance(d, list):
         return [remove_nulls(v) for v in d if v is not None]
     else:
@@ -43,7 +39,7 @@ def save_data(
     data: Union[pd.DataFrame, BaseModel],
     file_path: Union[str, Path],
     index: bool = False,
-):
+) -> None:
     """Save data to disk in an appropriate format based on its type and file extension.
 
     Parameters
@@ -91,9 +87,7 @@ def save_data(
         elif file_path.suffix == ".parquet":
             data.to_parquet(file_path, index=index)
         else:
-            raise Exception(
-                "Only csv and parquet formats are supported for saving DataFrame"
-            )
+            raise Exception("Only csv and parquet formats are supported for saving DataFrame")
 
     elif isinstance(data, BaseModel):
         if file_path.suffix != ".yaml":
@@ -109,9 +103,7 @@ def save_data(
             )
 
     else:
-        raise ValueError(
-            "Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel"
-        )
+        raise ValueError("Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel")
 
 
 def check_columns(file: Path | str, columns: Set[str]):
@@ -124,9 +116,7 @@ def check_columns(file: Path | str, columns: Set[str]):
 
     suffix = file.suffix.lower()
     if suffix == ".csv":
-        columns_present = [
-            col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()
-        ]
+        columns_present = [col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()]
     elif suffix == ".parquet":
         columns_present = [col.lower() for col in pq.ParquetFile(file).schema.names]
     else:

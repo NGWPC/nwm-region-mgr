@@ -5,15 +5,15 @@ general:
   # Name of the run, used to create output folders and files
   run_name: test1
 
-  # Define NWM domain. Supported options: CONUS, Alaska, Hawaii, and PuertoRico
-  domain: CONUS
+  # Define NWM domain. Supported options: conus, ak, hi, prvi
+  domain: conus
  
   # List of VPUs within the defined NWM domain to process during the current run.
   # The VPUs provided must be within the chosen domain.
-  # If vpu is set to 'all', all vpus within the chosen domain will be processed
-  vpu: ['01','02']
- 
-  # Catchments to be excluded from formulation regionalization.different formuladifferent formula
+  # If vpu_list is set to 'all', all vpus within the chosen domain will be processed
+  vpu_list: ['01']
+
+  # Catchments to be excluded from formulation regionalization.
   # For these catchments, no formulation regionalization will be performed at this stage; instead,
   # formulations and parameters will be regionalized together in the next step.
   # This field can be left blank, or set to 'all', or a list of catchment ids,
@@ -26,19 +26,18 @@ general:
  
   # List of formulation to exclude from the selection process
   # If left blank, no specific formulation will be excluded from the selection process
-  formulation_to_exlcude:
+  formulation_to_exclude:
  
   # Path to the base directory where all input and output files are stored.
-  base_dir: /home/yuqiong.liu/data/ngen_reg/
-  
-  # Path to folder where statistics from calibration and validation for each formulation are stored in
-  # parquet files with a specific naming convention (stat_calval_[formulation]_[domain]_[vpu].parquet,
-  # e.g., stat_calval_nom-cfes_CONUS_vpu01.parquet, or stat_calval_nom-cfes_CONUS.parquet)
-  dir_stats: '{base_dir}/formulation_stats'
+  base_dir: /home/yuqiong.liu/work/data/ngen_reg/
  
   # whether to consider computational cost of each formulation in the selection process
   # If set to True, the computational costs of all formulations must be provided in the formulation_cost section below
   consider_cost: True
+
+  id_name: divide_id
+  hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
+  gage_divide_cwt_file: '{base_dir}/inputs/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
 
   # Strategy for assigning formulations to calibrated basins
   # Currently two options are supported: 
@@ -48,50 +47,60 @@ general:
   #     computed from cal/val statistics of the basin (as defined in summary_score section). In this case, some
   #     calibrated basins within a given spatial unit may use different formulations, depending on their performance.
   approach_calib_basins: regionalization
-
-# Define configurations for the output of the formulation regionalization
-output:
-  # Path to output folder where the formulation selected for each catchment is stored, in either parquet or csv format
-  path: '{base_dir}/outputs/{run_name}/formulations/form_{domain}_vpu{vpu_list}.parquet'
- 
-  # Whether to create spatial map or histograms showing the spatial distribution of formulations identified
-  plots: 
-    spatial_map: True
-    histogram: True
-
+    
  
 # Define configurations for the spatial discretization for formulation regionalization
 # For each spatial unit, a single formulation will be identified and applied to all catchments within the unit
 spatial_unit: 
  
   # The USGS HUC (hydrologic unit code) level to be used for spatial discretization.
-  # For example, if huc-8 is specified, a formulation will be identified for each HUC-8 basin
-  huc_level: huc-8
- 
-  # Path to the crosswalk file that defines the mapping between the USGS HUC12 basins and NextGen catchments. 
+  # For example, if huc8 is specified, a formulation will be identified for each HUC-8 basin
+  huc_level: huc8
+
+  # Path to the crosswalk file that defines the mapping between the USGS HUC12 basins and NextGen catchments.
   # The file should be a csv file with two columns: huc12 and divide_id, where huc12 is the USGS HUC12 basin id
   # and divide_id is the NextGen catchment id. The file should contain all HUC12 basins within the chosen domain.
   crosswalk_file: '{base_dir}/inputs/cwt_ngen_huc12/cwt_huc12_divide_{domain}.csv'
 
   # Define the minimum number of calibration basins contained in each spatial unit
-  min_no_calib_basin: 5
+  nmin_calib_basin: 3
  
-  # Define the method to find more calibration basins for a spatial unit if the criteria of minimum number of calibration basins is not met
-  # Currently two options are supported: 1) upscaling: iteratively upscale the HUC level until enough calibration basins are found, and
-  # 2) nearest-neighbor: find additional calibration basins from surrounding spatial units based on the nearest-neighbor approach
+  # Define the method to find more calibration basins for a spatial unit if the criteria of minimum number of 
+  # calibration basins is not met
+  # Currently two options are supported: 
+  # 1) upscaling: iteratively upscale the HUC level until enough calibration basins are found, and
+  # 2) nearest-neighbor: find additional calibration basins from surrounding spatial units via nearest-neighbor approach
   basin_fill_method: upscaling
  
+  # define stragegy to calculate the total score for each spatial unit
+  # Currently two options are supported:
+  # 1) basin: calculate the total score for each spatial unit as the average of the summary scores of 
+  #     all calibration basins within the spatial unit
+  # 2) divide: calculate the total score for each spatial unit as the average of the summary scores of 
+  #     all catchments (divides) within the spatial unit
+  total_score_method: basin
+
 # Define configurations to compute the summary score for each competing formulation in each calibration basin
 # The summary score is calculated as the weighted average of selected metrics (each normalized to be between 0 and 1).
 # The final summary score is a number between 0 and 1, and the higher the score, the better the performance
 summary_score:
+
+  # Path to folder where statistics from calibration and validation for each formulation are stored in
+  # parquet/csv files with a specific naming convention (stat_calval_[formulation]_[domain]_vpu[vpu].parquet,
+  # e.g., stat_calval_nom-cfes_conus_vpu01.parquet, or stat_calval_nom-cfes_conus.parquet)
+  dir_stats: '{base_dir}/inputs/formulation_stats'
+
+  # Name of the column (in the stats file) containing the unique identifier for each calibration basin
+  id_name: gage_id
 
   # Evaluation period to be used. Currently three options are supported (inherited from ngen-cal):
   # 1) calib: statistics from the calibration period will be used
   # 2) valid: statistics from the validation period will be used
   # 3) full: statistics from the full period (i.e., calibration + validation) will be used
   # default to "valid"
-  eval_period: valid
+  metric_eval_period:
+    col_name: evalPeriod
+    value: valid
 
   # List of metrics to be used in computing the summary score (as the weighted average of the normalized metrics).
   # For each metric, the upper and lower bounds for normalization must be defined, as well as the orientation 
@@ -106,7 +115,7 @@ summary_score:
   #
   # The sum of all weights must equal 1.0. If undefined, the weight will be set to 0 and the metric will not be used.
   metrics:
-    corr:
+    cor:
       upper: 1.0
       lower: -0.5
       orientation: positive
@@ -121,7 +130,7 @@ summary_score:
       lower: -0.5
       orientation: positive
       weight: 0.25
-    pbias:
+    bias:
       upper: 300.0
       lower: 0.0
       orientation: negative
@@ -130,22 +139,59 @@ summary_score:
       upper: 1.0
       lower: 0.0
       orientation: negative
-      weight: 0.25
+      weight: 0
 
 
 # Define the computational cost of each formulation to assist in the selection process.
 # If consider_cost in general section is set to True, the computational cost of each formulation must be provided,
 # either via the formulation_cost file or costs dictionary below. 
 # If both are provided, the costs in the file will be used.
-# The costs need be defined in a consistent way across all formulations (e.g., as the number of seconds required 
+# The costs need to be defined in a consistent way across all formulations (e.g., as minutes required 
 #    to run the formulation for a single catchment)
-# If not provided, the computational cost will not be considered in the selection process
 formulation_cost:
+
+  # summary score tolerance. Formulations with a summary score within this tolerance of the best formulation
+  # will be considered as equally good. Final formulation will be selected based on the computational cost.
+  # If set to 0, only the best formulation will be selected.
+  # note the tolerance is defined as a fraction of the best score, so if the best score is 0.8 and the tolerance 
+  # is 0.05, then all formulations with a score between 0.76 (=0.8-0.8*0.05) and 0.8 will be considered as equally good.
+  score_tolerance: 0.05
+
   # Path to the file containing the computational cost of each formulation
   # The file should be a csv file with two columns: formulation and cost
-  file: /home/yuqiong.liu/data/ngen_form_reg/cost/formulation_cost.csv
+  file: #/home/yuqiong.liu/data/ngen_form_reg/cost/formulation_cost.csv
   costs:
     # List of formulations and their corresponding computational costs
-    # Example: ['nom-cfes': 10, 'nom-cfes-2': 20]
+    # Example: ['nom-cfes': 10, 'nom-cfex': 20]
     nom-cfes: 10
     nom-cfex: 20
+    nom-snow17-sac: 15
+    nom-ueb-sac: 25
+    nom-snow17-lasam: 18
+
+# Define configurations for the output of formulation regionalization
+output:
+
+  formulation: # Output configurations for the selected formulations
+    save: True
+    path: '{base_dir}/outputs/{run_name}/formulations'
+    stem: 'form_{domain}_vpu{vpu_list}'
+    format: parquet
+    plot:
+      spatial_map: True
+      histogram: True
+    plot_path: '{base_dir}/outputs/{run_name}/plots/formulation'
+  
+  config_final: # Final configuration file after processing and validation
+    save: True
+    path: '{base_dir}/outputs/{run_name}/config_formreg_final.yaml' 
+  
+  summary_score: # Output configurations for the summary score
+    save: True
+    path: '{base_dir}/outputs/{run_name}/summary_score'
+    stem: 'score_{domain}_vpu{vpu_list}'
+    format: parquet
+    plot:
+      histogram: False
+      spatial_map: False
+    plot_path: '{base_dir}/outputs/{run_name}/plots/summary_score'
