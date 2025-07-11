@@ -72,13 +72,18 @@ spatial_unit:
   # 2) nearest-neighbor: find additional calibration basins from surrounding spatial units via nearest-neighbor approach
   basin_fill_method: upscaling
  
-  # define stragegy to calculate the total score for each spatial unit
+  # define method to calculate the total score for each spatial unit
   # Currently two options are supported:
-  # 1) basin: calculate the total score for each spatial unit as the average of the summary scores of 
+  # 1) basin: calculate the total score for each spatial unit as the sum of the summary scores of
   #     all calibration basins within the spatial unit
-  # 2) divide: calculate the total score for each spatial unit as the average of the summary scores of 
-  #     all catchments (divides) within the spatial unit
-  total_score_method: basin
+  # 2) divide: calculate the total score for each spatial unit as the sum of the summary scores of 
+  #     all catchments (divides) of calibration basins within the spatial unit
+  # As a result, the total score will be higher for the divide method, as it is calculated as the sum of 
+  # the summary scores of all catchments within the calibration basins.
+  # Choose the 'divide' method to give more weight to the performance of larger basins,
+  # or the 'basin' method to give equal weight to all calibration basins within the spatial unit.
+  # If not specified, the default method is 'divide'
+  total_score_method: divide
 
 # Define configurations to compute the summary score for each competing formulation in each calibration basin
 # The summary score is calculated as the weighted average of selected metrics (each normalized to be between 0 and 1).
@@ -192,6 +197,6 @@ output:
     stem: 'score_{domain}_vpu{vpu_list}'
     format: parquet
     plot:
-      histogram: False
-      spatial_map: False
+      histogram: True
+      spatial_map: True
     plot_path: '{base_dir}/outputs/{run_name}/plots/summary_score'

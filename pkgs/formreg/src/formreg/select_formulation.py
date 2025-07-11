@@ -13,8 +13,10 @@ Functions:
 """
 
 import logging
+from pathlib import Path
 from typing import Optional
 
+import geopandas as gpd
 import pandas as pd
 from utils import check_columns, read_table
 
@@ -23,7 +25,7 @@ from . import config_schema as cs
 logger = logging.getLogger(__name__)
 
 
-def find_calibration_gages(huc_id: str, df: pd.DataFrame, min_gages: int) -> tuple[list, str]:
+def _find_calibration_gages(huc_id: str, df: pd.DataFrame, min_gages: int) -> tuple[list, str]:
     """Find gages for the given HUC ID in the DataFrame.
 
     Args:
@@ -55,13 +57,16 @@ def find_calibration_gages(huc_id: str, df: pd.DataFrame, min_gages: int) -> tup
             df_huc = df[df["huc_id"].str[:huc_digit] == huc_id[:huc_digit]].copy()
             gages = df_huc["gage_id"].unique().tolist()
 
+            # remove NaN values from gages
+            gages = [gage for gage in gages if pd.notna(gage)]
+
             if huc_level != current_huc_level:
-                logger.info(
+                logger.debug(
                     f"{huc_id}: upscaled HUC level from {current_huc_level} to {huc_level} "
                     f"and found {len(gages)} gages."
                 )
             else:
-                logger.info(f"{huc_id}: found {len(gages)} gages at {huc_level} level.")
+                logger.debug(f"{huc_id}: found {len(gages)} gages at {huc_level} level.")
 
             break
     else:
@@ -73,7 +78,7 @@ def find_calibration_gages(huc_id: str, df: pd.DataFrame, min_gages: int) -> tup
     return gages, huc_level
 
 
-def get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[str, float]]:
+def _get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[str, float]]:
     """Get formulation costs from the configuration.
 
     Args:
@@ -106,7 +111,7 @@ def get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[str
     return None
 
 
-def compute_total_score(
+def _compute_total_score(
     df: pd.DataFrame,
     method: str = "basin",
 ) -> pd.DataFrame:
@@ -137,7 +142,7 @@ def compute_total_score(
     df1 = df1.drop(columns=[col1])
 
     # count the values in the formulation column
-    if df1["formulation"].value_counts().nunique() != 1:
+    if df1["formulation"].value_counts().nunique() > 1:
         raise ValueError("Not all formulations have the same number of entries.")
 
     # compute total score for each formulation
@@ -152,10 +157,11 @@ def compute_total_score(
     return df1
 
 
-def select_formulation_given_score_cost(
+def _select_formulation_given_score_cost(
     df_score: pd.DataFrame,
     score_tolerance: float,
     cost_dict: Optional[dict] = None,
+    method: str = "basin",
 ) -> pd.DataFrame:
     """Select formulations based on summary scores and costs.
 
@@ -166,6 +172,8 @@ def select_formulation_given_score_cost(
             Tolerance for the summary score to consider formulations as equally good.
         cost_dict : dict, optional
             Dictionary containing costs for each formulation, by default None.
+        method : str, optional
+            Method to compute total score, either 'basin' or 'divide', by default 'basin'.
 
     Returns:
         pd.DataFrame
@@ -173,7 +181,7 @@ def select_formulation_given_score_cost(
 
     """
     # compute total score for each formulation
-    df_total = compute_total_score(df_score, method="basin")
+    df_total = _compute_total_score(df_score, method=method)
 
     # get the best formulation based on total scores
     max_score = df_total["total_score"].max()
@@ -225,23 +233,45 @@ def select_formulation(
     # crosswalk for divide/huc12
     cwt_divide_huc12 = read_table(config.spatial_unit.crosswalk_file, dtype={"divide_id": str, "huc12": str})
 
-    # merge the crosswalks with the score DataFrame
-    df_score = df_score.merge(cwt_divide_gage[["gage_id", "divide_id"]], on="gage_id", how="left")
-    df_score = df_score.merge(cwt_divide_huc12[["divide_id", "huc12"]], on="divide_id", how="left")
+    # filter cwt_divide_gage for the current vpu
+    cwt_divide_huc12["vpuid"] = cwt_divide_huc12["huc12"].str[:2]
+    cwt_divide_huc12 = cwt_divide_huc12[cwt_divide_huc12["vpuid"] == vpu].copy()
 
     # get spatial units for formulation selection
     huc_level = config.spatial_unit.huc_level.lower().replace("-", "").replace("_", "")
     huc_digit = int(huc_level.replace("huc", ""))
-    df_score["huc_id"] = df_score["huc12"].str[:huc_digit]
+
+    # add huc_id column to cwt_divide_huc12 based on huc_digit
+    cwt_divide_huc12["huc_id"] = cwt_divide_huc12["huc12"].str[:huc_digit]
+
+    # merge the two crosswalks first
+    df = cwt_divide_huc12[["huc_id", "huc12", "divide_id"]].merge(
+        cwt_divide_gage[["gage_id", "divide_id"]].drop_duplicates(),
+        on="divide_id",
+        how="left",
+    )
+
+    # then merge with the score DataFrame
+    df_score = df_score.merge(df, on="gage_id", how="right")
+
+    logger.info(
+        f"Selecting formulations for VPU {vpu} at {huc_level} level. "
+        f"There are {len(df_score['huc_id'].unique())} unique {huc_level} IDs."
+    )
 
     # get formulation costs from the configuration
-    formulation_costs = get_formulation_costs(config.formulation_cost)
+    formulation_costs = _get_formulation_costs(config.formulation_cost)
 
     # loop through each unique huc_id and select formulations
     df_selected = pd.DataFrame()
     for huc_id in df_score["huc_id"].unique():
         # find calibration gages for the current huc_id
-        gages, huc_level = find_calibration_gages(huc_id, df_score, config.spatial_unit.nmin_calib_basin)
+        df_score_huc = df_score[~df_score["formulation"].isna() & ~df_score["summary_score"].isna()].copy()
+        if df_score_huc.empty:
+            logger.warning(f"No valid formulation scores found for HUC ID: {huc_id}. Skipping this HUC.")
+            continue
+
+        gages, huc_level = _find_calibration_gages(huc_id, df_score_huc, config.spatial_unit.nmin_calib_basin)
         if not gages:
             logger.warning(f"No gages found for HUC ID: {huc_id}. Skipping this HUC.")
             continue
@@ -249,22 +279,25 @@ def select_formulation(
         df_huc = df_score[df_score["gage_id"].isin(gages)].copy()
 
         # select the best formulation based on the score & optionally costs
-        best_formulation = select_formulation_given_score_cost(
+        method = config.spatial_unit.total_score_method.lower()
+        logger.info(f"Computing total score using method: {method}")
+        best_formulation = _select_formulation_given_score_cost(
             df_huc,
             score_tolerance=config.formulation_cost.score_tolerance,
             cost_dict=formulation_costs,
+            method=method,
         )
+
+        # append the selected formulation to the list
+        if best_formulation.empty:
+            logger.warning(f"No valid formulations found for HUC ID: {huc_id}. Skipping this HUC.")
+            continue
 
         # add huc_id, huc_level, number of gages and vpu to the best formulation
         best_formulation["huc_id"] = huc_id
         best_formulation["upscale_huc"] = huc_level
         best_formulation["num_gages"] = len(gages)
         best_formulation["vpu"] = vpu
-
-        # append the selected formulation to the list
-        if best_formulation.empty:
-            logger.warning(f"No valid formulations found for HUC ID: {huc_id}. Skipping this HUC.")
-            continue
 
         df_selected = pd.concat([df_selected, best_formulation], ignore_index=True)
 
@@ -283,6 +316,50 @@ def select_formulation(
 
     # save the selected formulations to the output file
     cc = config.output.formulation
-    cc.save_to_file(df_selected, vpu=vpu)
+    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection")
+
+    # generate spatial map plots if enabled
+    if any(cc.plot.values()):
+        # merge with cwt_divide_huc12 to get the divide_id
+        df_selected = df_selected.merge(
+            cwt_divide_huc12[["huc_id", "divide_id"]].drop_duplicates(),
+            on="huc_id",
+            how="left",
+        )
+
+        # get geometry for divides if spatial map is enabled
+        if cc.plot.get("spatial_map", False):
+            # read the geometry file
+            geo_file = Path(config.general.hydrofabric_file[vpu]).resolve(strict=True)
+            if not geo_file.exists():
+                logger.warning(f"Geometry file {geo_file} does not exist. Skipping spatial map plot.")
+                return
+            gdf = gpd.read_file(geo_file)
+            if gdf.empty:
+                logger.warning(f"Geometry file {geo_file} is empty. Skipping spatial map plot.")
+                return
+
+            # merge the geometry with the selected formulations
+            df_selected = df_selected.merge(
+                gdf[["divide_id", "geometry"]].drop_duplicates(),
+                on="divide_id",
+                how="left",
+            )
+
+            # convert df_selected to a real GeoDataFrame for plotting
+            df_selected = gpd.GeoDataFrame(
+                df_selected,
+                geometry="geometry",
+                crs=gdf.crs,
+            )
+
+        # plot the selected formulations
+        plot_dict = {
+            "vpu": vpu,
+            "var_str": "Formulation Selection",
+            "columns": ["formulation", "total_score", "cost"],
+            "ncols": 3,
+        }
+        cc.plot_data(df_selected, plot_dict)
 
     return df_selected

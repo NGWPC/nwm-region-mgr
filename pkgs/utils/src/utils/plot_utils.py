@@ -30,6 +30,7 @@ def _plot_columns_by_dtype(
     cmap_categorical: str = "Set3",
     figsize=(10, 6),
     ncols: int = 3,
+    antialiased: bool = False,
 ):
     """Plot multiple GeoDataFrame columns in subplots based on data type.
 
@@ -42,6 +43,7 @@ def _plot_columns_by_dtype(
         cmap_categorical: colormap for categorical values
         figsize: figure size
         ncols: number of columns in the subplot grid (default is 3)
+        antialiased: whether to disable antialiasing for the plots
 
     """
     n = len(columns)
@@ -66,81 +68,40 @@ def _plot_columns_by_dtype(
         if pd.api.types.is_numeric_dtype(dtype):
             if num_bins is not None:
                 gdf_plot["__binned__"] = pd.cut(gdf_plot[column], bins=num_bins)
-                gdf_plot.plot(ax=ax, column="__binned__", cmap=cmap_numeric, legend=True, edgecolor=None)
+                gdf_plot.plot(ax=ax, column="__binned__", cmap=cmap_numeric, legend=True, edgecolor="none", linewidth=0)
             else:
-                gdf_plot.plot(ax=ax, column=column, cmap=cmap_numeric, legend=True, edgecolor=None)
+                gdf_plot.plot(ax=ax, column=column, cmap=cmap_numeric, legend=True, edgecolor="none", linewidth=0)
 
         elif pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(dtype):
             gdf_plot[column] = gdf_plot[column].astype("category")
-            gdf_plot.plot(ax=ax, column=column, cmap=cmap_categorical, legend=True, edgecolor=None)
+            gdf_plot.plot(ax=ax, column=column, cmap=cmap_categorical, legend=True, edgecolor="none", linewidth=0)
         else:
             ax.set_title(f"Unsupported dtype: {column}")
             ax.axis("off")
             continue
 
-        # add outer boundary
-        gpd.GeoSeries(boundary).plot(ax=ax, color="black", linewidth=0.8)
+        # Even when edgecolor="none" and linewidth=0, antialiasing can cause matplotlib to blend edges
+        # between adjacent polygons, resulting in faint grey or black lines. Disable antialiasing if needed.
+        for coll in ax.collections:
+            coll.set_antialiased(antialiased)
+
+        # plot outer boundary
+        gpd.GeoSeries(boundary).plot(ax=ax, color="black", linewidth=0.5)
 
         ax.set_title(column)
         ax.set_axis_off()
+
+        # make sure legend is outside the plot if it exists
+        legend = ax.get_legend()
+        if legend is not None:
+            legend.set_bbox_to_anchor((1.05, 1))
+            legend.set_frame_on(False)
 
     # Turn off any unused subplots
     for j in range(i + 1, len(axes)):
         axes[j].axis("off")
 
     return fig, axes[: i + 1]  # Return only used axes
-
-
-def _plot_column_by_dtype(
-    gdf: gpd.GeoDataFrame,
-    column: str,
-    ax=None,
-    fillna_value=None,
-    num_bins: int = None,
-    cmap_numeric: str = "viridis",
-    cmap_categorical: str = "Set3",
-):
-    """Plot a GeoDataFrame based on the data type of a column.
-
-    Args:
-        gdf: GeoDataFrame to plot
-        column: column name to use for coloring
-        ax: optional matplotlib axis
-        fillna_value: value to fill NaNs before plotting
-        num_bins: if specified, bin numeric data into this number of bins
-        cmap_numeric: colormap for numeric data
-        cmap_categorical: colormap for categorical/string data
-
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 6))
-
-    # Handle missing values
-    if fillna_value is not None:
-        gdf = gdf.copy()
-        gdf[column] = gdf[column].fillna(fillna_value)
-
-    dtype = gdf[column].dtype
-
-    if pd.api.types.is_numeric_dtype(dtype):
-        if num_bins is not None:
-            # Discretize into bins
-            gdf["__binned__"] = pd.cut(gdf[column], bins=num_bins)
-            gdf.plot(ax=ax, column="__binned__", cmap=cmap_numeric, legend=True, edgecolor="black")
-        else:
-            gdf.plot(ax=ax, column=column, cmap=cmap_numeric, legend=True, edgecolor="black")
-
-    elif pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(dtype):
-        gdf = gdf.copy()
-        gdf[column] = gdf[column].astype("category")
-        gdf.plot(ax=ax, column=column, cmap=cmap_categorical, legend=True, edgecolor="black")
-
-    else:
-        raise ValueError(f"Unsupported column data type for plotting: {dtype}")
-
-    ax.set_title(f"Plot by '{column}'")
-    ax.set_axis_off()
-    return ax
 
 
 def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
@@ -160,9 +121,6 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
             return
 
     _, ax = plt.subplots(figsize=(8, 6))
-
-    # project the GeoDataFrame to lat/lon for plotting
-    # gdf = gdf.to_crs(epsg=4326)
 
     # create spatial map
     fig, axes = _plot_columns_by_dtype(
@@ -184,7 +142,7 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
     if d1.get("outfile") is not None:
         plt.savefig(d1["outfile"], bbox_inches="tight")
         plt.close()
-        logger.info(f"Spatial map plot of {d1['var_str']} saved to {d1['outfile']}")
+        logger.info(f"Spatial map of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}")
     else:
         logger.warning("No output file specified for spatial map plot. Skipping save.")
 
@@ -202,6 +160,17 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
     columns = d1.get("columns", [])
     if not columns:
         raise ValueError("No columns specified in d1['columns'].")
+
+    # filter to numeric columns only
+    numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
+    if not numeric_columns:
+        raise ValueError("No numeric columns found in the dataframe to plot histograms.")
+    if not set(columns).issubset(set(numeric_columns)):
+        logger.warning(
+            f"Some specified columns {set(columns) - set(numeric_columns)} are not numeric. "
+            "Skipping these columns for histogram plots."
+        )
+        columns = [col for col in columns if col in numeric_columns]
 
     # Filter to columns that exist in data
     valid_columns = [col for col in columns if col in data.columns]
@@ -244,6 +213,6 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
     if d1.get("outfile") is not None:
         plt.savefig(d1["outfile"], bbox_inches="tight")
         plt.close()
-        logger.info(f"Histogram of {d1['var_str']} saved to {d1['outfile']}")
+        logger.info(f"Histogram of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}")
     else:
         logger.warning("No output file specified for histogram plot. Skipping save.")

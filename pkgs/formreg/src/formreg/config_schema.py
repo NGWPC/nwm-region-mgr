@@ -336,12 +336,13 @@ class OutputSection(BaseModel):
 
         return file_path
 
-    def save_to_file(self, data: Any, vpu: str = None) -> None:
+    def save_to_file(self, data: Any, vpu: str = None, data_str: str = None) -> None:
         """Save output data to the specified path and format.
 
         Args:
             data: Data to save, can be a DataFrame or Pydantic model.
             vpu: VPU identifier for the output file name.
+            data_str: String representation of the data being saved.
 
         Raises:
             ValueError: If the output path is a directory and no file name is provided.
@@ -355,7 +356,10 @@ class OutputSection(BaseModel):
 
         # save the output data
         save_data(data, filepath)
-        logger.info(f"Saved output to {filepath}")
+        if data_str is None:
+            logger.info(f"Saved output to {filepath}")
+        else:
+            logger.info(f"Saved {data_str} output to {filepath}")
 
     def plot_data(
         self,
@@ -375,15 +379,22 @@ class OutputSection(BaseModel):
         """
         if self.plot["histogram"]:
             path1 = self._get_file_path(plot_dict.get("vpu"), plot_type="hist")
-            plot_dict["outfile"] = path1
-            plot_dict["ncols"] = 2
-            plot_histogram(data, plot_dict)
+            plot_dict1 = plot_dict.copy()
+            plot_dict1["outfile"] = path1
+            plot_dict1["ncols"] = 2
+
+            # remove non-numeric columns from data from histogram plotting
+            numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
+            plot_dict1["columns"] = [col for col in plot_dict1.get("columns", []) if col in numeric_columns]
+
+            plot_histogram(data, plot_dict1)
 
         if self.plot["spatial_map"]:
             path2 = self._get_file_path(plot_dict.get("vpu"), plot_type="map")
-            plot_dict["outfile"] = path2
-            plot_dict["ncols"] = 3
-            plot_spatial_map(data, plot_dict)
+            plot_dict2 = plot_dict.copy()
+            plot_dict2["outfile"] = path2
+            plot_dict2["ncols"] = 3
+            plot_spatial_map(data, plot_dict2)
 
 
 class OutputConfig(BaseModel):

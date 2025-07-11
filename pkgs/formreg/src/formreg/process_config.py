@@ -36,8 +36,6 @@ def process_config(config_file: str) -> cs.Config:
         Config object with validated structure and substituted placeholders.
 
     """
-    logger.info(f"Loading configuration from {config_file}")
-
     # load and validate the config file
     config = load_and_validate_config(config_file, config_schema=cs.Config)
 
@@ -51,7 +49,7 @@ def process_config(config_file: str) -> cs.Config:
 
     # Save the final configuration
     cc = config.output.config_final
-    cc.save_to_file(config)
+    cc.save_to_file(config, data_str="Final Configuration")
 
     return config
 
@@ -108,8 +106,6 @@ def get_formulations_from_stats(config: cs.Config, vpu: str) -> dict[str, Path]:
 
     if not formulations:
         logger.warning(f"No formulations found in statistics files for VPU {vpu} in {dir_stats}")
-    else:
-        logger.info(f"Found formulations for VPU {vpu}: {', '.join(formulations)}")
 
     # Convert formulations to a dictionary mapping to their statistics file paths
     dict_form = {
@@ -225,9 +221,13 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             df["formulation"] = form  # Add formulation name to the DataFrame
             df_score = pd.concat([df_score, df[[ss.id_name, "formulation", "summary_score"]]], ignore_index=True)
 
+    logger.info(
+        f"Computed summary scores for the following formulations for VPU {vpu}: {df_score['formulation'].unique()}"
+    )
+
     # Save the summary score DataFrame
     cc = config.output.summary_score
-    cc.save_to_file(df_score, vpu=vpu)
+    cc.save_to_file(df_score, vpu=vpu, data_str="Summary Score")
 
     # plot the summary score
     if any(cc.plot.values()):
