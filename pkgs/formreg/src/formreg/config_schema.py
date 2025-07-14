@@ -1,87 +1,105 @@
 """Configuration schema for the formulation regionalization application."""
 
+import logging
 import math
 from enum import Enum
-from typing import Annotated, Dict, List, Literal, Optional, Union
+from pathlib import Path
+from typing import Annotated, Any, Dict, List, Optional, Union
 
+import geopandas as gpd
+import pandas as pd
 from pydantic import BaseModel, Field, model_validator
+from utils import plot_histogram, plot_spatial_map, save_data
+
+logger = logging.getLogger(__name__)
 
 
 class GeneralSettings(BaseModel):
-    """General settings for the formulation regionalization application.
-
-    Attributes:
-        run_name: Name of the run, used to create output folders and files.
-        domain: Define NWM domain. Options: conus, ak, hi, prvi.
-        vpu: List of VPUs within the domain or 'all' to process all.
-        catchments_to_exclude: List, 'all', or path to CSV with divide_id column.
-        formulation_to_include: List of formulations to consider.
-        formulation_to_exlcude: List of formulations to exclude.
-        base_dir: Path to base directory for input/output files.
-        dir_stats: Directory for calibration/validation stats parquet/csv files.
-        consider_cost: Whether to consider computational cost in selection.
-        approach_calib_basins: Strategy for assigning formulations to calibrated basins.
-
-    """
+    """General settings for the formulation regionalization application."""
 
     run_name: str
+    """Name of the run, used to create output folders and files."""
     domain: str
-    vpu: Union[List[str], str]
+    """Define NWM domain. Options: conus, ak, hi, prvi."""
+    vpu_list: Union[List[str], str]
+    """List of VPUs within the domain or 'all' to process all."""
     catchments_to_exclude: Optional[Union[str, List[str]]] = None
+    """List, 'all', or path to CSV with divide_id column to exclude from regionalization."""
     formulation_to_include: Optional[List[str]] = None
-    formulation_to_exlcude: Optional[List[str]] = None
+    """List of formulations to consider. If None, all formulations are included."""
+    """If 'all', all formulations are included."""
+    formulation_to_exclude: Optional[List[str]] = None
+    """List of formulations to exclude. If None, no formulations are excluded."""
     base_dir: str
-    dir_stats: str
+    """Path to base directory for input/output files."""
+    id_name: str = "divide_id"
+    """Name of the column containing the unique identifier for each catchment."""
+    hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
+    """Path to hydrofabric file, e.g., vpu_divides.gpkg."""
+    gage_divide_cwt_file: Optional[str] = None
+    """Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'."""
     consider_cost: Optional[bool] = False
+    """Whether to consider computational costs of formulations in the regionalization process."""
     approach_calib_basins: Optional[str] = "regionalization"  # Options: 'regionalization', 'calval_stat'
+    """Strategy for assigning formulations to calibrated basins."""
 
 
 class PlotsConfig(BaseModel):
-    """Configuration for output plots.
-
-    Attributes:
-        spatial_map: Whether to generate spatial maps of formulations.
-        histogram: Whether to generate histograms of formulation distributions.
-
-    """
+    """Configuration for output plots."""
 
     spatial_map: Optional[bool] = True
+    """Whether to generate spatial maps of formulations."""
     histogram: Optional[bool] = True
-
-
-class OutputConfig(BaseModel):
-    """Output file and plot configuration.
-
-    Attributes:
-        path: Path to output directory.
-        plots: Configuration for output plots, including spatial maps and histograms.
-        If not provided, defaults to generating spatial maps and histograms.
-
-    """
-
-    path: str
-    plots: PlotsConfig
+    """Whether to generate histograms of formulation distributions."""
 
 
 class SpatialUnitConfig(BaseModel):
-    """Spatial discretization settings.
-
-    For each spatial unit, a single formulation will be identified and applied to all catchments within the unit.
-    Special consideration may be given to calibrated catchments.
-
-    Attributes:
-        huc_level: USGS HUC level used for discretization (e.g., huc-8). Default is 'huc-8'.
-        min_no_calib_basin: Minimum calibration basins required per unit. Default is 5.
-        crosswalk_file: Path to CSV or parquet file with crosswalk between HUC-12 basins and NextGen catchments,
-            with columns 'divide_id' and 'huc_12', respectively.
-        basin_fill_method: How to handle units with too few calibration basins.
-
-    """
+    """Spatial discretization settings."""
 
     huc_level: Optional[str] = "huc-8"
+    """USGS HUC level used for discretization, e.g., 'huc-8'."""
     crosswalk_file: str
-    min_no_calib_basin: Optional[int] = 5
+    """Path to crosswalk file between HUC-12 basins and NextGen catchments, with columns 'divide_id' and 'huc_12'."""
+    nmin_calib_basin: Optional[int] = 5
+    """Minimum number of calibration basins required per spatial unit to consider it valid."""
     basin_fill_method: Optional[str] = "upscaling"
+    """Method to handle units with too few calibration basins. Options: 'upscaling', 'nearest-neighbor'."""
+    total_score_method: Optional[str] = "basin"
+    """Method to compute total score for each spatial unit. Options: 'basin', 'divide'."""
+
+    @model_validator(mode="after")
+    def check_huc_level(self) -> "SpatialUnitConfig":
+        """Ensure that the HUC level is valid."""
+        valid_huc_levels = ["huc-2", "huc-4", "huc-6", "huc-8", "huc-10", "huc-12"]
+        valid_huc_levels = (
+            valid_huc_levels
+            + [level.replace("-", "_") for level in valid_huc_levels]
+            + [level.replace("-", "") for level in valid_huc_levels]
+        )
+        if self.huc_level.lower() not in valid_huc_levels:
+            raise ValueError(f"Invalid HUC level: {self.huc_level}. Valid options are: {valid_huc_levels}")
+
+        return self
+
+    @model_validator(mode="after")
+    def check_basin_fill_method(self) -> "SpatialUnitConfig":
+        """Ensure that the basin fill method is valid."""
+        valid_methods = ["upscaling", "nearest-neighbor"]
+        if self.basin_fill_method not in valid_methods:
+            raise ValueError(f"Invalid basin fill method: {self.basin_fill_method}. Valid options are: {valid_methods}")
+
+        return self
+
+    @model_validator(mode="after")
+    def check_total_score_method(self) -> "SpatialUnitConfig":
+        """Ensure that the total score method is valid."""
+        valid_methods = ["basin", "divide"]
+        if self.total_score_method not in valid_methods:
+            raise ValueError(
+                f"Invalid total score method: {self.total_score_method}. Valid options are: {valid_methods}"
+            )
+
+        return self
 
 
 class Orientation(str, Enum):
@@ -94,23 +112,24 @@ class Orientation(str, Enum):
 class MetricConfig(BaseModel):
     """Configuration for an individual metric used in summary scoring."""
 
-    upper: float = Field()
+    upper: Optional[float] = Field(default=None)
     """Upper bound for scaling and normalization, must be greater than lower bound."""
 
-    lower: float = Field()
+    lower: Optional[float] = Field(default=None)
     """Lower bound for scaling and normalization, must be less than upper bound."""
 
-    orientation: Orientation = Field()
+    orientation: Optional[Orientation] = Field(default=Orientation.positive)
     """Orientation of the metric, either 'positive' or 'negative'."""
 
-    weight: Annotated[float, Field(ge=0.0, le=1.0)] = 0.0
+    weight: Annotated[float, Field(ge=0.0, le=1.0)] = Field(default=0.0)
     """Weight of the metric in the summary score, must be between 0.0 and 1.0."""
 
     @model_validator(mode="after")
     def check_bounds(self) -> "MetricConfig":
         """Ensure that upper bound is greater than lower bound."""
-        if self.upper <= self.lower:
-            raise ValueError(f"'upper' must be greater than 'lower' (got upper={self.upper}, lower={self.lower})")
+        if self.upper is not None and self.lower is not None and self.upper <= self.lower:
+            raise ValueError(f"'lower' must be smaller than 'upper' (got upper={self.upper}, lower={self.lower})")
+
         return self
 
     def _scale_value(self, value: float) -> float:
@@ -151,11 +170,31 @@ class MetricConfig(BaseModel):
         return max(0.0, min(1.0, normalized))
 
 
+class MetricEvalPeriod(BaseModel):
+    """Configuration for the evaluation period of metrics to be used for screening donors."""
+
+    col_name: str
+    """Name of the column in the donor stats file that contains the evaluation period."""
+
+    value: str
+    """Value of the evaluation period to filter the donor stats file."""
+
+
 class SummaryScoreConfig(BaseModel):
     """Configuration for computing a summary score as a weighted average of normalized metrics."""
 
-    eval_period: Literal["calib", "valid", "full"] = Field(default="valid")
-    """Evaluation period for the summary score."""
+    dir_stats: Union[str, Path]
+    """Directory for calibration/validation stats parquet/csv files
+
+    These files should have a specific naming convention: stat_calval_[formulation]_[domain]_vpu[vpu].parquet,
+    e.g., stat_calval_nom-cfes_conus_vpu01.parquet, or stat_calval_nom-cfes_conus.parquet, 
+    or stat_calval_nom-cfes_conus.csv
+    """
+    id_name: str = Field(default="gage_id")
+    """Name of the column containing the unique identifier for each calibration basin."""
+
+    metric_eval_period: Optional[MetricEvalPeriod] = None
+    """Optional: evaluation period of metrics to be used for screening donors."""
 
     metrics: Dict[str, MetricConfig] = Field()
     """Dictionary of metrics used in the summary score, keyed by metric name."""
@@ -167,6 +206,39 @@ class SummaryScoreConfig(BaseModel):
         if abs(total_weight - 1.0) > 1e-6:
             raise ValueError(f"The sum of all metric weights must equal 1.0, but got {total_weight}")
         return self
+
+    def get_active_metrics(self) -> Dict[str, MetricConfig]:
+        """Get metrics that have a weight greater than 0.0.
+
+        Returns:
+            Dictionary of active metrics, keyed by metric name.
+
+        """
+        return {name: metric for name, metric in self.metrics.items() if metric.weight > 0.0}
+
+    def _read_calval_stats(self, formulation: str, vpu: str) -> Dict[str, float]:
+        """Read calibration/validation statistics for a specific formulation and VPU.
+
+        Args:
+            formulation: Name of the formulation.
+            vpu: VPU identifier.
+
+        Returns:
+            Dictionary of metric values for the specified formulation and VPU.
+
+        """
+        # Construct the file path based on the naming convention
+        file_path = Path(self.dir_stats) / f"stat_calval_{formulation}_{domain}_vpu{vpu}.parquet"
+        if not file_path.exists():
+            raise FileNotFoundError(f"Calibration/validation stats file not found: {file_path}")
+
+        # Read the stats file (assuming it's in parquet format)
+        import pandas as pd
+
+        df = pd.read_parquet(file_path)
+
+        # Convert to dictionary of metric values
+        return df.set_index("metric_name")["value"].to_dict()
 
     def compute_summary_score(self, metric_values: Dict[str, float]) -> float:
         """Compute the summary score based on metric values.
@@ -186,33 +258,166 @@ class SummaryScoreConfig(BaseModel):
 
 
 class FormulationCostConfig(BaseModel):
-    """Computational cost of each formulation.
+    """Computational cost of each formulation."""
 
-    Attributes:
-        file: Path to CSV file with formulation costs.
-        costs: Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored.
-        If `file` is not provided, this should be populated with costs for each formulation.
-
-    """
-
+    score_tolerance: float = 0.05
+    """Summary score tolerance (as fraction of best score) for considering formulations as equally good."""
     file: Optional[str] = None
+    """Path to CSV file with formulation costs. If provided, costs will be read from this file."""
     costs: Optional[Dict[str, float]] = None
+    """Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored."""
+
+    @model_validator(mode="after")
+    def check_score_tolerance(self) -> "FormulationCostConfig":
+        """Ensure that score tolerance is a valid value."""
+        if not (0.0 <= self.score_tolerance <= 1.0):
+            raise ValueError(
+                f"Score tolerance (i.e., fraction of best score) must be between 0.0 and 1.0, "
+                f"got {self.score_tolerance}"
+            )
+        return self
+
+
+class OutputSection(BaseModel):
+    """Output Manager."""
+
+    save: bool
+    """Whether to save output files"""
+    path: Path | str
+    """Path to save output files. If a directory, the 'stem' and 'format' must be specified."""
+    stem: Optional[str | Dict[str, str]] = None
+    """File stem for output files, used to create unique file names based on the path."""
+    format: Optional[str] = None
+    """File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file."""
+    plot: Optional[dict] = None
+    """Configuration for output plots, if applicable."""
+    plot_path: Optional[str] = None
+    """Path to save output plots, if applicable."""
+
+    @model_validator(mode="after")
+    def check_format_if_dir(cls, values):
+        """Check if path is a directory. If so require a 'format'."""
+        if not Path(values.path).suffix and not values.format:
+            raise ValueError(f"'format' must be specified if 'path' is a directory: {Path(values.path)}")
+
+        return values
+
+    def _get_file_path(self, vpu: str = None, plot_type: str = None) -> Path:
+        """Get the file path for saving the output."""
+        file_path = Path(self.path) if plot_type is None else Path(self.plot_path)
+
+        # If the path is a directory, construct the file name using 'stem' and 'format'
+        if not file_path.suffix:
+            if not self.stem or not self.format:
+                raise ValueError(f" File 'stem' and 'format' must be specified if 'path' is a directory: {file_path}")
+            if isinstance(self.stem, dict):
+                # If stem is a dict (for different VPUs), find the stem for current VPU
+                file_stem = self.stem.get(f"{vpu}")
+            else:
+                # If stem is a string, use it directly
+                file_stem = self.stem
+
+            if not file_stem:
+                raise ValueError(f"File stem not found for VPU {vpu}: {self.stem}")
+
+            # make sure plot_type is supported
+            if plot_type not in [None, "map", "hist"]:
+                raise ValueError(f"Unsupported plot type: {plot_type}. Supported types are None, 'map', 'hist'.")
+
+            file_format = self.format if plot_type is None else "png"
+            file_prefix = "" if plot_type is None else f"{plot_type}_"
+
+            # Construct the full file path
+            file_path = file_path / f"{file_prefix}{file_stem}.{file_format}"
+
+        # create the directory if it does not exist
+        if not file_path.parent.exists():
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        return file_path
+
+    def save_to_file(self, data: Any, vpu: str = None, data_str: str = None) -> None:
+        """Save output data to the specified path and format.
+
+        Args:
+            data: Data to save, can be a DataFrame or Pydantic model.
+            vpu: VPU identifier for the output file name.
+            data_str: String representation of the data being saved.
+
+        Raises:
+            ValueError: If the output path is a directory and no file name is provided.
+
+        """
+        if not self.save:
+            return
+
+        # get the file path to save the output
+        filepath = self._get_file_path(vpu)
+
+        # save the output data
+        save_data(data, filepath)
+        if data_str is None:
+            logger.info(f"Saved output to {filepath}")
+        else:
+            logger.info(f"Saved {data_str} output to {filepath}")
+
+    def plot_data(
+        self,
+        data: pd.DataFrame | gpd.GeoDataFrame,
+        plot_dict: Dict[str, Any],
+    ) -> None:
+        """Plot the data and save png to the specified path.
+
+        Args:
+            data: DataFrame or GeoDataFrame containing the data to plot.
+            plot_dict: Dictionary containing plot configuration, including:
+                var_str: String representation of the variable being plotted.
+                columns: list of columns in the data to plot.
+                vpu: VPU identifier for the output file name.
+                plot_type: Type of plot being saved (e.g., 'map', 'hist').
+
+        """
+        if self.plot["histogram"]:
+            path1 = self._get_file_path(plot_dict.get("vpu"), plot_type="hist")
+            plot_dict1 = plot_dict.copy()
+            plot_dict1["outfile"] = path1
+            plot_dict1["ncols"] = 2
+
+            # remove non-numeric columns from data from histogram plotting
+            numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
+            plot_dict1["columns"] = [col for col in plot_dict1.get("columns", []) if col in numeric_columns]
+
+            plot_histogram(data, plot_dict1)
+
+        if self.plot["spatial_map"]:
+            path2 = self._get_file_path(plot_dict.get("vpu"), plot_type="map")
+            plot_dict2 = plot_dict.copy()
+            plot_dict2["outfile"] = path2
+            plot_dict2["ncols"] = 3
+            plot_spatial_map(data, plot_dict2)
+
+
+class OutputConfig(BaseModel):
+    """Output Configurer."""
+
+    formulation: OutputSection
+    """Output configuration for formulation regionalization results."""
+    config_final: OutputSection
+    """Output configuration for the final processed configuration file."""
+    summary_score: OutputSection
+    """Output configuration for summary score results."""
 
 
 class Config(BaseModel):
-    """Top-level configuration for formulation regionalization.
-
-    Attributes:
-        general: General settings for the application.
-        output: Output file and plot configuration.
-        spatial_unit: Spatial discretization settings.
-        summary_score: Summary score computation configuration.
-        formulation_cost: Computational cost of each formulation.
-
-    """
+    """Top-level configuration for formulation regionalization."""
 
     general: GeneralSettings
+    """General settings for the formulation regionalization application."""
     output: OutputConfig
+    """Output configuration for the application, including paths and formats for results."""
     spatial_unit: SpatialUnitConfig
+    """Spatial discretization settings for the application."""
     summary_score: SummaryScoreConfig
+    """Summary score computation configuration for the application."""
     formulation_cost: FormulationCostConfig
+    """Computational cost configuration for each formulation."""
