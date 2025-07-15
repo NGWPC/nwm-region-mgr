@@ -1,5 +1,6 @@
 """Utils for algorithms."""
 
+import concurrent.futures
 import warnings
 from pathlib import Path
 
@@ -7,22 +8,24 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
-from pyproj import CRS
+
+# from joblib import Parallel, delayed
+# from pyproj import CRS
+from shapely import Point
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 
 
-def ensure_projected(
-    gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070"
-) -> gpd.GeoDataFrame:
-    """Reprojects a GeoDataFrame to a projected CRS if currently in geographic CRS."""
-    crs = CRS.from_user_input(gdf.crs)
-    if crs.is_geographic:
-        return gdf.to_crs(target_crs)
-    return gdf
+# def ensure_projected(
+#     gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070"
+# ) -> gpd.GeoDataFrame:
+#     """Reprojects a GeoDataFrame to a projected CRS if currently in geographic CRS."""
+#     crs = CRS.from_user_input(gdf.crs)
+#     if crs.is_geographic:
+#         return gdf.to_crs(target_crs)
+#     return gdf
 
 
 def compute_pairwise_centroid_distances(
@@ -33,7 +36,7 @@ def compute_pairwise_centroid_distances(
     id_col_a_return: str = "donor_id",
     id_col_b_return: str = "receiver_id",
     distance_threshold: float = None,
-    n_jobs: int = -1,  # Use all available cores
+    n_jobs: int | None = None,  # Use all available cores
 ) -> pd.DataFrame:
     """Compute pairwise distances between centroids of two GeoDataFrames.
 
@@ -44,9 +47,9 @@ def compute_pairwise_centroid_distances(
     group_b : gpd.GeoDataFrame
         The second GeoDataFrame containing geometries and IDs.
     id_col_a : str, optional
-        The name of the ID column in group_a. Default is "id".
+        The name of the ID column in group_a. Default is "divide_id".
     id_col_b : str, optional
-        The name of the ID column in group_b. Default is "id".
+        The name of the ID column in group_b. Default is "divide_id".
     id_col_a_return : str, optional
         The name of the ID column to return from group_a. Default is "donor_id".
     id_col_b_return : str, optional
@@ -54,7 +57,7 @@ def compute_pairwise_centroid_distances(
     distance_threshold : float, optional
         If provided, only distances less than or equal to this value will be included in the output.
     n_jobs : int, optional
-        The number of jobs to run in parallel. Default is -1, which uses all available cores.
+        The number of jobs to run in parallel. Default is None, which uses all available cores.
 
     Returns
     -------
@@ -64,59 +67,49 @@ def compute_pairwise_centroid_distances(
 
     """
     # Precompute centroids to speed up
-    centroids_a = group_a.geometry.centroid
-    centroids_b = group_b.geometry.centroid
-
-    # Ensure projected centroids_a and centroids_b so that pairwise distance can be properly calculated
-    centroids_a = ensure_projected(centroids_a)
-    centroids_b = ensure_projected(centroids_b)
+    centroids_a = group_a.to_crs(5070).geometry.centroid
+    centroids_b = group_b.to_crs(5070).geometry.centroid
 
     a_ids = group_a[id_col_a].values
     b_ids = group_b[id_col_b].values
 
-    def compute_distances_for_a(i):
-        centroid_a = centroids_a.iloc[i]
-        distances = centroids_b.distance(centroid_a)
-
-        result = []
-        for j, dist in enumerate(distances):
-            if distance_threshold is None or dist <= distance_threshold:
-                result.append(
-                    {
-                        f"{id_col_a_return}": a_ids[i],
-                        f"{id_col_b_return}": b_ids[j],
-                        "centroid_distance": round(dist / 1000),  # Convert to km
-                    }
+    with concurrent.futures.ThreadPoolExecutor(max_workers=n_jobs) as executor:
+        futures = {}
+        data = {}
+        for i in range(len(group_a)):
+            futures[
+                executor.submit(
+                    compute_distances_for_a,
+                    centroids_a.iloc[i],
+                    centroids_b,
+                    distance_threshold,
                 )
-                result.append(
-                    {
-                        f"{id_col_a_return}": a_ids[i],
-                        f"{id_col_b_return}": b_ids[j],
-                        "centroid_distance": round(dist / 1000),  # Convert to km
-                    }
-                )
-        return result
+            ] = a_ids[i]
+        for future in concurrent.futures.as_completed(futures):
+            data[futures[future]] = future.result()
 
-    results = Parallel(n_jobs=n_jobs, backend="threading")(
-        delayed(compute_distances_for_a)(i) for i in range(len(group_a))
-    )
+    return pd.DataFrame(data.values(), columns=b_ids, index=data.keys()).T
 
-    # Flatten the results
-    flat_results = [item for sublist in results for item in sublist]
-    # return pd.DataFrame(flat_results)
-    # return pd.DataFrame(flat_results)
 
-    df_long = pd.DataFrame(flat_results)
-    # print(df_long.head())
-    df_wide = df_long.pivot(
-        index=id_col_b_return, columns=id_col_a_return, values="centroid_distance"
-    )
+def compute_distances_for_a(
+    centroid_a: Point,
+    centroids_b: gpd.GeoSeries,
+    distance_threshold: int | float | None,
+) -> list:
+    """Compute distance between a point and a series of points."""
+    distances = centroids_b.distance(centroid_a)
 
-    return df_wide
+    result = []
+    for dist in distances:
+        if distance_threshold is None or dist <= distance_threshold:
+            result.append(round(dist / 1000))  # Convert to km
+        else:
+            result.append(None)
+    return result
 
 
 def get_valid_attrs(
-    recs0: list, recs1: list, df_attr0: pd.DataFrame, config: dict
+    recs0: list, recs1: list, df_attr0: pd.DataFrame, attrs: dict, config: dict
 ) -> pd.DataFrame:
     """Get the valid attributes to be processed based on the valid attributes of the first receiver."""
     dt1 = df_attr0[~df_attr0["is_donor"]]
@@ -125,10 +118,10 @@ def get_valid_attrs(
     vars = config["non_attr_cols"] + dt1.index[~dt1.isna()].tolist()
     df_attr = df_attr0[vars]
     vars = [
-        value for value in vars if value in config["attrs"]["main"]
+        value for value in vars if value in attrs
     ]  # attrs included for current round
     vars0 = [
-        value for value in config["attrs"]["main"] if value not in vars
+        value for value in attrs if value not in vars
     ]  # attrs excluded for current round
 
     if len(vars) > 0:
@@ -138,9 +131,7 @@ def get_valid_attrs(
             print("Using all attributes")
 
     # ignore donors & receivers with NA attribute values
-    df_attr = df_attr.dropna(
-        subset=[x for x in config["attrs"]["main"] if x not in vars0], inplace=False
-    )
+    df_attr = df_attr.dropna(subset=[x for x in attrs if x not in vars0], inplace=False)
 
     if df_attr.shape[0] == 0:
         print("WARNING: no valid attributes found for the following receivers: ")
