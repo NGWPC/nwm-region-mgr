@@ -16,7 +16,6 @@ Notes:
 
 import logging
 import warnings
-from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
@@ -33,17 +32,20 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 logger = logging.getLogger(__name__)
 
 
-class ClusterPairer(BaseModel, ABC):
+class ClusterPairer(BaseModel):
     """Cluster Pairer."""
 
     config: dict
     df_attr_all: pd.DataFrame
     dist_spatial: pd.DataFrame
 
+    class Config:
+        arbitrary_types_allowed = True
+
     @property
     def attrs(self):
         """Attributes."""
-        return self.config["attrs"]["main"]
+        return self.config["attrs"]
 
     @property
     def receivers(self):
@@ -61,9 +63,8 @@ class ClusterPairer(BaseModel, ABC):
 
         Note in the attribute table, donors are listed first, followed by receivers.
         """
-        return self.df_attr_all[self.config["non_attr_cols"] + self.attrs]
+        return self.df_attr_all[self.config["non_attr_cols"] + self.attrs["main"]]
 
-    @abstractmethod
     def _pair(self):
         """Perform donor-receiver pairing using clustering methods.
 
@@ -95,6 +96,7 @@ class ClusterPairer(BaseModel, ABC):
                 self.receivers,
                 processed_receiver_ids,
                 self.df_attributes,
+                self.attrs["main"],
                 self.config,
             )
 
@@ -115,7 +117,6 @@ class ClusterPairer(BaseModel, ABC):
 
         return processed_receivers_df
 
-    @abstractmethod
     def process_snow_groups(
         self,
         df_attr: pd.DataFrame,
@@ -127,8 +128,9 @@ class ClusterPairer(BaseModel, ABC):
 
         snowy is a bool
         """
-        df_attr = df_attr[df_attr["snowy"] == snowy]
+        df_attr_reduced.index = df_attr.index
         df_attr_reduced = df_attr_reduced[df_attr["snowy"] == snowy]
+        df_attr = df_attr[df_attr["snowy"] == snowy]
 
         donors = df_attr[df_attr["is_donor"]]["divide_id"].tolist()
         receivers = df_attr[~df_attr["is_donor"]]["divide_id"].tolist()
@@ -156,7 +158,7 @@ class ClusterGroupPairer:
 
     def __init__(
         self,
-        donors: pd.DataFramer,
+        donors: pd.DataFrame,
         receivers: pd.DataFrame,
         df_attr_reduced: pd.DataFrame,
         processed_receivers_df: pd.DataFrame,
@@ -178,11 +180,14 @@ class ClusterGroupPairer:
     @property
     def receivers_to_be_processed_for_group(self) -> list:
         """Get receivers that need to be processed."""
-        return [
-            x
-            for x in self.receivers
-            if x not in self.processed_receivers_df["divide_id"].tolist()
-        ]
+        if len(self.processed_receivers_df) == 0:
+            return self.receivers
+        else:
+            return [
+                x
+                for x in self.receivers
+                if x not in self.processed_receivers_df["divide_id"].tolist()
+            ]
 
     @property
     def initial_labels(self) -> np.array:
@@ -198,14 +203,15 @@ class ClusterGroupPairer:
                 [
                     self.number_of_donors + self.receivers.index(x)
                     for x in self.receivers
-                    if x in self.all_donor_ids
+                    if x in self.processed_receiver_ids
                 ]
             ] = self.label_done  # label = -99 indicates donor identified
+        return labels
 
     @property
-    def processed_receiver_ids(self) -> list:
-        """Processed receivers ids."""
-        return self.processed_receivers_df["divide_id"].tolist()
+    def processed_receiver_ids(self):
+        """Ids of receivers that have already been processed."""
+        return self.processed_receivers_df["divide_id"].to_list()
 
     @property
     def number_of_donors(self) -> int:
@@ -222,12 +228,11 @@ class ClusterGroupPairer:
         receiver_label = np.unique(labels[self.number_of_donors :], return_counts=False)
         return receiver_label[receiver_label != self.label_done]
 
-    @property
-    def njob(self) -> int:
-        """Number of jobs."""
+    def njob(self, labels) -> int:
+        """Get number of jobs."""
         njob = self.config["njobs"]
-        if njob > len(self.receiver_label):
-            njob = len(self.receiver_label)
+        if njob > len(self.receiver_label(labels)):
+            njob = len(self.receiver_label(labels))
         return njob
 
     def update_processed_receivers_and_labels(
@@ -331,9 +336,6 @@ class ClusterGroupPairer:
 
         Iterate through all receivers to be processed for this group until all receivers in
         the group have been processed.
-
-            1.
-
         """
         if len(self.receivers_to_be_processed_for_group) == 0:
             return self.processed_receivers_df
@@ -350,10 +352,10 @@ class ClusterGroupPairer:
             iter1 += 1
 
             logger.info(f"===== iter1= {iter1} ======")
-            logger.info(f"Using {self.njob} processors ...")
+            logger.info(f"Using {self.njob(labels)} processors ...")
 
             # iterate through all clusters, break the cluster if necessary, or choose donors if the cluster is no longer breakable
-            pairing_results = Parallel(n_jobs=self.njob)(
+            pairing_results = Parallel(n_jobs=self.njob(labels))(
                 delayed(self.identify_donor_by_cluster)(
                     ll, labels, processed_receivers_for_group_df
                 )
@@ -390,7 +392,7 @@ class ClusterGroupPairer:
                     break
 
             # update progress
-            self.update_progress(processed_receivers_for_group_df)
+            self.update_progress(iter1, processed_receivers_for_group_df)
 
             # update number of receivers with donors identified
             number_of_receivers_with_donor = processed_receivers_for_group_df.shape[0]
@@ -427,13 +429,22 @@ class ClusterGroupPairer:
 
     def get_receivers_to_be_processed(
         self, processed_receivers_for_group_df: pd.DataFrame, cluster_receivers: list
-    ):
+    ) -> list:
         """Receivers in the current cluster that still need to be processed."""
-        processed_ids = set(
-            processed_receivers_for_group_df["divide_id"].tolist()
-            + self.processed_receivers_df["divide_id"].tolist()
-        )
-        if processed_ids > 0:
+        if len(processed_receivers_for_group_df) == 0:
+            if len(self.processed_receivers_df) == 0:
+                processed_ids = []
+            else:
+                processed_ids = self.processed_receivers_df["divide_id"].tolist()
+        else:
+            if len(self.processed_receivers_df) == 0:
+                processed_ids = processed_receivers_for_group_df["divide_id"].tolist()
+            else:
+                processed_ids = set(
+                    processed_receivers_for_group_df["divide_id"].tolist()
+                    + self.processed_receivers_df["divide_id"].tolist()
+                )
+        if len(processed_ids) > 0:
             return [x for x in cluster_receivers if x not in processed_ids]
         else:
             return cluster_receivers.copy()
@@ -455,6 +466,7 @@ class ClusterGroupPairer:
         fit.labels_ = (
             fit.labels_ + 2
         )  # add 2 to the cluster labels because hdbscan cluster starts with -1
+        return fit
 
     def get_cluster_receiver_donor_labels(
         self, fit: KMeans | KMedoids | HDBSCAN | Birch, cluster_donors: list
@@ -531,6 +543,8 @@ class ClusterGroupPairer:
                 self.dist_spatial,
                 self.df_attr_all,
             ), cluster_labels
+        else:
+            return pd.DataFrame(), cluster_labels
 
     def identify_donor_by_cluster(
         self,
@@ -557,7 +571,7 @@ class ClusterGroupPairer:
 
         # receivers in the current cluster that still need to be processed
         receivers_to_be_processed = self.get_receivers_to_be_processed(
-            self, processed_receivers_for_group_df, cluster_receivers
+            processed_receivers_for_group_df, cluster_receivers
         )
 
         # if there exist donors in the cluster
@@ -567,6 +581,7 @@ class ClusterGroupPairer:
                 return self.apply_clustering(
                     cluster_donors, cluster_receivers, cluster_labels
                 )
+
             else:
                 # for receivers in clusters with number of donors smaller than 'n_donor_max', no further clustering is needed
                 # identify donors from the current cluster
@@ -604,7 +619,7 @@ class KmeansPairer(ClusterPairer):
     def pair(self):
         """Pair the donor-receiver using Kmeans."""
         logger.info("perform clustering using Kmeans approach ...")
-        self._pair()
+        return self._pair()
 
     def _apply_algorithm(
         self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list
@@ -666,7 +681,7 @@ class HDBSCANPairer(ClusterPairer):
         ).fit(df_attr_reduced)
 
 
-class BIRCH(ClusterPairer):
+class BIRCHPairer(ClusterPairer):
     """BIRCH Pairer.
 
     A class for pairing donor-receiver catchments using sklearn's Birch.
