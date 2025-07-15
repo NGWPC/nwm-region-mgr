@@ -7,7 +7,6 @@ This function performs donor-receiver pairing using either Gower's distance (met
 
 import logging
 import time
-from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
@@ -20,12 +19,15 @@ from .unsupervised_random_forest import URF
 logger = logging.getLogger(__name__)
 
 
-class DistancePairer(BaseModel, ABC):
+class DistancePairer(BaseModel):
     """Distance Pairer."""
 
     config: dict
     df_attr_all: pd.DataFrame
     dist_spatial: pd.DataFrame
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @property
     def attrs(self):
@@ -38,25 +40,28 @@ class DistancePairer(BaseModel, ABC):
     def get_receivers_to_process(self, processed_receivers_df: pd.DataFrame) -> list:
         """Receivers that still need to be processed."""
         # check if donors are identified for all receivers
-        recs0 = self.df_attr_all[~self.df_attr_all["is_donor"]]["divide_id"].values
+        recs = self.df_attr_all[~self.df_attr_all["is_donor"]]["divide_id"].values
         if processed_receivers_df.shape[1] > 0:
             return [
                 value
-                for value in recs0
+                for value in recs
                 if value not in processed_receivers_df["divide_id"].values
             ]
+        else:
+            return recs
 
     def get_donors_in_receivers_snow_category(
         self, df_attr_for_round: pd.DataFrame, receiver: str
     ) -> list:
         """Get all donors in the same snow category as the receiver."""
-        snow_category_of_receiver = df_attr_for_round["snowy"][
+        snow_category_of_receiver = df_attr_for_round.loc[
             (df_attr_for_round["divide_id"] == receiver)
-            & (~df_attr_for_round["is_donor"])
-        ].squeeze()
+            & (~df_attr_for_round["is_donor"]),
+            "snowy",
+        ]
         return df_attr_for_round[
             (df_attr_for_round["is_donor"])
-            & (df_attr_for_round["snowy"] == snow_category_of_receiver)
+            & (df_attr_for_round["snowy"] == snow_category_of_receiver.iloc[0])
         ]["divide_id"].to_list()
 
     def apply_constraints(
@@ -117,7 +122,8 @@ class DistancePairer(BaseModel, ABC):
             ] or len(donors) == len(donors_for_round):
                 return donors, attr_distance_to_current_donors.loc[idx]
 
-    @abstractmethod
+        return [], []
+
     def identify_donor_slow(
         self,
         receiver: str,
@@ -214,7 +220,6 @@ class DistancePairer(BaseModel, ABC):
         logger.info(f"{len(receivers_to_process)} receivers to be processed this round")
         return receivers_to_process
 
-    @abstractmethod
     def pair(self):
         """Perform donor-receiver pairing using Gower's distance."""
         logger.info(
@@ -266,12 +271,12 @@ class DistancePairer(BaseModel, ABC):
                     df_attr_for_round, donors_for_round, receivers_for_round
                 )
                 dist_attr_for_round = self.update_columns_index(
-                    donors_for_round, receivers_for_round
+                    donors_for_round, receivers_for_round, dist_attr_for_round
                 )
 
                 # determine which receivers to be processed for the current round
                 # process only those not-yet processed receivers
-                self.get_receivers_to_process_for_round(
+                receivers_to_process = self.get_receivers_to_process_for_round(
                     receivers_to_process,
                     processed_receivers_for_round,
                     receivers_for_round,
@@ -305,10 +310,10 @@ class DistancePairer(BaseModel, ABC):
 class GowerPairer(DistancePairer):
     """Pairer using Gower distance."""
 
-    def __init__(self):
-        """Initialize Gower pairer."""
-        super().__init__()
-        self.method = "gower"
+    @property
+    def method(self):
+        """Method."""
+        return "gower"
 
     def process(
         self,
@@ -377,13 +382,16 @@ class GowerPairer(DistancePairer):
 class URFPairer(DistancePairer):
     """Pairer using Gower distance."""
 
-    def __init__(self):
-        """Initialize Gower pairer."""
-        super().__init__()
-        self.method = "urf"
+    @property
+    def method(self):
+        """Method."""
+        return "urf"
 
     def process(
-        self, df_attr_for_round: pd.DataFrame, donors_for_round: list
+        self,
+        df_attr_for_round: pd.DataFrame,
+        donors_for_round: list,
+        receivers_for_round: list,
     ) -> pd.DataFrame:
         """Process data."""
         # apply principal component analysis
@@ -418,6 +426,9 @@ class ProximityPairer(BaseModel):
     config: dict
     df_attr_all: pd.DataFrame
     dist_spatial: pd.DataFrame
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @property
     def recs0(self):
