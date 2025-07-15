@@ -38,12 +38,14 @@ general:
   id_name: divide_id
   hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
   gage_divide_cwt_file: '{base_dir}/inputs/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
+  donor_gage_file: '{base_dir}/inputs/gages_nwm4_calib_all.csv'
+  huc12_shape_file: '{base_dir}/inputs/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb'
 
   # Strategy for assigning formulations to calibrated basins
   # Currently two options are supported: 
   #  1) regionalization: use the global formulation identified for the spatial unit. In this case, all catchments 
   #     within the spatial unit will use the same formulation, regardless of their calibration performance.
-  #  2) calval_stat: use the locally best performing formulation for each calibrated basin, based on summary score 
+  #  2) summary_score: use the locally best performing formulation for each calibrated basin, based on summary score 
   #     computed from cal/val statistics of the basin (as defined in summary_score section). In this case, some
   #     calibrated basins within a given spatial unit may use different formulations, depending on their performance.
   approach_calib_basins: regionalization
@@ -70,10 +72,18 @@ spatial_unit:
   # Currently two options are supported: 
   # 1) upscaling: iteratively upscale the HUC level until enough calibration basins are found, and
   # 2) nearest-neighbor: find additional calibration basins from surrounding spatial units via nearest-neighbor approach
-  basin_fill_method: upscaling
- 
-  # define method to calculate the total score for each spatial unit
-  # Currently two options are supported:
+  #basin_fill_method: upscaling
+  basin_fill_method: nearest-neighbor
+
+
+  # Method: method to determine the best formulation for each spatial unit
+  # Currently two options are supported for the method:
+  # 1) total_score: select the formulation with the highest total score for the spatial unit, where the total score is
+  #     calculated as the sum of summary scores of all calibration basins/catchments within the spatial unit
+  # 2) total_count: select the formulation with the highest total count of calibration basins/catchments within the spatial unit
+  #     where the total count is calculated as the number of calibration basins/catchments
+  #
+  # Type: for each method, the best formulation will be selected based on one of two supported types of calculations:
   # 1) basin: calculate the total score for each spatial unit as the sum of the summary scores of
   #     all calibration basins within the spatial unit
   # 2) divide: calculate the total score for each spatial unit as the sum of the summary scores of 
@@ -82,8 +92,17 @@ spatial_unit:
   # the summary scores of all catchments within the calibration basins.
   # Choose the 'divide' method to give more weight to the performance of larger basins,
   # or the 'basin' method to give equal weight to all calibration basins within the spatial unit.
-  # If not specified, the default method is 'divide'
-  total_score_method: divide
+  # If not specified, the default method is 'divide' 
+  #
+  # Tolerance: the tolerance for the summary score, which is used to determine the best formulation
+  # If the tolerance is set to 0, only the best formulation will be selected.
+  # If the tolerance is set to a positive value (between 0 and 1), all formulations with a summary score within
+  # the tolerance of the best formulation will be considered as equally good.
+  # The final formulation will be selected based on the computational cost.
+  best_formulation: 
+    method: total_score # method can be either 'total_score' or 'total_count'
+    type: divide  # type can be either 'basin' or 'divide'
+    tolerance: 0.05  # tolerance for the summary score 
 
 # Define configurations to compute the summary score for each competing formulation in each calibration basin
 # The summary score is calculated as the weighted average of selected metrics (each normalized to be between 0 and 1).
@@ -155,11 +174,13 @@ summary_score:
 #    to run the formulation for a single catchment)
 formulation_cost:
 
-  # summary score tolerance. Formulations with a summary score within this tolerance of the best formulation
-  # will be considered as equally good. Final formulation will be selected based on the computational cost.
+  # Score tolerance for total score or count. 
+  # Formulations with a summary score within this tolerance of the best formulation will be considered as equally good. 
+  # Final formulation will be selected based on the computational cost. 
   # If set to 0, only the best formulation will be selected.
-  # note the tolerance is defined as a fraction of the best score, so if the best score is 0.8 and the tolerance 
-  # is 0.05, then all formulations with a score between 0.76 (=0.8-0.8*0.05) and 0.8 will be considered as equally good.
+  # note the tolerance is defined as a fraction of the best score (or count), so if the best score is 0.8 and 
+  # the tolerance is 0.05, then all formulations with a score between 0.76 (=0.8-0.8*0.05) and 0.8 will be considered 
+  # as equally good.
   score_tolerance: 0.05
 
   # Path to the file containing the computational cost of each formulation

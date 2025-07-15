@@ -4,10 +4,12 @@ This module provides functions to select formulations based on summary scores of
 as well as formulation costs if provided in the configuration.
 
 Functions:
-- find_calibration_gages: Find gages for a given HUC ID in the summary scores DataFrame.
-- get_formulation_costs: Retrieve formulation costs from the configuration.
-- compute_total_score: Compute total score for each spatial unit based on the method specified.
-- select_formulation_given_score_cost: Select formulations based on summary scores and costs.
+- _find_calibration_gages_nearest_neighbor: Find gages for a given HUC ID using the nearest neighbor method.
+- _find_calibration_gages_upscaling: Find gages for a given HUC ID using the upscaling method.
+- _find_calibration_gages: Find gages for a given HUC ID in the summary scores DataFrame.
+- _get_formulation_costs: Retrieve formulation costs from the configuration.
+- _select_formulation_given_score: Select a formulation for each spatial unit based on the method specified.
+- _identify_best_formulation_per_gage: Identify the best formulation for each gage based on summary scores and costs.
 - select_formulation: head function to select formulations for each spatial unit in the VPU.
 
 """
@@ -16,16 +18,79 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import fiona
 import geopandas as gpd
+import numpy as np
 import pandas as pd
-from utils import check_columns, read_table
 
+from utils import check_columns, find_gages_within_buffer, read_table
 from . import config_schema as cs
 
 logger = logging.getLogger(__name__)
 
 
-def _find_calibration_gages(huc_id: str, df: pd.DataFrame, min_gages: int) -> tuple[list, str]:
+def _find_calibration_gages_nearest_neighbor(
+    huc_id: str,
+    df: pd.DataFrame,
+    gage_file: Path,
+    min_gages: int,
+    gdf: gpd.GeoDataFrame,
+) -> tuple[list, str]:
+    """Find gages for the given HUC ID in the DataFrame.
+
+    Args:
+        huc_id (str): HUC ID to find gages for.
+        df (pd.DataFrame): DataFrame of summary scores.
+        gage_file (Path): Path to the donor gage file containing gage_id, longitude, and latitude.
+        min_gages (int): Minimum number of gages required for each spatial unit.
+        gdf (gpd.GeoDataFrame): GeoDataFrame of hydrofabric (HUC12) polygons.
+
+    Returns:
+        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID and distances of the gages
+            to the HUC centroid.
+
+    """
+    # get all calibration gages with valid formulation and summary scores
+    gages_calib = df[~df["formulation"].isna() & ~df["summary_score"].isna()]["gage_id"].unique().tolist()
+
+    # iteratively find the nearest neighbor gages for the given HUC ID, increasing the neighborhood size
+    # by 100km each time until the minimum number of gages is met
+    buffer = 100  # initial buffer size in kilometers
+    gages = []
+    while len(gages) < min_gages:
+        # find gages within the buffer around huc_id
+        gages, distances, _ = find_gages_within_buffer(gage_file, buffer, gdf=gdf)
+
+        # filter gages to only those that are calibrated, and filter distances accordingly
+        gages, distances = (
+            map(list, zip(*[(g, d) for g, d in zip(gages, distances) if g in gages_calib])) if gages else ([], [])
+        )
+        distances = pd.Series(distances)
+
+        # if no gages are found, increase the buffer size and try again
+        if not gages or len(gages) < min_gages:
+            logger.debug(f"{huc_id}: Not enough gages found within {buffer} km buffer. Increasing buffer size.")
+            buffer += 100  # increase buffer size by 100 km
+        else:
+            logger.debug(f"{huc_id}: Found {len(gages)} gages within {buffer} km buffer.")
+            break
+    else:
+        raise ValueError(
+            f"Not enough calibrated gages found for {huc_id} after increasing buffer size to {buffer} km. "
+            f"Minimum required is {min_gages}."
+        )
+
+    # only keep the minimum number of gages required
+    if len(gages) > min_gages:
+        # sort gages by distance and keep the closest ones
+        sorted_indices = distances.argsort()[:min_gages]
+        gages = [gages[i] for i in sorted_indices]
+        distances = distances.iloc[sorted_indices].tolist()
+
+    return gages, distances
+
+
+def _find_calibration_gages_upscaling(huc_id: str, df: pd.DataFrame, min_gages: int) -> tuple[list, str]:
     """Find gages for the given HUC ID in the DataFrame.
 
     Args:
@@ -78,6 +143,72 @@ def _find_calibration_gages(huc_id: str, df: pd.DataFrame, min_gages: int) -> tu
     return gages, huc_level
 
 
+def _find_calibration_gages(
+    huc_id: str, df: pd.DataFrame, config: cs.Config, gdf: gpd.GeoDataFrame
+) -> tuple[list, str]:
+    """Find gages for the given HUC ID in the DataFrame.
+
+    Args:
+        huc_id (str): HUC ID to find gages for.
+        df (pd.DataFrame): DataFrame of summary scores.
+        config (cs.Config): Configuration object containing settings.
+        gdf (gpd.GeoDataFrame): GeoDataFrame of hydrofabric (HUC12) polygons.
+
+    Returns:
+        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID and the HUC level.
+
+    """
+    # check if the huc_id is valid
+    if not isinstance(huc_id, str) or len(huc_id) < 2:
+        raise ValueError(f"Invalid HUC ID: {huc_id}. It should be a string with at least 2 characters.")
+
+    # check number of calibration gages within the current huc_id
+    gages0 = (
+        df[(df["huc_id"] == huc_id) & (~df["formulation"].isna()) & (~df["summary_score"].isna())]["gage_id"]
+        .unique()
+        .tolist()
+    )
+
+    # method to find additional calibration gages if not enough gages are found in the current huc_id
+    method = config.spatial_unit.basin_fill_method.lower()
+
+    # if there are enough gages at the current huc_id level, return them
+    if len(gages0) >= config.spatial_unit.nmin_calib_basin:
+        logger.debug(
+            f"Found {len(gages0)} calibration gages for HUC ID {huc_id} at the current level. "
+            f"No need to find additional gages."
+        )
+        huc_level = "huc" + str(len(huc_id))
+        return huc_level, gages0, [np.nan] * len(gages0)
+    else:
+        logger.debug(
+            f"Found only {len(gages0)} calibration gages for HUC ID {huc_id} at the current level. "
+            f"Need to find additional gages using the {method} method."
+        )
+
+    if method == "upscaling":
+        # find calibration gages using upscaling method
+        gages, huc_level = _find_calibration_gages_upscaling(huc_id, df, config.spatial_unit.nmin_calib_basin)
+        dists = [np.nan] * len(gages)
+    elif method == "nearest-neighbor":
+        # find calibration gages using nearest neighbor
+        gages, dists = _find_calibration_gages_nearest_neighbor(
+            huc_id,
+            df,
+            config.general.donor_gage_file,
+            config.spatial_unit.nmin_calib_basin,
+            gdf,
+        )
+        huc_level = "huc" + str(len(huc_id))  # HUC level is determined by the length of huc_id
+    else:
+        # raise error if the basin fill method is not recognized
+        raise ValueError(
+            f"Unknown basin fill method: {method}. Supported methods are 'upscaling' and 'nearest-neighbor'."
+        )
+
+    return huc_level, gages, dists
+
+
 def _get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[str, float]]:
     """Get formulation costs from the configuration.
 
@@ -111,9 +242,10 @@ def _get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[st
     return None
 
 
-def _compute_total_score(
+def _select_formulation_given_score(
     df: pd.DataFrame,
     method: str = "basin",
+    type: str = "total_score",
 ) -> pd.DataFrame:
     """Compute total score for each spatial unit based on the method specified.
 
@@ -122,15 +254,17 @@ def _compute_total_score(
             DataFrame containing summary scores for each formulation and calibrated basin.
         method : str, optional
             Method to compute total score, either 'basin' or 'divide', by default 'basin'.
+        type : str, optional
+            Type of total score to compute, either 'total_score' or 'total_count', by default 'total_score'.
 
     Returns:
         pd.DataFrame
             DataFrame with total scores computed for each spatial unit.
 
     """
-    col1 = "gage_id" if method == "basin" and "gage_id" in df.columns else "divide_id"
+    col1 = "gage_id" if type == "basin" and "gage_id" in df.columns else "divide_id"
 
-    df1 = df[[col1, "formulation", "summary_score"]].copy()
+    df1 = df[[col1, "formulation", "summary_score", "cost"]].copy()
 
     # remove duplicate rows
     df1 = df1.drop_duplicates(subset=[col1, "formulation"])
@@ -138,73 +272,77 @@ def _compute_total_score(
     # drop rows with NaN values in the summary_score column
     df1 = df1.dropna(subset=["summary_score"])
 
+    # identify best formulation(s)
+    if method == "total_score":
+        df1.loc[:, method] = df1.groupby(["formulation"])["summary_score"].transform("sum")
+    elif method == "total_count":
+        df1.loc[:, method] = df1.groupby(["formulation"])["summary_score"].transform("count")
+    else:
+        raise ValueError(f"Unknown method: {method}. Supported methods are 'total_score' and 'total_count'.")
+
+    # keep only the best formulation(s) with the highest total score
+    df1 = df1[df1[method] == df1[method].max()]
+
+    # if there are multiple formulations with the same total score, choose the one that has the lowest cost
+    if df1.shape[0] > 1:
+        df1 = df1[df1["cost"] == df1["cost"].min()]
+
     # drop col1
     df1 = df1.drop(columns=[col1])
-
-    # count the values in the formulation column
-    if df1["formulation"].value_counts().nunique() > 1:
-        raise ValueError("Not all formulations have the same number of entries.")
-
-    # compute total score for each formulation
-    df1["total_score"] = df1.groupby(["formulation"])["summary_score"].transform("sum")
-
-    # drop the summary_score column
-    df1 = df1.drop(columns=["summary_score"])
-
-    # remove duplicate rows
-    df1 = df1.drop_duplicates(subset=["formulation", "total_score"])
+    
+    # remove duplicates
+    df1 = df1.drop_duplicates(subset=["formulation", method])
 
     return df1
 
 
-def _select_formulation_given_score_cost(
+def _identify_best_formulation_per_gage(
     df_score: pd.DataFrame,
-    score_tolerance: float,
+    tolerance: float = 0.05,
     cost_dict: Optional[dict] = None,
-    method: str = "basin",
 ) -> pd.DataFrame:
-    """Select formulations based on summary scores and costs.
+    """Identify the best formulation for each gage based on summary scores and costs.
 
     Args:
         df_score : pd.DataFrame
             DataFrame containing summary scores for each formulation and calibrated basin.
-        score_tolerance : float
-            Tolerance for the summary score to consider formulations as equally good.
+        tolerance : float, optional
+            Tolerance for the summary score to consider formulations as equally good, by default 0.05.
         cost_dict : dict, optional
             Dictionary containing costs for each formulation, by default None.
-        method : str, optional
-            Method to compute total score, either 'basin' or 'divide', by default 'basin'.
 
     Returns:
         pd.DataFrame
-            DataFrame with selected formulations and their scores.
+            DataFrame with the best formulation for each gage and its score.
 
     """
-    # compute total score for each formulation
-    df_total = _compute_total_score(df_score, method=method)
+    max_scores = df_score.groupby("gage_id")["summary_score"].transform("max")
+    best_per_gage = df_score[df_score["summary_score"] >= (max_scores - max_scores * tolerance)].copy()
 
-    # get the best formulation based on total scores
-    max_score = df_total["total_score"].max()
-    df_best = df_total[df_total["total_score"] == max_score].copy()
-    df_best["cost"] = None  # Initialize cost column
-
-    # if cost_dict is provided, filter the formulations based on the cost threshold
     if cost_dict is not None:
-        df_score1 = df_total[df_total["total_score"] >= max_score - max_score * score_tolerance].copy()
-
         # check if all formulations are in the cost_dict
-        if not df_score1["formulation"].isin(cost_dict.keys()).all():
-            logger.warning("Not all formulations have associated costs. Filtering out those without costs.")
-            df_score1 = df_score1[df_score1["formulation"].isin(cost_dict.keys())]
+        if not best_per_gage["formulation"].isin(cost_dict.keys()).all():
+            missed_formulations = best_per_gage[~best_per_gage["formulation"].isin(cost_dict.keys())][
+                "formulation"
+            ].unique()
+            raise ValueError(f"The following formulations have no associated costs: {', '.join(missed_formulations)}.")
 
         # map costs to the formulations
-        df_score1["cost"] = df_score1["formulation"].map(cost_dict)
+        best_per_gage.loc[:, "cost"] = best_per_gage["formulation"].map(cost_dict)
 
-        # select the best formulation based on the cost
-        min_cost = df_score1["cost"].min()
-        df_best = df_score1[df_score1["cost"] == min_cost]
+        # for each gage, select the formulation with the minimum cost
+        best_per_gage = best_per_gage.loc[best_per_gage.groupby("gage_id")["cost"].idxmin()].copy()
 
-    return df_best
+        # if there are multiple formulations with the same minimum cost, keep the first one
+        best_per_gage = best_per_gage.drop_duplicates(subset=["gage_id"])
+    else:
+        # choose the first formulation with the highest score for each gage
+        best_per_gage = best_per_gage.loc[best_per_gage.groupby("gage_id")["summary_score"].idxmax()].copy()
+
+        # initialize cost column to None
+        best_per_gage["cost"] = None
+
+    return best_per_gage
 
 
 def select_formulation(
@@ -227,6 +365,18 @@ def select_formulation(
             DataFrame with selected formulations and their scores.
 
     """
+    # score computing method, type, and tolerance
+    score_method = config.spatial_unit.best_formulation["method"].lower()
+    score_type = config.spatial_unit.best_formulation["type"].lower()
+    score_tolerance = config.spatial_unit.best_formulation["tolerance"]
+    logger.info(f"Computing total score using method '{score_method}' and type '{score_type}'.")
+
+    # get formulation costs from the configuration
+    formulation_costs = _get_formulation_costs(config.formulation_cost)
+
+    # identify best formulation for each gage based on summary scores for formulation costs
+    df_best = _identify_best_formulation_per_gage(df_score, tolerance=score_tolerance, cost_dict=formulation_costs)
+
     # crosswalk for gage/divide
     cwt_divide_gage = read_table(config.general.gage_divide_cwt_file, dtype={"gage_id": str, "divide_id": str})
 
@@ -252,26 +402,54 @@ def select_formulation(
     )
 
     # then merge with the score DataFrame
-    df_score = df_score.merge(df, on="gage_id", how="right")
+    df_score = df_best.merge(df, on="gage_id", how="right")
+
+    # check number of unique gages with valid formulation and summary scores
+    gages_all = (
+        df_score[~df_score["formulation"].isna() & ~df_score["summary_score"].isna()]["gage_id"].unique().tolist()
+    )
 
     logger.info(
         f"Selecting formulations for VPU {vpu} at {huc_level} level. "
-        f"There are {len(df_score['huc_id'].unique())} unique {huc_level} IDs."
+        f"There are {len(df_score['huc_id'].unique())} unique {huc_level} IDs, and "
+        f"{len(gages_all)} unique gages."
     )
 
-    # get formulation costs from the configuration
-    formulation_costs = _get_formulation_costs(config.formulation_cost)
+    # all unique huc_ids in the score DataFrame
+    huc_ids = df_score["huc_id"].unique()
+
+    # read huc12 shape file to get the geometry for these huc_ids
+    huc12_shape_file = Path(config.general.huc12_shape_file).resolve(strict=True)
+    if not huc12_shape_file.exists():
+        logger.warning(f"HUC12 shape file {huc12_shape_file} does not exist. Skipping formulation selection.")
+        return pd.DataFrame()
+
+    # # Open with Fiona to read features in huc_ids
+    features = []
+    huc_digit = len(huc_ids[0])  # assuming all huc_ids have the same length
+    with fiona.open(huc12_shape_file, "r", open_options=["METHOD=ONLY_CCW"]) as src:
+        for feat in src:
+            if feat["properties"]["HUC_12"][:huc_digit] in huc_ids:
+                features.append(feat)
+
+        # Convert to GeoDataFrame
+        huc12_gdf = gpd.GeoDataFrame.from_features(features, crs=src.crs)
 
     # loop through each unique huc_id and select formulations
     df_selected = pd.DataFrame()
-    for huc_id in df_score["huc_id"].unique():
+    for huc_id in huc_ids:
         # find calibration gages for the current huc_id
         df_score_huc = df_score[~df_score["formulation"].isna() & ~df_score["summary_score"].isna()].copy()
         if df_score_huc.empty:
-            logger.warning(f"No valid formulation scores found for HUC ID: {huc_id}. Skipping this HUC.")
+            logger.warning(f"No valid formulation scores found for HUC ID: {huc_id}e Skipping this HUC.")
             continue
 
-        gages, huc_level = _find_calibration_gages(huc_id, df_score_huc, config.spatial_unit.nmin_calib_basin)
+        # filter huc12_gdf for the current huc_id
+        huc12_gdf_huc = huc12_gdf[huc12_gdf["HUC_12"].str[:huc_digit] == huc_id].copy()
+        if huc12_gdf_huc.empty:
+            logger.warning(f"No geometry found for HUC ID: {huc_id}. Skipping this HUC.")
+            continue
+        huc_level, gages, dists = _find_calibration_gages(huc_id, df_score_huc, config, huc12_gdf_huc)
         if not gages:
             logger.warning(f"No gages found for HUC ID: {huc_id}. Skipping this HUC.")
             continue
@@ -279,14 +457,7 @@ def select_formulation(
         df_huc = df_score[df_score["gage_id"].isin(gages)].copy()
 
         # select the best formulation based on the score & optionally costs
-        method = config.spatial_unit.total_score_method.lower()
-        logger.info(f"Computing total score using method: {method}")
-        best_formulation = _select_formulation_given_score_cost(
-            df_huc,
-            score_tolerance=config.formulation_cost.score_tolerance,
-            cost_dict=formulation_costs,
-            method=method,
-        )
+        best_formulation = _select_formulation_given_score(df_huc, method=score_method, type=score_type)
 
         # append the selected formulation to the list
         if best_formulation.empty:
@@ -297,22 +468,16 @@ def select_formulation(
         best_formulation["huc_id"] = huc_id
         best_formulation["upscale_huc"] = huc_level
         best_formulation["num_gages"] = len(gages)
+        best_formulation["distances"] = ", ".join([str(d) for d in dists])  # join distances as a string
         best_formulation["vpu"] = vpu
 
         df_selected = pd.concat([df_selected, best_formulation], ignore_index=True)
-
+    
     # rearrange the columns in the selected DataFrame
-    df_selected = df_selected[
-        [
-            "vpu",
-            "huc_id",
-            "formulation",
-            "total_score",
-            "cost",
-            "upscale_huc",
-            "num_gages",
-        ]
-    ]
+    columns = ["vpu", "huc_id", "formulation", score_method, "cost", "num_gages"]
+    method1 = config.spatial_unit.basin_fill_method.lower()
+    output_columns = columns + ["upscale_huc"] if method1 == "upscaling" else columns + ["distances"]
+    df_selected = df_selected.reindex(columns=output_columns)
 
     # save the selected formulations to the output file
     cc = config.output.formulation
@@ -357,7 +522,7 @@ def select_formulation(
         plot_dict = {
             "vpu": vpu,
             "var_str": "Formulation Selection",
-            "columns": ["formulation", "total_score", "cost"],
+            "columns": ["formulation", score_method, "cost"],
             "ncols": 3,
         }
         cc.plot_data(df_selected, plot_dict)

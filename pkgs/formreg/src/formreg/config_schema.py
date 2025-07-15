@@ -42,6 +42,18 @@ class GeneralSettings(BaseModel):
     """Whether to consider computational costs of formulations in the regionalization process."""
     approach_calib_basins: Optional[str] = "regionalization"  # Options: 'regionalization', 'calval_stat'
     """Strategy for assigning formulations to calibrated basins."""
+    donor_gage_file: Optional[str] = None
+    """Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."""
+    gage_divide_cwt_file: Optional[str] = None
+    """Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'."""
+    consider_cost: Optional[bool] = False
+    """Whether to consider computational costs of formulations in the regionalization process."""
+    approach_calib_basins: Optional[str] = "regionalization"  # Options: 'regionalization', 'calval_stat'
+    """Strategy for assigning formulations to calibrated basins."""
+    donor_gage_file: Optional[str] = None
+    """Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."""
+    huc12_shape_file: Optional[Union[str, Path]] = None
+    """Path to HUC12 shape file or GeoPackage containing HUC12 polygons for spatial discretization."""
 
 
 class PlotsConfig(BaseModel):
@@ -64,8 +76,12 @@ class SpatialUnitConfig(BaseModel):
     """Minimum number of calibration basins required per spatial unit to consider it valid."""
     basin_fill_method: Optional[str] = "upscaling"
     """Method to handle units with too few calibration basins. Options: 'upscaling', 'nearest-neighbor'."""
-    total_score_method: Optional[str] = "basin"
-    """Method to compute total score for each spatial unit. Options: 'basin', 'divide'."""
+    best_formulation: Optional[Dict[str, Union[str, float]]] = {
+        "method": "total_score",
+        "type": "divide",
+        "tolerance": 0.05,
+    }
+    """Method, type, and score tolerance to determine the best formulation for each spatial unit."""
 
     @model_validator(mode="after")
     def check_huc_level(self) -> "SpatialUnitConfig":
@@ -91,12 +107,39 @@ class SpatialUnitConfig(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def check_total_score_method(self) -> "SpatialUnitConfig":
-        """Ensure that the total score method is valid."""
-        valid_methods = ["basin", "divide"]
-        if self.total_score_method not in valid_methods:
+    def check_best_formulation(self) -> "SpatialUnitConfig":
+        """Ensure that the best formulation method and type are valid."""
+        # make sure best_formulation is a dict with keys 'method', 'type', and 'tolerance'
+        if (
+            not isinstance(self.best_formulation, dict)
+            or "method" not in self.best_formulation
+            or "type" not in self.best_formulation
+            or "tolerance" not in self.best_formulation
+        ):
             raise ValueError(
-                f"Invalid total score method: {self.total_score_method}. Valid options are: {valid_methods}"
+                f"best_formulation must be a dictionary with keys 'method', 'type', and 'tolerance'. "
+                f"Got: {self.best_formulation}"
+            )
+
+        valid_methods = ["total_score", "total_count"]
+        valid_types = ["basin", "divide"]
+
+        if self.best_formulation["method"] not in valid_methods:
+            raise ValueError(
+                f"Invalid best formulation method: {self.best_formulation['method']}. "
+                f"Valid options are: {valid_methods}"
+            )
+
+        if self.best_formulation["type"] not in valid_types:
+            raise ValueError(
+                f"Invalid best formulation type: {self.best_formulation['type']}. Valid options are: {valid_types}"
+            )
+
+        """Ensure that score tolerance is a valid value."""
+        if not (0.0 <= self.best_formulation["tolerance"] <= 1.0):
+            raise ValueError(
+                f"Score tolerance (i.e., fraction of best score) must be between 0.0 and 1.0, "
+                f"got {self.best_formulation['tolerance']}"
             )
 
         return self
@@ -260,22 +303,10 @@ class SummaryScoreConfig(BaseModel):
 class FormulationCostConfig(BaseModel):
     """Computational cost of each formulation."""
 
-    score_tolerance: float = 0.05
-    """Summary score tolerance (as fraction of best score) for considering formulations as equally good."""
     file: Optional[str] = None
     """Path to CSV file with formulation costs. If provided, costs will be read from this file."""
     costs: Optional[Dict[str, float]] = None
     """Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored."""
-
-    @model_validator(mode="after")
-    def check_score_tolerance(self) -> "FormulationCostConfig":
-        """Ensure that score tolerance is a valid value."""
-        if not (0.0 <= self.score_tolerance <= 1.0):
-            raise ValueError(
-                f"Score tolerance (i.e., fraction of best score) must be between 0.0 and 1.0, "
-                f"got {self.score_tolerance}"
-            )
-        return self
 
 
 class OutputSection(BaseModel):
