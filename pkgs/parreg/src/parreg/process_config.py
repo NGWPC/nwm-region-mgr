@@ -13,8 +13,15 @@ from pydantic import BaseModel, ValidationError
 from shapely.geometry import Point
 from shapely.ops import unary_union
 
-from . import config_schema as cs
-from . import funcs_clust, funcs_dist, utils, utils_algo
+from pkgs.parreg.src.parreg import config_schema as cs
+from pkgs.parreg.src.parreg import utils, utils_algo
+from pkgs.parreg.src.parreg.funcs_clust import (
+    BIRCHPairer,
+    HDBSCANPairer,
+    KmeansPairer,
+    KmedoidsPairer,
+)
+from pkgs.parreg.src.parreg.funcs_dist import GowerPairer, ProximityPairer, URFPairer
 
 logger = logging.getLogger(__name__)
 
@@ -537,7 +544,7 @@ class RegionalizationProcessor:
             file_changed = True
         return df_spatial_dist, file_changed
 
-    def write_spatial_file(self, file_changed: bool, df_spatial_dist: pd.DataFrame):
+    def write_spatial_file(self, df_spatial_dist: pd.DataFrame, file_changed: bool):
         """Save the spatial distance data."""
         if self.config.output.spatial_distance.save and file_changed:
             if not self.dist_file.parent.is_dir():
@@ -570,7 +577,7 @@ class RegionalizationProcessor:
         # save spatial distance file
         self.write_spatial_file(df_spatial_dist, file_changed)
 
-        self.df_spatial_dist = df_spatial_dist
+        self.dist_spatial = df_spatial_dist
 
     @property
     def datasets(self) -> list:
@@ -726,10 +733,10 @@ class RegionalizationProcessor:
         )
 
         self.check_attrs_in_spatial_distance_data(
-            self.donors_w_attrs, "donors", self.df_spatial_dist
+            self.donors_w_attrs, "donors", self.dist_spatial
         )
         self.check_attrs_in_spatial_distance_data(
-            self.receivers_w_attrs, "receivers", self.df_spatial_dist
+            self.receivers_w_attrs, "receivers", self.dist_spatial
         )
 
         # check percent missing
@@ -778,37 +785,37 @@ class RegionalizationProcessor:
         return df_attrs
 
     @property
-    def functions(self) -> dict:
+    def pairers(self) -> dict:
         """Pairing/regionalization algorithms."""
         return {
-            "proximity": funcs_dist,
-            "gower": funcs_dist,
-            "urf": funcs_dist,
-            "kmeans": funcs_clust,
-            "kmedoids": funcs_clust,
-            "hdbscan": funcs_clust,
-            "birch": funcs_clust,
+            "proximity": ProximityPairer,
+            "gower": GowerPairer,
+            "urf": URFPairer,
+            "kmeans": KmeansPairer,
+            "kmedoids": KmedoidsPairer,
+            "hdbscan": HDBSCANPairer,
+            "birch": BIRCHPairer,
         }
 
     @property
-    def function_names(self) -> list:
+    def pairer_names(self) -> list:
         """Run only those algorithms specified to run in the config file."""
         return [
-            x for x in self.functions.keys() if x in self.config.general.algorithm_list
+            x for x in self.pairers.keys() if x in self.config.general.algorithm_list
         ]
 
-    def construct_output_filepath(self, function_name: str) -> Path:
+    def construct_output_filepath(self, pairer_name: str) -> Path:
         """Construct output filepath."""
         file_name_str = (
-            f"pairs_{function_name}_{self.config.general.domain}_vpu{self.vpu}"
+            f"pairs_{pairer_name}_{self.config.general.domain}_vpu{self.vpu}"
         )
         return self.config.output.pairs.get_file_path(file_name_str)
 
     def update_algorithm_config(
-        self, function_name: str, df_attrs_all: pd.DataFrame
+        self, pairer_name: str, df_attrs_all: pd.DataFrame
     ) -> dict:
         """Update the algorithm config."""
-        algorithm_config = self.config.model_dump()["algorithms"][function_name]
+        algorithm_config = self.config.model_dump()["algorithms"][pairer_name]
         algorithm_config["max_spa_dist"] = self.config.model_dump()["algorithms"][
             "general"
         ]["max_spa_dist"]
@@ -826,8 +833,8 @@ class RegionalizationProcessor:
 
     def generate_pairing(
         self,
-        df_attrs_all: pd.DataFrame,
-        df_dist_spatial: pd.DataFrame,
+        df_attr_all: pd.DataFrame,
+        dist_spatial: pd.DataFrame,
     ):
         """Conduct donor-receiver pairing for a given VPU based on the configuration.
 
@@ -835,37 +842,37 @@ class RegionalizationProcessor:
         based on the attributes and spatial distance DataFrame.
 
         Args:
-            df_attrs_all: dataframe containing the full attribute data for all receivers and donors
-            df_dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
+            df_attr_all: dataframe containing the full attribute data for all receivers and donors
+            dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
 
         Returns:
             None. The pairing results are saved to designed locations based on the configurations.
 
         """
-        logger.info(f"Algorithms to run: {self.function_names}")
+        logger.info(f"Algorithms to run: {self.pairer_names}")
 
         # loop through regionalization algorithms to generate donor-receiver pairings for each algorithm/scenario combination
-        for function_name in self.function_names:
-            outfile = self.construct_output_filepath(function_name)
+        for pairer_name in self.pairer_names:
+            outfile = self.construct_output_filepath(pairer_name)
             if outfile.exists():
                 logger.info(f"Pair file already exist: {outfile}")
-                logger.info(f"Skip the current run: {function_name}")
+                logger.info(f"Skip the current run: {pairer_name}")
                 continue
 
-            logger.info(
-                f"\nIdentify donors for VPU {self.vpu} using: {function_name}\n"
-            )
+            logger.info(f"\nIdentify donors for VPU {self.vpu} using: {pairer_name}\n")
             start_time = time.time()
 
-            algorithm_config = self.update_algorithm_config(function_name, df_attrs_all)
+            algorithm_config = self.update_algorithm_config(pairer_name, df_attr_all)
 
             # execute function
-            df_donor_all = self.functions[function_name].func(
-                algorithm_config, df_attrs_all, df_dist_spatial, function_name
+            pairer = self.pairers[pairer_name](
+                config=algorithm_config,
+                df_attr_all=df_attr_all,
+                dist_spatial=dist_spatial,
             )
-
+            processed_receivers_df = pairer.pair()
             # save donor receiver pairing to csv file
-            self.config.output.pairs.save_data(df_donor_all, outfile)
+            self.config.output.pairs.save_data(processed_receivers_df, outfile)
             logger.info(f"Pairing results saved to {outfile}")
 
             end_time = time.time()

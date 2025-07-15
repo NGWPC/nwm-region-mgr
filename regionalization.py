@@ -10,8 +10,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from time import time
 
-from parreg.logging_config import setup_logging
-from parreg.process_config import RegionalizationProcessor
+from pkgs.parreg.src.parreg.logging_config import setup_logging
+from pkgs.parreg.src.parreg.process_config import RegionalizationProcessor
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     if not config_file.exists():
         raise FileNotFoundError(config_file)
 
-    # intialize RegionalizationProcessor
+    # initialize RegionalizationProcessor
     rp = RegionalizationProcessor(config_file)
 
     # process by VPU
@@ -63,9 +63,9 @@ if __name__ == "__main__":
         with timing_block("process_attr_data"):
             rp.process_attr_data()
 
-        # detemine whether the catchments are snowy (as snowy and non-snowy catchments are processed separately)
-        df_attrs_all = rp.set_snow_flag(rp.self.df_attrs_all)
+        # determine whether the catchments are snowy (as snowy and non-snowy catchments are processed separately)
+        df_attr_all = rp.set_snow_flag(rp.df_attrs_all)
 
         # loop through regionalization algorithms to generate donor-receiver pairings
         with timing_block("generate_pairing"):
-            rp.generate_pairing(df_attrs_all, rp.df_spatial_dist)
+            rp.generate_pairing(df_attr_all, rp.dist_spatial)
