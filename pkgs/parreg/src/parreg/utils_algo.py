@@ -87,8 +87,9 @@ def compute_pairwise_centroid_distances(
             ] = a_ids[i]
         for future in concurrent.futures.as_completed(futures):
             data[futures[future]] = future.result()
-
-    return pd.DataFrame(data.values(), columns=b_ids, index=data.keys()).T
+    data = pd.DataFrame(data.values(), columns=b_ids, index=data.keys()).T
+    data = data.sort_index(axis=0)
+    return data.sort_index(axis=1)
 
 
 def compute_distances_for_a(
@@ -135,7 +136,6 @@ def get_valid_attrs(
 
     if df_attr.shape[0] == 0:
         print("WARNING: no valid attributes found for the following receivers: ")
-        print(df_attr["id"].tolist())
 
     return df_attr
 
