@@ -13,15 +13,15 @@ from pydantic import BaseModel, ValidationError
 from shapely.geometry import Point
 from shapely.ops import unary_union
 
-from pkgs.parreg.src.parreg import config_schema as cs
-from pkgs.parreg.src.parreg import utils, utils_algo
-from pkgs.parreg.src.parreg.funcs_clust import (
+from . import config_schema as cs
+from . import utils, utils_algo
+from .funcs_clust import (
     BIRCHPairer,
     HDBSCANPairer,
     KmeansPairer,
     KmedoidsPairer,
 )
-from pkgs.parreg.src.parreg.funcs_dist import GowerPairer, ProximityPairer, URFPairer
+from .funcs_dist import GowerPairer, ProximityPairer, URFPairer
 
 logger = logging.getLogger(__name__)
 
@@ -475,6 +475,9 @@ class RegionalizationProcessor:
     def gdf_receivers(self) -> gpd.GeoDataFrame:
         """Geodataframe of receivers."""
         gdf_receivers, _ = self.donor_receiver_gdfs()
+        # gdf_receivers = gdf_receivers.sample(
+        #     n=50, replace=False, random_state=50
+        # )  # randomly sample a small number of receivers for testing
         return gdf_receivers
 
     @property
@@ -486,7 +489,6 @@ class RegionalizationProcessor:
     @property
     def receivers(self) -> list:
         """Receivers."""
-        # gdf_receivers = gdf_receivers.sample(n=500, replace=False) # randomly sample a small number of receivers for testing
         return self.gdf_receivers[self.general_id_name].tolist()
 
     @property
