@@ -4,8 +4,9 @@ This module provides functions to select formulations based on summary scores of
 as well as formulation costs if provided in the configuration.
 
 Functions:
-- _find_calibration_gages_nearest_neighbor: Find gages for a given HUC ID using the nearest neighbor method.
-- _find_calibration_gages_upscaling: Find gages for a given HUC ID using the upscaling method.
+- _get_gages_with_shared_formulations: Identify the largest formulation set shared by at least a minimum number of gages.
+- _find_gages_nearest_neighbor: Find gages for a given HUC ID using the nearest neighbor method.
+- _find_gages_upscaling: Find gages for a given HUC ID using the upscaling method.
 - _find_calibration_gages: Find gages for a given HUC ID in the summary scores DataFrame.
 - _get_formulation_costs: Retrieve formulation costs from the configuration.
 - _select_formulation_given_score: Select a formulation for each spatial unit based on the method specified.
@@ -15,8 +16,9 @@ Functions:
 """
 
 import logging
+from itertools import combinations
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import fiona
 import geopandas as gpd
@@ -29,14 +31,50 @@ from . import config_schema as cs
 logger = logging.getLogger(__name__)
 
 
-def _find_calibration_gages_nearest_neighbor(
+def _get_gages_with_shared_formulations(
+    df: pd.DataFrame,
+    min_gages: int = 3,
+) -> Tuple[bool, List[str], List[str]]:
+    """Identify the largest formulation set shared by at least `min_gages` gages.
+
+    Args:
+        df (pd.DataFrame): Must contain 'gage_id' and 'formulation' columns.
+        min_gages (int): Minimum number of gages that must share the same formulations.
+
+    Returns:
+        (True, [gages], [shared_formulations]) if found, else (False, [], [])
+
+    """
+    # Build mapping from gage_id -> set of formulations
+    gage_to_formulations = df.groupby("gage_id")["formulation"].apply(lambda x: frozenset(x))
+
+    # All unique gage_ids and their formulation sets
+    gage_ids = list(gage_to_formulations.index)
+    gage_form_sets = gage_to_formulations.tolist()
+
+    # Step 1: Get all unique formulations across gages
+    all_formulations = set().union(*gage_form_sets)
+
+    # Step 2: Loop through combinations of formulations, largest sets first
+    for r in range(len(all_formulations), 0, -1):  # Start from largest combos
+        for combo in combinations(all_formulations, r):
+            combo_set = set(combo)
+            matching_gages = [gage_ids[i] for i, g_form in enumerate(gage_form_sets) if combo_set.issubset(g_form)]
+            if len(matching_gages) >= min_gages:
+                logger.debug(f"Found {len(matching_gages)} gages ({matching_gages}) sharing formulations: {combo_set}.")
+                return True, matching_gages, list(combo_set)
+
+    return False, [], []
+
+
+def _find_gages_nearest_neighbor(
     huc_id: str,
     df: pd.DataFrame,
     gage_file: Path,
     gage_id_col: str,
     min_gages: int,
     gdf: gpd.GeoDataFrame,
-) -> tuple[list, str]:
+) -> tuple[list, list, list]:
     """Find gages for the given HUC ID in the DataFrame.
 
     Args:
@@ -48,8 +86,8 @@ def _find_calibration_gages_nearest_neighbor(
         gdf (gpd.GeoDataFrame): GeoDataFrame of hydrofabric (HUC12) polygons.
 
     Returns:
-        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID and distances of the gages
-            to the HUC centroid.
+        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID,  distances of the gages
+            to the HUC centroid, and the shared formulations.
 
     """
     # get all calibration gages with valid formulation and summary scores
@@ -64,17 +102,26 @@ def _find_calibration_gages_nearest_neighbor(
         gages, distances, _ = find_gages_within_buffer(gage_file, gage_id_col, buffer, gdf=gdf, id=huc_id)
 
         # filter gages to only those that are calibrated, and filter distances accordingly
-        gages, distances = (
-            map(list, zip(*[(g, d) for g, d in zip(gages, distances) if g in gages_calib])) if gages else ([], [])
-        )
-        distances = pd.Series(distances)
+        filtered = [(g, d) for g, d in zip(gages, distances) if g in gages_calib]
+        if filtered:
+            gages, distances = map(list, zip(*filtered))
+        else:
+            gages, distances = [], []
+
+        # distances = pd.Series(distances)
+
+        # if there are enough gages, check if they share the same formulations
+        if len(gages) > min_gages:
+            found_gages, gages, formulations = _get_gages_with_shared_formulations(
+                df[df[gage_id_col].isin(gages)], min_gages=min_gages
+            )
 
         # if no gages are found, increase the buffer size and try again
-        if not gages or len(gages) < min_gages:
+        if not found_gages:
             logger.debug(f"{huc_id}: Not enough gages found within {buffer} km buffer. Increasing buffer size.")
             buffer += 100  # increase buffer size by 100 km
         else:
-            logger.debug(f"{huc_id}: Found {len(gages)} gages within {buffer} km buffer.")
+            logger.debug(f"{huc_id}: Found {len(gages)} gages ({gages}) within {buffer} km buffer.")
             break
     else:
         msg = (
@@ -85,18 +132,16 @@ def _find_calibration_gages_nearest_neighbor(
         raise ValueError(msg)
 
     # only keep the minimum number of gages required
-    if len(gages) > min_gages:
-        # sort gages by distance and keep the closest ones
-        sorted_indices = distances.argsort()[:min_gages]
-        gages = [gages[i] for i in sorted_indices]
-        distances = distances.iloc[sorted_indices].tolist()
+    # if len(gages) > min_gages:
+    #     # sort gages by distance and keep the closest ones
+    #     sorted_indices = distances.argsort()[:min_gages]
+    #     gages = [gages[i] for i in sorted_indices]
+    #     distances = distances.iloc[sorted_indices].tolist()
 
-    return gages, distances
+    return gages, distances, formulations
 
 
-def _find_calibration_gages_upscaling(
-    huc_id: str, df: pd.DataFrame, gage_id_col: str, min_gages: int
-) -> tuple[list, str]:
+def _find_gages_upscaling(huc_id: str, df: pd.DataFrame, gage_id_col: str, min_gages: int) -> tuple[list, str, list]:
     """Find gages for the given HUC ID in the DataFrame.
 
     Args:
@@ -106,7 +151,8 @@ def _find_calibration_gages_upscaling(
         min_gages (int): Minimum number of gages required for each spatial unit.
 
     Returns:
-        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID and the HUC level.
+        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID, the HUC level,
+        and the shared formulations.
 
     """
     # define valid HUC levels
@@ -120,43 +166,46 @@ def _find_calibration_gages_upscaling(
         logger.error(msg)
         raise ValueError(msg)
 
+    gages = []
+    formulations = []
+    huc_level = current_huc_level  # Default to current if nothing better is found
+
     # start from current huc level, loop through valid HUC levels to ensure sufficient calibrated gages
-    for i, huc_level in enumerate(valid_huc_levels[valid_huc_levels.index(current_huc_level) :]):
+    for _, huc_level in enumerate(valid_huc_levels[valid_huc_levels.index(current_huc_level) :]):
         # count the number of unique gages in the new HUC level
         huc_digit = int(huc_level.replace("huc", ""))
-        ngage = df[df["huc_id"].str[:huc_digit] == huc_id[:huc_digit]][gage_id_col].nunique()
+        gages = df[df["huc_id"].str[:huc_digit] == huc_id[:huc_digit]][gage_id_col].unique().tolist()
 
-        # if the number of gages is sufficient, select the new HUC level
+        # remove NaN values from gages
+        gages = [gage for gage in gages if pd.notna(gage)]
+        ngage = len(gages)
+
+        # if there are enough gages, check if they share the same formulations
         if ngage >= min_gages:
-            df_huc = df[df["huc_id"].str[:huc_digit] == huc_id[:huc_digit]].copy()
-            gages = df_huc[gage_id_col].unique().tolist()
+            found_gages, gages, formulations = _get_gages_with_shared_formulations(
+                df[df[gage_id_col].isin(gages)], min_gages=min_gages
+            )
 
-            # remove NaN values from gages
-            gages = [gage for gage in gages if pd.notna(gage)]
-
-            if huc_level != current_huc_level:
-                logger.debug(
-                    f"{huc_id}: upscaled HUC level from {current_huc_level} to {huc_level} "
-                    f"and found {len(gages)} gages."
-                )
+            if not found_gages:
+                logger.debug(f"{huc_id}: upscaling HUC level from {current_huc_level} to {huc_level} ")
+                continue
             else:
-                logger.debug(f"{huc_id}: found {len(gages)} gages at {huc_level} level.")
+                # logger.debug(f"{huc_id}: found {len(gages)} gages ({gages}) at {huc_level} level.")
+                break
+    # else:
+    #     msg = (
+    #         f"Not enough gages found for {huc_id} at any valid HUC level after upscaling. "
+    #         f"Found {ngage} gages ({gages}), minimum required is {min_gages}."
+    #     )
+    #     logger.error(msg)
+    #     raise ValueError(msg)
 
-            break
-    else:
-        msg = (
-            f"Not enough calibrated gages at {current_huc_level} level for {huc_id}. "
-            f"Found {ngage} gages, minimum required is {min_gages}."
-        )
-        logger.error(msg)
-        raise ValueError(msg)
-
-    return gages, huc_level
+    return gages, huc_level, formulations
 
 
 def _find_calibration_gages(
     huc_id: str, df: pd.DataFrame, config: cs.Config, gdf: gpd.GeoDataFrame
-) -> tuple[list, str]:
+) -> tuple[str, list, list, list]:
     """Find gages for the given HUC ID in the DataFrame.
 
     Args:
@@ -166,11 +215,15 @@ def _find_calibration_gages(
         gdf (gpd.GeoDataFrame): GeoDataFrame of hydrofabric (HUC12) polygons.
 
     Returns:
-        tuple: A tuple containing a list of calibration gage IDs found for the HUC ID and the HUC level.
+        tuple: A tuple containing the HUC level, the list of calibration gage IDs found for the HUC ID,
+            list of corresponding distances, and the list of shared formulations.
 
     """
-    # column name for gage ID
-    gage_id_col = config.general.id_col.get("gage", "gage_id")
+    # get configuration settings
+    gage_id_col = config.general.id_col["gage"]  # column name for gage ID in the DataFrame
+    nmin_gages = config.spatial_unit.nmin_calib_basin  #  minimum number of calibration gages required
+    method = config.spatial_unit.basin_fill_method.lower()  # method to find additional calibration gages if needed
+    gage_file = config.general.donor_gage_file  # path to the donor gage file
 
     # check if the huc_id is valid
     if not isinstance(huc_id, str) or len(huc_id) < 2:
@@ -178,46 +231,52 @@ def _find_calibration_gages(
         logger.error(msg)
         raise ValueError(msg)
 
-    # check number of calibration gages within the current huc_id
-    gages0 = (
-        df[(df["huc_id"] == huc_id) & (~df["formulation"].isna()) & (~df["summary_score"].isna())][gage_id_col]
-        .unique()
-        .tolist()
-    )
+    # remove rows with invalid gage_id_col, formulation, and summary_score columns in the DataFrame
+    df = df[~df[gage_id_col].isna() & ~df["formulation"].isna() & ~df["summary_score"].isna()]
 
-    # method to find additional calibration gages if not enough gages are found in the current huc_id
-    method = config.spatial_unit.basin_fill_method.lower()
+    # check number of calibration gages within the current huc_id
+    gages0 = df[df["huc_id"] == huc_id][gage_id_col].unique().tolist()
+    gages0 = [gage for gage in gages0 if pd.notna(gage)]  # remove NaN values
+
+    if len(gages0) >= nmin_gages:
+        found_gages, gages0, formulations = _get_gages_with_shared_formulations(
+            df[df[gage_id_col].isin(gages0)], min_gages=nmin_gages
+        )
 
     # if there are enough gages at the current huc_id level, return them
-    if len(gages0) >= config.spatial_unit.nmin_calib_basin:
+    if len(gages0) >= nmin_gages:
         logger.debug(
-            f"Found {len(gages0)} calibration gages for HUC ID {huc_id} at the current level. "
-            f"No need to find additional gages."
+            f"{huc_id}: found {len(gages0)} calibration gages ({gages0}) at the current level. No need to find additional gages."
         )
         huc_level = "huc" + str(len(huc_id))
-        return huc_level, gages0, [np.nan] * len(gages0)
+        return huc_level, gages0, [np.nan] * len(gages0), formulations
     else:
         logger.debug(
-            f"Found only {len(gages0)} calibration gages for HUC ID {huc_id} at the current level. "
+            f"{huc_id}: found only {len(gages0)} calibration gages ({gages0}) at the current level. "
             f"Need to find additional gages using the {method} method."
         )
 
+    def nearest_neighbor_fallback():
+        logger.warning(
+            f"Not enough calibration gages found for {huc_id} after upscaling. "
+            f"Found {len(gages0)} gages ({gages0}), minimum required is {nmin_gages}. "
+            f"Use nearest-neighbor method for {huc_id} instead."
+        )
+        gages_nn, dists_nn, formulations = _find_gages_nearest_neighbor(
+            huc_id, df, gage_file, gage_id_col, nmin_gages, gdf
+        )
+        return gages_nn, dists_nn, "huc" + str(len(huc_id)), formulations
+
     if method == "upscaling":
         # find calibration gages using upscaling method
-        gages, huc_level = _find_calibration_gages_upscaling(
-            huc_id, df, gage_id_col, config.spatial_unit.nmin_calib_basin
-        )
+        gages, huc_level, formulations = _find_gages_upscaling(huc_id, df, gage_id_col, nmin_gages)
         dists = [np.nan] * len(gages)
+        if len(gages) < nmin_gages:
+            gages, dists, huc_level, formulations = nearest_neighbor_fallback()
+
     elif method == "nearest-neighbor":
         # find calibration gages using nearest neighbor
-        gages, dists = _find_calibration_gages_nearest_neighbor(
-            huc_id,
-            df,
-            config.general.donor_gage_file,
-            gage_id_col,
-            config.spatial_unit.nmin_calib_basin,
-            gdf,
-        )
+        gages, dists, formulations = _find_gages_nearest_neighbor(huc_id, df, gage_file, gage_id_col, nmin_gages, gdf)
         huc_level = "huc" + str(len(huc_id))  # HUC level is determined by the length of huc_id
     else:
         # raise error if the basin fill method is not recognized
@@ -225,7 +284,7 @@ def _find_calibration_gages(
         logger.error(msg)
         raise ValueError(msg)
 
-    return huc_level, gages, dists
+    return huc_level, gages, dists, formulations
 
 
 def _get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[str, float]]:
@@ -402,10 +461,10 @@ def select_formulation(
     """
     # get the ID columns from the configuration
     id_cols = config.general.id_col
-    gage_id_col = id_cols["gage"].lower()
-    divide_id_col = id_cols["divide"].lower()
-    huc12_id_col = id_cols["huc12"].lower()
-    vpu_id_col = id_cols["vpu"].lower()
+    gage_id_col = id_cols["gage"]
+    divide_id_col = id_cols["divide"]
+    huc12_id_col = id_cols["huc12"]
+    vpu_id_col = id_cols["vpu"]
 
     # score computing method, type, and tolerance
     score_method = config.spatial_unit.best_formulation.method.lower()
@@ -415,11 +474,6 @@ def select_formulation(
 
     # get formulation costs from the configuration
     formulation_costs = _get_formulation_costs(config.formulation_cost)
-
-    # identify best formulation for each gage based on summary scores for formulation costs
-    df_best = _identify_best_formulation_per_gage(
-        df_score, gage_id_col=gage_id_col, tolerance=score_tolerance, cost_dict=formulation_costs
-    )
 
     # crosswalk for gage/divide
     col_dtype = {
@@ -432,9 +486,13 @@ def select_formulation(
     # crosswalk for divide/huc12
     cwt_divide_huc12 = read_table(config.general.divide_huc12_cwt_file, dtype=col_dtype)
 
-    # filter cwt_divide_gage for the current vpu
-    cwt_divide_huc12[vpu_id_col] = cwt_divide_huc12[huc12_id_col].str[:2]
-    cwt_divide_huc12 = cwt_divide_huc12[cwt_divide_huc12[vpu_id_col] == vpu].copy()
+    # hydrofabric file for ngen; filter for the current VPU
+    ngen_hydro_file = Path(config.general.ngen_hydrofabric_file[vpu])
+    gdf_ngen = gpd.read_file(ngen_hydro_file, layer=config.general.layer_name["ngen"])
+    gdf_ngen = gdf_ngen[gdf_ngen[vpu_id_col] == vpu].copy()
+
+    # filter cwt_divide_huc12 with divides in gdf_ngen (i.e., only keep divides that are in the current VPU)
+    cwt_divide_huc12 = cwt_divide_huc12[cwt_divide_huc12[divide_id_col].isin(gdf_ngen[divide_id_col])].copy()
 
     # get spatial units for formulation selection
     huc_level = config.spatial_unit.huc_level.lower().replace("-", "").replace("_", "")
@@ -443,40 +501,39 @@ def select_formulation(
     # add huc_id column to cwt_divide_huc12 based on huc_digit
     cwt_divide_huc12["huc_id"] = cwt_divide_huc12[huc12_id_col].str[:huc_digit]
 
+    # make sure type of huc_id column is string
+    if not pd.api.types.is_string_dtype(cwt_divide_huc12["huc_id"]):
+        logger.warning(f"Converting 'huc_id' column to string type. Current type: {cwt_divide_huc12['huc_id'].dtype}.")
+        cwt_divide_huc12["huc_id"] = cwt_divide_huc12["huc_id"].astype(str)
+
     # merge the two crosswalks first
-    df = cwt_divide_huc12[["huc_id", huc12_id_col, divide_id_col]].merge(
+    df_cwt = cwt_divide_huc12[["huc_id", huc12_id_col, divide_id_col]].merge(
         cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
         on=divide_id_col,
         how="left",
     )
 
     # then merge with the score DataFrame
-    df_score = df_best.merge(df, on=gage_id_col, how="right")
-
-    # check number of unique gages with valid formulation and summary scores
-    gages_all = (
-        df_score[~df_score["formulation"].isna() & ~df_score["summary_score"].isna()][gage_id_col].unique().tolist()
-    )
+    df_score = df_score.merge(df_cwt, on=gage_id_col, how="outer")
 
     logger.info(
         f"Selecting formulations for VPU {vpu} at {huc_level} level. "
-        f"There are {len(df_score['huc_id'].unique())} unique {huc_level} IDs, and "
-        f"{len(gages_all)} unique calibration gages."
+        f"There are {len(df_score['huc_id'].unique())} unique {huc_level} IDs."
     )
 
     # all unique huc_ids in the score DataFrame
     huc_ids = df_score["huc_id"].unique()
 
-    # read huc12 shape file to get the geometry for these huc_ids
-    huc12_shape_file = Path(config.general.huc12_hydrofabric_file).resolve(strict=True)
-    if not huc12_shape_file.exists():
-        logger.warning(f"HUC12 shape file {huc12_shape_file} does not exist. Skipping formulation selection.")
-        return pd.DataFrame()
+    # remove NaN values from huc_ids
+    huc_ids = [huc_id for huc_id in huc_ids if pd.notna(huc_id)]
+
+    # get huc12 geometry for these huc_ids (to compute centroid distances between gages and huc_ids)
+    huc12_hydro_file = Path(config.general.huc12_hydrofabric_file).resolve(strict=True)
 
     # # Open with Fiona to read features in huc_ids
     features = []
     huc_digit = len(huc_ids[0])  # assuming all huc_ids have the same length
-    with fiona.open(huc12_shape_file, "r", open_options=["METHOD=ONLY_CCW"]) as src:
+    with fiona.open(huc12_hydro_file, "r", open_options=["METHOD=ONLY_CCW"]) as src:
         for feat in src:
             huc_key = next((k for k in feat["properties"] if k.lower() == huc12_id_col), None)
             if huc_key and feat["properties"][huc_key][:huc_digit] in huc_ids:
@@ -488,30 +545,40 @@ def select_formulation(
     # loop through each unique huc_id and select formulations
     df_selected = pd.DataFrame()
     for huc_id in huc_ids:
-        df_score_huc = df_score[~df_score["formulation"].isna() & ~df_score["summary_score"].isna()].copy()
-        if df_score_huc.empty:
-            logger.warning(f"No valid formulation scores found for HUC ID: {huc_id}. Skipping this HUC.")
-            continue
+        logger.debug(f"Processing HUC ID: {huc_id}")
+        # if huc_id != "04150500":
+        #     continue
 
         # Find actual column name in gdf that matches huc12_id_col (case-insensitive)
         col_match = next((col for col in huc12_gdf.columns if col.lower() == huc12_id_col.lower()), None)
-        if col_match is None:
-            raise ValueError(f"Column '{huc12_id_col}' not found in huc12_gdf (case-insensitive).")
 
         # Use the matched column to filter huc12_gdf
         huc12_gdf_huc = huc12_gdf[huc12_gdf[col_match].astype(str).str[:huc_digit] == huc_id].copy()
 
         if huc12_gdf_huc.empty:
-            logger.warning(f"No geometry found for HUC ID: {huc_id}. Skipping this HUC.")
-            continue
-        huc_level, gages, dists = _find_calibration_gages(huc_id, df_score_huc, config, huc12_gdf_huc)
+            msg = f"No geometry found for HUC ID: {huc_id}. Please check the HUC12 hydrofabric file."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        huc_level, gages, dists, formulations = _find_calibration_gages(huc_id, df_score, config, huc12_gdf_huc)
         if not gages:
-            logger.warning(f"No gages found for HUC ID: {huc_id}. Skipping this HUC.")
-            continue
+            msg = (
+                f"No calibration gages found for HUC ID: {huc_id}. "
+                f"Minimum required is {config.spatial_unit.nmin_calib_basin}."
+            )
+            logger.error(msg)
+            raise ValueError(msg)
 
-        df_huc = df_score[df_score[gage_id_col].isin(gages)].copy()
+        # filter the score DataFrame for identified gages and formulations
+        df_huc = df_score[df_score[gage_id_col].isin(gages) & df_score["formulation"].isin(formulations)].copy()
 
-        # select the best formulation based on the score & optionally costs
+        # identify best formulation for each gage based on summary scores for formulation costs
+        cost_dict = formulation_costs if config.general.consider_cost else None
+        df_huc = _identify_best_formulation_per_gage(
+            df_huc, gage_id_col=gage_id_col, tolerance=score_tolerance, cost_dict=cost_dict
+        )
+
+        # select the best formulation for each huc_id based on the total score or count
         best_formulation = _select_formulation_given_score(df_huc, method=score_method, type=score_type)
 
         # append the selected formulation to the list
@@ -536,12 +603,7 @@ def select_formulation(
 
     # save the selected formulations (by region/huc_id) to the output file
     cc = config.output["formulation"]
-    stem0 = cc.stem  # keep the original stem for the full version
-    if isinstance(cc.stem, str):
-        cc.stem = cc.stem + "_slim"
-    elif isinstance(cc.stem, dict):
-        cc.stem = {k: v + "_slim" for k, v in cc.stem.items()}
-    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection (slim)")
+    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection (slim)", use_stem_suffix=True)
 
     # merge with cwt_divide_huc12 to get the divide_id
     df_selected = df_selected.merge(
@@ -570,27 +632,15 @@ def select_formulation(
     df_selected = df_selected[cols]
 
     # save the selected formulations (by divide_id) to the output file
-    cc = config.output["formulation"]
-    cc.stem = stem0  # reset the stem to the original one
-    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection (full)")
+    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection (full)", use_stem_suffix=False)
 
     # generate plots if enabled
     if any(cc.plots.values()):
         # get geometry for divides if spatial map is enabled
         if cc.plots.get("spatial_map", False):
-            # read the geometry file
-            geo_file = Path(config.general.ngen_hydrofabric_file[vpu])
-            if not geo_file.exists():
-                logger.warning(f"Geometry file {geo_file} does not exist. Skipping spatial map plot.")
-                return
-            gdf = gpd.read_file(geo_file)
-            if gdf.empty:
-                logger.warning(f"Geometry file {geo_file} is empty. Skipping spatial map plot.")
-                return
-
             # merge the geometry with the selected formulations
             df_selected = df_selected.merge(
-                gdf[[divide_id_col, "geometry"]].drop_duplicates(),
+                gdf_ngen[[divide_id_col, "geometry"]].drop_duplicates(),
                 on=divide_id_col,
                 how="left",
             )
@@ -599,7 +649,7 @@ def select_formulation(
             df_selected = gpd.GeoDataFrame(
                 df_selected,
                 geometry="geometry",
-                crs=gdf.crs,
+                crs=gdf_ngen.crs,
             )
 
         # plot the selected formulations

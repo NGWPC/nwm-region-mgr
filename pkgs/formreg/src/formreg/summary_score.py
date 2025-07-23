@@ -26,12 +26,11 @@ from . import config_schema as cs
 logger = logging.getLogger(__name__)
 
 
-def get_formulations_from_stats(config: cs.Config, vpu: str) -> dict[str, Path]:
+def get_formulations_from_stats(config: cs.Config) -> dict[str, Path]:
     """Extract formulation names from the calibration and validation statistics file names.
 
     Args:
         config: The configuration object.
-        vpu: The VPU identifier.
 
     Returns:
         dict[str, Path]: A dictionary mapping formulation names to their statistics file paths.
@@ -40,19 +39,13 @@ def get_formulations_from_stats(config: cs.Config, vpu: str) -> dict[str, Path]:
     # Find all statistics files (parquet or csv) for the given VPU
     dir_stats = Path(config.general.calval_stats_dir)
 
-    # Pattern for VPU-specific files
-    stats_files = glob.glob(f"{dir_stats}/stat_calval_*_{config.general.domain}_vpu{vpu}.parquet") + glob.glob(
-        f"{dir_stats}/stat_calval_*_{config.general.domain}_vpu{vpu}.csv"
+    # domain stats files (csv or parquet)
+    stats_files = glob.glob(f"{dir_stats}/stat_calval_*_{config.general.domain}.parquet") + glob.glob(
+        f"{dir_stats}/stat_calval_*_{config.general.domain}.csv"
     )
 
-    # Fallback: general domain-level files
     if not stats_files:
-        stats_files = glob.glob(f"{dir_stats}/stat_calval_*_{config.general.domain}.parquet") + glob.glob(
-            f"{dir_stats}/stat_calval_*_{config.general.domain}.csv"
-        )
-
-    if not stats_files:
-        msg = f"No statistics files found for VPU {vpu} in {dir_stats}. Please check the configuration."
+        msg = f"No statistics files found for {config.general.domain} in {dir_stats}. Please check the configuration."
         logger.error(msg)
         raise FileNotFoundError(msg)
 
@@ -69,10 +62,7 @@ def get_formulations_from_stats(config: cs.Config, vpu: str) -> dict[str, Path]:
         formulations = {form for form in formulations if form in forms1}
         forms_missing = forms1 - formulations
         if forms_missing:
-            logger.warning(
-                f"Formulations {', '.join(forms_missing)} not found in statistics files for "
-                f"VPU {vpu} in {dir_stats}. Skipping them."
-            )
+            logger.warning(f"Formulations {', '.join(forms_missing)} not found in statistics files. Not using them.")
 
     # exclude formulations_to_exclude (if provided in the config)
     if config.general.formulation_to_exclude:
@@ -80,8 +70,9 @@ def get_formulations_from_stats(config: cs.Config, vpu: str) -> dict[str, Path]:
 
     if not formulations:
         msg = (
-            f"No valid formulations found in statistics files for VPU {vpu} in {dir_stats}. "
-            "Please check the configuration and ensure that the statistics files contain the expected formulations."
+            f"No valid formulations found in statistics files in {dir_stats}. "
+            "Please ensure the formulation names are included in the names of the statistics files with the convention "
+            "'stat_calval_<formulation>_<domain>.<extension>', e.g., 'stat_calval_nom-cfex_conus.parquet'."
         )
         logger.error(msg)
         raise ValueError(msg)
@@ -160,40 +151,33 @@ def formulation_summary_score(df: pd.DataFrame, dict_metrics: Dict[str, cs.Metri
     return df
 
 
-def compute_summary_score(config: cs.Config, vpu: str) -> None:
-    """Compute summary scores for each formulation from calibration and validation statistics.
+def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.DataFrame:
+    """Compute summary scores for all gages in the domain.
 
     Args:
         config: The configuration object.
-        vpu: The VPU identifier.
+        gage_id_col: The gage ID column name.
+
+    Returns:
+        pd.DataFrame: DataFrame containing summary scores for all gages in the domain.
 
     """
-    # Get the VPU ID column name
-    id_cols = config.general.id_col
-    gage_id_col = id_cols["gage"].lower()
-    divide_id_col = id_cols["divide"].lower()
-    vpu_id_col = id_cols["vpu"].lower()
-
-    # get the list of formulations from the statistics files
-    dict_form = get_formulations_from_stats(config, vpu)
+    # get the formulation stats files
+    dict_form = get_formulations_from_stats(config)
 
     # read statistics and compute summary scores for each formulation
     df_score = pd.DataFrame()
     for form, file in dict_form.items():
         # check if the required columns are present
         ss = config.summary_score
-        vpu_id_col = config.general.id_col.get("vpu", "vpuid")
-        required_columns = [gage_id_col, ss.metric_eval_period.col_name, vpu_id_col] + list(ss.metrics.keys())
+        required_columns = [gage_id_col, ss.metric_eval_period.col_name] + list(ss.metrics.keys())
         check_columns_dataframe(file, set(required_columns))
 
         # read the statistics file
-        df_stats = read_table(file, {gage_id_col: str, vpu_id_col: str})
+        df_stats = read_table(file, {gage_id_col: str})
         if df_stats.empty:
-            logger.warning(f"No data found in statistics file {file} for VPU {vpu} and formulation {form}")
+            logger.warning(f"No data found in statistics file {file} for formulation {form}")
             continue
-
-        # narrow down to the VPU
-        df_stats = df_stats[df_stats[vpu_id_col] == vpu]
 
         # narrow down to the evaluation period (case-insensitive)
         p1 = ss.metric_eval_period
@@ -208,18 +192,79 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             df["formulation"] = form  # Add formulation name to the DataFrame
             df_score = pd.concat([df_score, df[[gage_id_col, "formulation", "summary_score"]]], ignore_index=True)
 
-    logger.info(
-        f"Computed summary scores for the following formulations for VPU {vpu}: {df_score['formulation'].unique()}"
+    # remove duplicated rows
+    df_score = df_score.drop_duplicates(subset=[gage_id_col, "formulation", "summary_score"])
+
+    # remove rows with NaN summary scores
+    df_score = df_score.dropna(subset=["summary_score"])
+
+    # Save the summary score DataFrame for all gages in the domain
+    cc = config.output["summary_score"]
+    cc.save_to_file(df_score, vpu=None, data_str="Summary Score (for all gages)", use_stem_suffix=True)
+
+    return df_score
+
+
+def compute_summary_score(config: cs.Config, vpu: str) -> None:
+    """Compute summary scores for each formulation from calibration and validation statistics.
+
+    Args:
+        config: The configuration object.
+        vpu: The VPU identifier.
+
+    """
+    # Get the VPU ID column name
+    id_cols = config.general.id_col
+    gage_id_col = id_cols["gage"]
+    divide_id_col = id_cols["divide"]
+    vpu_id_col = id_cols["vpu"]
+
+    # compute summary scores for all gages in the domain only if this is the first VPU
+    if vpu == config.general.vpu_list[0]:
+        df_score_all = _compute_summary_score_all_gages(config, gage_id_col)
+    else:
+        # read the summary score DataFrame for all gages in the domain
+        cc = config.output["summary_score"]
+        df_score_all = cc.read_from_file(
+            vpu=None,
+            use_stem_suffix=True,
+            data_str="Summary Score (for all gages)",
+            data_type={vpu_id_col: str, divide_id_col: str, gage_id_col: str},
+        )
+
+    # get VPU from gage_divide crosswalk file
+    cwt_file = Path(config.general.gage_divide_cwt_file)
+    df_cwt = read_table(cwt_file, dtype={gage_id_col: str, divide_id_col: str, vpu_id_col: str})
+    df_score_vpu = df_score_all.merge(
+        df_cwt[[gage_id_col, divide_id_col, vpu_id_col]],
+        on=gage_id_col,
+        how="left",
     )
 
-    # Save the summary score DataFrame
+    # narrow down to the VPU
+    df_score_vpu = df_score_vpu[df_score_vpu[vpu_id_col] == vpu].copy()
+
+    if df_score_vpu.empty:
+        msg = f"No summary scores found for VPU {vpu}. Please check the statistics files."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    # drop vpu_id_col and divide_id_col
+    df_score_vpu = df_score_vpu.drop(columns=[vpu_id_col, divide_id_col], errors="ignore")
+
+    # remove duplicated rows
+    df_score_vpu = df_score_vpu.drop_duplicates(subset=[gage_id_col, "formulation", "summary_score"])
+
+    # Save the summary score DataFrame for the specific VPU
     cc = config.output["summary_score"]
-    cc.save_to_file(df_score, vpu=vpu, data_str="Summary Score")
+    cc.save_to_file(df_score_vpu, vpu=vpu, data_str=f"Summary Score (VPU {vpu})", use_stem_suffix=False)
 
     # plot the summary score
     if any(cc.plots.values()):
         # create wide-format DataFrame for plotting
-        df_score_wide = df_score.pivot(index=gage_id_col, columns="formulation", values="summary_score").reset_index()
+        df_score_wide = df_score_vpu.pivot(
+            index=gage_id_col, columns="formulation", values="summary_score"
+        ).reset_index()
         df_score_wide.columns.name = None
 
         if cc.plots.get("spatial_map", False):
@@ -240,13 +285,7 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             )
             # read the geometry file
             geo_file = Path(config.general.ngen_hydrofabric_file[vpu])
-            if not geo_file.exists():
-                logger.warning(f"Geometry file {geo_file} does not exist. Skipping spatial map plot.")
-                return
             gdf = gpd.read_file(geo_file)
-            if gdf.empty:
-                logger.warning(f"Geometry file {geo_file} is empty. Skipping spatial map plot.")
-                return
 
             # merge geometry with summary score DataFrame
             df_score_wide = df_score_wide.merge(gdf[[divide_id_col, "geometry"]], on=divide_id_col, how="right")
@@ -256,9 +295,9 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
         plot_dict = {
             "vpu": vpu,
             "var_str": "Summary Score",
-            "columns": df_score["formulation"].unique().tolist(),
+            "columns": df_score_vpu["formulation"].unique().tolist(),
             "ncols": 3,
         }
         cc.plot_data(df_score_wide, plot_dict)
 
-    return df_score
+    return df_score_all

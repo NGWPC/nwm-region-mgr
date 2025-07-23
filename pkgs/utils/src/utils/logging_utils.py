@@ -5,6 +5,18 @@ from pathlib import Path
 from typing import Iterable, Optional, Union
 
 
+class CustomLoggingFormatter(logging.Formatter):
+    """Custom logging formatter to change 'ERROR' to 'SEVERE', and 'CRITICAL' to 'FATAL'."""
+
+    def format(self, record):
+        """Format the log record."""
+        if record.levelno == logging.ERROR:
+            record.levelname = "SEVERE"
+        elif record.levelno == logging.CRITICAL:
+            record.levelname = "FATAL"
+        return super().format(record)
+
+
 def setup_logging(
     level: int = logging.INFO,
     target_packages: Iterable[str] = ("utils",),
@@ -20,6 +32,20 @@ def setup_logging(
         file_level: Logging level for file output (default: same as console level).
 
     """
+    user_log_levels = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "warn": logging.WARNING,
+        "error": logging.ERROR,
+        "severe": logging.ERROR,
+        "fatal": logging.CRITICAL,
+        "critical": logging.CRITICAL,
+    }
+
+    level = user_log_levels.get(level.strip().lower(), logging.INFO)
+    file_level = user_log_levels.get(file_level.strip().lower(), level) if file_level else level
+
     # Set root logger to WARNING to suppress noisy external logs
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.WARNING)
@@ -29,7 +55,7 @@ def setup_logging(
         root_logger.removeHandler(handler)
 
     # Formatter shared by all handlers
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = CustomLoggingFormatter("%(asctime)s - %(name)s - [%(levelname)s] - %(message)s")
 
     # Console handler
     console_handler = logging.StreamHandler()

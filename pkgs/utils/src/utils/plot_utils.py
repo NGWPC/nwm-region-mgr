@@ -94,8 +94,10 @@ def _plot_columns_by_dtype(
         # make sure legend is outside the plot if it exists
         legend = ax.get_legend()
         if legend is not None:
-            legend.set_bbox_to_anchor((1.05, 1))
-            legend.set_frame_on(False)
+            # legend.set_bbox_to_anchor((1.05, 1))
+            legend.set_bbox_to_anchor((0.5, -0.20))  # bottom center
+            legend.set_loc("lower center")
+            legend.set_frame_on(True)
 
     # Turn off any unused subplots
     for j in range(i + 1, len(axes)):
@@ -114,18 +116,21 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
             Information needed for creating the plot
 
     """
-    # check if the required column existss
-    for col in d1["columns"]:
-        if col not in gdf:
-            logger.warning(f"Column '{col}' not found in gdf. Skipping spatial map plot.")
-            return
+    # check if the required column exists
+    cols_exist = [c for c in d1["columns"] if c in gdf.columns]
+    cols_missing = set(d1["columns"]) - set(gdf.columns)
+    if not cols_exist:
+        logger.warning(f"Columns {cols_missing} not found in gdf. Cannot create spatial map plot.")
+        return
+    if cols_missing:
+        logger.warning(f"Excluding missing columns {cols_missing} from spatial map plot.")
 
     _, ax = plt.subplots(figsize=(8, 6))
 
     # create spatial map
     fig, axes = _plot_columns_by_dtype(
         gdf,
-        columns=d1["columns"],
+        columns=cols_exist,
         fillna_value=d1.get("fillna_value", None),
         num_bins=d1.get("num_bins", None),
         cmap_numeric=d1.get("cmap_numeric", "viridis"),

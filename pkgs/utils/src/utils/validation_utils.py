@@ -34,29 +34,51 @@ def check_columns_dataframe(file: Path | str, columns: Set[str]):
         file = Path(file)
 
     if not file.exists():
-        raise FileNotFoundError(f"File not found: {file}")
+        msg = f"File not found: {file}"
+        logger.error(msg)
+        raise FileNotFoundError(msg)
 
     suffix = file.suffix.lower()
     if suffix == ".csv":
-        columns_present = [col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()]
+        # Read full DataFrame with minimal memory usage
+        df = pd.read_csv(file, usecols=lambda col: True)
+        columns_present = [col.lower() for col in df.columns.tolist()]
+        is_empty = df.empty
+
     elif suffix == ".parquet":
-        columns_present = [col.lower() for col in pq.ParquetFile(file).schema.names]
+        pf = pq.ParquetFile(file)
+        columns_present = [col.lower() for col in pf.schema.names]
+        is_empty = pf.metadata.num_rows == 0  # More efficient than loading into pandas
+
     else:
-        raise ValueError("Only .csv and .parquet files are supported")
+        msg = f"Unsupported file format: {suffix}. Supported formats are .csv and .parquet."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    # raise error if the file is empty
+    if is_empty:
+        msg = f"The file {file} is empty. Please provide a file with data."
+        logger.error(msg)
+        raise ValueError(msg)
 
     # Check for missing columns (case insensitive)
     missing_cols = {col.lower() for col in columns} - {col.lower() for col in columns_present}
     if missing_cols:
-        raise ValueError(f"Missing columns (case insensitive) in {file}: {missing_cols}")
+        msg = f"Missing columns (case insensitive) in {file}: {missing_cols}. Available columns: {columns_present}"
+        logger.error(msg)
+        raise ValueError(msg)
 
 
-def check_columns_hydrofabric(hydro_file: str | Path, required_fields: list[str], layer_name: str = None):
+def check_columns_hydrofabric(hydro_file: str | Path, required_fields: list[str], layer_name: str = None) -> str:
     """Check if the required fields are present in the hydrofabric file.
 
     Args:
         hydro_file: Path to the hydrofabric file (GeoPackage or Shapefile).
         required_fields: List of required fields to check.
         layer_name: Optional layer name for GeoPackage or Geodatabase files.
+
+    Returns:
+        str: The layer name used for the hydrofabric file.
 
     """
     # get the file suffix
@@ -100,6 +122,8 @@ def check_columns_hydrofabric(hydro_file: str | Path, required_fields: list[str]
         msg = f"Missing required fields in {hydro_file}: {missing}. Available fields: {schema_fields}"
         logger.error(msg)
         raise ValueError(msg)
+
+    return layer_name
 
 
 def check_options(options: str | list[str], valid_options: list[str], var: str):

@@ -9,7 +9,7 @@ general:
   formulation_to_include: # List of competing formulations required to be considered in the selection process
   formulation_to_exclude: # List of formulation to exclude from the selection process
   consider_cost: True  # whether to consider computational cost
-  approach_calib_basins: summary_score # Strategy for assigning formulations to calibrated basins: regionalization or summary_score
+  approach_calib_basins: regionalization # Strategy for assigning formulations to calibrated basins: regionalization or summary_score
 
 # Define configurations for the spatial discretization for formulation regionalization
 # For each spatial unit, a single formulation will be identified and applied to all catchments within the unit
@@ -72,6 +72,13 @@ formulation_cost:
     nom-snow17-lasam: 18
     nom-top: 28
     nom-smp-lasam: 22
+    nom-snow17-top: 30
+    nom-ueb-top: 25
+    nom-smp-cfex: 20
+    nom-snow17-cfes: 10
+    nom-snow17-cfex: 13
+    nom-lasam: 17
+    nom-smp-cfes: 19
 
 # Configurations for the output of formulation regionalization
 output:
@@ -79,7 +86,8 @@ output:
   formulation: # Output configurations for the selected formulations
     save: True
     path: '{base_dir}/outputs/{run_name}/formulations'
-    stem: 'form_{domain}_vpu{vpu_list}' # note simplified data will also be saved in a separate file with a name {stem}_slim
+    stem: 'form_{domain}_vpu{vpu_list}' 
+    stem_suffix: '_slim'  # suffix for the formulation file containing info for regions (instead of all catchments)
     format: parquet
     plots:
       spatial_map: True  # whether to create spatial map of selected formulations & scores
@@ -93,7 +101,8 @@ output:
     save: True
     path: '{base_dir}/outputs/{run_name}/summary_score'
     stem: 'score_{domain}_vpu{vpu_list}'
+    stem_suffix: '_all_gages'  # suffix for the summary score file containing all gages in the domain
     format: parquet
     plots:
-      histogram: False
-      spatial_map: False
+      histogram: True
+      spatial_map: True

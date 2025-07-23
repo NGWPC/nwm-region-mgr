@@ -15,6 +15,7 @@ Functions:
 """
 
 import logging
+import re
 from functools import reduce
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -24,7 +25,7 @@ import pandas as pd
 import yaml
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
-from .io_utils import save_data
+from .io_utils import read_table, save_data
 from .logging_utils import setup_logging
 from .plot_utils import plot_histogram, plot_spatial_map
 from .string_utils import recursive_substitute
@@ -37,7 +38,7 @@ class LoggingConfig(BaseModel):
     """Logging configuration for the application."""
 
     level: Optional[str] = "INFO"
-    """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'."""
+    """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'SEVERE', 'FATAL'."""
     log_to_file: Optional[bool] = True
     """Whether to log to a file."""
     file: Optional[str] = None
@@ -46,7 +47,7 @@ class LoggingConfig(BaseModel):
     @model_validator(mode="after")
     def check_log_level(self) -> "LoggingConfig":
         """Ensure that the log level is valid."""
-        valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]  # use standard Python log levels
+        valid_levels = ["DEBUG", "INFO", "WARNING", "SEVERE", "FATAL"]  # use standard Python log levels
         check_options(self.level.upper(), valid_levels, "log level")
         return self
 
@@ -96,6 +97,17 @@ class BaseGeneralConfig(BaseModel):
     logging: Optional[LoggingConfig] = None
     """Logging configuration for the application."""
 
+    @model_validator(mode="after")
+    def lower_case_ids(self) -> "BaseGeneralConfig":
+        """Ensure that all ID columns are in lower case."""
+        if self.id_col:
+            self.id_col = {k.lower(): v.lower() for k, v in self.id_col.items()}
+
+        if self.layer_name:
+            self.layer_name = {k.lower(): v.lower() for k, v in self.layer_name.items()}
+
+        return self
+
 
 class BaseOutputConfig(BaseModel):
     """Base Output Manager."""
@@ -106,6 +118,8 @@ class BaseOutputConfig(BaseModel):
     """Path to save output files. If a directory, the 'stem' and 'format' must be specified."""
     stem: Optional[str | Dict[str, str]] = None
     """File stem for output files, used to create unique file names based on the path."""
+    stem_suffix: Optional[str] = None
+    """Suffix for the file stem, used to create unique file names based on the path for specific needs."""
     format: Optional[str] = None
     """File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file."""
     plots: Optional[Dict[str, bool]] = None
@@ -150,7 +164,7 @@ class BaseOutputConfig(BaseModel):
 
         return values
 
-    def _get_file_path(self, vpu: str = None, plot_type: str = None) -> Path:
+    def _get_file_path(self, vpu: str = None, plot_type: str = None, use_stem_suffix: bool = False) -> Path:
         """Get the file path for saving the output."""
         file_path = Path(self.path) if plot_type is None else Path(self.plot_path)
 
@@ -162,15 +176,29 @@ class BaseOutputConfig(BaseModel):
                 raise ValueError(msg)
             if isinstance(self.stem, dict):
                 # If stem is a dict (for different VPUs), find the stem for current VPU
-                file_stem = self.stem.get(f"{vpu}")
-            else:
-                # If stem is a string, use it directly
+                if vpu:
+                    file_stem = self.stem.get(f"{vpu}")
+                else:
+                    file_stem = re.sub(r"_vpu.*$", "", next(iter(self.stem.values())))  # remove VPU part from stem
+            elif isinstance(self.stem, str):
                 file_stem = self.stem
+            else:
+                msg = f"Invalid 'stem' type: {type(self.stem)}. Must be str or dict."
+                logger.error(msg)
+                raise ValueError(msg)
 
             if not file_stem:
                 msg = f"File stem not found for VPU {vpu}: {self.stem}"
                 logger.error(msg)
                 raise ValueError(msg)
+
+            if use_stem_suffix:
+                if not self.stem_suffix:
+                    msg = f"File stem suffix not specified: {self.stem_suffix}"
+                    logger.error(msg)
+                    raise ValueError(msg)
+                else:
+                    file_stem += self.stem_suffix
 
             # make sure plot_type is supported
             if plot_type not in [None, "map", "hist"]:
@@ -190,13 +218,14 @@ class BaseOutputConfig(BaseModel):
 
         return file_path
 
-    def save_to_file(self, data: Any, vpu: str = None, data_str: str = None) -> None:
+    def save_to_file(self, data: Any, vpu: str = None, data_str: str = None, use_stem_suffix: bool = False) -> None:
         """Save output data to the specified path and format.
 
         Args:
             data: Data to save, can be a DataFrame or Pydantic model.
             vpu: VPU identifier for the output file name.
             data_str: String representation of the data being saved.
+            use_stem_suffix: Whether to use the stem suffix for the file name.
 
         Raises:
             ValueError: If the output path is a directory and no file name is provided.
@@ -206,7 +235,7 @@ class BaseOutputConfig(BaseModel):
             return
 
         # get the file path to save the output
-        filepath = self._get_file_path(vpu)
+        filepath = self._get_file_path(vpu, use_stem_suffix=use_stem_suffix)
 
         # save the output data
         save_data(data, filepath)
@@ -214,6 +243,37 @@ class BaseOutputConfig(BaseModel):
             logger.info(f"Saved output to {filepath}")
         else:
             logger.info(f"Saved {data_str} output to {filepath}")
+
+    def read_from_file(
+        self, vpu: str = None, use_stem_suffix: bool = False, data_str: str = None, data_type: dict[str, Any] = None
+    ) -> pd.DataFrame | gpd.GeoDataFrame:
+        """Read output data from the specified path and format.
+
+        Args:
+            vpu: VPU identifier for the output file name.
+            use_stem_suffix: Whether to use the stem suffix for the file name.
+            data_str: String representation of the data being read.
+            data_type: Optional dictionary specifying the data types for specific columns.
+
+        Returns:
+            DataFrame or GeoDataFrame containing the loaded data.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+
+        """
+        # get the file path to read the output
+        filepath = self._get_file_path(vpu, use_stem_suffix=use_stem_suffix)
+
+        # read the output data
+        data = read_table(filepath, dtype=data_type)
+
+        if data_str is None:
+            logger.info(f"Read output from {filepath}")
+        else:
+            logger.info(f"Read {data_str} output from {filepath}")
+
+        return data
 
     def plot_data(
         self,
@@ -332,29 +392,28 @@ def _substitute_placeholders(config: BaseModel) -> BaseModel:
     return config
 
 
-def _validate_paths(obj: Any, root: str = ""):
-    """Recursively validate that all file and directory paths exist.
+def _validate_paths(paths: str | Path | list[str | Path]):
+    """Validate that all file and directory paths exist.
 
     Args:
-        obj: The object to validate, can be a dict, list, or a string representing a path.
-        root: The root path for error messages, used for nested structures.
+        paths: A string, Path, or list of strings/Paths to validate.
 
     Raises:
         FileNotFoundError: If any path does not exist.
 
     """
-    if isinstance(obj, dict):
-        for key, value in obj.items():
-            _validate_paths(value, root + f".{key}" if root else key)
-    elif isinstance(obj, list):
-        for idx, item in enumerate(obj):
-            _validate_paths(item, f"{root}[{idx}]")
-    elif isinstance(obj, (str, Path)):
-        path = Path(obj)
-        if not path.exists():
-            msg = f"Path does not exist: {path} (in {root})"
-            logger.error(msg)
-            raise FileNotFoundError(msg)
+    if isinstance(paths, (str, Path)):
+        paths = [paths]
+
+    missing_paths = []
+    for path in paths:
+        if not Path(path).exists():
+            missing_paths.append(Path(path))
+
+    if missing_paths:
+        msg = f"Missing paths: {missing_paths}"
+        logger.error(msg)
+        raise FileNotFoundError(msg)
 
 
 def _check_file_columns(config: BaseModel):
@@ -369,12 +428,33 @@ def _check_file_columns(config: BaseModel):
     """
     # get the ID columns and hydrofabric layer names from the configuration
     id_cols = config.general.id_col
-    gage_id_col = id_cols["gage"].lower()
-    divide_id_col = id_cols["divide"].lower()
-    huc12_id_col = id_cols["huc12"].lower()
-    vpu_id_col = id_cols["vpu"].lower()
-    ngen_layer = config.general.layer_name["ngen"]
-    huc12_layer = config.general.layer_name["huc12"]
+
+    gage_id_col = id_cols["gage"] if "gage" in id_cols else None
+    if not gage_id_col:
+        msg = "Gage ID column is not defined in the configuration."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    divide_id_col = id_cols["divide"] if "divide" in id_cols else None
+    if not divide_id_col:
+        msg = "Divide ID column is not defined in the configuration."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    huc12_id_col = id_cols["huc12"] if "huc12" in id_cols else None
+    if not huc12_id_col:
+        msg = "HUC12 ID column is not defined in the configuration."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    vpu_id_col = id_cols["vpu"] if "vpu" in id_cols else None
+    if not vpu_id_col:
+        msg = "VPU ID column is not defined in the configuration."
+        logger.error(msg)
+        raise ValueError(msg)
+
+    ngen_layer = config.general.layer_name["ngen"] if "ngen" in config.general.layer_name else None
+    huc12_layer = config.general.layer_name["huc12"] if "huc12" in config.general.layer_name else None
 
     # NextGen hydrofabric file
     file = config.general.ngen_hydrofabric_file
@@ -382,13 +462,13 @@ def _check_file_columns(config: BaseModel):
     if file is not None:
         if isinstance(file, dict):
             for vpu, f in file.items():
-                check_columns_hydrofabric(f, required_fields, layer_name=ngen_layer)
+                config.general.layer_name["ngen"] = check_columns_hydrofabric(f, required_fields, layer_name=ngen_layer)
 
     # huc12 hydrofabric file
     file = config.general.huc12_hydrofabric_file
     required_fields = {huc12_id_col, "geometry"}
     if file is not None:
-        check_columns_hydrofabric(file, required_fields, layer_name=huc12_layer)
+        config.general.layer_name["huc12"] = check_columns_hydrofabric(file, required_fields, layer_name=huc12_layer)
 
     # Gage divide CWT file
     file = config.general.gage_divide_cwt_file
@@ -441,7 +521,19 @@ def load_and_process_config(
     logger.info("Log file: %s", log_file)
 
     # Validate that all paths in the configuration exist
-    _validate_paths(config)
+    paths = [
+        config.general.huc12_hydrofabric_file,
+        config.general.gage_divide_cwt_file,
+        config.general.divide_huc12_cwt_file,
+        config.general.donor_gage_file,
+        config.general.calval_stats_dir,
+    ]
+    paths.extend(config.general.ngen_hydrofabric_file.values())
+
+    # remove None values from paths
+    paths = [p for p in paths if p is not None]
+
+    _validate_paths(paths)
 
     # Check if the required columns are present in the files
     _check_file_columns(config)
