@@ -29,6 +29,7 @@ setup(
         "pyproj",
         "numba",
         "matplotlib",
+        "pytest",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
