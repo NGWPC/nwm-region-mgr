@@ -29,10 +29,11 @@ logger = logging.getLogger(__name__)
 class RegionalizationProcessor:
     """Regionalization Processor."""
 
-    def __init__(self, config_file: str | Path):
+    def __init__(self, config_file: str | Path, sample_size: int = None):
         """Initialize regionalzation processor."""
         self.config_file = config_file
         self.config = self.load_and_validate_config
+        self.sample_size = sample_size
 
     def expand_with_vpu(self, string_with_vpu: str, context: dict) -> dict:
         """Expand a string with {vpu_list} placeholders.
@@ -475,15 +476,20 @@ class RegionalizationProcessor:
     def gdf_receivers(self) -> gpd.GeoDataFrame:
         """Geodataframe of receivers."""
         gdf_receivers, _ = self.donor_receiver_gdfs()
-        # gdf_receivers = gdf_receivers.sample(
-        #     n=50, replace=False, random_state=50
-        # )  # randomly sample a small number of receivers for testing
+        if self.sample_size is not None:
+            gdf_receivers = gdf_receivers.sample(
+                n=self.sample_size, replace=False, random_state=50
+            )  # randomly sample a small number of receivers for testing
         return gdf_receivers
 
     @property
     def gdf_donors(self) -> gpd.GeoDataFrame:
         """Geodataframe of donors."""
         _, gdf_donors = self.donor_receiver_gdfs()
+        if self.sample_size is not None:
+            gdf_donors = gdf_donors.sample(
+                n=self.sample_size, replace=False, random_state=50
+            )  # randomly sample a small number of receivers for testing
         return gdf_donors
 
     @property
@@ -495,6 +501,16 @@ class RegionalizationProcessor:
     def donors(self) -> list:
         """Donors."""
         return self.gdf_donors[self.general_id_name].tolist()
+
+    @property
+    def number_of_donors(self):
+        """Number of donors."""
+        return len(self.donors)
+
+    @property
+    def number_of_receiver(self):
+        """Number of receivers."""
+        return len(self.receivers)
 
     @property
     def dist_file(self) -> Path:
