@@ -45,19 +45,31 @@ output:
       save: True
       path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data/test_outputs/{run_name}/pairs'
       format: 'parquet'
+      plots:
+        donor_spatial_map: True
+        pair_spatial_distance_histogram: True
+        pair_attribute_distance_histogram: True
+        pair_spatial_distance_map: True
+        pair_attribute_distance_map: True 
+        top10_pair_group_map: True       
     attr_data_final:
       save: True
-      path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data//test_outputs/{run_name}/attr_data_final'
+      path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data/test_outputs/{run_name}/attr_data_final'
       format: 'parquet'
+      plots:
+        attr_missing_count: True
+        attr_spatial_distribution: True
+        attrs_to_plot:
+          hlr: ['PMPE', 'SAND']
+          ngen: ['dksat', 'smcmax']
     config_final:
       save: True
-      path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data//test_outputs/{run_name}/config_final.yaml'
+      path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data/test_outputs/{run_name}/config_final.yaml'
       format: 
     spatial_distance:
       save: True
-      path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data//test_outputs/{run_name}/spatial_distance'
+      path: '/home/matthew.deshotel/repos/ngen-regionalization/pkgs/parreg/tests/test_data/test_outputs/{run_name}/spatial_distance'
       format: 'parquet'
-
 ### algorithm parameters
 algorithms:
   ## general parameters common to all algorithms 

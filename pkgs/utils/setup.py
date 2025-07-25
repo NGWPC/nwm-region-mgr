@@ -3,14 +3,14 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="parreg",
+    name="utils",
     version="0.0.1",
     author="Yuqiong.Liu, Matthew.Deshotel",
     author_email="yuqiong.liu@ertcorp.com",
-    description="NextGen parameter regionalization",
+    description="Utility functions for NextGen regionalization",
     long_description=open("../../README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://gitlab.sh.nextgenwaterprediction.com/NGWPC/nwm-ngen/ngen-regionalization.git/pkgs/parreg",
+    url="https://gitlab.sh.nextgenwaterprediction.com/NGWPC/nwm-ngen/ngen-regionalization.git/pkgs/utils",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     include_package_data=True,
@@ -29,8 +29,6 @@ setup(
         "pyproj",
         "numba",
         "matplotlib",
-        "pytest",
-        "seaborn",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

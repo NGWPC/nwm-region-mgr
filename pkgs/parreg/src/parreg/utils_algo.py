@@ -8,10 +8,10 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-# from joblib import Parallel, delayed
-# from pyproj import CRS
-from shapely import Point
+from joblib import Parallel, delayed
+from pyproj import CRS
+from scipy.spatial import cKDTree
+from shapely.geometry import Point
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 

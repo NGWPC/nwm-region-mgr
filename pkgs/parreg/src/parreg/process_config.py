@@ -1,4 +1,22 @@
-"""Process configuration."""
+"""Process configuration to perform parameter regionalization.
+
+process_config.py
+
+Functions:
+- expand_with_vpu: Expand a string with {vpu_list} placeholders using a list of VPU codes.
+- recursive_substitute: Recursively substitute placeholders in a Pydantic model, dictionary, or string.
+- validate_by_section: Validate different sections of the config file using Pydantic models.
+- find_occurrences: Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
+- load_and_validate_config: Load a YAML file, validate its structure, and substitute placeholders.
+- get_donor_basins: Get the donor basins for a given VPU from the config.
+- update_spatial_distance_donors: Update existing dataframe for pairwise spatial distance to include new donors.
+- update_spatial_distance_receivers: Update existing dataframe for pairwise spatial distance to include new receivers.
+- get_donors_receivers: Get the donors and receivers for a given VPU from the config.
+- process_attr_data: Process attribute data for donors and receivers, including spatial distances.
+- set_snow_flag: Set a flag indicating whether the catchments are snowy based on the snow fraction.
+- generate_pairings: Generate donor-receiver pairings using specified algorithms.
+
+"""
 
 import logging
 import time
@@ -14,6 +32,7 @@ from shapely.geometry import Point
 from shapely.ops import unary_union
 
 from . import config_schema as cs
+from . import plot_outputs as po
 from . import utils, utils_algo
 from .funcs_clust import (
     BIRCHPairer,
@@ -278,13 +297,14 @@ class RegionalizationProcessor:
         return self.hydrofabric_gdf.to_crs(3857)
 
     @property
+    def combined_geom(self):
+        """Dissolve all polygons into one before buffering."""
+        return unary_union(self.hydrofabric_gdf_3857.geometry)
+
+    @property
     def hydrofabric_buffered_polygon(self):
         """Buffered hydrofabric Polygon."""
-        # dissolve all polygons into one before buffering
-        combined_geom = unary_union(self.hydrofabric_gdf_3857.geometry)
-
-        # Create a buffer around the VPU polygon
-        return combined_geom.buffer(self.config.donor.buffer_km * 1000)
+        return self.combined_geom.buffer(self.config.donor.buffer_km * 1000)
 
     @property
     def donor_basins(self) -> list:
@@ -595,6 +615,15 @@ class RegionalizationProcessor:
         # save spatial distance file
         self.write_spatial_file(df_spatial_dist, file_changed)
 
+        # plot donor basin spatial map
+        po.plot_donor_spatial_map(
+            self.config,
+            self.vpu,
+            self.donor_basins,
+            self.hydrofabric_buffered_polygon,
+            self.combined_geom,
+        )
+
         self.dist_spatial = df_spatial_dist
 
     @property
@@ -718,6 +747,8 @@ class RegionalizationProcessor:
             logger.info(
                 f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}"
             )
+            # plot the missing attribute counts
+            po.plot_missing_attr_counts(self.config, self.vpu, self.df_attrs_all)
 
     def save_attribute_data(self):
         """Save the attribute data."""
@@ -742,6 +773,9 @@ class RegionalizationProcessor:
         # check if all donors/receivers have attributes
         self.check_missing_attrs(self.donors, "donors")
         self.check_missing_attrs(self.receivers, "receivers")
+
+        # plot spatial map of attribute data
+        po.plot_attribute_spatial_map(self.config, self.vpu, self.sorted_df_attrs_all)
 
         logger.info(
             f"Number of donors with attribute data: {self.number_of_donors_w_attrs}"
@@ -856,15 +890,15 @@ class RegionalizationProcessor:
     ):
         """Conduct donor-receiver pairing for a given VPU based on the configuration.
 
-        For a given VPU, generate donor-receiver pairing results for each algorithm selected in the configuration,
-        based on the attributes and spatial distance DataFrame.
+            For a given VPU, generate donor-receiver pairing results for each algorithm selected in the configuration,
+            based on the attributes and spatial distance DataFrame.
 
-        Args:
-            df_attr_all: dataframe containing the full attribute data for all receivers and donors
-            dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
+            Args:
+                df_attr_all: dataframe containing the full attribute data for all receivers and donors
+                dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
 
         Returns:
-            None. The pairing results are saved to designed locations based on the configurations.
+            None, but saves the pairing results to a file.
 
         """
         logger.info(f"Algorithms to run: {self.pairer_names}")
@@ -892,6 +926,9 @@ class RegionalizationProcessor:
             # save donor receiver pairing to csv file
             self.config.output.pairs.save_data(processed_receivers_df, outfile)
             logger.info(f"Pairing results saved to {outfile}")
+
+            # plot the results if requested
+            po.plot_pairing_outputs(self.config, self.vpu, pairer_name, outfile)
 
             end_time = time.time()
             logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
