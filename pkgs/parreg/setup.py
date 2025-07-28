@@ -29,6 +29,8 @@ setup(
         "pyproj",
         "numba",
         "matplotlib",
+        "pytest",
+        "seaborn",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

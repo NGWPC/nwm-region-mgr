@@ -39,7 +39,7 @@ class URF(object):
     def get_random_forest(self):
         """Run random forest on x."""
         x_total, y_total = synthetic_data.create_synthetic_data(
-            self.X, self.synthetic_data_type
+            self.x, self.synthetic_data_type
         )
 
         rf = RandomForestClassifier(
@@ -55,9 +55,9 @@ class URF(object):
     def get_leafs(self):
         """Get leafs."""
         rf = self.get_random_forest()
-        rf_leafs = rf.apply(self.X)
+        rf_leafs = rf.apply(self.x)
 
-        is_good = is_good_matrix_get(rf, self.X)
+        is_good = is_good_matrix_get(rf, self.x)
         return rf_leafs, is_good
 
     def get_xs(self, x):
