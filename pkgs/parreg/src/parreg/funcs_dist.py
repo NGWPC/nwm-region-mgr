@@ -392,7 +392,7 @@ class GowerPairer(DistancePairer):
 
 
 class URFPairer(DistancePairer):
-    """Pairer using Gower distance."""
+    """Pairer using Unsupervised Random Forest (URF) distance."""
 
     @property
     def method(self):
