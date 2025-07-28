@@ -7,14 +7,14 @@ general:
   attr_dataset_list: ['ngen', 'hlr']
   algorithm_list: ["gower","urf","kmeans","kmedoids",'hdbscan',"birch"]
   base_dir: '/home/matthew.deshotel/repos/ngen-regionalization/data/ngen_reg'
-  hydrofabric_file: '{base_dir}/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
+  hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
   id_name: 'divide_id'
 
 donor:
   id_name: 'gage_id'
-  donor_gage_file: '{base_dir}/gages_nwm4_calib_all.csv'
-  donor_ngen_cwt_file: '{base_dir}/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
-  donor_stats_file:  '{base_dir}/donor_stats/stats_calib_valid_{domain}.csv'
+  donor_gage_file: '{base_dir}/inputs/gages_nwm4_calib_all.csv'
+  donor_ngen_cwt_file: '{base_dir}/inputs/cwt_ngen_donor/calib_gage_divide_{domain}.parquet'
+  donor_stats_file:  '{base_dir}/inputs/donor_stats/stats_calib_valid_{domain}.csv'
   buffer_km: 200
   metric_eval_period:
     col_name: 'evalPeriod'
@@ -33,12 +33,12 @@ donor:
 attr_datasets:
   ngen:
     attr_list: 
-    attr_select_file: '{base_dir}/config/attr_selection_ngen.csv'
-    attr_data_file: '{base_dir}/attr_datasets/attr_ngen_{domain}.parquet'
+    attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_ngen.csv'
+    attr_data_file: '{base_dir}/inputs/attr_datasets/attr_ngen_{domain}.parquet'
   hlr:
     attr_list:
-    attr_select_file: '{base_dir}/config/attr_selection_hlr.csv'
-    attr_data_file: '{base_dir}/attr_datasets/attr_hlr_{domain}.parquet'
+    attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_hlr.csv'
+    attr_data_file: '{base_dir}/inputs/attr_datasets/attr_hlr_{domain}.parquet'
 
 output:
     pairs:
