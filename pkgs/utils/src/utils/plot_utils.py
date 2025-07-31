@@ -3,6 +3,7 @@
 plot_utils.py
 
 Functions:
+- _plot_columns_by_dtype: Plot multiple columns of a GeoDataFrame based on their data types.
 - plot_spatial_map: Generate a spatial map plot for the given data.
 - plot_histogram: Generate histogram plot for the spatial or attribute distance between donors and receivers.
 
@@ -116,8 +117,8 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
             Information needed for creating the plot
 
     """
-    # check if the required column exists
-    cols_exist = [c for c in d1["columns"] if c in gdf.columns]
+    # check if the required column exists, allow case insensitivity
+    cols_exist = [c for c in d1["columns"] if c.lower() in gdf.columns.str.lower()]
     cols_missing = set(d1["columns"]) - set(gdf.columns)
     if not cols_exist:
         logger.warning(f"Columns {cols_missing} not found in gdf. Cannot create spatial map plot.")
@@ -177,8 +178,8 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
         )
         columns = [col for col in columns if col in numeric_columns]
 
-    # Filter to columns that exist in data
-    valid_columns = [col for col in columns if col in data.columns]
+    # Filter to columns that exist in data, allow case insensitivity
+    valid_columns = [col for col in columns if col.lower() in data.columns.str.lower()]
     if not valid_columns:
         raise ValueError("None of the specified columns exist in the dataframe.")
     missing_columns = set(columns) - set(valid_columns)

@@ -653,10 +653,13 @@ def select_formulation(
             )
 
         # plot the selected formulations
+        columns_to_plot = cc.plots.get("columns_to_plot", None)
+        if columns_to_plot is None:
+            columns_to_plot = ["formulation", score_method, "cost"]
         plot_dict = {
             "vpu": vpu,
             "var_str": "Formulation Selection",
-            "columns": ["formulation", score_method, "cost"],
+            "columns": columns_to_plot,
             "ncols": 3,
         }
         cc.plot_data(df_selected, plot_dict)

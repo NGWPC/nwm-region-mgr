@@ -2,21 +2,22 @@
 
 config_utils.py
 
-Functions:
-- _deep_merge_configs: Recursively merge two dictionaries, with values from dict #2 overwriting those in dict #1.
-- _load_and_validate_config: Load a YAML file, validate its structure using Pydantic
-- _substitute_placeholders: Substitute placeholders in the config with actual values.
-- load_and_process_config: Load, validate, process, and save the configuration files.
+Classes/Functions:
 - LoggingConfig: Pydantic model for logging configuration.
 - BaseGeneralConfig: Pydantic model for general settings of the application.
 - BaseOutputConfig: Pydantic model for output settings of the application.
 - BaseConfig: Pydantic model for the base configuration of the application.
+- BaseConfigProcessor: base class for processing and validating configurations
+    - _deep_merge_configs: Recursively merge two dictionaries, with values from dict #2 overwriting those in dict #1.
+    - _load_and_validate_config: Load a YAML file, validate its structure using Pydantic
+    - _substitute_placeholders: Substitute placeholders in the config with actual values.
+    - load_and_process_config: Load, validate, process, and save the configuration files.
 
 """
 
 import logging
 import re
-from functools import reduce
+from functools import lru_cache, reduce
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -69,9 +70,14 @@ class BaseGeneralConfig(BaseModel):
     """Define NWM domain. Options: conus, ak, hi, prvi."""
     vpu_list: Union[List[str], str]
     """List of VPUs within the domain or 'all' to process all."""
+
+    run_formreg: bool = False
+    """Whether to run formulation regionalization."""
+    run_parreg: bool = False
+    """Whether to run parameter regionalization."""
+
     base_dir: str
     """Path to base directory for input/output files."""
-
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
     """Path to NextGen hydrofabric file, e.g., vpu_01.gpkg."""
     gage_divide_cwt_file: Path | str = Field()
@@ -122,7 +128,7 @@ class BaseOutputConfig(BaseModel):
     """Suffix for the file stem, used to create unique file names based on the path for specific needs."""
     format: Optional[str] = None
     """File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file."""
-    plots: Optional[Dict[str, bool]] = None
+    plots: Optional[Dict[str, Any]] = None
     """Configuration for output plots, if applicable."""
     plot_path: Optional[str] = None
     """Path to save output plots, if applicable. If not specified, plots will be saved in the same directory 
@@ -158,7 +164,7 @@ class BaseOutputConfig(BaseModel):
             # only "histogram" and "spatial_map" are supported, currently
             check_options(
                 list(values.plots.keys()),
-                ["histogram", "spatial_map"],
+                ["histogram", "spatial_map", "columns_to_plot"],
                 "plot keys",
             )
 
@@ -291,7 +297,11 @@ class BaseOutputConfig(BaseModel):
                 plot_type: Type of plot being saved (e.g., 'map', 'hist').
 
         """
-        if self.plots["histogram"]:
+        # if columns_to_plot is specified by the user, use it
+        if self.plots and self.plots.get("columns_to_plot", None) is not None:
+            plot_dict["columns"] = self.plots["columns_to_plot"]
+
+        if self.plots and self.plots.get("histogram", False):
             path1 = self._get_file_path(plot_dict.get("vpu"), plot_type="hist")
             plot_dict1 = plot_dict.copy()
             plot_dict1["outfile"] = path1
@@ -303,7 +313,7 @@ class BaseOutputConfig(BaseModel):
 
             plot_histogram(data, plot_dict1)
 
-        if self.plots["spatial_map"]:
+        if self.plots and self.plots.get("spatial_map", False):
             path2 = self._get_file_path(plot_dict.get("vpu"), plot_type="map")
             plot_dict2 = plot_dict.copy()
             plot_dict2["outfile"] = path2
@@ -321,227 +331,259 @@ class BaseConfig(BaseModel):
     """Base output settings for the regionalization application."""
 
 
-def _deep_merge_configs(a: dict, b: dict) -> dict:
-    """Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.
+class BaseConfigProcessor:
+    """Base configuration processor."""
 
-    Args:
-        a: The base dictionary.
-        b: The dictionary whose values will overwrite those in `a`.
+    def __init__(
+        self,
+        config_file: str | Path | list[str] | list[Path],
+        config_schema: BaseModel = Field(...),
+        sample_size: int = None,
+    ):
+        """Initialize regionalzation processor."""
+        self.config_file = config_file
+        self.config_schema = config_schema
+        self.config = self.load_and_process_config
+        self.sample_size = sample_size
 
-    Returns:
-        A new dictionary that is the result of merging `a` and `b`.
+    def _deep_merge_configs(self, a: dict, b: dict) -> dict:
+        """Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.
 
-    """
-    result = a.copy()
-    for key, value in b.items():
-        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-            result[key] = _deep_merge_configs(result[key], value)
-        else:
-            result[key] = value
-    return result
+        Args:
+            a: The base dictionary.
+            b: The dictionary whose values will overwrite those in `a`.
 
+        Returns:
+            A new dictionary that is the result of merging `a` and `b`.
 
-def _load_and_validate_config(config_paths: list[str], config_schema: BaseModel = Field(...)) -> BaseModel:
-    """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
+        """
+        result = a.copy()
+        for key, value in b.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = self._deep_merge_configs(result[key], value)
+            else:
+                result[key] = value
+        return result
 
-    Args:
-        config_paths: list of paths to the config files
-        config_schema: Pydantic model to validate the config structure
+    def _load_and_validate_config(self, config_paths: list[str], config_schema: BaseModel = Field(...)) -> BaseModel:
+        """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
 
-    Returns:
-        Config object with validated structure
+        Args:
+            config_paths: list of paths to the config files
+            config_schema: Pydantic model to validate the config structure
 
-    """
-    try:
-        configs = []
-        for p in config_paths:
-            with open(p, "r") as f:
-                configs.append(yaml.safe_load(f))
-        merged_config = reduce(_deep_merge_configs, configs)
-        config = config_schema(**merged_config)
+        Returns:
+            Config object with validated structure
+
+        """
+        try:
+            configs = []
+            for p in config_paths:
+                with open(p, "r") as f:
+                    configs.append(yaml.safe_load(f))
+            merged_config = reduce(self._deep_merge_configs, configs)
+            config = config_schema(**merged_config)
+
+            return config
+
+        except ValidationError as e:
+            logger.exception(f"Validation Error: {e}")
+            raise
+        except Exception as e:
+            logger.exception(f"Error loading YAML file: {e}")
+            raise
+
+    def _substitute_placeholders(self, config: BaseModel) -> BaseModel:
+        """Substitute placeholders in the config with actual values.
+
+        Args:
+            config: Config object with placeholders
+
+        Returns:
+            Config object with placeholders substituted
+
+        """
+        # resolve placeholders in the config
+        context = {
+            "domain": config.general.domain,
+            "run_name": config.general.run_name,
+            "base_dir": config.general.base_dir,
+            "vpu_list": config.general.vpu_list,
+        }
+        config = recursive_substitute(config, context)
 
         return config
 
-    except ValidationError as e:
-        logger.exception(f"Validation Error: {e}")
-        raise
-    except Exception as e:
-        logger.exception(f"Error loading YAML file: {e}")
-        raise
+    def _validate_paths(self, paths: str | Path | list[str | Path]):
+        """Validate that all file and directory paths exist.
 
+        Args:
+            paths: A string, Path, or list of strings/Paths to validate.
 
-def _substitute_placeholders(config: BaseModel) -> BaseModel:
-    """Substitute placeholders in the config with actual values.
+        Raises:
+            FileNotFoundError: If any path does not exist.
 
-    Args:
-        config: Config object with placeholders
+        """
+        if isinstance(paths, (str, Path)):
+            paths = [paths]
 
-    Returns:
-        Config object with placeholders substituted
+        missing_paths = []
+        for path in paths:
+            if not Path(path).exists():
+                missing_paths.append(Path(path))
 
-    """
-    # resolve placeholders in the config
-    context = {
-        "domain": config.general.domain,
-        "run_name": config.general.run_name,
-        "base_dir": config.general.base_dir,
-        "vpu_list": config.general.vpu_list,
-    }
-    config = recursive_substitute(config, context)
+        if missing_paths:
+            msg = f"Missing paths: {missing_paths}"
+            logger.error(msg)
+            raise FileNotFoundError(msg)
 
-    return config
+    def _check_file_columns(self, config: BaseModel):
+        """Check if the required columns are present in the files in the configuration.
 
+        Args:
+            config: The configuration object to check.
 
-def _validate_paths(paths: str | Path | list[str | Path]):
-    """Validate that all file and directory paths exist.
+        Raises:
+            ValueError: If any required columns are missing in the files.
 
-    Args:
-        paths: A string, Path, or list of strings/Paths to validate.
+        """
+        # get the ID columns and hydrofabric layer names from the configuration
+        id_cols = config.general.id_col
 
-    Raises:
-        FileNotFoundError: If any path does not exist.
+        gage_id_col = id_cols["gage"] if "gage" in id_cols else None
+        if not gage_id_col:
+            msg = "Gage ID column is not defined in the configuration."
+            logger.error(msg)
+            raise ValueError(msg)
 
-    """
-    if isinstance(paths, (str, Path)):
-        paths = [paths]
+        divide_id_col = id_cols["divide"] if "divide" in id_cols else None
+        if not divide_id_col:
+            msg = "Divide ID column is not defined in the configuration."
+            logger.error(msg)
+            raise ValueError(msg)
 
-    missing_paths = []
-    for path in paths:
-        if not Path(path).exists():
-            missing_paths.append(Path(path))
+        huc12_id_col = id_cols["huc12"] if "huc12" in id_cols else None
+        if not huc12_id_col:
+            msg = "HUC12 ID column is not defined in the configuration."
+            logger.error(msg)
+            raise ValueError(msg)
 
-    if missing_paths:
-        msg = f"Missing paths: {missing_paths}"
-        logger.error(msg)
-        raise FileNotFoundError(msg)
+        vpu_id_col = id_cols["vpu"] if "vpu" in id_cols else None
+        if not vpu_id_col:
+            msg = "VPU ID column is not defined in the configuration."
+            logger.error(msg)
+            raise ValueError(msg)
 
+        ngen_layer = config.general.layer_name["ngen"] if "ngen" in config.general.layer_name else None
+        huc12_layer = config.general.layer_name["huc12"] if "huc12" in config.general.layer_name else None
 
-def _check_file_columns(config: BaseModel):
-    """Check if the required columns are present in the files in the configuration.
+        # NextGen hydrofabric file
+        required_fields = {divide_id_col, vpu_id_col, "geometry"}
+        file = getattr(config.general, "ngen_hydrofabric_file", None)
+        if file:
+            if isinstance(file, dict):
+                for vpu, f in file.items():
+                    config.general.layer_name["ngen"] = check_columns_hydrofabric(
+                        f, required_fields, layer_name=ngen_layer
+                    )
+            elif isinstance(file, (str, Path)):
+                config.general.layer_name["ngen"] = check_columns_hydrofabric(
+                    file, required_fields, layer_name=ngen_layer
+                )
+            else:
+                msg = f"Invalid type for 'ngen_hydrofabric_file': {type(file)}. Must be str, Path, or dict."
+                logger.error(msg)
+                raise ValueError(msg)
 
-    Args:
-        config: The configuration object to check.
+        # huc12 hydrofabric file
+        required_fields = {huc12_id_col, "geometry"}
+        file = getattr(config.general, "huc12_hydrofabric_file", None)
+        if file:
+            config.general.layer_name["huc12"] = check_columns_hydrofabric(
+                file, required_fields, layer_name=huc12_layer
+            )
 
-    Raises:
-        ValueError: If any required columns are missing in the files.
+        # Gage divide CWT file
+        file = getattr(config.general, "gage_divide_cwt_file", None)
+        if file:
+            check_columns_dataframe(file, {divide_id_col, gage_id_col})
 
-    """
-    # get the ID columns and hydrofabric layer names from the configuration
-    id_cols = config.general.id_col
+        # huc12 divide crosswalk file
+        file = getattr(config.general, "divide_huc12_cwt_file", None)
+        if file:
+            check_columns_dataframe(file, {divide_id_col, huc12_id_col})
 
-    gage_id_col = id_cols["gage"] if "gage" in id_cols else None
-    if not gage_id_col:
-        msg = "Gage ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        # Donor gage file
+        file = getattr(config.general, "donor_gage_file", None)
+        if file:
+            check_columns_dataframe(file, {gage_id_col, "longitude", "latitude"})
 
-    divide_id_col = id_cols["divide"] if "divide" in id_cols else None
-    if not divide_id_col:
-        msg = "Divide ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+    @property
+    @lru_cache
+    def load_and_process_config(self) -> BaseModel:
+        """Load, validate, and process the configuration files.
 
-    huc12_id_col = id_cols["huc12"] if "huc12" in id_cols else None
-    if not huc12_id_col:
-        msg = "HUC12 ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        Returns:
+            Config object with validated structure and substituted placeholders.
 
-    vpu_id_col = id_cols["vpu"] if "vpu" in id_cols else None
-    if not vpu_id_col:
-        msg = "VPU ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        """
+        # Load and validate the configuration
+        config = self._load_and_validate_config(self.config_file, self.config_schema)
 
-    ngen_layer = config.general.layer_name["ngen"] if "ngen" in config.general.layer_name else None
-    huc12_layer = config.general.layer_name["huc12"] if "huc12" in config.general.layer_name else None
+        # Substitute placeholders in the configuration
+        config = self._substitute_placeholders(config)
 
-    # NextGen hydrofabric file
-    file = config.general.ngen_hydrofabric_file
-    required_fields = {divide_id_col, vpu_id_col, "geometry"}
-    if file is not None:
-        if isinstance(file, dict):
-            for vpu, f in file.items():
-                config.general.layer_name["ngen"] = check_columns_hydrofabric(f, required_fields, layer_name=ngen_layer)
+        # Set up logging based on the configuration
+        log_level = config.general.logging.level.upper()
+        log_file = Path(config.general.logging.file)
+        setup_logging(
+            level=log_level,
+            target_packages=("__main__", "formreg", "utils"),
+            log_file=log_file,
+            file_level=log_level,
+        )
 
-    # huc12 hydrofabric file
-    file = config.general.huc12_hydrofabric_file
-    required_fields = {huc12_id_col, "geometry"}
-    if file is not None:
-        config.general.layer_name["huc12"] = check_columns_hydrofabric(file, required_fields, layer_name=huc12_layer)
+        from formreg import config_schema as fcs
 
-    # Gage divide CWT file
-    file = config.general.gage_divide_cwt_file
-    if file is not None:
-        check_columns_dataframe(file, {divide_id_col, gage_id_col})
+        config_str = "Formulation Regionalization" if isinstance(config, fcs.Config) else "Parameter Regionalization"
+        logger.info("%s - Config files: %s", config_str, self.config_file)
+        logger.info("Set up logging with level: %s", log_level)
+        logger.info("Log files: %s", log_file)
 
-    # huc12 divide crosswalk file
-    file = config.general.divide_huc12_cwt_file
-    if file is not None:
-        check_columns_dataframe(file, {divide_id_col, huc12_id_col})
+        # Validate that all paths in the configuration exist
+        paths = [
+            getattr(config.general, path, None)
+            for path in [
+                "gage_divide_cwt_file",
+                "donor_gage_file",
+                "calval_stats_dir",
+                "huc12_hydrofabric_file",
+                "divide_huc12_cwt_file",
+            ]
+            if getattr(config.general, path, None) is not None
+        ]
 
-    # Donor gage file
-    file = config.general.donor_gage_file
-    if file is not None:
-        check_columns_dataframe(file, {gage_id_col, "longitude", "latitude"})
+        ngen_paths = getattr(config.general, "ngen_hydrofabric_file", None)
+        if isinstance(ngen_paths, dict):
+            paths += list(ngen_paths.values())
 
+        # remove None values from paths
+        paths = [p for p in paths if p is not None]
 
-def load_and_process_config(
-    config_paths: list[str],
-    config_schema: BaseModel = Field(...),
-) -> BaseModel:
-    """Load, validate, and process the configuration files.
+        self._validate_paths(paths)
 
-    Args:
-        config_paths: List of paths to the config files.
-        config_schema: Pydantic model to validate the config structure.
+        # Check if the required columns are present in the files
+        self._check_file_columns(config)
 
-    Returns:
-        Config object with validated structure and substituted placeholders.
+        logger.info("Successfully validated and processed the configurations.")
 
-    """
-    # Load and validate the configuration
-    config = _load_and_validate_config(config_paths, config_schema)
+        # Save the final configuration
+        cc = config.output["config_final"]
+        cc.save_to_file(config, data_str="Final Configuration")
 
-    # Substitute placeholders in the configuration
-    config = _substitute_placeholders(config)
+        return config
 
-    # Set up logging based on the configuration
-    log_level = config.general.logging.level.upper()
-    log_file = Path(config.general.logging.file)
-    setup_logging(
-        level=log_level,
-        target_packages=("__main__", "formreg", "utils"),
-        log_file=log_file,
-        file_level=log_level,
-    )
-
-    logger.info("Used config files: %s", config_paths)
-    logger.info("Set up logging with level: %s, based on config file", log_level)
-    logger.info("Log file: %s", log_file)
-
-    # Validate that all paths in the configuration exist
-    paths = [
-        config.general.huc12_hydrofabric_file,
-        config.general.gage_divide_cwt_file,
-        config.general.divide_huc12_cwt_file,
-        config.general.donor_gage_file,
-        config.general.calval_stats_dir,
-    ]
-    paths.extend(config.general.ngen_hydrofabric_file.values())
-
-    # remove None values from paths
-    paths = [p for p in paths if p is not None]
-
-    _validate_paths(paths)
-
-    # Check if the required columns are present in the files
-    _check_file_columns(config)
-
-    logger.info("Successfully validated and processed the configuration.")
-
-    # Save the final configuration
-    cc = config.output["config_final"]
-    cc.save_to_file(config, data_str="Final Configuration")
-
-    return config
+    def set_vpu(self, vpu: str):
+        """Set the vpu."""
+        self.vpu = vpu
+        # self.donor_receiver_gdfs.cache_clear()

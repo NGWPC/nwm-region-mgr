@@ -30,6 +30,7 @@ import yaml
 from pydantic import BaseModel, ValidationError
 from shapely.geometry import Point
 from shapely.ops import unary_union
+from utils import BaseConfigProcessor
 
 from . import config_schema as cs
 from . import plot_outputs as po
@@ -45,201 +46,196 @@ from .funcs_dist import GowerPairer, ProximityPairer, URFPairer
 logger = logging.getLogger(__name__)
 
 
-class RegionalizationProcessor:
+class RegionalizationProcessor(BaseConfigProcessor):
     """Regionalization Processor."""
 
-    def __init__(self, config_file: str | Path, sample_size: int = None):
-        """Initialize regionalzation processor."""
-        self.config_file = config_file
-        self.config = self.load_and_validate_config
-        self.sample_size = sample_size
+    # def __init__(self, config_file: str | Path, sample_size: int = None):
+    #     """Initialize regionalzation processor."""
+    #     self.config_file = config_file
+    #     self.config = self.load_and_validate_config
+    #     self.sample_size = sample_size
 
-    def expand_with_vpu(self, string_with_vpu: str, context: dict) -> dict:
-        """Expand a string with {vpu_list} placeholders.
+    # def expand_with_vpu(self, string_with_vpu: str, context: dict) -> dict:
+    #     """Expand a string with {vpu_list} placeholders.
 
-        Expand a string with {vpu_list} placeholders using a list of VPU codes from the context.
-        Returns a dictionary where keys are vpu codes and values are the formatted strings.
-        """
-        if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
-            return {"default": string_with_vpu.format(**context)}
+    #     Expand a string with {vpu_list} placeholders using a list of VPU codes from the context.
+    #     Returns a dictionary where keys are vpu codes and values are the formatted strings.
+    #     """
+    #     if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
+    #         return {"default": string_with_vpu.format(**context)}
 
-        return {
-            vpu: string_with_vpu.format(**{**context, "vpu_list": vpu})
-            for vpu in context["vpu_list"]
-        }
+    #     return {vpu: string_with_vpu.format(**{**context, "vpu_list": vpu}) for vpu in context["vpu_list"]}
 
-    def recursive_substitute(self, obj: Any, context: dict) -> Any:
-        """Recursively substitute placeholders.
+    # """     def recursive_substitute(self, obj: Any, context: dict) -> Any:
+    #         """Recursively substitute placeholders.
 
-        Recursively substitute placeholders in config, be it a Pydantic model, dictionary, or string.
+    #         Recursively substitute placeholders in config, be it a Pydantic model, dictionary, or string.
 
-        Args:
-            obj: A Pydantic model instance, a dictionary, or a string.
-            context: A dictionary of substitution variables.
+    #         Args:
+    #             obj: A Pydantic model instance, a dictionary, or a string.
+    #             context: A dictionary of substitution variables.
 
-        Returns:
-            The Pydantic model instance, dictionary or string after substitution
+    #         Returns:
+    #             The Pydantic model instance, dictionary or string after substitution
 
-        """
-        if isinstance(obj, BaseModel):
-            # Convert Pydantic model to dict, substitute, then reconstruct the model
-            data = obj.model_dump()
-            substituted = self.recursive_substitute(data, context)
-            return obj.__class__(**substituted)
+    #         """
+    #         if isinstance(obj, BaseModel):
+    #             # Convert Pydantic model to dict, substitute, then reconstruct the model
+    #             data = obj.model_dump()
+    #             substituted = self.recursive_substitute(data, context)
+    #             return obj.__class__(**substituted)
 
-        elif isinstance(obj, dict):
-            return {k: self.recursive_substitute(v, context) for k, v in obj.items()}
+    #         elif isinstance(obj, dict):
+    #             return {k: self.recursive_substitute(v, context) for k, v in obj.items()}
 
-        elif isinstance(obj, str):
-            try:
-                if "{vpu_list}" in obj and "vpu_list" in context:
-                    # If the string contains {vpu} and vpu_list is in context, expand it and substitute the placeholders
-                    return self.expand_with_vpu(obj, context)
-                else:  # Otherwise, just substitute the placeholders
-                    return obj.format(**context)
-            except KeyError:
-                return obj  # leave unchanged if context is incomplete
+    #         elif isinstance(obj, str):
+    #             try:
+    #                 if "{vpu_list}" in obj and "vpu_list" in context:
+    #                     # If the string contains {vpu} and vpu_list is in context, expand it and substitute the placeholders
+    #                     return self.expand_with_vpu(obj, context)
+    #                 else:  # Otherwise, just substitute the placeholders
+    #                     return obj.format(**context)
+    #             except KeyError:
+    #                 return obj  # leave unchanged if context is incomplete
 
-        else:
-            return obj  # return as-is if not str, dict, or BaseModel
+    #         else:
+    #             return obj  # return as-is if not str, dict, or BaseModel
 
-    def validate_by_section(self, config: dict) -> dict:
-        """Perform pydantic validation separately for different sections.
+    #     def validate_by_section(self, config: dict) -> dict:
+    #         """Perform pydantic validation separately for different sections.
 
-        Validate different sections of the config file to allow specific validation for certain sections.
+    #         Validate different sections of the config file to allow specific validation for certain sections.
 
-        Args:
-            config: dictionary of config prior to validation
+    #         Args:
+    #             config: dictionary of config prior to validation
 
-        Returns:
-            Dictionary of config after validation
+    #         Returns:
+    #             Dictionary of config after validation
 
-        """
-        # Define the mapping of section names to Pydantic models
-        section_map = {
-            "general": cs.GeneralConfig,
-            "donor": cs.DonorConfig,
-            "attr_datasets": cs.AttrDatasets,
-            "output": cs.OutputConfig,
-            "algorithms": cs.AlgorithmConfig,
-        }
+    #         """
+    #         # Define the mapping of section names to Pydantic models
+    #         section_map = {
+    #             "general": cs.GeneralConfig,
+    #             "donor": cs.DonorConfig,
+    #             "attr_datasets": cs.AttrDatasets,
+    #             "output": cs.OutputConfig,
+    #             "algorithms": cs.AlgorithmConfig,
+    #         }
 
-        # Define the mapping of algorithm names to Pydantic models
-        algorithm_map = {
-            "general": cs.AlgoGeneral,
-            "gower": cs.Gower,
-            "urf": cs.URF,
-            "kmeans": cs.KMeans,
-            "kmedoids": cs.KMedoids,
-            "hdbscan": cs.HDBSCAN,
-            "birch": cs.Birch,
-        }
+    #         # Define the mapping of algorithm names to Pydantic models
+    #         algorithm_map = {
+    #             "general": cs.AlgoGeneral,
+    #             "gower": cs.Gower,
+    #             "urf": cs.URF,
+    #             "kmeans": cs.KMeans,
+    #             "kmedoids": cs.KMedoids,
+    #             "hdbscan": cs.HDBSCAN,
+    #             "birch": cs.Birch,
+    #         }
 
-        valid_config = dict()
-        for section_name, section_content in config.items():
-            if section_name != "algorithms":
-                section = section_map[section_name]
-                valid_config[section_name] = section(**section_content)
-            else:
-                # Loop through each algorithm
-                general = section_content["general"]
-                validated_algorithms = {}
-                for alg_name, alg_specific in section_content.items():
-                    alg1 = algorithm_map[alg_name]
+    #         valid_config = dict()
+    #         for section_name, section_content in config.items():
+    #             if section_name != "algorithms":
+    #                 section = section_map[section_name]
+    #                 valid_config[section_name] = section(**section_content)
+    #             else:
+    #                 # Loop through each algorithm
+    #                 general = section_content["general"]
+    #                 validated_algorithms = {}
+    #                 for alg_name, alg_specific in section_content.items():
+    #                     alg1 = algorithm_map[alg_name]
 
-                    if alg_name == "general":
-                        validated_algorithms[alg_name] = alg1(**alg_specific)
-                    if alg_name not in algorithm_map:
-                        raise ValueError(f"No model defined for algorithm: {alg_name}")
+    #                     if alg_name == "general":
+    #                         validated_algorithms[alg_name] = alg1(**alg_specific)
+    #                     if alg_name not in algorithm_map:
+    #                         raise ValueError(f"No model defined for algorithm: {alg_name}")
 
-                    # Merge general algorithm into specific algorithm
-                    merged = {**general, **alg_specific}
+    #                     # Merge general algorithm into specific algorithm
+    #                     merged = {**general, **alg_specific}
 
-                    # Validate
-                    validated_algorithms[alg_name] = alg1(**merged)
+    #                     # Validate
+    #                     validated_algorithms[alg_name] = alg1(**merged)
 
-                valid_config[section_name] = validated_algorithms
+    #                 valid_config[section_name] = validated_algorithms
 
-        return valid_config
+    #         return valid_config
 
-    def find_occurrences(self, obj: Any, target: str, path: str = "") -> list:
-        """Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
+    #     def find_occurrences(self, obj: Any, target: str, path: str = "") -> list:
+    #         """Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
 
-        Args:
-            obj: The object to search (can be a Pydantic model, dictionary, or list).
-            target: The target string to find.
-            path: The current path in the object structure (used for recursion).
+    #         Args:
+    #             obj: The object to search (can be a Pydantic model, dictionary, or list).
+    #             target: The target string to find.
+    #             path: The current path in the object structure (used for recursion).
 
-        Returns:
-            A list of paths where the target string occurs.
+    #         Returns:
+    #             A list of paths where the target string occurs.
 
-        """
-        occurrences = []
+    #         """
+    #         occurrences = []
 
-        if isinstance(obj, BaseModel):
-            obj = obj.model_dump(exclude_unset=True)
+    #         if isinstance(obj, BaseModel):
+    #             obj = obj.model_dump(exclude_unset=True)
 
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                new_path = f"{path}.{k}" if path else k
-                occurrences.extend(self.find_occurrences(v, target, new_path))
+    #         if isinstance(obj, dict):
+    #             for k, v in obj.items():
+    #                 new_path = f"{path}.{k}" if path else k
+    #                 occurrences.extend(self.find_occurrences(v, target, new_path))
 
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                new_path = f"{path}[{i}]"
-                occurrences.extend(self.find_occurrences(item, target, new_path))
+    #         elif isinstance(obj, list):
+    #             for i, item in enumerate(obj):
+    #                 new_path = f"{path}[{i}]"
+    #                 occurrences.extend(self.find_occurrences(item, target, new_path))
 
-        elif isinstance(obj, str):
-            if target in obj:
-                occurrences.append(path)
+    #         elif isinstance(obj, str):
+    #             if target in obj:
+    #                 occurrences.append(path)
 
-        return occurrences
+    #         return occurrences
 
-    @property
-    @lru_cache
-    def load_and_validate_config(self):
-        """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
+    #     @property
+    #     @lru_cache
+    #     def load_and_validate_config(self):
+    #         """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
 
-        Args:
-            file_path: path to the config file
+    #         Args:
+    #             file_path: path to the config file
 
-        """
-        try:
-            with open(Path(self.config_file), "r") as file:
-                data = yaml.safe_load(file)
+    #         """
+    #         try:
+    #             with open(Path(self.config_file), "r") as file:
+    #                 data = yaml.safe_load(file)
 
-            # validate the config
-            validated_config = self.validate_by_section(data)
-            config = cs.Config(**validated_config)
+    #             # validate the config
+    #             validated_config = self.validate_by_section(data)
+    #             config = cs.Config(**validated_config)
 
-            # resolve placeholders in the config
-            context = {
-                "domain": config.general.domain,
-                "run_name": config.general.run_name,
-                "base_dir": config.general.base_dir,
-                "vpu_list": config.general.vpu_list,
-            }
-            config = self.recursive_substitute(config, context)
+    #             # resolve placeholders in the config
+    #             context = {
+    #                 "domain": config.general.domain,
+    #                 "run_name": config.general.run_name,
+    #                 "base_dir": config.general.base_dir,
+    #                 "vpu_list": config.general.vpu_list,
+    #             }
+    #             config = self.recursive_substitute(config, context)
 
-            # additional validation after substitution
-            # config.donor.check_files()
-            out = config.output.config_final
-            if out.save:
-                logger.info(f"Saving config to {out.path}")
-                if Path(out.path).is_file():
-                    utils.save_data(config, Path(out.path))
-                elif Path(out.path).is_dir():
-                    utils.save_data(
-                        config, Path(out.path, "config_final." + out.format)
-                    )
+    #             # additional validation after substitution
+    #             # config.donor.check_files()
+    #             out = config.output.config_final
+    #             if out.save:
+    #                 logger.info(f"Saving config to {out.path}")
+    #                 if Path(out.path).is_file():
+    #                     utils.save_data(config, Path(out.path))
+    #                 elif Path(out.path).is_dir():
+    #                     utils.save_data(config, Path(out.path, "config_final." + out.format))
 
-            return config
+    #             return config
 
-        except ValidationError as e:
-            raise Exception(f"Validation Error: {e}")
-        except Exception as e:
-            raise Exception(f"Error loading YAML file: {e}")
-
+    #         except ValidationError as e:
+    #             raise Exception(f"Validation Error: {e}")
+    #         except Exception as e:
+    #             raise Exception(f"Error loading YAML file: {e}")
+    #  """
     def set_vpu(self, vpu: str):
         """Set the vpu."""
         self.vpu = vpu
@@ -249,19 +245,14 @@ class RegionalizationProcessor:
     @lru_cache
     def donors_df(self) -> pd.DataFrame:
         """Donors."""
-        donors = utils.read_table(self.config.donor.donor_gage_file)
+        gage_file = self.config.general.donor_gage_file
+        donors = utils.read_table(gage_file)
         if donors.empty:
-            raise ValueError(
-                f"No donors found in the donor gage file: {self.config.donor.donor_gage_file}"
-            )
+            raise ValueError(f"No donors found in the donor gage file: {gage_file}")
         if "longitude" not in donors.columns or "latitude" not in donors.columns:
-            raise ValueError(
-                f"Donor gage file must contain 'longitude' and 'latitude' columns: {self.config.donor.donor_gage_file}"
-            )
+            raise ValueError(f"Donor gage file must contain 'longitude' and 'latitude' columns: {gage_file}")
         if "gage_id" not in donors.columns:
-            raise ValueError(
-                f"Donor gage file must contain 'gage_id' column: {self.config.donor.donor_gage_file}"
-            )
+            raise ValueError(f"Donor gage file must contain 'gage_id' column: {gage_file}")
         return donors
 
     @property
@@ -270,19 +261,14 @@ class RegionalizationProcessor:
         """Create a GeoDataFrame of donors with geometry as points."""
         return gpd.GeoDataFrame(
             self.donors_df,
-            geometry=[
-                Point(xy)
-                for xy in zip(self.donors_df["longitude"], self.donors_df["latitude"])
-            ],
+            geometry=[Point(xy) for xy in zip(self.donors_df["longitude"], self.donors_df["latitude"])],
             crs="EPSG:4326",
         )
 
     @property
     def hydrofabric_gdf(self) -> gpd.GeoDataFrame:
         """Hydrofabric geodataframe with only valid geometries."""
-        gdf = gpd.read_file(
-            self.config.general.hydrofabric_file[self.vpu], layer="divides"
-        )
+        gdf = gpd.read_file(self.config.general.ngen_hydrofabric_file[self.vpu], layer="divides")
         return gdf[gdf.is_valid]
 
     @property
@@ -315,14 +301,12 @@ class RegionalizationProcessor:
 
         """
         # Find donors in the buffered VPU
-        donor_basins = self.donor_gdf_3857[
-            self.donor_gdf_3857.geometry.within(self.hydrofabric_buffered_polygon)
-        ]["gage_id"].tolist()
+        donor_basins = self.donor_gdf_3857[self.donor_gdf_3857.geometry.within(self.hydrofabric_buffered_polygon)][
+            "gage_id"
+        ].tolist()
 
         if not donor_basins:
-            logger.warning(
-                "No donor basins found. Please check the donor gage file and hydrofabric file."
-            )
+            logger.warning("No donor basins found. Please check the donor gage file and hydrofabric file.")
 
         return donor_basins
 
@@ -357,9 +341,7 @@ class RegionalizationProcessor:
 
         if missing_donors:
             # Subset new donors GeoDataFrame to only missing donors
-            missing_donors_gdf = donors_gdf[
-                donors_gdf["divide_id"].isin(missing_donors)
-            ]
+            missing_donors_gdf = donors_gdf[donors_gdf["divide_id"].isin(missing_donors)]
 
             # Compute distances for missing donors
             missing_distances_df = utils_algo.compute_pairwise_centroid_distances(
@@ -407,9 +389,7 @@ class RegionalizationProcessor:
 
         if missing_receivers:
             # Subset new receivers GeoDataFrame to only missing receivers
-            missing_receivers_gdf = receivers_gdf[
-                receivers_gdf["divide_id"].isin(missing_receivers)
-            ]
+            missing_receivers_gdf = receivers_gdf[receivers_gdf["divide_id"].isin(missing_receivers)]
 
             # Compute distances for missing receivers
             missing_distances_df = utils_algo.compute_pairwise_centroid_distances(
@@ -429,29 +409,23 @@ class RegionalizationProcessor:
     @property
     def general_id_name(self):
         """Id_name from the config."""
-        return self.config.general.id_name
+        return self.config.general.id_col.get("divide", None)
 
     @property
     def donor_vpus(self):
         """Determine the VPUs of the donor basins."""
-        df_cwt = utils.read_table(self.config.donor.donor_ngen_cwt_file)
-        return (
-            df_cwt[df_cwt["gage_id"].isin(self.donor_basins)]["vpuid"].unique().tolist()
-        )
+        df_cwt = utils.read_table(self.config.general.gage_divide_cwt_file)
+        return df_cwt[df_cwt["gage_id"].isin(self.donor_basins)]["vpuid"].unique().tolist()
 
     def build_hydrofabric_path(self, vpu1):
         """Build hydrofabric path."""
         file1 = self.config.general.hydrofabric_file[self.vpu]
         if vpu1 != self.vpu:
             # rename the hydrofabric file to match the current VPU
-            file1 = self.config.general.hydrofabric_file[self.vpu].replace(
-                "vpu_" + self.vpu, "vpu_" + vpu1
-            )
+            file1 = self.config.general.hydrofabric_file[self.vpu].replace("vpu_" + self.vpu, "vpu_" + vpu1)
             # make sure the file exists
             if not Path(file1).is_file():
-                raise FileNotFoundError(
-                    f"Hydrofabric file for VPU {vpu1} not found: {file1}"
-                )
+                raise FileNotFoundError(f"Hydrofabric file for VPU {vpu1} not found: {file1}")
         return file1
 
     @lru_cache
@@ -487,9 +461,7 @@ class RegionalizationProcessor:
                 raise ValueError(
                     f"No receivers found in VPU {self.vpu}. Please check the hydrofabric file and donor gage file."
                 )
-        logger.info(
-            f"Total number of donor basins in VPU {self.vpu}: {len(donor_basin_all)}"
-        )
+        logger.info(f"Total number of donor basins in VPU {self.vpu}: {len(donor_basin_all)}")
         return gdf_receivers, gdf_donors
 
     @property
@@ -549,9 +521,7 @@ class RegionalizationProcessor:
 
             # check if the spatial distance data includes all donors and receivers
             # if not, identify the missing donors and receivers, compute the distance for them and add to the existing dataframe
-            logger.info(
-                "Updating existing spatial distance file (if needed) to include all donors and receivers ..."
-            )
+            logger.info("Updating existing spatial distance file (if needed) to include all donors and receivers ...")
             df_spatial_dist, file_changed1 = self.update_spatial_distance_donors(
                 self.general_id_name,
                 self.gdf_donors,
@@ -576,9 +546,7 @@ class RegionalizationProcessor:
                 self.general_id_name,
             )
             end_time = time.time()
-            logger.info(
-                f"Spatial distance computed in {end_time - start_time:.4f} seconds"
-            )
+            logger.info(f"Spatial distance computed in {end_time - start_time:.4f} seconds")
             file_changed = True
         return df_spatial_dist, file_changed
 
@@ -592,9 +560,7 @@ class RegionalizationProcessor:
             if self.dist_file.is_file():
                 backup_file = self.dist_file.with_suffix(".bak")
                 self.dist_file.rename(backup_file)
-                logger.info(
-                    f"Backup of existing spatial distance file created: {backup_file}"
-                )
+                logger.info(f"Backup of existing spatial distance file created: {backup_file}")
 
             # save the spatial distance data
             utils.save_data(df_spatial_dist, self.dist_file, index=True)
@@ -602,12 +568,8 @@ class RegionalizationProcessor:
 
     def get_donors_receivers(self):
         """Get the donors and receivers for a given VPU from the config."""
-        logger.info(
-            f"Total number of donor catchments in vpu {self.vpu}: {len(self.donors)}"
-        )
-        logger.info(
-            f"Total number of receiver catchments in vpu {self.vpu}: {len(self.receivers)}"
-        )
+        logger.info(f"Total number of donor catchments in vpu {self.vpu}: {len(self.donors)}")
+        logger.info(f"Total number of receiver catchments in vpu {self.vpu}: {len(self.receivers)}")
 
         # compute spatial distance file
         df_spatial_dist, file_changed = self.compute_donor_receiver_spatial_distance()
@@ -640,25 +602,17 @@ class RegionalizationProcessor:
             dataset = getattr(self.config.attr_datasets, dataset_name)
             df_attrs = dataset.get_attr_data()
 
-            df_attrs = df_attrs.rename(
-                columns=lambda x: x
-                if x == self.general_id_name
-                else f"{dataset_name}_{x}"
-            )
+            df_attrs = df_attrs.rename(columns=lambda x: x if x == self.general_id_name else f"{dataset_name}_{x}")
 
             # subset the attribute data to only include donors and receivers for the current VPU
             # TODO: add functionality to add additional donors from neighboring VPUs
-            df_attrs = df_attrs[
-                df_attrs[self.general_id_name].isin(self.donors + self.receivers)
-            ]
+            df_attrs = df_attrs[df_attrs[self.general_id_name].isin(self.donors + self.receivers)]
 
             df_attrs_all.append(df_attrs)
 
         # Merge all attribute data frames column-wise, based on divide_id
         df_attrs_all = reduce(
-            lambda left, right: pd.merge(
-                left, right, on=self.general_id_name, how="outer"
-            ),
+            lambda left, right: pd.merge(left, right, on=self.general_id_name, how="outer"),
             df_attrs_all,
         )
 
@@ -667,44 +621,28 @@ class RegionalizationProcessor:
         # move the is_donor column to be the second column
         return df_attrs_all[
             [self.general_id_name, "is_donor"]
-            + [
-                col
-                for col in df_attrs_all.columns
-                if col not in [self.general_id_name, "is_donor"]
-            ]
+            + [col for col in df_attrs_all.columns if col not in [self.general_id_name, "is_donor"]]
         ]
 
     def check_missing_attrs(self, ids: list, list_type: str):
         """Check for missing attributes."""
         if list_type not in ["donors", "receivers"]:
-            raise TypeError(
-                f"Expected either 'donors' or 'receivers'; received '{list_type}'"
-            )
+            raise TypeError(f"Expected either 'donors' or 'receivers'; received '{list_type}'")
 
         if not set(ids).issubset(self.df_attrs_all[self.general_id_name]):
-            logger.warning(
-                f"Not all {list_type} are included in the attribute data for VPU {self.vpu}."
-            )
-            missing_ids = [
-                x
-                for x in ids
-                if x not in self.df_attrs_all[self.general_id_name].values
-            ]
+            logger.warning(f"Not all {list_type} are included in the attribute data for VPU {self.vpu}.")
+            missing_ids = [x for x in ids if x not in self.df_attrs_all[self.general_id_name].values]
             logger.info(f"Missing {list_type}: {missing_ids}")
 
     @property
     def donors_w_attrs(self):
         """Donors with attributes."""
-        return self.df_attrs_all[self.df_attrs_all["is_donor"]][
-            self.general_id_name
-        ].tolist()
+        return self.df_attrs_all[self.df_attrs_all["is_donor"]][self.general_id_name].tolist()
 
     @property
     def receivers_w_attrs(self):
         """Receivers with attributes."""
-        return self.df_attrs_all[~self.df_attrs_all["is_donor"]][
-            self.general_id_name
-        ].tolist()
+        return self.df_attrs_all[~self.df_attrs_all["is_donor"]][self.general_id_name].tolist()
 
     @property
     def number_of_receivers_w_attrs(self):
@@ -716,14 +654,10 @@ class RegionalizationProcessor:
         """Number of donors with attributes."""
         return len(self.donors_w_attrs)
 
-    def check_attrs_in_spatial_distance_data(
-        self, ids: list, list_type: str, df_spatial_dist: pd.DataFrame
-    ):
+    def check_attrs_in_spatial_distance_data(self, ids: list, list_type: str, df_spatial_dist: pd.DataFrame):
         """Check if all donors in attribute data are included in the columns of the spatial distance data."""
         if list_type not in ["donors", "receivers"]:
-            raise TypeError(
-                f"Expected either 'donors' or 'receivers'; received '{list_type}'"
-            )
+            raise TypeError(f"Expected either 'donors' or 'receivers'; received '{list_type}'")
 
         if not set(ids).issubset(df_spatial_dist.columns):
             logger.warning(
@@ -735,18 +669,14 @@ class RegionalizationProcessor:
     @property
     def sorted_df_attrs_all(self):
         """Df_attrs_all sorted by is_donor and divide_id."""
-        return self.df_attrs_all.sort_values(
-            by=["is_donor", self.general_id_name], ascending=[False, True]
-        )
+        return self.df_attrs_all.sort_values(by=["is_donor", self.general_id_name], ascending=[False, True])
 
     def check_percent_missing(self):
         """Check percentage of missing data."""
         df_missing = self.sorted_df_attrs_all.isna().mean() * 100
         if df_missing.sum() > 0:
             logger.warning(f"There are missing data for attributes in vpu {self.vpu}")
-            logger.info(
-                f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}"
-            )
+            logger.info(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
             # plot the missing attribute counts
             po.plot_missing_attr_counts(self.config, self.vpu, self.df_attrs_all)
 
@@ -766,9 +696,7 @@ class RegionalizationProcessor:
 
     def process_attr_data(self):
         """Process the attribute data for a given VPU from the config."""
-        logger.info(
-            f"Processing attribute data for VPU {self.vpu} ... datasets: {self.datasets}"
-        )
+        logger.info(f"Processing attribute data for VPU {self.vpu} ... datasets: {self.datasets}")
 
         # check if all donors/receivers have attributes
         self.check_missing_attrs(self.donors, "donors")
@@ -777,19 +705,11 @@ class RegionalizationProcessor:
         # plot spatial map of attribute data
         po.plot_attribute_spatial_map(self.config, self.vpu, self.sorted_df_attrs_all)
 
-        logger.info(
-            f"Number of donors with attribute data: {self.number_of_donors_w_attrs}"
-        )
-        logger.info(
-            f"Number of receivers with attribute data: {self.number_of_receivers_w_attrs}"
-        )
+        logger.info(f"Number of donors with attribute data: {self.number_of_donors_w_attrs}")
+        logger.info(f"Number of receivers with attribute data: {self.number_of_receivers_w_attrs}")
 
-        self.check_attrs_in_spatial_distance_data(
-            self.donors_w_attrs, "donors", self.dist_spatial
-        )
-        self.check_attrs_in_spatial_distance_data(
-            self.receivers_w_attrs, "receivers", self.dist_spatial
-        )
+        self.check_attrs_in_spatial_distance_data(self.donors_w_attrs, "donors", self.dist_spatial)
+        self.check_attrs_in_spatial_distance_data(self.receivers_w_attrs, "receivers", self.dist_spatial)
 
         # check percent missing
         self.check_percent_missing()
@@ -815,16 +735,12 @@ class RegionalizationProcessor:
             # check if the snow_frac column is present in the attribute data
             n1 = df_attrs["snow_frac"].isna().sum()
             if n1 > 0:
-                logger.warning(
-                    f"There are {n1} missing values in the snow_frac column. Setting them to non-snowy."
-                )
+                logger.warning(f"There are {n1} missing values in the snow_frac column. Setting them to non-snowy.")
                 df_attrs["snow_frac"] = df_attrs["snow_frac"].fillna(0.0)
 
             # create a new column to indicate whether the catchment is snowy
             df_attrs["snowy"] = df_attrs["snow_frac"].apply(
-                lambda x: True
-                if x >= self.config.algorithms.general.min_snow_frac
-                else False
+                lambda x: True if x >= self.config.algorithms.general.min_snow_frac else False
             )
 
         else:
@@ -852,33 +768,21 @@ class RegionalizationProcessor:
     @property
     def pairer_names(self) -> list:
         """Run only those algorithms specified to run in the config file."""
-        return [
-            x for x in self.pairers.keys() if x in self.config.general.algorithm_list
-        ]
+        return [x for x in self.pairers.keys() if x in self.config.general.algorithm_list]
 
     def construct_output_filepath(self, pairer_name: str) -> Path:
         """Construct output filepath."""
-        file_name_str = (
-            f"pairs_{pairer_name}_{self.config.general.domain}_vpu{self.vpu}"
-        )
+        file_name_str = f"pairs_{pairer_name}_{self.config.general.domain}_vpu{self.vpu}"
         return self.config.output.pairs.get_file_path(file_name_str)
 
-    def update_algorithm_config(
-        self, pairer_name: str, df_attrs_all: pd.DataFrame
-    ) -> dict:
+    def update_algorithm_config(self, pairer_name: str, df_attrs_all: pd.DataFrame) -> dict:
         """Update the algorithm config."""
         algorithm_config = self.config.model_dump()["algorithms"][pairer_name]
-        algorithm_config["max_spa_dist"] = self.config.model_dump()["algorithms"][
-            "general"
-        ]["max_spa_dist"]
+        algorithm_config["max_spa_dist"] = self.config.model_dump()["algorithms"]["general"]["max_spa_dist"]
         algorithm_config["njobs"] = self.config.model_dump()["general"]["n_procs"]
         algorithm_config["non_attr_cols"] = ["divide_id", "is_donor", "snowy"]
         algorithm_config["attrs"] = {
-            "main": [
-                x
-                for x in df_attrs_all.columns
-                if x not in algorithm_config["non_attr_cols"]
-            ],
+            "main": [x for x in df_attrs_all.columns if x not in algorithm_config["non_attr_cols"]],
             "base": ["ngen_elevation", "ngen_slope", "ngen_aspect"],
         }
         return algorithm_config

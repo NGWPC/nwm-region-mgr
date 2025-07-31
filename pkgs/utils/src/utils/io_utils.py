@@ -38,6 +38,8 @@ def save_data(
 
         file_path : Union[str, pathlib.Path]
             The target file path where the data will be saved. The file extension determines the format.
+        index : bool
+            Whether to write row indices in the DataFrame (default: False).
 
     Raises:
         Exception

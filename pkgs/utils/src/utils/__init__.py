@@ -2,10 +2,10 @@
 
 from .config_utils import (
     BaseConfig,
+    BaseConfigProcessor,
     BaseGeneralConfig,
     BaseOutputConfig,
     LoggingConfig,
-    load_and_process_config,
 )
 from .dict_utils import remove_nulls
 from .hydrofabric_utils import find_gages_within_buffer
@@ -19,8 +19,9 @@ __all__ = [
     "BaseConfig",
     "BaseGeneralConfig",
     "BaseOutputConfig",
+    "BaseConfigProcessor",
     "LoggingConfig",
-    "load_and_process_config",
+    # "load_and_process_config",
     "remove_nulls",
     "find_gages_within_buffer",
     "read_table",
