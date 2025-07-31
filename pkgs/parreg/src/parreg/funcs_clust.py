@@ -17,7 +17,6 @@ Notes:
 import logging
 import random
 import warnings
-from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
@@ -34,7 +33,7 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 logger = logging.getLogger(__name__)
 
 
-class ClusterPairer(BaseModel, ABC):
+class ClusterPairer(BaseModel):
     """Cluster Pairer."""
 
     config: dict
@@ -67,7 +66,6 @@ class ClusterPairer(BaseModel, ABC):
         """
         return self.df_attr_all[self.config["non_attr_cols"] + self.attrs["main"]]
 
-    @abstractmethod
     def _pair(self):
         """Perform donor-receiver pairing using clustering methods.
 
@@ -122,7 +120,6 @@ class ClusterPairer(BaseModel, ABC):
 
         return processed_receivers_df
 
-    @abstractmethod
     def process_snow_groups(
         self,
         df_attr: pd.DataFrame,

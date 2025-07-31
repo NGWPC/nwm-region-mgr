@@ -8,7 +8,6 @@ This function performs donor-receiver pairing using either Gower's distance (met
 import logging
 import random
 import time
-from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
@@ -21,7 +20,7 @@ from .unsupervised_random_forest import URF
 logger = logging.getLogger(__name__)
 
 
-class DistancePairer(BaseModel, ABC):
+class DistancePairer(BaseModel):
     """Distance Pairer."""
 
     config: dict
@@ -39,7 +38,6 @@ class DistancePairer(BaseModel, ABC):
             "base": self.config["attrs"]["base"],
         }
 
-    @abstractmethod
     def get_receivers_to_process(self, processed_receivers_df: pd.DataFrame) -> list:
         """Receivers that still need to be processed."""
         # check if donors are identified for all receivers
@@ -53,7 +51,6 @@ class DistancePairer(BaseModel, ABC):
         else:
             return recs
 
-    @abstractmethod
     def get_donors_in_receivers_snow_category(
         self, df_attr_for_round: pd.DataFrame, receiver: str
     ) -> list:
@@ -68,7 +65,6 @@ class DistancePairer(BaseModel, ABC):
             & (df_attr_for_round["snowy"] == snow_category_of_receiver.iloc[0])
         ]["divide_id"].to_list()
 
-    @abstractmethod
     def apply_constraints(
         self,
         receiver: str,
@@ -129,7 +125,6 @@ class DistancePairer(BaseModel, ABC):
 
         return [], []
 
-    @abstractmethod
     def identify_donor_slow(
         self,
         receiver: str,
@@ -199,7 +194,6 @@ class DistancePairer(BaseModel, ABC):
 
         return processed_receivers_round_df
 
-    @abstractmethod
     def update_columns_index(
         self, donors_for_round: list, receivers_for_round: list, dist_attr: pd.DataFrame
     ) -> pd.DataFrame:
@@ -208,7 +202,6 @@ class DistancePairer(BaseModel, ABC):
         dist_attr.index = receivers_for_round
         return dist_attr.round(3)
 
-    @abstractmethod
     def get_receivers_to_process_for_round(
         self,
         receivers_to_process: list,
@@ -228,7 +221,6 @@ class DistancePairer(BaseModel, ABC):
         logger.info(f"{len(receivers_to_process)} receivers to be processed this round")
         return receivers_to_process
 
-    @abstractmethod
     def pair(self):
         """Perform donor-receiver pairing using Gower's distance."""
         np.random.seed(5)
