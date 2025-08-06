@@ -31,8 +31,11 @@ class GeneralConfig(BaseGeneralConfig):
     algorithm_list: List[str] = Field()
     """Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch')."""
 
-    run_formreg: bool = Field(default=False)
-    """Whether to run formulation regionalization before parameter regionalization."""
+    # consider_formulation: bool = False
+    # """Whether to consider formulation regionalization results in donor selection."""
+
+    # formulation_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
+    # """Path to the formulation regionalization results file."""
 
 
 class MetricEvalPeriod(BaseModel):
@@ -77,79 +80,67 @@ class DonorConfig(BaseModel):
     metric_threshold: Optional[Dict[str, MetricThreshold]] = None
     """Optional: dictionary of metric thresholds to be used for screening donors."""
 
-    def _check_files(self):
-        """Validate that the required columns are present in donor files."""
-        check_columns(self.general.gage_divide_cwt_file, [self.id_name])
-        check_columns(self.general.donor_gage_file, [self.id_name])
-
-        # Skip metric validation if metric_threshold is empty or None
-        if not self.metric_threshold:
-            return self
-
-        # Check if donor_stats_file is provided and exists
-        if not self.donor_stats_file or not Path(self.donor_stats_file).exists():
-            raise ValueError(f"donor_stats_file not found at: {self.donor_stats_file}")
-
-        # Check if donor_stats_file has the required columns
-        cols_metric = {k.lower() for k in self.metric_threshold.keys()}
-        col_period = {self.metric_eval_period.col_name.lower()}
-        cols_all = cols_metric.union(col_period | {self.id_name.lower()})
-        check_columns(self.donor_stats_file, cols_all)
-
-    def get_qualified_donors(self, vpu: str = None, donors: list = None, id_name: str = "divide_id") -> list:
+    def get_qualified_donors(
+        self,
+        config: BaseModel,
+        vpu: str = None,
+        donors: list = None,
+        # stats_file: str | Path = None,
+        # id_name: str = "divide_id",
+    ) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
         # check if the required files/columns are present
-        self._check_files()
+        # self._check_files()
+
+        divide_id_name = config.general.id_col.get("divide", "divide_id")
+        gage_id_name = config.general.id_col.get("gage", "gage_id")
 
         # determine inital donor gages
-        df_cwt = read_table(self.donor_ngen_cwt_file)
+        df_cwt = read_table(config.general.gage_divide_cwt_file)
         if not donors:
-            if self.donor_gage_file:
-                logger.info(f"Initial donors based on all gages in {self.donor_gage_file}")
-                df = read_table(self.donor_gage_file)
-                donors = df[self.id_name].unique().tolist()
+            if config.general.donor_gage_file:
+                logger.info(f"Initial donors based on all gages in {config.general.donor_gage_file}")
+                df = read_table(config.general.donor_gage_file)
+                donors = df[gage_id_name].unique().tolist()
             else:
-                logger.info(f"Initial donors based on all gages in {self.donor_ngen_cwt_file}")
-                donors = df_cwt[self.id_name].unique().tolist()
+                logger.info(f"Initial donors based on all gages in {config.general.gage_divide_cwt_file}")
+                donors = df_cwt[gage_id_name].unique().tolist()
 
-        # donor_cats = df_cwt[id_name].unique().tolist()
-        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+        # initial donor catchments
+        donor_cats = df_cwt[df_cwt[divide_id_name].isin(donors)][divide_id_name].unique().tolist()
 
         # filter by vpu if provided
         if vpu:
             if "vpuid" in df_cwt.columns:
                 df_cwt = df_cwt[df_cwt["vpuid"] == vpu]
-                donors0 = df_cwt[self.id_name].unique().tolist()
+                donors0 = df_cwt[gage_id_name].unique().tolist()
                 donors = [d for d in donors if d in donors0]
-                donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+                donor_cats = df_cwt[df_cwt[gage_id_name].isin(donors)][divide_id_name].unique().tolist()
                 logger.info(
                     f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments"
                 )
             else:
-                raise ValueError(f"Column 'vpuid' not found in {self.donor_ngen_cwt_file}. Cannot filter by VPU.")
+                raise ValueError(
+                    f"Column 'vpuid' not found in {config.general.gage_divide_cwt_file}. Cannot filter by VPU."
+                )
         else:
             logger.info(f"Number of initial donors from all VPUs: {len(donors)} gages, {len(donor_cats)} catchments")
 
-        # if no metric thresholds are provided, return all gage_ids
-        if not self.metric_threshold:
-            logger.info("No metric thresholds provided. Using all gages in the initial list as donors.")
-            return {"gage_id": donors, id_name: donor_cats}
-
         # read the donor stats file
-        df = read_table(self.donor_stats_file)
+        stats_file = config.general.calval_stats_file
+        df = read_table(stats_file)
 
         # filter based on initial donors
-        df = df[df[self.id_name].isin(donors)]
+        df = df[df[gage_id_name].isin(donors)]
         if df.empty:
             logger.warning(
-                f"No matching gages found in {self.donor_stats_file} for the initial donors. "
-                f"Returning the initial list."
+                f"No matching gages found in {stats_file} for the initial donors. Returning the initial list."
             )
-            return {"gage_id": donors, id_name: donor_cats}
+            return {gage_id_name: donors, divide_id_name: donor_cats}
         else:
             if len(df) < len(donors):
                 logger.warning(
-                    f"Some gages in the initial list are not found in {self.donor_stats_file}. "
+                    f"Some gages in the initial list are not found in {stats_file}. "
                     f"Only {len(df)} gages are found. Using these as donors."
                 )
 
@@ -157,12 +148,12 @@ class DonorConfig(BaseModel):
         if self.metric_eval_period:
             periods = df[self.metric_eval_period.col_name].unique()
             if self.metric_eval_period.value not in periods:
-                raise ValueError(f"Column {self.metric_eval_period.value} not found in {self.donor_stats_file}.")
+                raise ValueError(f"Column {self.metric_eval_period.value} not found in {stats_file}.")
             else:
                 # Filter the DataFrame based on the evaluation period
                 df = df[df[self.metric_eval_period.col_name] == self.metric_eval_period.value]
         else:
-            logger.warning("No evaluation period provided. Using all periods in {self.donor_stats_file}.")
+            logger.warning(f"No evaluation period provided. Using all periods in {stats_file}.")
 
         # filter based on metric thresholds
         for col, threshold in self.metric_threshold.items():
@@ -173,8 +164,15 @@ class DonorConfig(BaseModel):
             if threshold.max is not None:
                 df = df[df[col] <= threshold.max]
 
-        donors = df[self.id_name].unique().tolist()
-        donor_cats = df_cwt[df_cwt[self.id_name].isin(donors)][id_name].unique().tolist()
+        # # filter based on formulation regionalization results if available
+        # if self.consider_formulation:
+        #     if not self.formulation_file:
+        #         raise ValueError("Formulation regionalization results file is not provided.")
+        #     form_file = Path(self.formulation_file[vpu])
+        #     df = df[df[gage_id_name].isin(read_table(form_file)["formulation"].unique())]
+
+        donors = df[gage_id_name].unique().tolist()
+        donor_cats = df_cwt[df_cwt[gage_id_name].isin(donors)][divide_id_name].unique().tolist()
 
         logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments")
 
@@ -182,7 +180,7 @@ class DonorConfig(BaseModel):
         if not donors:
             logger.info("No donors left after filtering. Check the metric thresholds and evaluation period.")
 
-        return {"gage_id": donors, id_name: donor_cats}
+        return {gage_id_name: donors, divide_id_name: donor_cats}
 
 
 class AttrDatasetConfig(BaseModel):
@@ -191,6 +189,7 @@ class AttrDatasetConfig(BaseModel):
     attr_list: Optional[list] = None
     attr_select_file: Optional[Path | str] = None
     attr_data_file: Optional[Path | str] = None
+    base_attr_list: Optional[list] = None
 
     @model_validator(mode="after")
     def validate_either_field_exists(self):
@@ -210,7 +209,11 @@ class AttrDatasetConfig(BaseModel):
             # make sure attr_list is valid
             attrs1 = [x for x in self.attr_list if x not in pq.ParquetFile(self.attr_data_file).schema.names]
             if attrs1:
-                raise ValueError(f"These attributes {attrs1} are not found in {self.attr_data_file}")
+                msg = (
+                    f"These attributes {attrs1} are not found in {self.attr_data_file}. Please check the configuration."
+                )
+                logger.error(msg)
+                raise ValueError(msg)
         else:
             attr_select_path = Path(self.attr_select_file)
             if not attr_select_path.exists():
@@ -260,54 +263,6 @@ class AttrDatasets(BaseModel):
     streamcat: Optional[AttrDatasetConfig] = None
     nhdplus: Optional[AttrDatasetConfig] = None
     camels: Optional[AttrDatasetConfig] = None
-
-
-# class OutputSection(BaseModel):
-#     """Output Manager."""
-
-#     save: bool
-#     path: Path | str
-#     format: Optional[str] = None
-#     plots: Optional[dict] = None
-
-#     @model_validator(mode="after")
-#     def check_format_if_dir(cls, values):
-#         """Check if path is a diretory. If so require a 'format'."""
-#         if not Path(values.path).suffix and not values.format:
-#             raise ValueError(f"'format' must be specified if 'path' is a directory: {Path(values.path)}")
-
-#         return values
-
-#     def get_file_path(self, file_name: Optional[str] = None) -> Path:
-#         """Get the file path for saving the output."""
-#         file_path = Path(self.path)
-#         if file_name:
-#             file_path = file_path / file_name
-#         if not file_path.suffix and self.format:
-#             file_path = file_path.with_suffix(f".{self.format}")
-
-#         return file_path
-
-#     def save_data(self, data: Any, file_name: Optional[str] = None):
-#         """Save the data to the specified path and format."""
-#         if not self.save:
-#             return
-
-#         if not self.format:
-#             raise ValueError(f"'format' must be specified if 'save' is True: {self.path}")
-
-#         file_path = self.get_file_path(file_name)
-
-#         save_data(data, file_path)
-
-
-# class OutputConfig(BaseModel):
-#     """Output Configueer."""
-
-#     pairs: OutputSection
-#     attr_data_final: OutputSection
-#     config_final: OutputSection
-#     spatial_distance: OutputSection
 
 
 class AlgoGeneral(BaseModel):

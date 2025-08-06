@@ -62,23 +62,14 @@ summary_score:
 # Define the computational cost of each formulation to assist in the selection process.
 formulation_cost:
 
-  score_tolerance: 0.05 # Tolerance in percentage for summary score. 
-  file:  # Path to the file containing the computational cost of each formulation
+  #score_tolerance: 0.05 # Tolerance in percentage for summary score. 
+  file:  '{base_dir}/inputs/formulation_costs_secs_per_catchment.csv' # Path to the file containing the computational cost of each formulation
   costs: # List of formulations and their corresponding computational costs
-    nom-cfes: 10
-    nom-cfex: 20
-    nom-snow17-sac: 15
-    nom-ueb-sac: 25
-    nom-snow17-lasam: 18
-    nom-top: 28
-    nom-smp-lasam: 22
-    nom-snow17-top: 30
-    nom-ueb-top: 25
-    nom-smp-cfex: 20
-    nom-snow17-cfes: 10
-    nom-snow17-cfex: 13
-    nom-lasam: 17
-    nom-smp-cfes: 19
+    "noah-owp-modular ueb cfe-x t-route": 10
+    # "noah-owp-modular sac-sma t-route": 20
+    # "noah-owp-modular cfe-x t-route": 30
+    # "noah-owp-modular topmodel t-route": 25
+    # "noah-owp-modular ueb lasam t-route": 30
 
 # Configurations for the output of formulation regionalization
 output:

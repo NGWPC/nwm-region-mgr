@@ -1,6 +1,7 @@
 """Utils for algorithms."""
 
 import concurrent.futures
+import logging
 import warnings
 from pathlib import Path
 
@@ -16,7 +17,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
-
+logger = logging.getLogger(__name__)
 
 # def ensure_projected(
 #     gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070"
@@ -109,33 +110,27 @@ def compute_distances_for_a(
     return result
 
 
-def get_valid_attrs(
-    recs0: list, recs1: list, df_attr0: pd.DataFrame, attrs: dict, config: dict
-) -> pd.DataFrame:
+def get_valid_attrs(recs0: list, recs1: list, df_attr0: pd.DataFrame, attrs: dict, config: dict) -> pd.DataFrame:
     """Get the valid attributes to be processed based on the valid attributes of the first receiver."""
     dt1 = df_attr0[~df_attr0["is_donor"]]
     dt1 = dt1[dt1.divide_id.isin(recs0) & ~dt1.divide_id.isin(recs1)].iloc[0]
     dt1 = dt1[~dt1.index.isin(config["non_attr_cols"])]
     vars = config["non_attr_cols"] + dt1.index[~dt1.isna()].tolist()
     df_attr = df_attr0[vars]
-    vars = [
-        value for value in vars if value in attrs
-    ]  # attrs included for current round
-    vars0 = [
-        value for value in attrs if value not in vars
-    ]  # attrs excluded for current round
+    vars = [value for value in vars if value in attrs]  # attrs included for current round
+    vars0 = [value for value in attrs if value not in vars]  # attrs excluded for current round
 
     if len(vars) > 0:
         if len(vars0) > 0:
-            print("Excluding " + str(len(vars0)) + " attributes: " + ",".join(vars0))
+            logger.info("Excluding " + str(len(vars0)) + " attributes: " + ",".join(vars0))
         else:
-            print("Using all attributes")
+            logger.info("Using all attributes")
 
     # ignore donors & receivers with NA attribute values
     df_attr = df_attr.dropna(subset=[x for x in attrs if x not in vars0], inplace=False)
 
     if df_attr.shape[0] == 0:
-        print("WARNING: no valid attributes found for the following receivers: ")
+        logger.warning("No valid attributes found for the following receivers: ")
 
     return df_attr
 
@@ -150,10 +145,8 @@ def apply_pca(data0: pd.DataFrame, min_var: float = 0.8) -> pd.DataFrame:
     pca.fit(scaled_data)
     n1 = pca.n_components_
 
-    print(f"Number of PCs selected: {n1}")
-    print(
-        f"PCA total portion of variance explained ... {sum(pca.explained_variance_ratio_)}"
-    )
+    logger.info(f"Number of PCs selected: {n1}")
+    logger.info(f"PCA total portion of variance explained ... {sum(pca.explained_variance_ratio_)}")
     x_pca = pca.transform(scaled_data)
 
     # standardize the reduced data (comment out because it is not necessary)
@@ -172,20 +165,40 @@ def apply_pca(data0: pd.DataFrame, min_var: float = 0.8) -> pd.DataFrame:
     return x_pca, w1
 
 
-def apply_donor_constraints(
-    rec: str, donors: list, dists: pd.DataFrame, config: dict, df_attr: pd.DataFrame
-) -> tuple:
+def apply_donor_constraints(rec: str, donors: list, dists: pd.DataFrame, config: dict, df_attr: pd.DataFrame) -> tuple:
     """Apply a few additional constraints to donors identified (e.g., via Gower's distance or other techniques)."""
     # 1. narrow down to donors with the same snowiness category
     # snowy = df_attr.query("id == @rec & tag=='receiver'")['snowy']
     # snowy1 = df_attr.query("id in @donors & tag=='donor'")['snowy']
-    snowy = df_attr[df_attr["divide_id"] == rec]["snowy"].values[0]
-    snowy1 = df_attr[df_attr["divide_id"].isin(donors)]["snowy"].values
-    # ix1 = snowy1.isin(snowy)
+    # snowy = df_attr[df_attr["divide_id"] == rec]["snowy"].values[0]
+    # snowy1 = df_attr[df_attr["divide_id"].isin(donors)]["snowy"].values
+    # # ix1 = snowy1.isin(snowy)
+    # ix1 = np.isin(snowy1, snowy)
+    # if sum(ix1) > 0:
+    #     dists = np.array(dists)[ix1]
+    #     donors = np.array(donors)[ix1]
+
+    # 1. narrow down to donors with the same snowiness category
+    # get receiver's snowiness
+    try:
+        snowy = df_attr.loc[df_attr["divide_id"] == rec, "snowy"].values[0]
+    except IndexError:
+        raise ValueError(f"Receiver '{rec}' not found in attribute dataframe.")
+
+    # Get donor snowiness in same order as donor list
+    try:
+        donor_index = pd.Index(donors)
+        donor_rows = df_attr.set_index("divide_id").loc[donor_index]
+    except KeyError as e:
+        raise ValueError(f"Some donors not found in attribute dataframe: {e}")
+
+    snowy1 = donor_rows["snowy"].values
+
+    # Apply constraint
     ix1 = np.isin(snowy1, snowy)
-    if sum(ix1) > 0:
+    if ix1.sum() > 0:
+        donors = donor_index[ix1].tolist()
         dists = np.array(dists)[ix1]
-        donors = np.array(donors)[ix1]
 
     # 2. further narrow down to those donors within maximum spatial distance defined
     ix1 = dists <= config["max_spa_dist"]
@@ -221,29 +234,43 @@ def assign_donors(
     dist_attr: pd.DataFrame,
     dist_spatial: pd.DataFrame,
     df_attr: pd.DataFrame,
+    # formulation_dict: dict | None = None,
 ) -> pd.DataFrame:
     """Assign donors based on clusters and spatial distance and apply additional constrains."""
     df_donor = pd.DataFrame()
     for receiver in receivers:
         # get spatial distances
-        # dists1 = dist_spatial.loc[rec1, donors]
         dists1 = dist_spatial.loc[receiver, donors].to_numpy()
+        donors1 = donors.copy()
 
-        # apply additional donor constraints
-        if df_attr is None:
-            donors1 = donors.copy()
-        else:
-            donors1, dists1 = apply_donor_constraints(
-                receiver, donors, dists1, config, df_attr
-            )
+        # # filter donors based on the receiver's formulation
+        # if formulation_dict is not None:
+        #     receiver_formulation = formulation_dict.get(receiver, None)
+        #     donor_formulation = {k: formulation_dict[k] for k in donors1 if k in formulation_dict}
+        #     if receiver_formulation:
+        #         if receiver_formulation not in donor_formulation.values() and scenario == "proximity":
+        #             logger.warning(
+        #                 f"Pairing with proximity: receiver {receiver} has formulation {receiver_formulation}, "
+        #                 "but no donors with this formulation found. Formulation will not be considered."
+        #             )
+        #         else:
+        #             # filter donors to those with the same formulation as the receiver
+        #             donors1 = [d for d in donors1 if donor_formulation.get(d) == receiver_formulation]
+        #             dists1 = dists1[[donors.index(donor) for donor in donors1]]
+        #     else:
+        #         logger.warning(
+        #             f"Receiver {receiver} has no formulation defined. Donor selection will not consider formulation."
+        #         )
+
+        # apply additional donor constraints1
+        if df_attr is not None:
+            donors1, dists1 = apply_donor_constraints(receiver, donors1, dists1, config, df_attr)
 
         # if applicable, choose donor with the smallest attribute distances
         if dist_attr is not None:
             ix0 = [donors.index(i) for i in donors1]
             dist_attr = [dist_attr.iloc[i] for i in ix0]
-            ix1 = np.argsort(dist_attr)[
-                range(min(len(dist_attr), config["n_donor_max"]))
-            ]
+            ix1 = np.argsort(dist_attr)[range(min(len(dist_attr), config["n_donor_max"]))]
             dist_attr1 = np.array(dist_attr)[ix1]
             dists1 = dists1[ix1]
             donors1 = np.array(donors1)[ix1]
@@ -259,6 +286,9 @@ def assign_donors(
         dists1 = dists1[range(nd_max)]
         donors1 = donors1[range(nd_max)]
 
+        # if scenario == "proximity":
+        #     print(f"Receiver: {receiver}, Donors: {donors1}, Distances: {dists1}")
+
         # add the donor/receiver pair to the pairing table
         if len(donors1) > 0:
             pair1 = {
@@ -272,9 +302,7 @@ def assign_donors(
 
             # add attribute distance if applicable (e.g., for Gower & URF)
             if dist_attr is not None:
-                dist_attr1 = np.array(dist_attr1)[
-                    ix1
-                ]  # sort according to spatial distance
+                dist_attr1 = np.array(dist_attr1)[ix1]  # sort according to spatial distance
                 dist_attr1 = dist_attr1[
                     range(nd_max)
                 ]  # ignore unneeded donor (likely not necessary given the treatment above)
@@ -354,15 +382,13 @@ def plot_clusters(data1, labels, ndonor):
             fontweight="bold",
         )
 
-    plt.subplots_adjust(
-        left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03
-    )
+    plt.subplots_adjust(left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03)
     plt.show()
 
 
 def calculate_spatial_distance(shp_file: str | Path, donors: list, receivers: list):
     """Calculate spatial distances."""
-    print("compute donor-receiver spatial distance ...")
+    logger.info("Compute donor-receiver spatial distance ...")
 
     # read in shapefile as GeoDataFrame
     shps = gpd.read_file(shp_file, layer="divides")

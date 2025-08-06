@@ -4,6 +4,8 @@ dict_utils.py
 
 Functions:
 - remove_nulls: Recursively remove None values from a dictionary or list.
+- convert_enum_to_value: Recursively convert Enum values to their `.value` (string) for YAML serialization.
+- flatten_dict: Flatten a nested dictionary into a single level with concatenated keys.
 
 """
 
@@ -55,3 +57,25 @@ def convert_enum_to_value(obj: Any) -> Any:
         return obj.value
     else:
         return obj
+
+
+def flatten_dict(d: dict, parent_key: str = "", sep: str = ".") -> dict:
+    """Flatten a nested dictionary.
+
+    Args:
+        d (dict): The dictionary to flatten.
+        parent_key (str): The base key to prepend to the flattened keys.
+        sep (str): The separator to use between keys.
+
+    Returns:
+        dict: A flattened dictionary with concatenated keys.
+
+    """
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)

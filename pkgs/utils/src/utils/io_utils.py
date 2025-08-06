@@ -117,8 +117,13 @@ def read_table(file_path: Path | str, dtype: dict[str, str] | None = None) -> pd
 
     suffix = file_path.suffix.lower()
     if suffix == ".csv":
-        return pd.read_csv(file_path, dtype=dtype)
+        df = pd.read_csv(file_path, dtype=dtype)
     elif suffix == ".parquet":
-        return pd.read_parquet(file_path)
+        df = pd.read_parquet(file_path)
     else:
         raise ValueError(f"Unsupported file format: {suffix}")
+
+    # remove leading/trailing whitespace from column names
+    df.columns = df.columns.str.strip()
+
+    return df

@@ -3,36 +3,57 @@
 process_config.py
 
 Functions:
-- expand_with_vpu: Expand a string with {vpu_list} placeholders using a list of VPU codes.
-- recursive_substitute: Recursively substitute placeholders in a Pydantic model, dictionary, or string.
-- validate_by_section: Validate different sections of the config file using Pydantic models.
-- find_occurrences: Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
-- load_and_validate_config: Load a YAML file, validate its structure, and substitute placeholders.
-- get_donor_basins: Get the donor basins for a given VPU from the config.
+- run_parreg_for_vpu: Run the parameter regionalization process for a given VPU.
+- set_vpu: Set the VPU for processing.
+- get_donors_receivers: Get the donors and receivers for a given VPU from the config.
 - update_spatial_distance_donors: Update existing dataframe for pairwise spatial distance to include new donors.
 - update_spatial_distance_receivers: Update existing dataframe for pairwise spatial distance to include new receivers.
-- get_donors_receivers: Get the donors and receivers for a given VPU from the config.
-- process_attr_data: Process attribute data for donors and receivers, including spatial distances.
-- set_snow_flag: Set a flag indicating whether the catchments are snowy based on the snow fraction.
-- generate_pairings: Generate donor-receiver pairings using specified algorithms.
+- compute_donor_receiver_spatial_distance: Compute spatial distance between donors and receivers.
+- write_spatial_file: Save the spatial distance data.
+- generate_pairing: Generate pairings based on the spatial distance and attributes.
+- process_attr_data: Process attribute data for donors and receivers.
+- set_snow_flag: Set the snow flag in the attribute data.
+- build_hydrofabric_path: Build hydrofabric path for a given VPU.
+- donors_df: Get the donors DataFrame.
+- donors_gdf: Get the donors GeoDataFrame.
+- hydrofabric_gdf: Get the hydrofabric GeoDataFrame.
+- hydrofabric_gdf_3857: Get the hydrofabric GeoDataFrame projected to EPSG:3857.
+- donor_gdf_3857: Get the donors GeoDataFrame projected to EPSG:3857.
+- combined_geom: Get the combined geometry of the hydrofabric.
+- hydrofabric_buffered_polygon: Get the buffered hydrofabric polygon.
+- donor_basins: Get the donor basins for a given VPU.
+- donors: Get the list of donor IDs.
+- receivers: Get the list of receiver IDs.
+- number_of_donors: Get the number of donors.
+- number_of_receiver: Get the number of receivers.
+- dist_file: Build the path for the spatial distance file.
+- dist_spatial: Get the spatial distance DataFrame.
+- set_formulation_dict: Set the {formulation: catchments} dictionary.
+- get_base_attr_list_all: Get the base attribute list from all datasets.
+- df_attrs_all: Get the DataFrame containing all attributes.
+- general_id_name: Get the general ID name from the config.
+- datasets: Get the list of datasets from the config.
 
 """
 
 import logging
 import time
-from functools import lru_cache, reduce
+from functools import cached_property, lru_cache, reduce
 from pathlib import Path
 from typing import Any, Tuple
 
 import geopandas as gpd
 import pandas as pd
-import yaml
-from pydantic import BaseModel, ValidationError
+
+# import yaml
+from formreg.process_config import FormulationRegionalizationProcessor as FRP
+
+# from pydantic import BaseModel, ValidationError
 from shapely.geometry import Point
 from shapely.ops import unary_union
-from utils import BaseConfigProcessor
+from utils import BaseConfigProcessor, read_table
 
-from . import config_schema as cs
+# from . import config_schema as cs
 from . import plot_outputs as po
 from . import utils, utils_algo
 from .funcs_clust import (
@@ -49,197 +70,92 @@ logger = logging.getLogger(__name__)
 class RegionalizationProcessor(BaseConfigProcessor):
     """Regionalization Processor."""
 
-    # def __init__(self, config_file: str | Path, sample_size: int = None):
-    #     """Initialize regionalzation processor."""
-    #     self.config_file = config_file
-    #     self.config = self.load_and_validate_config
-    #     self.sample_size = sample_size
-
-    # def expand_with_vpu(self, string_with_vpu: str, context: dict) -> dict:
-    #     """Expand a string with {vpu_list} placeholders.
-
-    #     Expand a string with {vpu_list} placeholders using a list of VPU codes from the context.
-    #     Returns a dictionary where keys are vpu codes and values are the formatted strings.
-    #     """
-    #     if "{vpu_list}" not in string_with_vpu or "vpu_list" not in context:
-    #         return {"default": string_with_vpu.format(**context)}
-
-    #     return {vpu: string_with_vpu.format(**{**context, "vpu_list": vpu}) for vpu in context["vpu_list"]}
-
-    # """     def recursive_substitute(self, obj: Any, context: dict) -> Any:
-    #         """Recursively substitute placeholders.
-
-    #         Recursively substitute placeholders in config, be it a Pydantic model, dictionary, or string.
-
-    #         Args:
-    #             obj: A Pydantic model instance, a dictionary, or a string.
-    #             context: A dictionary of substitution variables.
-
-    #         Returns:
-    #             The Pydantic model instance, dictionary or string after substitution
-
-    #         """
-    #         if isinstance(obj, BaseModel):
-    #             # Convert Pydantic model to dict, substitute, then reconstruct the model
-    #             data = obj.model_dump()
-    #             substituted = self.recursive_substitute(data, context)
-    #             return obj.__class__(**substituted)
-
-    #         elif isinstance(obj, dict):
-    #             return {k: self.recursive_substitute(v, context) for k, v in obj.items()}
-
-    #         elif isinstance(obj, str):
-    #             try:
-    #                 if "{vpu_list}" in obj and "vpu_list" in context:
-    #                     # If the string contains {vpu} and vpu_list is in context, expand it and substitute the placeholders
-    #                     return self.expand_with_vpu(obj, context)
-    #                 else:  # Otherwise, just substitute the placeholders
-    #                     return obj.format(**context)
-    #             except KeyError:
-    #                 return obj  # leave unchanged if context is incomplete
-
-    #         else:
-    #             return obj  # return as-is if not str, dict, or BaseModel
-
-    #     def validate_by_section(self, config: dict) -> dict:
-    #         """Perform pydantic validation separately for different sections.
-
-    #         Validate different sections of the config file to allow specific validation for certain sections.
-
-    #         Args:
-    #             config: dictionary of config prior to validation
-
-    #         Returns:
-    #             Dictionary of config after validation
-
-    #         """
-    #         # Define the mapping of section names to Pydantic models
-    #         section_map = {
-    #             "general": cs.GeneralConfig,
-    #             "donor": cs.DonorConfig,
-    #             "attr_datasets": cs.AttrDatasets,
-    #             "output": cs.OutputConfig,
-    #             "algorithms": cs.AlgorithmConfig,
-    #         }
-
-    #         # Define the mapping of algorithm names to Pydantic models
-    #         algorithm_map = {
-    #             "general": cs.AlgoGeneral,
-    #             "gower": cs.Gower,
-    #             "urf": cs.URF,
-    #             "kmeans": cs.KMeans,
-    #             "kmedoids": cs.KMedoids,
-    #             "hdbscan": cs.HDBSCAN,
-    #             "birch": cs.Birch,
-    #         }
-
-    #         valid_config = dict()
-    #         for section_name, section_content in config.items():
-    #             if section_name != "algorithms":
-    #                 section = section_map[section_name]
-    #                 valid_config[section_name] = section(**section_content)
-    #             else:
-    #                 # Loop through each algorithm
-    #                 general = section_content["general"]
-    #                 validated_algorithms = {}
-    #                 for alg_name, alg_specific in section_content.items():
-    #                     alg1 = algorithm_map[alg_name]
-
-    #                     if alg_name == "general":
-    #                         validated_algorithms[alg_name] = alg1(**alg_specific)
-    #                     if alg_name not in algorithm_map:
-    #                         raise ValueError(f"No model defined for algorithm: {alg_name}")
-
-    #                     # Merge general algorithm into specific algorithm
-    #                     merged = {**general, **alg_specific}
-
-    #                     # Validate
-    #                     validated_algorithms[alg_name] = alg1(**merged)
-
-    #                 valid_config[section_name] = validated_algorithms
-
-    #         return valid_config
-
-    #     def find_occurrences(self, obj: Any, target: str, path: str = "") -> list:
-    #         """Recursively find occurrences of a target string in a Pydantic model, dictionary, or list.
-
-    #         Args:
-    #             obj: The object to search (can be a Pydantic model, dictionary, or list).
-    #             target: The target string to find.
-    #             path: The current path in the object structure (used for recursion).
-
-    #         Returns:
-    #             A list of paths where the target string occurs.
-
-    #         """
-    #         occurrences = []
-
-    #         if isinstance(obj, BaseModel):
-    #             obj = obj.model_dump(exclude_unset=True)
-
-    #         if isinstance(obj, dict):
-    #             for k, v in obj.items():
-    #                 new_path = f"{path}.{k}" if path else k
-    #                 occurrences.extend(self.find_occurrences(v, target, new_path))
-
-    #         elif isinstance(obj, list):
-    #             for i, item in enumerate(obj):
-    #                 new_path = f"{path}[{i}]"
-    #                 occurrences.extend(self.find_occurrences(item, target, new_path))
-
-    #         elif isinstance(obj, str):
-    #             if target in obj:
-    #                 occurrences.append(path)
-
-    #         return occurrences
-
-    #     @property
-    #     @lru_cache
-    #     def load_and_validate_config(self):
-    #         """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
-
-    #         Args:
-    #             file_path: path to the config file
-
-    #         """
-    #         try:
-    #             with open(Path(self.config_file), "r") as file:
-    #                 data = yaml.safe_load(file)
-
-    #             # validate the config
-    #             validated_config = self.validate_by_section(data)
-    #             config = cs.Config(**validated_config)
-
-    #             # resolve placeholders in the config
-    #             context = {
-    #                 "domain": config.general.domain,
-    #                 "run_name": config.general.run_name,
-    #                 "base_dir": config.general.base_dir,
-    #                 "vpu_list": config.general.vpu_list,
-    #             }
-    #             config = self.recursive_substitute(config, context)
-
-    #             # additional validation after substitution
-    #             # config.donor.check_files()
-    #             out = config.output.config_final
-    #             if out.save:
-    #                 logger.info(f"Saving config to {out.path}")
-    #                 if Path(out.path).is_file():
-    #                     utils.save_data(config, Path(out.path))
-    #                 elif Path(out.path).is_dir():
-    #                     utils.save_data(config, Path(out.path, "config_final." + out.format))
-
-    #             return config
-
-    #         except ValidationError as e:
-    #             raise Exception(f"Validation Error: {e}")
-    #         except Exception as e:
-    #             raise Exception(f"Error loading YAML file: {e}")
-    #  """
     def set_vpu(self, vpu: str):
         """Set the vpu."""
         self.vpu = vpu
         self.donor_receiver_gdfs.cache_clear()
+        if "formulation_dict" in self.__dict__:
+            del self.__dict__["formulation_dict"]
+
+    def get_formulation_file_name(self, vpu: str, config: Any) -> str:
+        """Get the formulation file name for a given VPU."""
+        co = config.output.get("formulation", None)
+        if co is None:
+            logger.warning("No 'formulation' section found in formulation output config.")
+            return ""
+
+        return co.get_file_path(vpu=vpu)
+
+    def expand_form_config_for_donor_vpu(self, vpu: str, config: Any) -> Any:
+        """Expand the formulation config for donor VPUs.
+
+        This function modifies formulation config to encompass all donor VPUs as needed.
+        """
+        config1 = config.copy()
+
+        def add_entry_if_missing(d: dict, vpu_key: str) -> dict:
+            if vpu_key not in d:
+                first_key = next(iter(d))
+                d[vpu_key] = d[first_key].replace(first_key, vpu_key)
+            return d
+
+        config1.general.ngen_hydrofabric_file = add_entry_if_missing(config.general.ngen_hydrofabric_file, vpu)
+        config1.output.get("summary_score").stem = add_entry_if_missing(config.output.get("summary_score").stem, vpu)
+        config1.output.get("formulation").stem = add_entry_if_missing(config.output.get("formulation").stem, vpu)
+
+        # save the expanded configuration
+        if config1 != config:
+            config1.output["config_final"].save_to_file(config1, data_str="Expanded final configuration")
+
+        return config1
+
+    def run_parreg_for_vpu(self, vpu: str, frp: FRP) -> None:
+        """Run the parameter regionalization process for a given VPU."""
+        # set the VPU for processing
+        self.set_vpu(vpu)
+
+        # if pair files already exist for all pairing algorithms, skip the process
+        co = self.config.output.get("pairs", None)
+        if co is None:
+            logger.warning("No 'pairs' section found in output config.")
+            return
+
+        all_exist = True  # Assume all exist until proven otherwise
+        for pairer_name in self.pairer_names:
+            outfile = co.get_file_path(vpu=self.vpu, algorithm=pairer_name)
+            if not outfile.exists():
+                all_exist = False
+                logger.info(f"Missing pair file for VPU {self.vpu}, algorithm {pairer_name}. Will proceed.")
+                break  # No need to check further, we know not all exist
+
+        if all_exist:
+            logger.info(f"All pair files already exist for VPU {self.vpu}, skipping parameter regionalization.")
+            return
+
+        logger.info(f"========= Processing parameter regionalization for VPU: {vpu} =========")
+
+        # get donors and receivers
+        with self.timing_block("get_donors_receivers"):
+            self.get_donors_receivers()
+
+        # run formulation regionalization for all donor VPUs
+        for vpu1 in self.donor_vpus:
+            frp.config = self.expand_form_config_for_donor_vpu(vpu1, frp.config)
+            formulation_file = self.get_formulation_file_name(vpu1, frp.config)
+            frp.run_formreg_for_vpu(vpu1, formulation_file)
+
+        # process attribute data
+        with self.timing_block("process_attr_data"):
+            self.process_attr_data()
+
+        # set snow flag
+        df_attr_all = self.set_snow_flag(self.sorted_df_attrs_all)
+
+        # generate pairings
+        with self.timing_block("generate_pairing"):
+            self.generate_pairing(df_attr_all, self.dist_spatial, frp.config)
+
+        logger.info(f"Parameter regionalization for VPU {vpu} completed.")
 
     @property
     @lru_cache
@@ -419,10 +335,10 @@ class RegionalizationProcessor(BaseConfigProcessor):
 
     def build_hydrofabric_path(self, vpu1):
         """Build hydrofabric path."""
-        file1 = self.config.general.hydrofabric_file[self.vpu]
+        file1 = self.config.general.ngen_hydrofabric_file[self.vpu]
         if vpu1 != self.vpu:
             # rename the hydrofabric file to match the current VPU
-            file1 = self.config.general.hydrofabric_file[self.vpu].replace("vpu_" + self.vpu, "vpu_" + vpu1)
+            file1 = self.config.general.ngen_hydrofabric_file[self.vpu].replace("vpu_" + self.vpu, "vpu_" + vpu1)
             # make sure the file exists
             if not Path(file1).is_file():
                 raise FileNotFoundError(f"Hydrofabric file for VPU {vpu1} not found: {file1}")
@@ -433,19 +349,22 @@ class RegionalizationProcessor(BaseConfigProcessor):
         """Get valid donor and receiver geodataframes."""
         # loop through the VPUs of the donor basins to get donor & receiver catchments
         # note that the donor basins may be from multiple VPUs, but receivers are only from the current VPU
+        gage_id_name = self.config.general.id_col.get("gage", "gage_id")
+        divide_id_name = self.config.general.id_col.get("divide", "divide_id")
+
         gdf_donors = gpd.GeoDataFrame()
         gdf_receivers = gpd.GeoDataFrame()
         donor_basin_all = []
         for vpu1 in self.donor_vpus:
             # first get the qualified donors
-            donor_dict = self.config.donor.get_qualified_donors(vpu1, self.donor_basins)
-            donors0 = donor_dict[self.general_id_name]
-            donor_basin_all.extend(donor_dict[self.config.donor.id_name])
+            donor_dict = self.config.donor.get_qualified_donors(self.config, vpu1, self.donor_basins)
+            donors0 = donor_dict[divide_id_name]
+            donor_basin_all.extend(donor_dict[gage_id_name])
 
             file1 = self.build_hydrofabric_path(vpu1)
-            gdf = gpd.read_file(file1, layer="divides")
-            gdf1 = gdf[gdf[self.general_id_name].isin(donors0)]
-            donors = gdf1[self.general_id_name].tolist()
+            gdf = gpd.read_file(file1, layer=self.config.general.layer_name.get("ngen", "divides"))
+            gdf1 = gdf[gdf[divide_id_name].isin(donors0)]
+            donors = gdf1[divide_id_name].tolist()
 
             # check if all donors are in the hydrofabric
             donors_missing = set(donors0) - set(donors)
@@ -455,13 +374,15 @@ class RegionalizationProcessor(BaseConfigProcessor):
             # gather donors and receivers in GeoDataFrame
             gdf_donors = pd.concat([gdf_donors, gdf1])
             if vpu1 == self.vpu:
-                gdf_receivers = gdf[~gdf[self.general_id_name].isin(donors)]
+                gdf_receivers = gdf[~gdf[divide_id_name].isin(donors)]
 
             if gdf_receivers.empty:
                 raise ValueError(
                     f"No receivers found in VPU {self.vpu}. Please check the hydrofabric file and donor gage file."
                 )
+
         logger.info(f"Total number of donor basins in VPU {self.vpu}: {len(donor_basin_all)}")
+
         return gdf_receivers, gdf_donors
 
     @property
@@ -478,10 +399,10 @@ class RegionalizationProcessor(BaseConfigProcessor):
     def gdf_donors(self) -> gpd.GeoDataFrame:
         """Geodataframe of donors."""
         _, gdf_donors = self.donor_receiver_gdfs()
-        if self.sample_size is not None:
-            gdf_donors = gdf_donors.sample(
-                n=self.sample_size, replace=False, random_state=50
-            )  # randomly sample a small number of receivers for testing
+        # if self.sample_size is not None:  #sample_size should not be applied to donors
+        #     gdf_donors = gdf_donors.sample(
+        #         n=self.sample_size, replace=False, random_state=50
+        #     )  # randomly sample a small number of receivers for testing
         return gdf_donors
 
     @property
@@ -507,11 +428,58 @@ class RegionalizationProcessor(BaseConfigProcessor):
     @property
     def dist_file(self) -> Path:
         """Build dist file path."""
-        out = self.config.output.spatial_distance
+        out = self.config.output.get("spatial_distance", None)
         return Path(
             out.path,
             f"donor_receiver_dist_{self.config.general.domain}_vpu{self.vpu}.{out.format}",
         )
+
+    def set_formulation_dict(self, form_config: Any):
+        """Get the formulation lookup table."""
+        df_form_all = pd.DataFrame()
+        for vpu in self.donor_vpus:
+            formulation_file = self.get_formulation_file_name(vpu, form_config)
+
+            if not formulation_file:
+                msg = f"No formulation file found for VPU {vpu}. Exiting ..."
+                logger.error(msg)
+                raise FileNotFoundError(msg)
+
+            if not Path(formulation_file).is_file():
+                msg = f"Formulation file not found: {formulation_file}. Exiting ..."
+                logger.error(msg)
+                raise FileNotFoundError(msg)
+
+            df_form = read_table(formulation_file, dtype={self.general_id_name: str})
+            df_form_all = pd.concat([df_form_all, df_form])
+
+        # filter df_form_all to only include donors and receivers
+        df_form_all = df_form_all[df_form_all[self.general_id_name].isin(self.donors + self.receivers)]
+
+        # formulation dictionary
+        form_dict = df_form_all.groupby("formulation")["divide_id"].apply(list).to_dict()
+
+        # check if all donors and receivers have a formulation
+        donors_missing = set(self.donors) - set(df_form_all[self.general_id_name].values)
+        if donors_missing:
+            logger.warning(
+                f"Some donors are missing formulations: {donors_missing}. These donors will not be used in the pairing"
+            )
+
+        # check if all receivers have a formulation
+        receivers_missing = set(self.receivers) - set(df_form_all[self.general_id_name].values)
+        if receivers_missing:
+            logger.warning(
+                f"Some receivers are missing formulations: {receivers_missing}. "
+                f"These receivers will be paired with donors without considering formulations."
+            )
+
+        # add donors and receivers with missing formulation to form_dict, assigning formulation as 'unknown'
+        if donors_missing or receivers_missing:
+            form_dict["unknown"] = list(donors_missing) + list(receivers_missing)
+            logger.info("Assigning 'unknown' formulation to donors and receivers with missing formulations")
+
+        self.formulation_dict = form_dict
 
     def compute_donor_receiver_spatial_distance(self):
         """Compute spatial distance."""
@@ -552,7 +520,8 @@ class RegionalizationProcessor(BaseConfigProcessor):
 
     def write_spatial_file(self, df_spatial_dist: pd.DataFrame, file_changed: bool):
         """Save the spatial distance data."""
-        if self.config.output.spatial_distance.save and file_changed:
+        sd = self.config.output.get("spatial_distance", None)
+        if sd and sd.save and file_changed:
             if not self.dist_file.parent.is_dir():
                 self.dist_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -568,8 +537,8 @@ class RegionalizationProcessor(BaseConfigProcessor):
 
     def get_donors_receivers(self):
         """Get the donors and receivers for a given VPU from the config."""
-        logger.info(f"Total number of donor catchments in vpu {self.vpu}: {len(self.donors)}")
-        logger.info(f"Total number of receiver catchments in vpu {self.vpu}: {len(self.receivers)}")
+        logger.info(f"Total number of donor catchments in VPU {self.vpu}: {len(self.donors)}")
+        logger.info(f"Total number of receiver catchments in VPU {self.vpu}: {len(self.receivers)}")
 
         # compute spatial distance file
         df_spatial_dist, file_changed = self.compute_donor_receiver_spatial_distance()
@@ -624,6 +593,18 @@ class RegionalizationProcessor(BaseConfigProcessor):
             + [col for col in df_attrs_all.columns if col not in [self.general_id_name, "is_donor"]]
         ]
 
+    @cached_property
+    def get_base_attr_list_all(self) -> list:
+        """Get the base attribute list from all datasets."""
+        base_attr_list = []
+        for dataset_name in self.datasets:
+            attrs = getattr(self.config.attr_datasets, dataset_name).base_attr_list
+            # attrs = dataset.get_selected_base_attrs()
+            if attrs is not None:
+                base_attr_list.extend([dataset_name + "_" + x for x in attrs])
+
+        return list(set(base_attr_list))
+
     def check_missing_attrs(self, ids: list, list_type: str):
         """Check for missing attributes."""
         if list_type not in ["donors", "receivers"]:
@@ -632,7 +613,7 @@ class RegionalizationProcessor(BaseConfigProcessor):
         if not set(ids).issubset(self.df_attrs_all[self.general_id_name]):
             logger.warning(f"Not all {list_type} are included in the attribute data for VPU {self.vpu}.")
             missing_ids = [x for x in ids if x not in self.df_attrs_all[self.general_id_name].values]
-            logger.info(f"Missing {list_type}: {missing_ids}")
+            logger.debug(f"Missing {list_type}: {missing_ids}")
 
     @property
     def donors_w_attrs(self):
@@ -664,35 +645,72 @@ class RegionalizationProcessor(BaseConfigProcessor):
                 f"Not all {list_type} in the attribute data are present in the spatial distance data for VPU {self.vpu}."
             )
             missing_donor_ids = [x for x in ids if x not in df_spatial_dist.columns]
-            logger.info(f"Missing {list_type}: {missing_donor_ids}")
+            logger.debug(f"Missing {list_type}: {missing_donor_ids}")
 
     @property
     def sorted_df_attrs_all(self):
-        """Df_attrs_all sorted by is_donor and divide_id."""
-        return self.df_attrs_all.sort_values(by=["is_donor", self.general_id_name], ascending=[False, True])
+        """Df_attrs_all sorted by is_donor, _missing_count, and divide_id."""
+        # add column to count missing values per row
+        df_sorted = self.df_attrs_all.copy()
+        df_sorted["_missing_count"] = df_sorted.isnull().sum(axis=1)
+
+        # sort the DataFrame by is_donor, _missing_count, and divide_id
+        df_sorted = df_sorted.sort_values(
+            by=["is_donor", "_missing_count", self.general_id_name], ascending=[False, True, True]
+        )
+
+        # drop '_missing_count' column
+        df_sorted = df_sorted.drop(columns=["_missing_count"])
+
+        return df_sorted
 
     def check_percent_missing(self):
         """Check percentage of missing data."""
         df_missing = self.sorted_df_attrs_all.isna().mean() * 100
         if df_missing.sum() > 0:
-            logger.warning(f"There are missing data for attributes in vpu {self.vpu}")
-            logger.info(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
+            logger.warning(
+                f"There are missing data for attributes in vpu {self.vpu}. "
+                f"Check the missing attribute counts plot given below."
+            )
+            logger.debug(f"Missing data percentage for each attribute:\n{df_missing.loc[df_missing > 0]}")
             # plot the missing attribute counts
             po.plot_missing_attr_counts(self.config, self.vpu, self.df_attrs_all)
 
     def save_attribute_data(self):
         """Save the attribute data."""
-        out1 = self.config.output.attr_data_final
-        if out1.save:
-            if not Path(out1.path).is_dir():
-                Path(out1.path).mkdir(parents=True, exist_ok=True)
-            out_file = Path(
-                out1.path,
-                f"attr_{self.config.general.domain}_vpu{self.vpu}.{out1.format}",
-            )
+        out = self.config.output["attr_data_final"]
+        out.save_to_file(
+            self.sorted_df_attrs_all,
+            vpu=self.vpu,
+            data_str=f"Final Attribute Data (VPU {self.vpu})",
+            use_stem_suffix=False,
+        )
 
-            logger.info(f"Saving attribute data to {out_file}")
-            utils.save_data(self.sorted_df_attrs_all, out_file)
+    def plot_attribute_data(self):
+        """Plot attribute data."""
+        out = self.config.output["attr_data_final"]
+        columns_to_plot = out.plots.get("columns_to_plot", None)
+        if out.plots.get("spatial_map", False) or out.plots.get("histogram", False):
+            if columns_to_plot is None:
+                msg = "No columns to plot specified in the config for attr_data_final. Skipping plot."
+                logger.warning(msg)
+            else:
+                df_attr = self.sorted_df_attrs_all.copy()
+                if out.plots.get("spatial_map", False):
+                    # merge geometry with attribute DataFrame
+                    divide_id_col = self.config.general.id_col.get("divide", "divide_id")
+                    df_attr = df_attr.merge(
+                        self.get_vpu_gdf()[[divide_id_col, "geometry"]], on=divide_id_col, how="right"
+                    )
+                    df_attr = gpd.GeoDataFrame(df_attr, geometry="geometry", crs=self.get_vpu_gdf().crs)
+
+                plot_dict = {
+                    "vpu": self.vpu,
+                    "var_str": "Attribute Data",
+                    "columns": columns_to_plot,
+                    "ncols": 3,
+                }
+                out.plot_data(df_attr, plot_dict)
 
     def process_attr_data(self):
         """Process the attribute data for a given VPU from the config."""
@@ -703,7 +721,7 @@ class RegionalizationProcessor(BaseConfigProcessor):
         self.check_missing_attrs(self.receivers, "receivers")
 
         # plot spatial map of attribute data
-        po.plot_attribute_spatial_map(self.config, self.vpu, self.sorted_df_attrs_all)
+        self.plot_attribute_data()
 
         logger.info(f"Number of donors with attribute data: {self.number_of_donors_w_attrs}")
         logger.info(f"Number of receivers with attribute data: {self.number_of_receivers_w_attrs}")
@@ -772,34 +790,162 @@ class RegionalizationProcessor(BaseConfigProcessor):
 
     def construct_output_filepath(self, pairer_name: str) -> Path:
         """Construct output filepath."""
-        file_name_str = f"pairs_{pairer_name}_{self.config.general.domain}_vpu{self.vpu}"
-        return self.config.output.pairs.get_file_path(file_name_str)
+        # file_name_str = f"pairs_{pairer_name}_{self.config.general.domain}_vpu{self.vpu}"
+        return self.config.output.pairs._get_file_path(self.vpu)
 
     def update_algorithm_config(self, pairer_name: str, df_attrs_all: pd.DataFrame) -> dict:
         """Update the algorithm config."""
-        algorithm_config = self.config.model_dump()["algorithms"][pairer_name]
-        algorithm_config["max_spa_dist"] = self.config.model_dump()["algorithms"]["general"]["max_spa_dist"]
-        algorithm_config["njobs"] = self.config.model_dump()["general"]["n_procs"]
-        algorithm_config["non_attr_cols"] = ["divide_id", "is_donor", "snowy"]
+        id_name = self.config.general.id_col.get("divide", "divide_id")
+        config = self.config.model_dump()
+
+        if pairer_name in config["algorithms"]:
+            algorithm_config = config["algorithms"][pairer_name]
+        else:  # if the pairer is not in the config (e.g., proximity), use the general algorithm config
+            algorithm_config = config["algorithms"]["algo_general"].copy()
+
+        algorithm_config["max_spa_dist"] = config["algorithms"]["algo_general"]["max_spa_dist"]
+        algorithm_config["njobs"] = config["general"]["n_procs"]
+        algorithm_config["non_attr_cols"] = [id_name, "is_donor", "snowy"]
+
+        # add attributes to algorithm_config
+        main_attrs = [x for x in df_attrs_all.columns if x not in algorithm_config["non_attr_cols"]]
+        base_attrs = self.get_base_attr_list_all
+        # make sure base_attrs are in main_attrs
+        missed_base_attrs = set(base_attrs) - set(main_attrs)
+        if missed_base_attrs:
+            logger.warning(
+                f"Base attributes {missed_base_attrs} are not present in the main attributes. "
+                "They will not be used in the pairing."
+            )
+        # filter base_attrs to only include those that are in main_attrs
+        base_attrs = [x for x in base_attrs if x in main_attrs]
+
         algorithm_config["attrs"] = {
-            "main": [x for x in df_attrs_all.columns if x not in algorithm_config["non_attr_cols"]],
-            "base": ["ngen_elevation", "ngen_slope", "ngen_aspect"],
+            "main": main_attrs,
+            "base": base_attrs,
         }
+
         return algorithm_config
 
-    def generate_pairing(
+    def plot_pairing_outputs(self, algorithm: str, df_pairs: pd.DataFrame = None, d1: dict = None) -> None:
+        """Plot the donor-receiver distances for the given algorithm.
+
+        Args:
+            algorithm: algorithm name
+            df_pairs: DataFrame containing the donor-receiver pairs
+            d1: dictionary containing additional parameters for plotting
+
+        """
+        # output config for pairs
+        co = self.config.output.get("pairs", None)
+
+        # read the pairing results from file if df_pairs is not provided
+        if df_pairs is None or df_pairs.empty:
+            outfile = co.get_file_path(vpu=self.vpu, algorithm=algorithm)
+            if not outfile.exists():
+                msg = f"Pairing results file does not exist: {outfile}. Please run the pairing first."
+                logger.error(msg)
+                raise FileNotFoundError(msg)
+            else:
+                logger.info(f"Loading processed pairing data from file: {outfile}")
+                df_pairs = utils.read_table(outfile)
+
+        columns_to_plot = co.plots.get("columns_to_plot", ["distSpatial", "distAttr"])
+        plot_dict = {
+            "vpu": self.vpu,
+            "algorithm": algorithm,
+            "var_str": "Donor-Receiver Distances",
+            "columns": columns_to_plot,
+            "ncols": min(3, len(columns_to_plot)),
+        }
+
+        # convert df_pairs to GeoDataFrame to plot spatial map
+        if co.plots and co.plots.get("spatial_map", False):
+            # if "geometry" not in df_pairs.columns:
+            id_col = self.general_id_name
+
+            # merge df_pairs with the VPU geodataframe to get the geometry
+            gdf = self.get_vpu_gdf()
+
+            # get donor IDs not in pairs
+            donor_ids = set(self.donors) - set(df_pairs[id_col].unique())
+
+            # merge df_pairs with gdf to get the geometry
+            df_pairs = df_pairs.merge(gdf, on=id_col, how="right")
+            df_pairs = gpd.GeoDataFrame(df_pairs, geometry="geometry", crs=gdf.crs)
+
+            # assign zero spatial and attribute distances to donor rows
+            if donor_ids:
+                if "distSpatial" in df_pairs.columns:
+                    if "distAttr" in df_pairs.columns:
+                        df_pairs.loc[df_pairs[id_col].isin(donor_ids), ["distSpatial", "distAttr"]] = 0
+                    else:
+                        df_pairs.loc[df_pairs[id_col].isin(donor_ids), "distSpatial"] = 0
+
+        co.plot_data(df_pairs, plot_dict)
+
+    def supplementary_pairing(
         self,
+        pairer_name: str,
         df_attr_all: pd.DataFrame,
         dist_spatial: pd.DataFrame,
-    ):
+        processed_receivers_df: pd.DataFrame = None,
+        receivers_tobe_processed: list = None,
+    ) -> pd.DataFrame:
+        """Conduct supplementary donor-receiver pairing.
+
+        Currently only pairing via spatial proximity is supported.
+
+        Args:
+            pairer_name: name of the pairing algorithm to use (e.g., "proximity")
+            df_attr_all: dataframe containing the full attribute data for all receivers and donors
+            dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
+            processed_receivers_df: dataframe containing the already processed receivers
+            receivers_tobe_processed: list of receivers to be processed
+
+        Returns:
+            processed_receivers_df: dataframe containing the updated receiver-donor pairs.
+
+        """
+        if receivers_tobe_processed is None:
+            return processed_receivers_df
+
+        # determine the receivers to be processed
+        if processed_receivers_df is not None:
+            receivers_processed = processed_receivers_df[self.general_id_name].tolist()
+            receivers_tobe_processed = list(set(receivers_tobe_processed) - set(receivers_processed))
+
+        new_receivers_df = processed_receivers_df.copy()
+        if receivers_tobe_processed:
+            logger.info(f"Processing {len(receivers_tobe_processed)} receivers using {pairer_name} algorithm.")
+
+            # initialize the pairer
+            if pairer_name not in self.pairers or pairer_name != "proximity":
+                raise ValueError(f"Pairer {pairer_name} is not supported or not selected in the configuration.")
+
+            algorithm_config = self.update_algorithm_config(pairer_name, df_attr_all)
+            pairer = self.pairers[pairer_name](
+                config=algorithm_config,
+                df_attr_all=df_attr_all,
+                dist_spatial=dist_spatial,
+            )
+
+            # conduct pairing for the remaining receivers
+            df_new = pairer.pair(receivers=receivers_tobe_processed)
+            new_receivers_df = pd.concat([new_receivers_df, df_new])
+
+        return new_receivers_df
+
+    def generate_pairing(self, df_attr_all: pd.DataFrame, dist_spatial: pd.DataFrame, form_config: Any):
         """Conduct donor-receiver pairing for a given VPU based on the configuration.
 
-            For a given VPU, generate donor-receiver pairing results for each algorithm selected in the configuration,
-            based on the attributes and spatial distance DataFrame.
+        For a given VPU, generate donor-receiver pairing results for each algorithm selected in the configuration,
+        based on the attributes and spatial distance DataFrame.
 
-            Args:
-                df_attr_all: dataframe containing the full attribute data for all receivers and donors
-                dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
+        Args:
+            df_attr_all: dataframe containing the full attribute data for all receivers and donors
+            dist_spatial: dataframe containing the pair-wise spatial distance between donors and receivers
+            form_config: configuration object containing the settings for formulation regionalization
 
         Returns:
             None, but saves the pairing results to a file.
@@ -807,32 +953,104 @@ class RegionalizationProcessor(BaseConfigProcessor):
         """
         logger.info(f"Algorithms to run: {self.pairer_names}")
 
+        # output config for pairs
+        co = self.config.output.get("pairs", None)
+
         # loop through regionalization algorithms to generate donor-receiver pairings for each algorithm/scenario combination
         for pairer_name in self.pairer_names:
-            outfile = self.construct_output_filepath(pairer_name)
+            # outfile = self.construct_output_filepath(pairer_name)
+            outfile = co.get_file_path(vpu=self.vpu, algorithm=pairer_name)
+            processed_receivers_df = pd.DataFrame()
             if outfile.exists():
                 logger.info(f"Pair file already exist: {outfile}")
-                logger.info(f"Skip the current run: {pairer_name}")
-                continue
+                logger.info(f"Skip the current pairing run: {pairer_name}")
+                # continue
+            else:
+                logger.info(f"Identify donors for VPU {self.vpu} using: {pairer_name}\n")
+                start_time = time.time()
 
-            logger.info(f"\nIdentify donors for VPU {self.vpu} using: {pairer_name}\n")
-            start_time = time.time()
+                algorithm_config = self.update_algorithm_config(pairer_name, df_attr_all)
 
-            algorithm_config = self.update_algorithm_config(pairer_name, df_attr_all)
+                # loop through formulations to conduct pairing separately for each formulation
+                df_pairs_all = pd.DataFrame()
+                self.set_formulation_dict(form_config)
+                for form_key, form_values in self.formulation_dict.items():
+                    donors_in_form = list(set(self.donors) & set(form_values))
+                    receivers_in_form = list(set(self.receivers) & set(form_values))
+                    if form_key == "unknown":
+                        donors_in_form = self.donors
 
-            # execute function
-            pairer = self.pairers[pairer_name](
-                config=algorithm_config,
-                df_attr_all=df_attr_all,
-                dist_spatial=dist_spatial,
-            )
-            processed_receivers_df = pairer.pair()
-            # save donor receiver pairing to csv file
-            self.config.output.pairs.save_data(processed_receivers_df, outfile)
-            logger.info(f"Pairing results saved to {outfile}")
+                    form_no = list(self.formulation_dict).index(form_key) + 1
+                    if not receivers_in_form:
+                        logger.warning(
+                            f"No receivers found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
+                            f"Skipping this formulation."
+                        )
+                        continue
 
-            # plot the results if requested
-            po.plot_pairing_outputs(self.config, self.vpu, pairer_name, outfile)
+                    if receivers_in_form and not donors_in_form:
+                        msg = f"No donors found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
+                        msg += (
+                            f"Formulation will not be used for pairing for these receivers ({len(receivers_in_form)})."
+                        )
+                        logger.warning(msg)
+                        donors_in_form = self.donors  # use all donors if no donors in the current formulation
 
-            end_time = time.time()
-            logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
+                    logger.info(
+                        f"Processing formulation #{form_no}: "
+                        f"[{form_key.upper()}], with {len(donors_in_form)} donors and "
+                        f"{len(receivers_in_form)} receivers."
+                    )
+
+                    # filter the attribute data to only include donors and receivers in the current formulation
+                    df_attr_form = df_attr_all[
+                        df_attr_all[self.general_id_name].isin(donors_in_form + receivers_in_form)
+                    ]
+                    # order df_attr_form by is_donor and divide_id
+                    df_attr_form = df_attr_form.sort_values(
+                        by=["is_donor", self.general_id_name], ascending=[False, True]
+                    )
+
+                    # execute pairing function
+                    pairer = self.pairers[pairer_name](
+                        config=algorithm_config,
+                        df_attr_all=df_attr_form,
+                        dist_spatial=dist_spatial.loc[receivers_in_form, donors_in_form],
+                    )
+                    processed_receivers_df = pairer.pair()
+
+                    # supplementary pairing if needed
+                    processed_receivers_df = self.supplementary_pairing(
+                        "proximity", df_attr_all, dist_spatial, processed_receivers_df, receivers_in_form
+                    )
+
+                    # check if all receivers have been processed
+                    missed_receivers = set(receivers_in_form) - set(
+                        processed_receivers_df[self.general_id_name].tolist()
+                    )
+                    if missed_receivers:
+                        logger.warning(
+                            f"{len(missed_receivers)} receivers were not successfully processed: {missed_receivers} \n"
+                        )
+                    else:
+                        logger.info(
+                            f"All {len(receivers_in_form)} receivers were successfully processed for the current "
+                            f"formulation.\n"
+                        )
+
+                    df_pairs_all = pd.concat([df_pairs_all, processed_receivers_df])
+
+                # save donor receiver pairing to csv file
+                co.save_to_file(
+                    df_pairs_all,
+                    vpu=self.vpu,
+                    algorithm=pairer_name,
+                    data_str=f"Pairing results (VPU {self.vpu}, algorithm = {pairer_name})",
+                    use_stem_suffix=False,
+                )
+
+                end_time = time.time()
+                logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
+
+            # plot the pairing results
+            self.plot_pairing_outputs(pairer_name, df_pairs_all)

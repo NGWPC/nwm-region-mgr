@@ -5,7 +5,10 @@ general:
   #vpu_list: ['01']
   n_procs: 3  # number of processes to use for parallel processing, -1 for all available cores
   attr_dataset_list: ['ngen', 'hlr']
-  algorithm_list: ['gower']
+  algorithm_list: ['gower','urf','kmeans', 'kmedoids', 'hdbscan', 'birch']  # list of algorithms to use for parameter regionalization
+  #consider_formulation: True  # whether to consider formulation regionalization results in donor selection
+  #formulation_file: '{base_dir}/outputs/{run_name}/formulations/form_{domain}_vpu{vpu_list}.parquet'  # path to the formulation regionalization results file
+
   #base_dir: '/home/yuqiong.liu/work/data/ngen_reg'
   #hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
   #id_name: 'divide_id'
@@ -20,7 +23,7 @@ donor:
     col_name: 'evalPeriod'
     value: 'full'
   metric_threshold:
-    corr:
+    cor:
       min: 0.4
     kge: 
       min: 0.2
@@ -35,10 +38,12 @@ attr_datasets:
     attr_list: 
     attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_ngen.csv'
     attr_data_file: '{base_dir}/inputs/attr_datasets/attr_ngen_{domain}.parquet'
+    base_attr_list: ['elevation', 'slope', 'aspect']
   hlr:
     attr_list:
     attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_hlr.csv'
     attr_data_file: '{base_dir}/inputs/attr_datasets/attr_hlr_{domain}.parquet'
+    base_attr_list: ['PPT']
 
 output:
     pairs:
@@ -49,6 +54,7 @@ output:
       plots:
         spatial_map: True
         histogram: True
+        columns_to_plot: ['distSpatial', 'distAttr']  # columns to plot
         # donor_spatial_map: True
         # pair_spatial_distance_histogram: True
         # pair_attribute_distance_histogram: True
@@ -63,7 +69,7 @@ output:
       plots:
         spatial_map: True
         histogram: True
-        columns_to_plot: ['hlr-PMPE', 'hlr-SAND', 'ngen-dksat', 'ngen-smcmax']  # attributes to plot
+        columns_to_plot: ['hlr_PMPE', 'hlr_SAND', 'ngen_dksat', 'ngen_smcmax']  # attributes to plot
     config_final:
       save: True
       path: '{base_dir}/outputs/{run_name}/config_parreg_final.yaml'
