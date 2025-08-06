@@ -205,10 +205,10 @@ class DistancePairer(Pairer):
         return receivers_to_process
 
     def pair(self):
-        """Perform donor-receiver pairing using Gower's distance."""
+        """Perform donor-receiver pairing using Gower's distance or URF approach."""
         np.random.seed(5)
         random.seed(5)
-        logger.info("calling function funcs_dist using the Gower's distance approach ...")
+        # logger.info("calling function funcs_dist using the Gower's distance approach ...")
 
         processed_receivers_df = pd.DataFrame()
 
