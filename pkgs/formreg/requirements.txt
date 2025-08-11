@@ -1,0 +1,8 @@
+fiona==1.10.1
+geopandas==1.0.1
+numpy==2.3.2
+pandas==2.3.1
+pydantic==2.11.7
+setuptools==59.6.0
+utils==0.0.1
+utils.egg==info

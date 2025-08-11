@@ -23,22 +23,17 @@ if __name__ == "__main__":
 
     config_files = ["config_general.yaml", "config_formreg.yaml", "config_parreg.yaml"]
 
-    # Add arguments
+    # Argument help text
     help_text = """Path to the folder containing the following three YAML config files:
     config_general.yaml: contains general settings for the regionalization process.
     config_formreg.yaml: contains specific settings for the formulation regionalization process.
     config_parreg.yaml: contains specific settings for the parameter regionalization process.
     """
+    # Add the argument for the config directory
     parser.add_argument(
         "config_dir",
         type=str,
         help=help_text,
-        # help="Path to the folder containing the following three yaml config files: \n"
-        # + ", ".join(config_files)
-        # + "\n\n"
-        # + "config_general.yaml: contains general settings for the regionalization process.\n\n"
-        # + "config_formreg.yaml: contains specific settings for the formulation regionalization process.\n\n"
-        # + "config_parreg.yaml: contains specific settings for the parameter regionalization process.",
     )
 
     # Parse the arguments
@@ -48,7 +43,7 @@ if __name__ == "__main__":
     # Build full paths to each config file
     config_paths = {file: config_dir / file for file in config_files}
 
-    # Access individual files if needed
+    # Allow access to individual files
     file_general_config = config_paths["config_general.yaml"]
     file_formreg_config = config_paths["config_formreg.yaml"]
     file_parreg_config = config_paths["config_parreg.yaml"]
@@ -68,6 +63,6 @@ if __name__ == "__main__":
         config_file=[file_general_config, file_parreg_config], config_schema=pcs.Config, sample_size=None
     )
 
-    # process by VPU
+    # process parameter regionalization by VPU (which also runs formulation regionalization)
     for vpu in rp.config.general.vpu_list:
         rp.run_parreg_for_vpu(vpu, frp)

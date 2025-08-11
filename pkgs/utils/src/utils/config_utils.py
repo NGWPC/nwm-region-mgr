@@ -32,7 +32,7 @@ from .dict_utils import flatten_dict
 from .io_utils import read_table, save_data
 from .logging_utils import setup_logging
 from .plot_utils import plot_histogram, plot_spatial_map
-from .string_utils import recursive_substitute, recursive_substitute_multi_lists
+from .string_utils import recursive_substitute
 from .validation_utils import check_columns_dataframe, check_columns_hydrofabric, check_options
 
 logger = logging.getLogger(__name__)
@@ -84,6 +84,9 @@ class BaseGeneralConfig(BaseModel):
     """Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."""
     calval_stats_file: Path | str = Field()
     """Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'."""
+
+    approach_calib_basins: Optional[str] = "regionalization"  # Options: 'regionalization', 'summary_score'
+    """Strategy for assigning formulations to calibrated basins."""
 
     id_col: Optional[dict[str, str]] = Field(
         default_factory=lambda: {"divide": "divide_id", "gage": "gage_id", "huc12": "huc_12", "vpu": "vpuid"}
@@ -436,19 +439,6 @@ class BaseConfigProcessor:
 
         return config
 
-    # @cached_property
-    # def _filepath_fields(self) -> List[str]:
-    #     """Return a list of fields in the config that are file paths."""
-    #     return [
-    #         "gage_divide_cwt_file",
-    #         "donor_gage_file",
-    #         "calval_stats_file",
-    #         "huc12_hydrofabric_file",
-    #         "divide_huc12_cwt_file",
-    #         "ngen_hydrofabric_file",
-    #         "formulation_file",
-    #     ]
-
     def _required_columns_calval_stats(self, config) -> set[str]:
         """Return a set of required columns for calibration/validation statistics."""
         id_col = config.general.id_col.get("gage", "gage_id")
@@ -488,7 +478,7 @@ class BaseConfigProcessor:
         huc12_id_col = gen.id_col["huc12"]
         vpu_id_col = gen.id_col["vpu"]
 
-        return {
+        file_dict = {
             "gage_divide_cwt_file": {divide_id_col, gage_id_col},
             "donor_gage_file": {gage_id_col, "longitude", "latitude"},
             "calval_stats_file": self._required_columns_calval_stats(config),
@@ -497,6 +487,18 @@ class BaseConfigProcessor:
             "divide_huc12_cwt_file": {divide_id_col, huc12_id_col},
             "formulation_file": {divide_id_col, "formulation"},
         }
+
+        # add snow cover file if it exists in the config
+        from parreg import config_schema as pcs
+
+        if isinstance(config, pcs.Config) and hasattr(config, "snow_cover"):
+            if config.snow_cover.consider_snowness:
+                snow_cover_file = getattr(config.snow_cover, "snow_cover_file", None)
+                snow_frac_col = getattr(config.snow_cover, "column", None)
+                if snow_cover_file and snow_frac_col:
+                    file_dict["snow_cover_file"] = {divide_id_col, snow_frac_col}
+
+        return file_dict
 
     def _assemble_file_paths(
         self, config: BaseModel, exclude: set[str] = None, include: set[str] = None
@@ -526,7 +528,8 @@ class BaseConfigProcessor:
         # create a dictionary to hold the paths
         paths = {}
         for path1 in path_fields:
-            val = getattr(config.general, path1, None)
+            # check in snow_cover config if not found in general config
+            val = getattr(config.general, path1, None) or getattr(config.snow_cover, path1, None)
             if val is not None:
                 if isinstance(val, (str, Path)):
                     paths[path1] = Path(val)

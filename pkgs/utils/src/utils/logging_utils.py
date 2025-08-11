@@ -6,7 +6,11 @@ from typing import Iterable, Optional, Union
 
 
 class CustomLoggingFormatter(logging.Formatter):
-    """Custom logging formatter to change 'ERROR' to 'SEVERE', and 'CRITICAL' to 'FATAL'."""
+    """Custom logging formatter to change 'ERROR' to 'SEVERE', and 'CRITICAL' to 'FATAL'.
+
+    This is to be consistent with logging levels in ngen and ngen-cal.
+
+    """
 
     def format(self, record):
         """Format the log record."""

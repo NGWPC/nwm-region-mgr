@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib.lines import Line2D
+
+# from matplotlib.lines import Line2D
 from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)

@@ -3,6 +3,7 @@
 process_config.py
 
 Functions:
+- run_formreg_for_vpu: Run the formulation regionalization process for a given VPU.
 
 """
 
@@ -48,6 +49,6 @@ class FormulationRegionalizationProcessor(BaseConfigProcessor):
 
         # select the best formulation based on the summary score and optionally costs
         with self.timing_block("select_formulation"):
-            sf.select_formulation(self.config, vpu, df_score)
+            sf.select_formulation(self.config, vpu, df_score, self.get_vpu_gdf())
 
         logger.info(f"Formulation regionalization for VPU {vpu} completed.")

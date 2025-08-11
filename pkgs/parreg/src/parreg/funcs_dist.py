@@ -12,7 +12,6 @@ import time
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from pydantic import BaseModel
 
 from . import utils_algo
 from .pairer import Pairer
@@ -23,9 +22,6 @@ logger = logging.getLogger(__name__)
 
 class DistancePairer(Pairer):
     """Distance Pairer."""
-
-    # class Config:
-    #     arbitrary_types_allowed = True
 
     @property
     def attrs(self):
@@ -145,37 +141,10 @@ class DistancePairer(Pairer):
                         attr_distance_to_current_donors,
                         self.dist_spatial,
                         self.df_attr_all,
-                        # formulation_dict=self.get_formulation_dict(donors + [receiver]),
                     ),
                 ),
                 axis=0,
             )
-        # NOTE: commented out the code below as the functionality was moved to supplementary_pairing in process_config.py
-        # # if no donors found (after both 'main' and 'base' attribute rounds),
-        # # get the spatially closest donor with some constraints
-        # if len(filtered_donors) == 0 and run == "base":
-        #     # get all donors and their spatial distance to the receiver
-        #     all_donors = self.df_attr_all[self.df_attr_all["is_donor"]]["divide_id"].tolist()
-        #     # spatial_distance_to_receiver = self.dist_spatial.loc[receiver]
-
-        #     # assign donor
-        #     processed_receivers_round_df = pd.concat(
-        #         (
-        #             processed_receivers_round_df,
-        #             utils_algo.assign_donors(
-        #                 "proximity",
-        #                 all_donors,
-        #                 [receiver],
-        #                 self.config,
-        #                 None,  # no attr distance for proximity
-        #                 # spatial_distance_to_receiver,
-        #                 self.dist_spatial,
-        #                 self.df_attr_all,
-        #                 formulation_dict=self.get_formulation_dict(all_donors + [receiver]),
-        #             ),
-        #         ),
-        #         axis=0,
-        #     )
 
         return processed_receivers_round_df
 
@@ -208,7 +177,6 @@ class DistancePairer(Pairer):
         """Perform donor-receiver pairing using Gower's distance or URF approach."""
         np.random.seed(5)
         random.seed(5)
-        # logger.info("calling function funcs_dist using the Gower's distance approach ...")
 
         processed_receivers_df = pd.DataFrame()
 
@@ -380,9 +348,6 @@ class URFPairer(DistancePairer):
 class ProximityPairer(Pairer):
     """Pairer using proximity."""
 
-    # class Config:
-    #     arbitrary_types_allowed = True
-
     @property
     def recs0(self):
         """Receivers."""
@@ -405,5 +370,4 @@ class ProximityPairer(Pairer):
             None,
             self.dist_spatial,
             None,
-            # formulation_dict=self.get_formulation_dict(donors + receivers),
         )

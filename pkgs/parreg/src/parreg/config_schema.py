@@ -2,19 +2,12 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, get_args
+from typing import Dict, List, Optional, get_args
 
 import pandas as pd
 import pyarrow.parquet as pq
 from pydantic import BaseModel, Field, model_validator
-from utils import (
-    BaseConfig,
-    BaseGeneralConfig,
-    check_columns_dataframe,
-    check_options,
-)
-
-from .utils import check_columns, read_table, save_data
+from utils import BaseConfig, BaseGeneralConfig, read_table
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +23,6 @@ class GeneralConfig(BaseGeneralConfig):
 
     algorithm_list: List[str] = Field()
     """Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch')."""
-
-    # consider_formulation: bool = False
-    # """Whether to consider formulation regionalization results in donor selection."""
-
-    # formulation_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
-    # """Path to the formulation regionalization results file."""
 
 
 class MetricEvalPeriod(BaseModel):
@@ -83,52 +70,23 @@ class DonorConfig(BaseModel):
     def get_qualified_donors(
         self,
         config: BaseModel,
-        vpu: str = None,
-        donors: list = None,
+        # vpu: str = None,
+        donors0: list = None,
+        init_donor_df: pd.DataFrame = None,
         # stats_file: str | Path = None,
         # id_name: str = "divide_id",
     ) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
-        # check if the required files/columns are present
-        # self._check_files()
-
         divide_id_name = config.general.id_col.get("divide", "divide_id")
         gage_id_name = config.general.id_col.get("gage", "gage_id")
 
-        # determine inital donor gages
-        df_cwt = read_table(config.general.gage_divide_cwt_file)
-        if not donors:
-            if config.general.donor_gage_file:
-                logger.info(f"Initial donors based on all gages in {config.general.donor_gage_file}")
-                df = read_table(config.general.donor_gage_file)
-                donors = df[gage_id_name].unique().tolist()
-            else:
-                logger.info(f"Initial donors based on all gages in {config.general.gage_divide_cwt_file}")
-                donors = df_cwt[gage_id_name].unique().tolist()
-
-        # initial donor catchments
-        donor_cats = df_cwt[df_cwt[divide_id_name].isin(donors)][divide_id_name].unique().tolist()
-
-        # filter by vpu if provided
-        if vpu:
-            if "vpuid" in df_cwt.columns:
-                df_cwt = df_cwt[df_cwt["vpuid"] == vpu]
-                donors0 = df_cwt[gage_id_name].unique().tolist()
-                donors = [d for d in donors if d in donors0]
-                donor_cats = df_cwt[df_cwt[gage_id_name].isin(donors)][divide_id_name].unique().tolist()
-                logger.info(
-                    f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments"
-                )
-            else:
-                raise ValueError(
-                    f"Column 'vpuid' not found in {config.general.gage_divide_cwt_file}. Cannot filter by VPU."
-                )
-        else:
-            logger.info(f"Number of initial donors from all VPUs: {len(donors)} gages, {len(donor_cats)} catchments")
+        # initial donors
+        donors = [d for d in init_donor_df[gage_id_name].unique().tolist() if d in donors0]
+        donor_cats = init_donor_df.loc[init_donor_df[gage_id_name].isin(donors), divide_id_name].unique().tolist()
 
         # read the donor stats file
         stats_file = config.general.calval_stats_file
-        df = read_table(stats_file)
+        df = read_table(stats_file, dtype={gage_id_name: str})
 
         # filter based on initial donors
         df = df[df[gage_id_name].isin(donors)]
@@ -164,15 +122,8 @@ class DonorConfig(BaseModel):
             if threshold.max is not None:
                 df = df[df[col] <= threshold.max]
 
-        # # filter based on formulation regionalization results if available
-        # if self.consider_formulation:
-        #     if not self.formulation_file:
-        #         raise ValueError("Formulation regionalization results file is not provided.")
-        #     form_file = Path(self.formulation_file[vpu])
-        #     df = df[df[gage_id_name].isin(read_table(form_file)["formulation"].unique())]
-
         donors = df[gage_id_name].unique().tolist()
-        donor_cats = df_cwt[df_cwt[gage_id_name].isin(donors)][divide_id_name].unique().tolist()
+        donor_cats = init_donor_df[init_donor_df[gage_id_name].isin(donors)][divide_id_name].unique().tolist()
 
         logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments")
 
@@ -263,6 +214,33 @@ class AttrDatasets(BaseModel):
     streamcat: Optional[AttrDatasetConfig] = None
     nhdplus: Optional[AttrDatasetConfig] = None
     camels: Optional[AttrDatasetConfig] = None
+
+
+class SnowCoverConfig(BaseModel):
+    """Configuration for snow cover data."""
+
+    consider_snowness: Optional[bool] = False
+    """Whether to consider snow cover data in the regionalization process."""
+
+    snow_cover_file: Optional[Path | str | dict[str, Path | str]] = None
+    """Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values."""
+
+    column: Optional[str] = None
+    """Column name in the snow cover data file that contains the snow cover percentage."""
+
+    threshold: Optional[float] = None
+    """Threshold value for snow cover percentage to determine if a catchment is considered snow-driven."""
+
+    @model_validator(mode="after")
+    def validate_snow_cover_config(self):
+        """Validate the snow cover configuration."""
+        if self.consider_snowness:
+            if not self.snow_cover_file or not self.column or not self.threshold:
+                raise ValueError(
+                    "When 'consider_snowness' is True, 'snow_cover_file', 'column', and 'threshold' must be provided."
+                )
+
+        return self
 
 
 class AlgoGeneral(BaseModel):
@@ -376,7 +354,7 @@ class Config(BaseConfig):
     general: GeneralConfig
     donor: DonorConfig
     attr_datasets: AttrDatasets
-    # output: OutputConfig
+    snow_cover: SnowCoverConfig
     algorithms: AlgorithmConfig
 
     @model_validator(mode="after")

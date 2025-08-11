@@ -19,7 +19,7 @@ from typing import Dict
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from utils import check_columns_dataframe, read_table
+from utils import read_table
 
 from . import config_schema as cs
 
@@ -162,9 +162,6 @@ def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.
         pd.DataFrame: DataFrame containing summary scores for all gages in the domain.
 
     """
-    # get the formulation stats files
-    # dict_form = get_formulations_from_stats(config)
-
     # read statistics (all gages and all formulations)
     df_stats = read_table(config.general.calval_stats_file, dtype={gage_id_col: str})
 
@@ -181,8 +178,6 @@ def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.
         # compute the summary score for the formulation
         df_score = formulation_summary_score(df_stats, ss.metrics)
         df_score = df_score[[gage_id_col, "formulation", "summary_score"]].copy()
-        # df["formulation"] = form  # Add formulation name to the DataFrame
-        # df_score = pd.concat([df_score, df[[gage_id_col, "formulation", "summary_score"]]], ignore_index=True)
 
     # remove duplicated rows
     df_score = df_score.drop_duplicates(subset=[gage_id_col, "formulation", "summary_score"])

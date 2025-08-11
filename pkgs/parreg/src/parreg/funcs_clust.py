@@ -37,9 +37,6 @@ logger = logging.getLogger(__name__)
 class ClusterPairer(Pairer):
     """Cluster Pairer."""
 
-    # class Config:
-    #     arbitrary_types_allowed = True
-
     @property
     def attrs(self):
         """Attributes."""
@@ -160,7 +157,6 @@ class ClusterGroupPairer:
         dist_spatial: pd.DataFrame,
         df_attr_all: pd.DataFrame,
         _apply_algorithm,
-        # formulation_dict: dict,
     ):
         """Initialize Cluster Group Pairer."""
         self.donors = donors
@@ -171,7 +167,6 @@ class ClusterGroupPairer:
         self.dist_spatial = dist_spatial
         self.df_attr_all = df_attr_all
         self._apply_algorithm = _apply_algorithm
-        # self.formulation_dict = formulation_dict
 
     @property
     def receivers_to_be_processed_for_group(self) -> list:
@@ -488,7 +483,6 @@ class ClusterGroupPairer:
                 None,
                 self.dist_spatial,
                 self.df_attr_all,
-                # formulation_dict=self.formulation_dict,
             ), cluster_labels
         else:
             return pd.DataFrame(), cluster_labels
@@ -537,7 +531,6 @@ class ClusterGroupPairer:
                     None,
                     self.dist_spatial,
                     self.df_attr_all,
-                    # formulation_dict=self.formulation_dict,
                 ), cluster_labels
         # for receivers in clusters without donors, choose from all donors based on spatial proximity
         else:
@@ -550,7 +543,6 @@ class ClusterGroupPairer:
                 None,
                 self.dist_spatial,
                 self.df_attr_all,
-                # formulation_dict=self.formulation_dict,
             ), cluster_labels
 
 

@@ -9,23 +9,17 @@ Functions:
 """
 
 import logging
-import re
 from pathlib import Path
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 from matplotlib.lines import Line2D
 from shapely.geometry import Point
-from shapely.ops import unary_union
-
-from parreg.logging_config import setup_logging
+from utils import read_table
 
 from . import config_schema as cs
-from . import utils
 
-setup_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -41,12 +35,6 @@ def plot_missing_attr_counts(config: cs.Config, vpu: str, df_attrs_all: pd.DataF
             DataFrame containing all attributes for the catchments.
 
     """
-    # get plotting flag from the config
-    # plot_flag = getattr(config.output["attr_data_final"], "plots", {}) or {}
-    # plot_flag = plot_flag.get("attr_missing_count", False)
-    # if not plot_flag:
-    #     return
-
     cols = []
     for dataset in config.general.attr_dataset_list:
         cols = cols + [dataset + "_" + x for x in getattr(config.attr_datasets, dataset).attr_list]
@@ -71,7 +59,12 @@ def plot_missing_attr_counts(config: cs.Config, vpu: str, df_attrs_all: pd.DataF
 
 
 def plot_donor_spatial_map(
-    config: cs.Config, vpu: str, donor_basins: list, gdf_buffered: gpd.GeoDataFrame, combined_geom: gpd.GeoDataFrame
+    config: cs.Config,
+    vpu: str,
+    donor_basins: list,
+    final_donor_basins: list,
+    gdf_buffered: gpd.GeoDataFrame,
+    combined_geom: gpd.GeoDataFrame,
 ) -> None:
     """Plot the spatial distribution of donors within a VPU and its buffer zone.
 
@@ -81,23 +74,21 @@ def plot_donor_spatial_map(
         vpu : str
             The VPU (Virtual Processing Unit) identifier.
         donor_basins : list
-            List of donor basin identifiers.
+            List of initial donor basin identifiers.
+        final_donor_basins : list
+            List of final donor basin identifiers.
         gdf_buffered : gpd.GeoDataFrame
             GeoDataFrame of the buffered VPU polygon.
         combined_geom : gpd.GeoDataFrame
             GeoDataFrame of the combined geometry of the VPU.
 
     """
-    # plot_flag = getattr(config.output["pairs"], "plots", {}) or {}
-    # plot_flag = plot_flag.get("donor_spatial_map", False)
-    # if not plot_flag:
-    #    return
-
     # read in lat/lon of all donors
-    donors_all = utils.read_table(config.general.donor_gage_file)
+    gage_id_name = config.general.id_col.get("gage", "gage_id")
+    donors_all = read_table(config.general.donor_gage_file, dtype={gage_id_name: str})
 
     # filter donors based on the donor_basins list (qualified donors)
-    donors = donors_all[donors_all["gage_id"].isin(donor_basins)]
+    donors = donors_all[donors_all[gage_id_name].isin(donor_basins)]
     donor_gdf = gpd.GeoDataFrame(
         donors, geometry=[Point(xy) for xy in zip(donors["longitude"], donors["latitude"])], crs="EPSG:4326"
     )
@@ -117,12 +108,19 @@ def plot_donor_spatial_map(
         edgecolor="black",
     )
 
-    # donors in the buffered VPU
-    donor_gdf.plot(ax=ax, color="blue", markersize=10)
+    # donor and non-donor calibration basins in the buffered VPU
+    non_donor_gdf = donor_gdf[~donor_gdf["gage_id"].isin(final_donor_basins)]
+    final_donor_gdf = donor_gdf[donor_gdf["gage_id"].isin(final_donor_basins)]
 
-    # donors in the original VPU
-    donors1 = donor_gdf[donor_gdf.geometry.within(combined_geom)]
-    donors1.plot(ax=ax, color="red", markersize=10)
+    # plot calibration basins in the buffered VPU
+    non_donor_gdf.plot(ax=ax, color="blue", markersize=10, marker="x")
+    final_donor_gdf.plot(ax=ax, color="blue", markersize=10)
+
+    # donors and non-donors in the original VPU
+    donors_vpu = final_donor_gdf[final_donor_gdf.geometry.within(combined_geom)]
+    non_donors_vpu = non_donor_gdf[non_donor_gdf.geometry.within(combined_geom)]
+    donors_vpu.plot(ax=ax, color="red", markersize=10)
+    non_donors_vpu.plot(ax=ax, color="red", markersize=10, marker="x")
 
     # Create custom legend handles
     legend_elements = [
@@ -131,7 +129,7 @@ def plot_donor_spatial_map(
             [0],
             marker="o",
             color="w",
-            label=f"Donors within VPU ({len(donors1)})",
+            label=f"Donors within VPU ({len(donors_vpu)})",
             markerfacecolor="red",
             markersize=8,
         ),
@@ -140,8 +138,26 @@ def plot_donor_spatial_map(
             [0],
             marker="o",
             color="w",
-            label=f"Donors in buffer zone ({len(donor_gdf) - len(donors1)})",
+            label=f"Donors in buffer zone ({len(final_donor_gdf) - len(donors_vpu)})",
             markerfacecolor="blue",
+            markersize=8,
+        ),
+        Line2D(
+            [0],
+            [0],
+            marker="x",
+            color="red",
+            label=f"non-donors within VPU ({len(non_donors_vpu)})",
+            # markerfacecolor="red",
+            markersize=8,
+        ),
+        Line2D(
+            [0],
+            [0],
+            marker="x",
+            color="blue",
+            label=f"non-donors in buffer zone ({len(non_donor_gdf) - len(non_donors_vpu)})",
+            # markerfacecolor="blue",
             markersize=8,
         ),
         Line2D(

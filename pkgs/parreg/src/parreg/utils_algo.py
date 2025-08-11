@@ -3,15 +3,10 @@
 import concurrent.futures
 import logging
 import warnings
-from pathlib import Path
 
 import geopandas as gpd
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from joblib import Parallel, delayed
-from pyproj import CRS
-from scipy.spatial import cKDTree
 from shapely.geometry import Point
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -19,23 +14,12 @@ from sklearn.preprocessing import StandardScaler
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 logger = logging.getLogger(__name__)
 
-# def ensure_projected(
-#     gdf: gpd.GeoDataFrame, target_crs: str = "EPSG:5070"
-# ) -> gpd.GeoDataFrame:
-#     """Reprojects a GeoDataFrame to a projected CRS if currently in geographic CRS."""
-#     crs = CRS.from_user_input(gdf.crs)
-#     if crs.is_geographic:
-#         return gdf.to_crs(target_crs)
-#     return gdf
-
 
 def compute_pairwise_centroid_distances(
     group_a: gpd.GeoDataFrame,
     group_b: gpd.GeoDataFrame,
     id_col_a: str = "divide_id",
     id_col_b: str = "divide_id",
-    id_col_a_return: str = "donor_id",
-    id_col_b_return: str = "receiver_id",
     distance_threshold: float = None,
     n_jobs: int | None = None,  # Use all available cores
 ) -> pd.DataFrame:
@@ -51,10 +35,6 @@ def compute_pairwise_centroid_distances(
         The name of the ID column in group_a. Default is "divide_id".
     id_col_b : str, optional
         The name of the ID column in group_b. Default is "divide_id".
-    id_col_a_return : str, optional
-        The name of the ID column to return from group_a. Default is "donor_id".
-    id_col_b_return : str, optional
-        The name of the ID column to return from group_b. Default is "receiver_id".
     distance_threshold : float, optional
         If provided, only distances less than or equal to this value will be included in the output.
     n_jobs : int, optional
@@ -234,7 +214,6 @@ def assign_donors(
     dist_attr: pd.DataFrame,
     dist_spatial: pd.DataFrame,
     df_attr: pd.DataFrame,
-    # formulation_dict: dict | None = None,
 ) -> pd.DataFrame:
     """Assign donors based on clusters and spatial distance and apply additional constrains."""
     df_donor = pd.DataFrame()
@@ -242,25 +221,6 @@ def assign_donors(
         # get spatial distances
         dists1 = dist_spatial.loc[receiver, donors].to_numpy()
         donors1 = donors.copy()
-
-        # # filter donors based on the receiver's formulation
-        # if formulation_dict is not None:
-        #     receiver_formulation = formulation_dict.get(receiver, None)
-        #     donor_formulation = {k: formulation_dict[k] for k in donors1 if k in formulation_dict}
-        #     if receiver_formulation:
-        #         if receiver_formulation not in donor_formulation.values() and scenario == "proximity":
-        #             logger.warning(
-        #                 f"Pairing with proximity: receiver {receiver} has formulation {receiver_formulation}, "
-        #                 "but no donors with this formulation found. Formulation will not be considered."
-        #             )
-        #         else:
-        #             # filter donors to those with the same formulation as the receiver
-        #             donors1 = [d for d in donors1 if donor_formulation.get(d) == receiver_formulation]
-        #             dists1 = dists1[[donors.index(donor) for donor in donors1]]
-        #     else:
-        #         logger.warning(
-        #             f"Receiver {receiver} has no formulation defined. Donor selection will not consider formulation."
-        #         )
 
         # apply additional donor constraints1
         if df_attr is not None:
@@ -312,121 +272,3 @@ def assign_donors(
             df_donor = pd.concat((df_donor, pd.DataFrame(pair1, index=[0])), axis=0)
 
     return df_donor
-
-
-def plot_clusters(data1, labels, ndonor):
-    """Plot the clusters (using the first 6 components)."""
-    fig = plt.figure(figsize=(20, 14))
-    cols_all = [[0, 1], [0, 2], [3, 4], [3, 5]]
-    for i1, cols in enumerate(cols_all):
-        if max(cols) > data1.shape[1]:
-            break
-        _ = fig.add_subplot(2, 2, i1 + 1)
-
-        # receiver - noise
-        d1 = labels[ndonor:] == -1
-        plt.scatter(
-            data1.iloc[:, cols[0]][ndonor:][d1],
-            data1.iloc[:, cols[1]][ndonor:][d1],
-            c="grey",
-            marker=".",
-        )
-
-        # receiver non-noise
-        d1 = labels[ndonor:] != -1
-        plt.scatter(
-            data1.iloc[:, cols[0]][ndonor:][d1],
-            data1.iloc[:, cols[1]][ndonor:][d1],
-            c=labels[ndonor:][d1],
-            cmap="rainbow",
-            marker=".",
-        )
-        plt.colorbar()
-
-        # donor - noise
-        d1 = labels[:ndonor] == -1
-        plt.scatter(
-            data1.iloc[:, cols[0]][:ndonor][d1],
-            data1.iloc[:, cols[1]][:ndonor][d1],
-            c="black",
-            marker="x",
-            s=100,
-        )
-
-        # donor non-noise
-        d1 = labels[:ndonor] != -1
-        plt.scatter(
-            data1.iloc[:, cols[0]][:ndonor][d1],
-            data1.iloc[:, cols[1]][:ndonor][d1],
-            c="green",
-            marker="x",
-            s=100,
-        )
-
-        plt.title(
-            data1.columns[cols[1]] + " vs " + data1.columns[cols[0]],
-            fontsize=20,
-            fontweight="bold",
-        )
-        plt.scatter(
-            data1.iloc[:, cols[0]][:ndonor][d1],
-            data1.iloc[:, cols[1]][:ndonor][d1],
-            c="green",
-            marker="x",
-            s=100,
-        )
-
-        plt.title(
-            data1.columns[cols[1]] + " vs " + data1.columns[cols[0]],
-            fontsize=20,
-            fontweight="bold",
-        )
-
-    plt.subplots_adjust(left=0.07, bottom=0.07, right=0.95, top=0.93, hspace=0.15, wspace=0.03)
-    plt.show()
-
-
-def calculate_spatial_distance(shp_file: str | Path, donors: list, receivers: list):
-    """Calculate spatial distances."""
-    logger.info("Compute donor-receiver spatial distance ...")
-
-    # read in shapefile as GeoDataFrame
-    shps = gpd.read_file(shp_file, layer="divides")
-
-    # reproject from geodetic coordinates to meters (for distance calculation)
-    shps = shps.to_crs(crs=3857)
-
-    # narrow down donors and receiver GeoDataFrames to those needed
-    id1 = "id"
-    if "divide_id" in shps.columns:
-        id1 = "divide_id"
-    shps_rec = shps[shps[id1].isin(receivers)]
-    shps_don = shps[shps[id1].isin(donors)]
-
-    # reindex the GeoDataFrames by order of ids
-    shps_rec = shps_rec.set_index(id1)
-    shps_rec = shps_rec.reindex(receivers)
-
-    # calculate centroids of donor and receiver catchments
-    cent_don = shps_don["geometry"].centroid
-    cent_rec = shps_rec["geometry"].centroid
-
-    # convert centroids from GeoSeries to GeoDataFrame
-    cent_don = gpd.GeoDataFrame(geometry=cent_don)
-    cent_rec = gpd.GeoDataFrame(geometry=cent_rec)
-
-    # calculate distance between all receiver and donor centroids
-    def calculate_distances(row):
-        return cent_don.distance(row.geometry)
-
-    distances = cent_rec.apply(calculate_distances, axis=1)
-
-    # convert to km
-    distances = distances.div(1000)
-    distances = distances.astype(int)
-
-    # reset the columns and index of the distance matrix
-    distances.columns = donors
-    distances.index = receivers
-
-    return distances
