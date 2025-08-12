@@ -767,7 +767,7 @@ def select_formulation(
     formulation_costs = _get_formulation_costs(config.formulation_cost)
     cost_dict = formulation_costs if config.general.consider_cost else None
 
-    if config.general.donors_only:
+    if config.general.calib_basins_only:
         # select formulations for donor basins only
         df_formulation = select_formulation_donors_only(config, df_score, cost_dict)
     else:

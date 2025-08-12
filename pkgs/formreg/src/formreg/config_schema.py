@@ -23,8 +23,8 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     divide_huc12_cwt_file: Optional[str] = None
     """Path to crosswalk file between HUC12 basins and NextGen catchments, with columns 'divide_id' and 'huc_12'."""
 
-    donors_only: Optional[bool] = False
-    """Whether to run formulation selection only for donor basins (based on summary score)."""
+    calib_basins_only: Optional[bool] = False
+    """Whether to run formulation selection only for calibrated basins (based on summary score)."""
     formulation_to_include: Optional[List[str]] = None
     """List of formulations to consider. If None, all formulations are included."""
     """If 'all', all formulations are included."""

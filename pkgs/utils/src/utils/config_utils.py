@@ -667,6 +667,8 @@ class BaseConfigProcessor:
     def set_vpu(self, vpu: str):
         """Set the vpu."""
         self.vpu = vpu
+        if hasattr(self, "vpu_gdf"):
+            delattr(self, "vpu_gdf")
 
     def set_vpu_gdf(self) -> gpd.GeoDataFrame:
         """Set the GeoDataFrame for the current vpu."""
