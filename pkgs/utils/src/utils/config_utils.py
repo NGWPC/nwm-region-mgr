@@ -2,22 +2,25 @@
 
 config_utils.py
 
-Functions:
-- _deep_merge_configs: Recursively merge two dictionaries, with values from dict #2 overwriting those in dict #1.
-- _load_and_validate_config: Load a YAML file, validate its structure using Pydantic
-- _substitute_placeholders: Substitute placeholders in the config with actual values.
-- load_and_process_config: Load, validate, process, and save the configuration files.
+Classes/Functions:
 - LoggingConfig: Pydantic model for logging configuration.
 - BaseGeneralConfig: Pydantic model for general settings of the application.
 - BaseOutputConfig: Pydantic model for output settings of the application.
 - BaseConfig: Pydantic model for the base configuration of the application.
+- BaseConfigProcessor: base class for processing and validating configurations
+    - _deep_merge_configs: Recursively merge two dictionaries, with values from dict #2 overwriting those in dict #1.
+    - _load_and_validate_config: Load a YAML file, validate its structure using Pydantic
+    - _substitute_placeholders: Substitute placeholders in the config with actual values.
+    - load_and_process_config: Load, validate, process, and save the configuration files.
 
 """
 
 import logging
 import re
-from functools import reduce
+from contextlib import contextmanager
+from functools import lru_cache, reduce
 from pathlib import Path
+from time import time
 from typing import Any, Dict, List, Optional, Union
 
 import geopandas as gpd
@@ -25,6 +28,7 @@ import pandas as pd
 import yaml
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
+from .dict_utils import flatten_dict
 from .io_utils import read_table, save_data
 from .logging_utils import setup_logging
 from .plot_utils import plot_histogram, plot_spatial_map
@@ -69,17 +73,20 @@ class BaseGeneralConfig(BaseModel):
     """Define NWM domain. Options: conus, ak, hi, prvi."""
     vpu_list: Union[List[str], str]
     """List of VPUs within the domain or 'all' to process all."""
+
     base_dir: str
     """Path to base directory for input/output files."""
-
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
     """Path to NextGen hydrofabric file, e.g., vpu_01.gpkg."""
     gage_divide_cwt_file: Path | str = Field()
     """Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'."""
     donor_gage_file: Path | str = Field()
     """Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."""
-    calval_stats_dir: Path | str = Field()
-    """Path to directory with calibration/validation statistics files"""
+    calval_stats_file: Path | str = Field()
+    """Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'."""
+
+    approach_calib_basins: Optional[str] = "regionalization"  # Options: 'regionalization', 'summary_score'
+    """Strategy for assigning formulations to calibrated basins."""
 
     id_col: Optional[dict[str, str]] = Field(
         default_factory=lambda: {"divide": "divide_id", "gage": "gage_id", "huc12": "huc_12", "vpu": "vpuid"}
@@ -122,7 +129,7 @@ class BaseOutputConfig(BaseModel):
     """Suffix for the file stem, used to create unique file names based on the path for specific needs."""
     format: Optional[str] = None
     """File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file."""
-    plots: Optional[Dict[str, bool]] = None
+    plots: Optional[Dict[str, Any]] = None
     """Configuration for output plots, if applicable."""
     plot_path: Optional[str] = None
     """Path to save output plots, if applicable. If not specified, plots will be saved in the same directory 
@@ -158,13 +165,15 @@ class BaseOutputConfig(BaseModel):
             # only "histogram" and "spatial_map" are supported, currently
             check_options(
                 list(values.plots.keys()),
-                ["histogram", "spatial_map"],
+                ["histogram", "spatial_map", "columns_to_plot"],
                 "plot keys",
             )
 
         return values
 
-    def _get_file_path(self, vpu: str = None, plot_type: str = None, use_stem_suffix: bool = False) -> Path:
+    def get_file_path(
+        self, vpu: str = None, algorithm: str = None, plot_type: str = None, use_stem_suffix: bool = False
+    ) -> Path:
         """Get the file path for saving the output."""
         file_path = Path(self.path) if plot_type is None else Path(self.plot_path)
 
@@ -176,8 +185,12 @@ class BaseOutputConfig(BaseModel):
                 raise ValueError(msg)
             if isinstance(self.stem, dict):
                 # If stem is a dict (for different VPUs), find the stem for current VPU
-                if vpu:
+                if vpu and not algorithm:
                     file_stem = self.stem.get(f"{vpu}")
+                elif vpu and algorithm:
+                    file_stem = self.stem.get(f"{vpu}_{algorithm}")
+                elif algorithm and not vpu:
+                    file_stem = self.stem.get(f"{algorithm}")
                 else:
                     file_stem = re.sub(r"_vpu.*$", "", next(iter(self.stem.values())))  # remove VPU part from stem
             elif isinstance(self.stem, str):
@@ -187,6 +200,9 @@ class BaseOutputConfig(BaseModel):
                 logger.error(msg)
                 raise ValueError(msg)
 
+            if not file_stem:
+                if isinstance(self.stem, dict):
+                    file_stem = next(iter(self.stem.values())).replace(f"{next(iter(self.stem))}", f"{vpu}")
             if not file_stem:
                 msg = f"File stem not found for VPU {vpu}: {self.stem}"
                 logger.error(msg)
@@ -218,12 +234,15 @@ class BaseOutputConfig(BaseModel):
 
         return file_path
 
-    def save_to_file(self, data: Any, vpu: str = None, data_str: str = None, use_stem_suffix: bool = False) -> None:
+    def save_to_file(
+        self, data: Any, vpu: str = None, algorithm: str = None, data_str: str = None, use_stem_suffix: bool = False
+    ) -> None:
         """Save output data to the specified path and format.
 
         Args:
             data: Data to save, can be a DataFrame or Pydantic model.
             vpu: VPU identifier for the output file name.
+            algorithm: Algorithm identifier for the output file name.
             data_str: String representation of the data being saved.
             use_stem_suffix: Whether to use the stem suffix for the file name.
 
@@ -235,7 +254,7 @@ class BaseOutputConfig(BaseModel):
             return
 
         # get the file path to save the output
-        filepath = self._get_file_path(vpu, use_stem_suffix=use_stem_suffix)
+        filepath = self.get_file_path(vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix)
 
         # save the output data
         save_data(data, filepath)
@@ -245,12 +264,18 @@ class BaseOutputConfig(BaseModel):
             logger.info(f"Saved {data_str} output to {filepath}")
 
     def read_from_file(
-        self, vpu: str = None, use_stem_suffix: bool = False, data_str: str = None, data_type: dict[str, Any] = None
+        self,
+        vpu: str = None,
+        algorithm: str = None,
+        use_stem_suffix: bool = False,
+        data_str: str = None,
+        data_type: dict[str, Any] = None,
     ) -> pd.DataFrame | gpd.GeoDataFrame:
         """Read output data from the specified path and format.
 
         Args:
             vpu: VPU identifier for the output file name.
+            algorithm: Algorithm identifier for the output file name.
             use_stem_suffix: Whether to use the stem suffix for the file name.
             data_str: String representation of the data being read.
             data_type: Optional dictionary specifying the data types for specific columns.
@@ -263,7 +288,7 @@ class BaseOutputConfig(BaseModel):
 
         """
         # get the file path to read the output
-        filepath = self._get_file_path(vpu, use_stem_suffix=use_stem_suffix)
+        filepath = self.get_file_path(vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix)
 
         # read the output data
         data = read_table(filepath, dtype=data_type)
@@ -291,11 +316,15 @@ class BaseOutputConfig(BaseModel):
                 plot_type: Type of plot being saved (e.g., 'map', 'hist').
 
         """
-        if self.plots["histogram"]:
-            path1 = self._get_file_path(plot_dict.get("vpu"), plot_type="hist")
+        # if columns_to_plot is specified by the user, use it
+        if self.plots and self.plots.get("columns_to_plot", None) is not None:
+            plot_dict["columns"] = self.plots["columns_to_plot"]
+
+        if self.plots and self.plots.get("histogram", False):
+            path1 = self.get_file_path(plot_dict.get("vpu"), algorithm=plot_dict.get("algorithm"), plot_type="hist")
             plot_dict1 = plot_dict.copy()
             plot_dict1["outfile"] = path1
-            plot_dict1["ncols"] = 2
+            plot_dict1["ncols"] = min(2, plot_dict1.get("ncols", 2))
 
             # remove non-numeric columns from data from histogram plotting
             numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
@@ -303,11 +332,11 @@ class BaseOutputConfig(BaseModel):
 
             plot_histogram(data, plot_dict1)
 
-        if self.plots["spatial_map"]:
-            path2 = self._get_file_path(plot_dict.get("vpu"), plot_type="map")
+        if self.plots and self.plots.get("spatial_map", False):
+            path2 = self.get_file_path(plot_dict.get("vpu"), algorithm=plot_dict.get("algorithm"), plot_type="map")
             plot_dict2 = plot_dict.copy()
             plot_dict2["outfile"] = path2
-            plot_dict2["ncols"] = 3
+            plot_dict2["ncols"] = min(3, plot_dict2.get("ncols", 3))
             plot_spatial_map(data, plot_dict2)
 
 
@@ -321,227 +350,348 @@ class BaseConfig(BaseModel):
     """Base output settings for the regionalization application."""
 
 
-def _deep_merge_configs(a: dict, b: dict) -> dict:
-    """Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.
+class BaseConfigProcessor:
+    """Base configuration processor."""
 
-    Args:
-        a: The base dictionary.
-        b: The dictionary whose values will overwrite those in `a`.
+    def __init__(
+        self,
+        config_file: str | Path | list[str] | list[Path],
+        config_schema: BaseModel = Field(...),
+        sample_size: int = None,
+    ):
+        """Initialize regionalzation processor."""
+        self.config_file = config_file
+        self.config_schema = config_schema
+        self.config = self.load_and_process_config
+        self.sample_size = sample_size
 
-    Returns:
-        A new dictionary that is the result of merging `a` and `b`.
+    def _deep_merge_configs(self, a: dict, b: dict) -> dict:
+        """Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.
 
-    """
-    result = a.copy()
-    for key, value in b.items():
-        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-            result[key] = _deep_merge_configs(result[key], value)
-        else:
-            result[key] = value
-    return result
+        Args:
+            a: The base dictionary.
+            b: The dictionary whose values will overwrite those in `a`.
 
+        Returns:
+            A new dictionary that is the result of merging `a` and `b`.
 
-def _load_and_validate_config(config_paths: list[str], config_schema: BaseModel = Field(...)) -> BaseModel:
-    """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
+        """
+        result = a.copy()
+        for key, value in b.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = self._deep_merge_configs(result[key], value)
+            else:
+                result[key] = value
+        return result
 
-    Args:
-        config_paths: list of paths to the config files
-        config_schema: Pydantic model to validate the config structure
+    def _load_and_validate_config(self, config_paths: list[str], config_schema: BaseModel = Field(...)) -> BaseModel:
+        """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
 
-    Returns:
-        Config object with validated structure
+        Args:
+            config_paths: list of paths to the config files
+            config_schema: Pydantic model to validate the config structure
 
-    """
-    try:
-        configs = []
-        for p in config_paths:
-            with open(p, "r") as f:
-                configs.append(yaml.safe_load(f))
-        merged_config = reduce(_deep_merge_configs, configs)
-        config = config_schema(**merged_config)
+        Returns:
+            Config object with validated structure
+
+        """
+        try:
+            configs = []
+            for p in config_paths:
+                with open(p, "r") as f:
+                    configs.append(yaml.safe_load(f))
+            merged_config = reduce(self._deep_merge_configs, configs)
+            config = config_schema(**merged_config)
+
+            return config
+
+        except ValidationError as e:
+            logger.exception(f"Validation Error: {e}")
+            raise
+        except Exception as e:
+            logger.exception(f"Error loading YAML file: {e}")
+            raise
+
+    def _substitute_placeholders(self, config: BaseModel) -> BaseModel:
+        """Substitute placeholders in the config with actual values.
+
+        Args:
+            config: Config object with placeholders
+
+        Returns:
+            Config object with placeholders substituted
+
+        """
+        # Create a context dictionary with general config parameters
+        context = {
+            "domain": config.general.domain if hasattr(config.general, "domain") else None,
+            "run_name": config.general.run_name if hasattr(config.general, "run_name") else None,
+            "base_dir": config.general.base_dir if hasattr(config.general, "base_dir") else None,
+            "vpu_list": config.general.vpu_list if hasattr(config.general, "vpu_list") else None,
+            "algorithm_list": config.general.algorithm_list if hasattr(config.general, "algorithm_list") else None,
+        }
+
+        # remove items with None values from context
+        context = {k: v for k, v in context.items() if v is not None}
+
+        # substitute placeholders in the config
+        config = recursive_substitute(config, context)
 
         return config
 
-    except ValidationError as e:
-        logger.exception(f"Validation Error: {e}")
-        raise
-    except Exception as e:
-        logger.exception(f"Error loading YAML file: {e}")
-        raise
+    def _required_columns_calval_stats(self, config) -> set[str]:
+        """Return a set of required columns for calibration/validation statistics."""
+        id_col = config.general.id_col.get("gage", "gage_id")
+        required_fields = {id_col, "formulation"}
 
+        # required fields for summary score configuration (for formulation regionalization)
+        sc = getattr(config, "summary_score", None)
+        if sc:
+            mp = getattr(sc, "metric_eval_period", None)
+            eval_col = getattr(mp, "col_name", None) if mp else None
+            if eval_col:
+                required_fields.add(eval_col)
 
-def _substitute_placeholders(config: BaseModel) -> BaseModel:
-    """Substitute placeholders in the config with actual values.
+            metrics = getattr(sc, "metrics", None)
+            if isinstance(metrics, dict):
+                required_fields.update(metrics)
 
-    Args:
-        config: Config object with placeholders
+        # required fields for parameter regionalization
+        donor = getattr(config, "donor", None)
+        if donor:
+            eval_pd = getattr(donor, "metric_eval_period", None)
+            if eval_pd:
+                eval_col = getattr(eval_pd, "col_name", None)
+                if eval_col:
+                    required_fields.add(eval_col)
+            metrics = getattr(donor, "metric_threshold", None)
+            if isinstance(metrics, dict):
+                required_fields.update(metrics)
 
-    Returns:
-        Config object with placeholders substituted
+        return required_fields
 
-    """
-    # resolve placeholders in the config
-    context = {
-        "domain": config.general.domain,
-        "run_name": config.general.run_name,
-        "base_dir": config.general.base_dir,
-        "vpu_list": config.general.vpu_list,
-    }
-    config = recursive_substitute(config, context)
+    def _file_required_column_map(self, config) -> Dict[str, str]:
+        """Return a dictionary mapping files to required columns."""
+        gen = config.general
+        divide_id_col = gen.id_col["divide"]
+        gage_id_col = gen.id_col["gage"]
+        huc12_id_col = gen.id_col["huc12"]
+        vpu_id_col = gen.id_col["vpu"]
 
-    return config
+        file_dict = {
+            "gage_divide_cwt_file": {divide_id_col, gage_id_col},
+            "donor_gage_file": {gage_id_col, "longitude", "latitude"},
+            "calval_stats_file": self._required_columns_calval_stats(config),
+            "ngen_hydrofabric_file": {divide_id_col, vpu_id_col, "geometry"},
+            "huc12_hydrofabric_file": {huc12_id_col, "geometry"},
+            "divide_huc12_cwt_file": {divide_id_col, huc12_id_col},
+            "formulation_file": {divide_id_col, "formulation"},
+        }
 
+        # add snow cover file if it exists in the config
+        from parreg import config_schema as pcs
 
-def _validate_paths(paths: str | Path | list[str | Path]):
-    """Validate that all file and directory paths exist.
+        if isinstance(config, pcs.Config) and hasattr(config, "snow_cover"):
+            if config.snow_cover.consider_snowness:
+                snow_cover_file = getattr(config.snow_cover, "snow_cover_file", None)
+                snow_frac_col = getattr(config.snow_cover, "column", None)
+                if snow_cover_file and snow_frac_col:
+                    file_dict["snow_cover_file"] = {divide_id_col, snow_frac_col}
 
-    Args:
-        paths: A string, Path, or list of strings/Paths to validate.
+        return file_dict
 
-    Raises:
-        FileNotFoundError: If any path does not exist.
+    def _assemble_file_paths(
+        self, config: BaseModel, exclude: set[str] = None, include: set[str] = None
+    ) -> dict[str, Path]:
+        """Assemble file paths from the configuration.
 
-    """
-    if isinstance(paths, (str, Path)):
-        paths = [paths]
+        Args:
+            config: The configuration object.
+            exclude: Optional set of fields to exclude from the list of paths.
+            include: Optional set of fields to include in the list of paths.
 
-    missing_paths = []
-    for path in paths:
-        if not Path(path).exists():
-            missing_paths.append(Path(path))
+        Returns:
+            Dictionary mapping path names to their Path objects.
 
-    if missing_paths:
-        msg = f"Missing paths: {missing_paths}"
-        logger.error(msg)
-        raise FileNotFoundError(msg)
+        """
+        # all input file paths to be checked in the config
+        path_fields = self._file_required_column_map(config)
 
+        if exclude:
+            # exclude specified fields from the list
+            path_fields = [field for field in path_fields if field not in exclude]
 
-def _check_file_columns(config: BaseModel):
-    """Check if the required columns are present in the files in the configuration.
+        if include:
+            # include specified fields in the list
+            path_fields = [field for field in path_fields if field in include]
 
-    Args:
-        config: The configuration object to check.
+        # create a dictionary to hold the paths
+        paths = {}
+        for path1 in path_fields:
+            # check in snow_cover config if not found in general config
+            val = getattr(config.general, path1, None) or getattr(config.snow_cover, path1, None)
+            if val is not None:
+                if isinstance(val, (str, Path)):
+                    paths[path1] = Path(val)
+                elif isinstance(val, dict):
+                    paths[path1] = {k: Path(v) for k, v in val.items() if isinstance(v, (str, Path))}
+                else:
+                    logger.warning(f"Unsupported type for {path1}: {type(val)}")
 
-    Raises:
-        ValueError: If any required columns are missing in the files.
+        # Remove any None values and return the paths dictionary
+        return {k: v for k, v in paths.items() if v is not None}
 
-    """
-    # get the ID columns and hydrofabric layer names from the configuration
-    id_cols = config.general.id_col
+    def _validate_paths(self, paths: str | Path | list[str | Path] | dict[str, str | Path]) -> None:
+        """Validate that all file and directory paths exist.
 
-    gage_id_col = id_cols["gage"] if "gage" in id_cols else None
-    if not gage_id_col:
-        msg = "Gage ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        Args:
+            paths: A string, Path, list, or dict of strings/Paths to validate.
 
-    divide_id_col = id_cols["divide"] if "divide" in id_cols else None
-    if not divide_id_col:
-        msg = "Divide ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        Raises:
+            FileNotFoundError: If any path does not exist.
 
-    huc12_id_col = id_cols["huc12"] if "huc12" in id_cols else None
-    if not huc12_id_col:
-        msg = "HUC12 ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        """
+        if isinstance(paths, (str, Path)):
+            paths = [paths]
+        elif isinstance(paths, dict):
+            paths = list(flatten_dict(paths).values())
 
-    vpu_id_col = id_cols["vpu"] if "vpu" in id_cols else None
-    if not vpu_id_col:
-        msg = "VPU ID column is not defined in the configuration."
-        logger.error(msg)
-        raise ValueError(msg)
+        missing_paths = [p for p in paths if not Path(p).exists()]
+        if missing_paths:
+            msg = f"Missing paths: {missing_paths}"
+            logger.error(msg)
+            raise FileNotFoundError(msg)
 
-    ngen_layer = config.general.layer_name["ngen"] if "ngen" in config.general.layer_name else None
-    huc12_layer = config.general.layer_name["huc12"] if "huc12" in config.general.layer_name else None
+    def _check_file_columns(
+        self, config: BaseModel, dict_path: Dict[str, str | Path | dict[str, str | Path]] = None
+    ) -> None:
+        """Check if the required columns are present in the files in the configuration.
 
-    # NextGen hydrofabric file
-    file = config.general.ngen_hydrofabric_file
-    required_fields = {divide_id_col, vpu_id_col, "geometry"}
-    if file is not None:
-        if isinstance(file, dict):
-            for vpu, f in file.items():
-                config.general.layer_name["ngen"] = check_columns_hydrofabric(f, required_fields, layer_name=ngen_layer)
+        Args:
+            config: The configuration object to check.
+            dict_path: Optional dictionary of file paths to check.
 
-    # huc12 hydrofabric file
-    file = config.general.huc12_hydrofabric_file
-    required_fields = {huc12_id_col, "geometry"}
-    if file is not None:
-        config.general.layer_name["huc12"] = check_columns_hydrofabric(file, required_fields, layer_name=huc12_layer)
+        Raises:
+            ValueError: If any required columns are missing in the files.
 
-    # Gage divide CWT file
-    file = config.general.gage_divide_cwt_file
-    if file is not None:
-        check_columns_dataframe(file, {divide_id_col, gage_id_col})
+        """
+        if dict_path is None:
+            msg = "No file paths provided for checking columns."
+            logger.error(msg)
+            raise ValueError(msg)
 
-    # huc12 divide crosswalk file
-    file = config.general.divide_huc12_cwt_file
-    if file is not None:
-        check_columns_dataframe(file, {divide_id_col, huc12_id_col})
+        dict_cols = self._file_required_column_map(config)
+        logger.debug("Required columns for files: %s", dict_cols)
 
-    # Donor gage file
-    file = config.general.donor_gage_file
-    if file is not None:
-        check_columns_dataframe(file, {gage_id_col, "longitude", "latitude"})
+        # loop through the required files and check their columns
+        for file_key, file_path in dict_path.items():
+            if file_key not in dict_cols:
+                logger.warning(f"No required columns defined for {file_key}. Skipping column check.")
+                continue
 
+            if isinstance(file_path, (str, Path)):
+                file_path = [Path(file_path)]  # Ensure file_path is a list of Path objects
+            elif isinstance(file_path, dict):
+                file_path = [Path(v) for v in file_path.values()]
+            else:
+                msg = f"Invalid type for file path '{file_key}': {type(file_path)}. Must be str, Path, or dict."
+                logger.error(msg)
+                raise ValueError(msg)
 
-def load_and_process_config(
-    config_paths: list[str],
-    config_schema: BaseModel = Field(...),
-) -> BaseModel:
-    """Load, validate, and process the configuration files.
+            required_columns = dict_cols[file_key]
+            if not required_columns:
+                logger.warning(f"No required columns defined for {file_key}. Skipping column check.")
+                continue
 
-    Args:
-        config_paths: List of paths to the config files.
-        config_schema: Pydantic model to validate the config structure.
+            for file in file_path:
+                if "geometry" in required_columns:
+                    layer = (
+                        config.general.layer_name.get("ngen", None)
+                        if "ngen" in file_key
+                        else config.general.layer_name.get("huc12", None)
+                    )
+                    check_columns_hydrofabric(file, required_columns, layer_name=layer)
+                else:
+                    check_columns_dataframe(file, required_columns)
 
-    Returns:
-        Config object with validated structure and substituted placeholders.
+    @property
+    @lru_cache
+    def load_and_process_config(self) -> BaseModel:
+        """Load, validate, and process the configuration files.
 
-    """
-    # Load and validate the configuration
-    config = _load_and_validate_config(config_paths, config_schema)
+        Returns:
+            Config object with validated structure and substituted placeholders.
 
-    # Substitute placeholders in the configuration
-    config = _substitute_placeholders(config)
+        """
+        # Load and validate the configuration
+        config = self._load_and_validate_config(self.config_file, self.config_schema)
 
-    # Set up logging based on the configuration
-    log_level = config.general.logging.level.upper()
-    log_file = Path(config.general.logging.file)
-    setup_logging(
-        level=log_level,
-        target_packages=("__main__", "formreg", "utils"),
-        log_file=log_file,
-        file_level=log_level,
-    )
+        # Substitute placeholders in the configuration
+        config = self._substitute_placeholders(config)
 
-    logger.info("Used config files: %s", config_paths)
-    logger.info("Set up logging with level: %s, based on config file", log_level)
-    logger.info("Log file: %s", log_file)
+        # Set up logging based on the configuration
+        log_level = config.general.logging.level.upper()
+        log_file = Path(config.general.logging.file)
+        setup_logging(
+            level=log_level,
+            target_packages=("__main__", "formreg", "parreg", "utils"),
+            log_file=log_file,
+            file_level=log_level,
+        )
 
-    # Validate that all paths in the configuration exist
-    paths = [
-        config.general.huc12_hydrofabric_file,
-        config.general.gage_divide_cwt_file,
-        config.general.divide_huc12_cwt_file,
-        config.general.donor_gage_file,
-        config.general.calval_stats_dir,
-    ]
-    paths.extend(config.general.ngen_hydrofabric_file.values())
+        from formreg import config_schema as fcs
 
-    # remove None values from paths
-    paths = [p for p in paths if p is not None]
+        config_str = "Formulation Regionalization" if isinstance(config, fcs.Config) else "Parameter Regionalization"
+        logger.info("%s - Config files: %s", config_str, [str(f) for f in self.config_file])
+        logger.info("Set up logging with level: %s", log_level)
+        logger.info("Log files: %s", log_file)
 
-    _validate_paths(paths)
+        # Assemble file paths from the configuration
+        paths = self._assemble_file_paths(config, exclude={"formulation_file"})
+        logger.debug("Input file paths from configuration: %s", paths)
 
-    # Check if the required columns are present in the files
-    _check_file_columns(config)
+        # Validate that all file paths exist
+        self._validate_paths(paths)
 
-    logger.info("Successfully validated and processed the configuration.")
+        # Check if the required columns are present in the files
+        self._check_file_columns(config, paths)
 
-    # Save the final configuration
-    cc = config.output["config_final"]
-    cc.save_to_file(config, data_str="Final Configuration")
+        logger.info("Successfully validated and processed the configurations.")
 
-    return config
+        # Save the final configuration
+        cc = config.output["config_final"]
+        cc.save_to_file(config, data_str="Final Configuration")
+
+        return config
+
+    def set_vpu(self, vpu: str):
+        """Set the vpu."""
+        self.vpu = vpu
+        if hasattr(self, "vpu_gdf"):
+            delattr(self, "vpu_gdf")
+
+    def set_vpu_gdf(self) -> gpd.GeoDataFrame:
+        """Set the GeoDataFrame for the current vpu."""
+        gdf = gpd.read_file(Path(self.config.general.ngen_hydrofabric_file[self.vpu]))
+        gdf = gdf[[self.config.general.id_col["divide"].lower(), "geometry"]]
+
+        self.vpu_gdf = gdf.copy()
+
+    def get_vpu_gdf(self) -> gpd.GeoDataFrame:
+        """Get the GeoDataFrame for the current vpu."""
+        if not hasattr(self, "vpu_gdf"):
+            self.set_vpu_gdf()
+        return self.vpu_gdf
+
+    @contextmanager
+    def timing_block(self, step_str: str):
+        """Context manager for timing code execution.
+
+        Args:
+            step_str: Description of the step being timed.
+
+        """
+        start = time()
+        yield
+        end = time()
+        logger.info(f"  Execution time for {step_str}: {end - start} seconds")

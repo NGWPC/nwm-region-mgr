@@ -6,7 +6,11 @@ from typing import Iterable, Optional, Union
 
 
 class CustomLoggingFormatter(logging.Formatter):
-    """Custom logging formatter to change 'ERROR' to 'SEVERE', and 'CRITICAL' to 'FATAL'."""
+    """Custom logging formatter to change 'ERROR' to 'SEVERE', and 'CRITICAL' to 'FATAL'.
+
+    This is to be consistent with logging levels in ngen and ngen-cal.
+
+    """
 
     def format(self, record):
         """Format the log record."""
@@ -75,6 +79,12 @@ def setup_logging(
     for pkg in target_packages:
         logger = logging.getLogger(pkg)
         logger.setLevel(min(level, file_level or level))  # Allow lower thresholds
+
+        # Remove existing handlers for the logger to avoid duplication
+        # (e.g., when both formulation and parameter regionalizations are run)
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+
         logger.addHandler(console_handler)
         if file_handler:
             logger.addHandler(file_handler)

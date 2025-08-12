@@ -6,66 +6,63 @@ using the specified algorithms and configurations.
 
 import argparse
 import logging
-from contextlib import contextmanager
+from argparse import RawTextHelpFormatter
 from pathlib import Path
-from time import time
 
-from parreg.logging_config import setup_logging
+from formreg import config_schema as fcs
+from formreg.process_config import FormulationRegionalizationProcessor
+from parreg import config_schema as pcs
 from parreg.process_config import RegionalizationProcessor
 
-setup_logging()
 logger = logging.getLogger(__name__)
-
-
-# function to timing the execution of various steps
-@contextmanager
-def timing_block(step_str: str):
-    """Context manager for timing code execution."""
-    start = time()
-    yield
-    end = time()
-    logger.info(f"  Execution time for {step_str}: {end - start} seconds")
 
 
 if __name__ == "__main__":
     # Create the parser
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
 
-    # Add arguments
+    config_files = ["config_general.yaml", "config_formreg.yaml", "config_parreg.yaml"]
+
+    # Argument help text
+    help_text = """Path to the folder containing the following three YAML config files:
+    config_general.yaml: contains general settings for the regionalization process.
+    config_formreg.yaml: contains specific settings for the formulation regionalization process.
+    config_parreg.yaml: contains specific settings for the parameter regionalization process.
+    """
+    # Add the argument for the config directory
     parser.add_argument(
-        "config_file",
+        "config_dir",
         type=str,
-        help="Path to the config yaml file for parameter regionalization",
+        help=help_text,
     )
 
     # Parse the arguments
     args = parser.parse_args()
-    logger.info(f"  Config file to use: {args.config_file}")
+    config_dir = Path(args.config_dir)
 
-    # read and validate config
-    config_file = Path(args.config_file)
-    if not config_file.exists():
-        raise FileNotFoundError(config_file)
+    # Build full paths to each config file
+    config_paths = {file: config_dir / file for file in config_files}
 
-    # initialize RegionalizationProcessor
-    rp = RegionalizationProcessor(config_file)
+    # Allow access to individual files
+    file_general_config = config_paths["config_general.yaml"]
+    file_formreg_config = config_paths["config_formreg.yaml"]
+    file_parreg_config = config_paths["config_parreg.yaml"]
 
-    # process by VPU
+    # Check that all config files exist
+    missing = [str(p) for p in config_paths.values() if not p.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Missing required config files: {', '.join(missing)}")
+
+    # Load and process the formulation regionalization config
+    frp = FormulationRegionalizationProcessor(
+        config_file=[file_general_config, file_formreg_config], config_schema=fcs.Config
+    )
+
+    # Load and process the parameter regionalization config
+    rp = RegionalizationProcessor(
+        config_file=[file_general_config, file_parreg_config], config_schema=pcs.Config, sample_size=None
+    )
+
+    # process parameter regionalization by VPU (which also runs formulation regionalization)
     for vpu in rp.config.general.vpu_list:
-        # set vpu
-        rp.set_vpu(vpu)
-
-        # get receivers and qualified donors in the VPU, and compute pairwise spatial distances between them
-        with timing_block("get_donors_receivers"):
-            rp.get_donors_receivers()
-
-        # assemble the attribute data for donors and receivers
-        with timing_block("process_attr_data"):
-            rp.process_attr_data()
-
-        # determine whether the catchments are snowy (as snowy and non-snowy catchments are processed separately)
-        df_attr_all = rp.set_snow_flag(rp.sorted_df_attrs_all)
-
-        # loop through regionalization algorithms to generate donor-receiver pairings
-        with timing_block("generate_pairing"):
-            rp.generate_pairing(df_attr_all, rp.dist_spatial)
+        rp.run_parreg_for_vpu(vpu, frp)

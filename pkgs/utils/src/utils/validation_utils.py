@@ -4,6 +4,7 @@ validation_utils.py
 
 Functions:
 - check_columns_dataframe: Check if the required columns are present in a DataFrame (CSV or Parquet).
+- check_columns_hydrofabric: Check if the required fields are present in a hydrofabric file (GeoPackage or Shapefile).
 - check_options: Check if the provided option is valid against a list of valid options.
 
 """
@@ -41,13 +42,14 @@ def check_columns_dataframe(file: Path | str, columns: Set[str]):
     suffix = file.suffix.lower()
     if suffix == ".csv":
         # Read full DataFrame with minimal memory usage
-        df = pd.read_csv(file, usecols=lambda col: True)
-        columns_present = [col.lower() for col in df.columns.tolist()]
+        df = pd.read_csv(file)
+        df.columns = df.columns.str.strip().str.lower()
+        columns_present = list(df.columns)
         is_empty = df.empty
 
     elif suffix == ".parquet":
         pf = pq.ParquetFile(file)
-        columns_present = [col.lower() for col in pf.schema.names]
+        columns_present = [col.strip().lower() for col in pf.schema.names]
         is_empty = pf.metadata.num_rows == 0  # More efficient than loading into pandas
 
     else:

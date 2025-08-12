@@ -2,12 +2,9 @@
  
 # General settings for the formulation regionalization application
 general:
-  run_name: test_temp  # Name of the run, used to create output folders and files
+  run_name: test2  # Name of the run, used to create output folders and files
   domain: conus  # Define NWM domain. Supported options: conus, ak, hi, prvi
   vpu_list: ['01'] # List of VPUs to process. 
-
-  #run_formreg: False  # Whether to run formulation regionalization
-  #run_parreg: True  # Whether to run parameter regionalization
 
   base_dir: /home/yuqiong.liu/work/data/ngen_reg/  # Path to the base directory
   ngen_hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg'  
@@ -15,6 +12,8 @@ general:
   donor_gage_file: '{base_dir}/inputs/gages_nwm4_calib_all.csv'
   calval_stats_file: '{base_dir}/inputs/calval_stats/stat_calval_all_{domain}.parquet' #Path to folder where statistics from calibration and validation are stored
 
+  approach_calib_basins: regionalization  # Strategy for assigning formulations and parameters to calibrated basins: regionalization or summary_score
+  
   id_col: # case-insensitive column names for different spatial units across all applicable files
     divide: divide_id  # Name of column for catchment ID in all files
     gage: gage_id  # Name of column for calibration basin ID in all files

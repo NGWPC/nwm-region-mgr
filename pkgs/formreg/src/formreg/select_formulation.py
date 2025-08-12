@@ -4,14 +4,18 @@ This module provides functions to select formulations based on summary scores of
 as well as formulation costs if provided in the configuration.
 
 Functions:
-- _get_gages_with_shared_formulations: Identify the largest formulation set shared by at least a minimum number of gages.
+- _get_gages_with_shared_formulations: Identify the formulations shared by a number of gages.
 - _find_gages_nearest_neighbor: Find gages for a given HUC ID using the nearest neighbor method.
 - _find_gages_upscaling: Find gages for a given HUC ID using the upscaling method.
 - _find_calibration_gages: Find gages for a given HUC ID in the summary scores DataFrame.
 - _get_formulation_costs: Retrieve formulation costs from the configuration.
 - _select_formulation_given_score: Select a formulation for each spatial unit based on the method specified.
 - _identify_best_formulation_per_gage: Identify the best formulation for each gage based on summary scores and costs.
-- select_formulation: head function to select formulations for each spatial unit in the VPU.
+- select_formulation_donors_only: Select formulations for donor basins only.
+- select_formulation_all: Select formulations for all basins.
+- save_formulation_results: Save the formulation selection results to file.
+- plot_formulation_results: Plot the formulation selection results.
+- select_formulation: Head function to select formulations for each spatial unit in the VPU.
 
 """
 
@@ -108,8 +112,6 @@ def _find_gages_nearest_neighbor(
         else:
             gages, distances = [], []
 
-        # distances = pd.Series(distances)
-
         # if there are enough gages, check if they share the same formulations
         if len(gages) > min_gages:
             found_gages, gages, formulations = _get_gages_with_shared_formulations(
@@ -130,13 +132,6 @@ def _find_gages_nearest_neighbor(
         )
         logger.error(msg)
         raise ValueError(msg)
-
-    # only keep the minimum number of gages required
-    # if len(gages) > min_gages:
-    #     # sort gages by distance and keep the closest ones
-    #     sorted_indices = distances.argsort()[:min_gages]
-    #     gages = [gages[i] for i in sorted_indices]
-    #     distances = distances.iloc[sorted_indices].tolist()
 
     return gages, distances, formulations
 
@@ -192,13 +187,6 @@ def _find_gages_upscaling(huc_id: str, df: pd.DataFrame, gage_id_col: str, min_g
             else:
                 # logger.debug(f"{huc_id}: found {len(gages)} gages ({gages}) at {huc_level} level.")
                 break
-    # else:
-    #     msg = (
-    #         f"Not enough gages found for {huc_id} at any valid HUC level after upscaling. "
-    #         f"Found {ngage} gages ({gages}), minimum required is {min_gages}."
-    #     )
-    #     logger.error(msg)
-    #     raise ValueError(msg)
 
     return gages, huc_level, formulations
 
@@ -439,12 +427,67 @@ def _identify_best_formulation_per_gage(
     return best_per_gage
 
 
-def select_formulation(
+def select_formulation_donors_only(
+    config: cs.Config,
+    df_score: pd.DataFrame,
+    cost_dict: Optional[dict] = None,
+) -> pd.DataFrame:
+    """Select formulations for donor basins only based on summary scores and costs.
+
+    Args:
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+        df_score : pd.DataFrame
+            DataFrame containing summary scores for each formulation and calibrated basin.
+        cost_dict : Optional[dict], optional
+            Dictionary containing costs for each formulation, by default None.
+
+    Returns:
+        pd.DataFrame
+            DataFrame with selected formulations and their scores.
+
+    """
+    # get the ID columns from the configuration
+    id_cols = config.general.id_col
+    gage_id_col = id_cols["gage"]
+    divide_id_col = id_cols["divide"]
+
+    # score computing method, type, and tolerance
+    score_tolerance = config.spatial_unit.best_formulation.tolerance
+
+    # identify the best formulation for each gage
+    df_best_per_gage = _identify_best_formulation_per_gage(
+        df_score,
+        gage_id_col=gage_id_col,
+        tolerance=score_tolerance,
+        cost_dict=cost_dict,
+    )
+
+    # read the crosswalk file for gage/divide relationships
+    col_dtype = {
+        gage_id_col: "str",
+        divide_id_col: "str",
+    }
+    cwt_divide_gage = read_table(config.general.gage_divide_cwt_file, dtype=col_dtype)
+
+    # merge the crosswalk with the best formulations DataFrame
+    df_selected = df_best_per_gage.merge(
+        cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
+        on=gage_id_col,
+        how="left",
+    )
+
+    return df_selected
+
+
+def select_formulation_all(
     config: cs.Config,
     vpu: str,
     df_score: pd.DataFrame,
+    gdf_vpu: gpd.GeoDataFrame,
+    cost_dict: Optional[dict] = None,
 ) -> pd.DataFrame:
-    """Head function to select formulations for each spatial unit in the VPU.
+    """Select formulation for all catchments in the VPU.
 
     Args:
         config : cs.Config
@@ -453,6 +496,10 @@ def select_formulation(
             Virtual Planning Unit (VPU) for which to select formulations.
         df_score : pd.DataFrame
             DataFrame containing summary scores for each formulation and calibrated basin.
+        gdf_vpu : gpd.GeoDataFrame
+            GeoDataFrame of the VPU polygons, used for spatial operations where needed.
+        cost_dict : Optional[dict], optional
+            Dictionary containing costs for each formulation, by default None.
 
     Returns:
         pd.DataFrame
@@ -464,16 +511,12 @@ def select_formulation(
     gage_id_col = id_cols["gage"]
     divide_id_col = id_cols["divide"]
     huc12_id_col = id_cols["huc12"]
-    vpu_id_col = id_cols["vpu"]
 
     # score computing method, type, and tolerance
     score_method = config.spatial_unit.best_formulation.method.lower()
     score_type = config.spatial_unit.best_formulation.type.lower()
     score_tolerance = config.spatial_unit.best_formulation.tolerance
     logger.info(f"Computing total score using method '{score_method}' and type '{score_type}'.")
-
-    # get formulation costs from the configuration
-    formulation_costs = _get_formulation_costs(config.formulation_cost)
 
     # crosswalk for gage/divide
     col_dtype = {
@@ -486,13 +529,8 @@ def select_formulation(
     # crosswalk for divide/huc12
     cwt_divide_huc12 = read_table(config.general.divide_huc12_cwt_file, dtype=col_dtype)
 
-    # hydrofabric file for ngen; filter for the current VPU
-    ngen_hydro_file = Path(config.general.ngen_hydrofabric_file[vpu])
-    gdf_ngen = gpd.read_file(ngen_hydro_file, layer=config.general.layer_name["ngen"])
-    gdf_ngen = gdf_ngen[gdf_ngen[vpu_id_col] == vpu].copy()
-
-    # filter cwt_divide_huc12 with divides in gdf_ngen (i.e., only keep divides that are in the current VPU)
-    cwt_divide_huc12 = cwt_divide_huc12[cwt_divide_huc12[divide_id_col].isin(gdf_ngen[divide_id_col])].copy()
+    # filter cwt_divide_huc12 with divides in gdf_vpu (i.e., only keep divides that are in the current VPU)
+    cwt_divide_huc12 = cwt_divide_huc12[cwt_divide_huc12[divide_id_col].isin(gdf_vpu[divide_id_col])].copy()
 
     # get spatial units for formulation selection
     huc_level = config.spatial_unit.huc_level.lower().replace("-", "").replace("_", "")
@@ -530,7 +568,7 @@ def select_formulation(
     # get huc12 geometry for these huc_ids (to compute centroid distances between gages and huc_ids)
     huc12_hydro_file = Path(config.general.huc12_hydrofabric_file).resolve(strict=True)
 
-    # # Open with Fiona to read features in huc_ids
+    # Open with Fiona to read features in huc_ids
     features = []
     huc_digit = len(huc_ids[0])  # assuming all huc_ids have the same length
     with fiona.open(huc12_hydro_file, "r", open_options=["METHOD=ONLY_CCW"]) as src:
@@ -542,12 +580,10 @@ def select_formulation(
         # Convert to GeoDataFrame
         huc12_gdf = gpd.GeoDataFrame.from_features(features, crs=src.crs)
 
-    # loop through each unique huc_id and select formulations
+    # loop through each unique huc_id and select formulation
     df_selected = pd.DataFrame()
     for huc_id in huc_ids:
         logger.debug(f"Processing HUC ID: {huc_id}")
-        # if huc_id != "04150500":
-        #     continue
 
         # Find actual column name in gdf that matches huc12_id_col (case-insensitive)
         col_match = next((col for col in huc12_gdf.columns if col.lower() == huc12_id_col.lower()), None)
@@ -573,7 +609,6 @@ def select_formulation(
         df_huc = df_score[df_score[gage_id_col].isin(gages) & df_score["formulation"].isin(formulations)].copy()
 
         # identify best formulation for each gage based on summary scores for formulation costs
-        cost_dict = formulation_costs if config.general.consider_cost else None
         df_huc = _identify_best_formulation_per_gage(
             df_huc, gage_id_col=gage_id_col, tolerance=score_tolerance, cost_dict=cost_dict
         )
@@ -590,20 +625,9 @@ def select_formulation(
         best_formulation["huc_id"] = huc_id
         best_formulation["upscale_huc"] = huc_level
         best_formulation["num_gages"] = len(gages)
-        best_formulation["distances"] = ", ".join([str(d) for d in dists])  # join distances as a string
-        best_formulation["vpu"] = vpu
+        best_formulation["distances"] = ", ".join([str(d) for d in dists])  # join distances as a stringi
 
         df_selected = pd.concat([df_selected, best_formulation], ignore_index=True)
-
-    # rearrange the columns in the selected DataFrame
-    columns = ["vpu", "huc_id", "formulation", score_method, "cost", "num_gages"]
-    method1 = config.spatial_unit.basin_fill_method.lower()
-    output_columns = columns + ["upscale_huc"] if method1 == "upscaling" else columns + ["distances"]
-    df_selected = df_selected.reindex(columns=output_columns)
-
-    # save the selected formulations (by region/huc_id) to the output file
-    cc = config.output["formulation"]
-    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection (slim)", use_stem_suffix=True)
 
     # merge with cwt_divide_huc12 to get the divide_id
     df_selected = df_selected.merge(
@@ -616,7 +640,11 @@ def select_formulation(
     if config.general.approach_calib_basins == "regionalization":
         pass
     elif config.general.approach_calib_basins == "summary_score":
-        form_map = df_score.drop_duplicates(divide_id_col).set_index(divide_id_col)["formulation"]
+        # select formulations for donor gages based on the summary scores and costs
+        df_selected_donors = select_formulation_donors_only(config, df_score, cost_dict=cost_dict)
+
+        # replace the formulation for donors in df_selected with the one from df_selected_donors
+        form_map = df_selected_donors.drop_duplicates(divide_id_col).set_index(divide_id_col)["formulation"]
         df_selected.loc[:, "formulation"] = df_selected[divide_id_col].map(form_map).fillna(df_selected["formulation"])
     else:
         msg = (
@@ -626,21 +654,68 @@ def select_formulation(
         logger.error(msg)
         raise ValueError(msg)
 
-    # move divide_id to be the second column
-    cols = df_selected.columns.tolist()
-    cols.insert(1, cols.pop(cols.index(divide_id_col)))
-    df_selected = df_selected[cols]
+    return df_selected
 
-    # save the selected formulations (by divide_id) to the output file
-    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection (full)", use_stem_suffix=False)
 
+def save_formulation_results(
+    df_selected: pd.DataFrame,
+    config: cs.Config,
+    vpu: str,
+) -> None:
+    """Save the selected formulations to the output file.
+
+    Args:
+        df_selected : pd.DataFrame
+            DataFrame with selected formulations and their scores.
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+        vpu : str
+            Virtual Planning Unit (VPU) for which to save formulations.
+
+    """
+    cc = config.output["formulation"]
+    cc.save_to_file(df_selected, vpu=vpu, data_str="Formulation Selection", use_stem_suffix=False)
+
+    # create a slim version of the selected DataFrame by removing the divide_id column
+    df_selected_slim = df_selected.copy()
+    df_selected_slim = df_selected_slim.drop(columns=["divide_id"])
+
+    # remove duplicates based on formulation and huc_id/gage_id
+    columns = ["formulation", "huc_id", "gage_id"]
+    df_selected_slim = df_selected_slim.drop_duplicates(subset=[c for c in columns if c in df_selected_slim.columns])
+
+    cc.save_to_file(df_selected_slim, vpu=vpu, data_str="Formulation Selection (slim version)", use_stem_suffix=True)
+
+
+def plot_formulation_results(
+    df_selected: pd.DataFrame,
+    config: cs.Config,
+    vpu: str,
+    gdf_vpu: Optional[gpd.GeoDataFrame],
+) -> None:
+    """Plot the selected formulations for each spatial unit in the VPU.
+
+    Args:
+        df_selected : pd.DataFrame
+            DataFrame with selected formulations and their scores.
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+        vpu : str
+            Virtual Planning Unit (VPU) for which to plot formulations.
+        gdf_vpu : Optional[gpd.GeoDataFrame], optional
+            GeoDataFrame of the VPU polygons, used for spatial operations where needed
+
+    """
     # generate plots if enabled
+    cc = config.output["formulation"]
+    divide_id_col = config.general.id_col["divide"]
+    score_method = config.spatial_unit.best_formulation.method.lower()
     if any(cc.plots.values()):
         # get geometry for divides if spatial map is enabled
         if cc.plots.get("spatial_map", False):
             # merge the geometry with the selected formulations
             df_selected = df_selected.merge(
-                gdf_ngen[[divide_id_col, "geometry"]].drop_duplicates(),
+                gdf_vpu[[divide_id_col, "geometry"]].drop_duplicates(),
                 on=divide_id_col,
                 how="left",
             )
@@ -649,16 +724,71 @@ def select_formulation(
             df_selected = gpd.GeoDataFrame(
                 df_selected,
                 geometry="geometry",
-                crs=gdf_ngen.crs,
+                crs=gdf_vpu.crs,
             )
 
         # plot the selected formulations
+        columns_to_plot = cc.plots.get("columns_to_plot", None)
+        if columns_to_plot is None:
+            columns_to_plot = ["formulation", score_method, "summary_score", "cost"]
         plot_dict = {
             "vpu": vpu,
             "var_str": "Formulation Selection",
-            "columns": ["formulation", score_method, "cost"],
+            "columns": columns_to_plot,
             "ncols": 3,
         }
         cc.plot_data(df_selected, plot_dict)
 
-    return df_selected
+
+def select_formulation(
+    config: cs.Config,
+    vpu: str,
+    df_score: pd.DataFrame,
+    gdf_vpu: Optional[gpd.GeoDataFrame],
+) -> pd.DataFrame:
+    """Head function to select formulations for catchments in the VPU.
+
+    Args:
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+        vpu : str
+            Virtual Planning Unit (VPU) for which to select formulations.
+        df_score : pd.DataFrame
+            DataFrame containing summary scores for each formulation and calibrated basin.
+        gdf_vpu : Optional[gpd.GeoDataFrame]
+            GeoDataFrame of the VPU polygons, used for spatial operations where needed.
+
+    Returns:
+        pd.DataFrame
+            DataFrame with selected formulations and their scores.
+
+    """
+    # get formulation costs from the configuration
+    formulation_costs = _get_formulation_costs(config.formulation_cost)
+    cost_dict = formulation_costs if config.general.consider_cost else None
+
+    if config.general.calib_basins_only:
+        # select formulations for donor basins only
+        df_formulation = select_formulation_donors_only(config, df_score, cost_dict)
+    else:
+        # select formulations for all catchments in the VPU
+        df_formulation = select_formulation_all(config, vpu, df_score, gdf_vpu, cost_dict)
+
+    # add vpu column to the formulation DataFrame
+    df_formulation["vpu"] = vpu
+
+    # rearrange the columns in the formulation DataFrame
+    divide_id_col = config.general.id_col["divide"]
+    score_method = config.spatial_unit.best_formulation.method.lower()
+    columns = ["vpu", divide_id_col, "formulation", "huc_id", score_method, "summary_score", "cost", "num_gages"]
+    method1 = config.spatial_unit.basin_fill_method.lower()
+    output_columns = columns + ["upscale_huc"] if method1 == "upscaling" else columns + ["distances"]
+    df_formulation = df_formulation.reindex(columns=[c for c in output_columns if c in df_formulation.columns])
+
+    # save the selected formulations to the output file
+    save_formulation_results(df_formulation, config, vpu)
+
+    # plot the selected formulations
+    plot_formulation_results(df_formulation, config, vpu, gdf_vpu)
+
+    return df_formulation

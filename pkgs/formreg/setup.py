@@ -1,6 +1,16 @@
 """Function for setting up regionalization."""
 
+from pathlib import Path
+
 from setuptools import find_packages, setup
+
+# Load dependencies from requirements.txt
+requirements_path = Path(__file__).with_name("requirements.txt")
+install_requires = []
+if requirements_path.exists():
+    install_requires = [
+        line.strip() for line in requirements_path.read_text().splitlines() if line.strip() and not line.startswith("#")
+    ]
 
 setup(
     name="forreg",
@@ -14,22 +24,7 @@ setup(
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     include_package_data=True,
-    install_requires=[
-        "numpy==1.26.4",
-        "scikit-learn==1.3.2",
-        "scikit-learn-extra==0.3.0",
-        "pandas",
-        "hdbscan",
-        "joblib",
-        "pydantic",
-        "pyarrow",
-        "geopandas",
-        "shapely",
-        "pyyaml",
-        "pyproj",
-        "numba",
-        "matplotlib",
-    ],
+    install_requires=install_requires,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

@@ -5,11 +5,11 @@ general:
   huc12_hydrofabric_file: '{base_dir}/inputs/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb'
   divide_huc12_cwt_file: '{base_dir}/inputs/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv' # Path to crosswalk file for HUC12 and NextGen catchments.
 
-  catchments_to_exclude: # Catchments to be excluded from formulation regionalization.
+  calib_basins_only: False  # whether to run formulation selection only for calibrated basins (based on summary score)
   formulation_to_include: # List of competing formulations required to be considered in the selection process
   formulation_to_exclude: # List of formulation to exclude from the selection process
   consider_cost: True  # whether to consider computational cost
-  approach_calib_basins: regionalization # Strategy for assigning formulations to calibrated basins: regionalization or summary_score
+  #approach_calib_basins: regionalization # Strategy for assigning formulations to calibrated basins: regionalization or summary_score
 
 # Define configurations for the spatial discretization for formulation regionalization
 # For each spatial unit, a single formulation will be identified and applied to all catchments within the unit

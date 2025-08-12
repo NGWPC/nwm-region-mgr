@@ -19,7 +19,7 @@ from typing import Dict
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from utils import check_columns_dataframe, read_table
+from utils import read_table
 
 from . import config_schema as cs
 
@@ -162,35 +162,22 @@ def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.
         pd.DataFrame: DataFrame containing summary scores for all gages in the domain.
 
     """
-    # get the formulation stats files
-    dict_form = get_formulations_from_stats(config)
+    # read statistics (all gages and all formulations)
+    df_stats = read_table(config.general.calval_stats_file, dtype={gage_id_col: str})
 
-    # read statistics and compute summary scores for each formulation
-    df_score = pd.DataFrame()
-    for form, file in dict_form.items():
-        # check if the required columns are present
-        ss = config.summary_score
-        required_columns = [gage_id_col, ss.metric_eval_period.col_name] + list(ss.metrics.keys())
-        check_columns_dataframe(file, set(required_columns))
+    # narrow down to the evaluation period (case-insensitive)
+    ss = config.summary_score
+    p1 = ss.metric_eval_period
+    df_stats = df_stats[df_stats[p1.col_name].str.lower() == p1.value.lower()]
 
-        # read the statistics file
-        df_stats = read_table(file, {gage_id_col: str})
-        if df_stats.empty:
-            logger.warning(f"No data found in statistics file {file} for formulation {form}")
-            continue
+    # keep only the required columns
+    required_columns = [gage_id_col, "formulation", ss.metric_eval_period.col_name] + list(ss.metrics.keys())
+    df_stats = df_stats[required_columns]
 
-        # narrow down to the evaluation period (case-insensitive)
-        p1 = ss.metric_eval_period
-        df_stats = df_stats[df_stats[p1.col_name].str.lower() == p1.value.lower()]
-
-        # keep only the required columns
-        df_stats = df_stats[required_columns]
-
-        if not df_stats.empty:
-            # compute the summary score for the formulation
-            df = formulation_summary_score(df_stats, ss.metrics)
-            df["formulation"] = form  # Add formulation name to the DataFrame
-            df_score = pd.concat([df_score, df[[gage_id_col, "formulation", "summary_score"]]], ignore_index=True)
+    if not df_stats.empty:
+        # compute the summary score for the formulation
+        df_score = formulation_summary_score(df_stats, ss.metrics)
+        df_score = df_score[[gage_id_col, "formulation", "summary_score"]].copy()
 
     # remove duplicated rows
     df_score = df_score.drop_duplicates(subset=[gage_id_col, "formulation", "summary_score"])

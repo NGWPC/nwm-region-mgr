@@ -12,23 +12,16 @@ import time
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from pydantic import BaseModel
 
 from . import utils_algo
+from .pairer import Pairer
 from .unsupervised_random_forest import URF
 
 logger = logging.getLogger(__name__)
 
 
-class DistancePairer(BaseModel):
+class DistancePairer(Pairer):
     """Distance Pairer."""
-
-    config: dict
-    df_attr_all: pd.DataFrame
-    dist_spatial: pd.DataFrame
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @property
     def attrs(self):
@@ -42,27 +35,20 @@ class DistancePairer(BaseModel):
         """Receivers that still need to be processed."""
         # check if donors are identified for all receivers
         recs = self.df_attr_all[~self.df_attr_all["is_donor"]]["divide_id"].values
-        if processed_receivers_df.shape[1] > 0:
-            return [
-                value
-                for value in recs
-                if value not in processed_receivers_df["divide_id"].values
-            ]
+        # logger.info(f"Number of already processed receivers: {len(processed_receivers_df)}")
+        if len(processed_receivers_df) > 0:
+            return [value for value in recs if value not in processed_receivers_df["divide_id"].values]
         else:
             return recs
 
-    def get_donors_in_receivers_snow_category(
-        self, df_attr_for_round: pd.DataFrame, receiver: str
-    ) -> list:
+    def get_donors_in_receivers_snow_category(self, df_attr_for_round: pd.DataFrame, receiver: str) -> list:
         """Get all donors in the same snow category as the receiver."""
         snow_category_of_receiver = df_attr_for_round.loc[
-            (df_attr_for_round["divide_id"] == receiver)
-            & (~df_attr_for_round["is_donor"]),
+            (df_attr_for_round["divide_id"] == receiver) & (~df_attr_for_round["is_donor"]),
             "snowy",
         ]
         return df_attr_for_round[
-            (df_attr_for_round["is_donor"])
-            & (df_attr_for_round["snowy"] == snow_category_of_receiver.iloc[0])
+            (df_attr_for_round["is_donor"]) & (df_attr_for_round["snowy"] == snow_category_of_receiver.iloc[0])
         ]["divide_id"].to_list()
 
     def apply_constraints(
@@ -98,9 +84,7 @@ class DistancePairer(BaseModel):
                 donors = [distances_to_donors[donors_within_spatial_distance].idxmin()]
             else:
                 # otherwise, narrow down to donors within the buffer
-                donors = distances_to_donors.loc[
-                    distances_to_donors <= buffer
-                ].index.tolist()
+                donors = distances_to_donors.loc[distances_to_donors <= buffer].index.tolist()
 
             # potential donors in the same snowy category
             donors = list(set(donors).intersection(set(candidate_donors_for_round)))
@@ -112,15 +96,13 @@ class DistancePairer(BaseModel):
                 for i in attr_distance_to_current_donors.index
                 if attr_distance_to_current_donors[i] <= self.config["max_attr_dist"]
             ]
-            if (
-                len(idx) == 0
-            ):  # if not, continue to the next round with a larger neighborhood
+            if len(idx) == 0:  # if not, continue to the next round with a larger neighborhood
                 continue
 
             # if a suitable donor is found (or all donors have been assessed), break the loop and stop searching
-            if attr_distance_to_current_donors[idx].min() <= self.config[
-                "min_attr_dist"
-            ] or len(donors) == len(donors_for_round):
+            if attr_distance_to_current_donors[idx].min() <= self.config["min_attr_dist"] or len(donors) == len(
+                donors_for_round
+            ):
                 return donors, attr_distance_to_current_donors.loc[idx]
 
         return [], []
@@ -136,9 +118,7 @@ class DistancePairer(BaseModel):
         """Identify donors (to be used in parallel computing)."""
         processed_receivers_round_df = pd.DataFrame()
 
-        candidate_donors_for_round = self.get_donors_in_receivers_snow_category(
-            df_attr_for_round, receiver
-        )
+        candidate_donors_for_round = self.get_donors_in_receivers_snow_category(df_attr_for_round, receiver)
 
         filtered_donors, attr_distance_to_current_donors = self.apply_constraints(
             receiver, candidate_donors_for_round, dist_attr_for_round, donors_for_round
@@ -159,32 +139,6 @@ class DistancePairer(BaseModel):
                         [receiver],
                         self.config,
                         attr_distance_to_current_donors,
-                        self.dist_spatial,
-                        self.df_attr_all,
-                    ),
-                ),
-                axis=0,
-            )
-
-        # if no donors found (after both 'main' and 'base' attribute rounds),
-        # get the spatially closest donor with some constraints
-        if len(filtered_donors) == 0 and run == "base":
-            # get all donors and their spatial distance to the receiver
-            all_donors = self.df_attr_all[self.df_attr_all["is_donor"]][
-                "divide_id"
-            ].tolist()
-            spatial_distance_to_receiver = self.dist_spatial.loc[receiver]
-
-            # assign donor
-            processed_receivers_round_df = pd.concat(
-                (
-                    processed_receivers_round_df,
-                    utils_algo.assign_donors(
-                        "proximity",
-                        all_donors,
-                        [receiver],
-                        self.config,
-                        spatial_distance_to_receiver,
                         self.dist_spatial,
                         self.df_attr_all,
                     ),
@@ -213,21 +167,16 @@ class DistancePairer(BaseModel):
         process only those not-yet processed receivers.
         """
         receivers_to_process = [
-            r
-            for r in receivers_to_process
-            if r in receivers_for_round and r not in processed_receivers_for_round
+            r for r in receivers_to_process if r in receivers_for_round and r not in processed_receivers_for_round
         ]
 
         logger.info(f"{len(receivers_to_process)} receivers to be processed this round")
         return receivers_to_process
 
     def pair(self):
-        """Perform donor-receiver pairing using Gower's distance."""
+        """Perform donor-receiver pairing using Gower's distance or URF approach."""
         np.random.seed(5)
         random.seed(5)
-        logger.info(
-            "calling function funcs_dist using the Gower's distance approach ..."
-        )
 
         processed_receivers_df = pd.DataFrame()
 
@@ -238,20 +187,21 @@ class DistancePairer(BaseModel):
             if len(receivers_to_process) == 0:
                 continue
 
+            logger.info(f"Number of receivers to be processed in {run} attributes: {len(receivers_to_process)}")
+
             # reduce the attribute table to attributes for the current attr round
+            logger.info(f"Using {run} attributes: {self.attrs[run]}")
             df_attr0 = self.df_attr_all[self.config["non_attr_cols"] + self.attrs[run]]
 
             # iteratively process all the receivers to handle data gaps so that
             # receivers with the same missing attributes are processed in the same round
             processed_receivers_for_round = []  # receivers that have already been processed in previous krounds
             kround = 0
-            while len(
-                [x for x in receivers_to_process if x in processed_receivers_for_round]
-            ) != len(receivers_to_process):
+            while len([x for x in receivers_to_process if x in processed_receivers_for_round]) != len(
+                receivers_to_process
+            ):
                 kround = kround + 1
-                logger.info(
-                    f"------------------------{run} attributes,  Round {kround}--------------------"
-                )
+                logger.info(f"------------------------{run} attributes,  Round {kround}--------------------")
 
                 # figure out valid attributes to use this round
                 df_attr_for_round = utils_algo.get_valid_attrs(
@@ -262,29 +212,21 @@ class DistancePairer(BaseModel):
                     self.config,
                 )
                 # donors and receivers for this round
-                donors_for_round = df_attr_for_round[df_attr_for_round["is_donor"]][
-                    "divide_id"
-                ].tolist()
-                receivers_for_round = df_attr_for_round[~df_attr_for_round["is_donor"]][
-                    "divide_id"
-                ].tolist()
+                donors_for_round = df_attr_for_round[df_attr_for_round["is_donor"]]["divide_id"].tolist()
+                receivers_for_round = df_attr_for_round[~df_attr_for_round["is_donor"]]["divide_id"].tolist()
 
                 # apply principal component analysis and compute distances
-                dist_attr_for_round = self.process(
-                    df_attr_for_round, donors_for_round, receivers_for_round
-                )
+                dist_attr_for_round = self.process(df_attr_for_round, donors_for_round, receivers_for_round)
                 dist_attr_for_round = self.update_columns_index(
                     donors_for_round, receivers_for_round, dist_attr_for_round
                 )
 
                 # determine which receivers to be processed for the current round
                 # process only those not-yet processed receivers
-                receivers_to_process_for_round = (
-                    self.get_receivers_to_process_for_round(
-                        receivers_to_process,
-                        processed_receivers_for_round,
-                        receivers_for_round,
-                    )
+                receivers_to_process_for_round = self.get_receivers_to_process_for_round(
+                    receivers_to_process,
+                    processed_receivers_for_round,
+                    receivers_for_round,
                 )
 
                 processed_receivers_round_df = Parallel(n_jobs=self.config["njobs"])(
@@ -297,16 +239,15 @@ class DistancePairer(BaseModel):
                     )
                     for receiver in receivers_to_process_for_round
                 )
+                processed_receivers_round_df = pd.concat(processed_receivers_round_df, axis=0)
+                logger.info(f"Number of processed receivers in this round: {len(processed_receivers_round_df)}")
+
                 # update list of processed receivers for this round
                 processed_receivers_for_round += receivers_to_process_for_round
 
-                processed_receivers_round_df = pd.concat(
-                    processed_receivers_round_df, axis=0
-                )
                 # update processed receivers df
-                processed_receivers_df = pd.concat(
-                    (processed_receivers_df, processed_receivers_round_df), axis=0
-                )
+                processed_receivers_df = pd.concat((processed_receivers_df, processed_receivers_round_df), axis=0)
+                logger.info(f"Number of processed receivers after {run} attributes: {len(processed_receivers_df)}")
 
         return processed_receivers_df
 
@@ -326,9 +267,7 @@ class GowerPairer(DistancePairer):
         receivers_for_round: list,
     ):
         """Process data."""
-        df_attr_reduced, weights = utils_algo.apply_pca(
-            df_attr_for_round.drop(self.config["non_attr_cols"], axis=1)
-        )
+        df_attr_reduced, weights = utils_algo.apply_pca(df_attr_for_round.drop(self.config["non_attr_cols"], axis=1))
 
         time1 = time.time()
         # compute Gower's distance between donors and receivers only, i.e., avoid calculating distance
@@ -337,9 +276,7 @@ class GowerPairer(DistancePairer):
         number_of_receivers = len(receivers_for_round)
 
         range_of_reduced_attr = df_attr_reduced.max() - df_attr_reduced.min()
-        range_array = np.repeat(
-            np.matrix(range_of_reduced_attr), number_of_receivers, axis=0
-        )
+        range_array = np.repeat(np.matrix(range_of_reduced_attr), number_of_receivers, axis=0)
 
         weights_array = np.repeat(np.matrix(weights), number_of_receivers, axis=0)
 
@@ -373,14 +310,8 @@ class GowerPairer(DistancePairer):
         number_of_receivers,
     ):
         """Calculate Gower's distance between donors and receivers (to be used in parallel computing)."""
-        scores_donor = np.repeat(
-            np.matrix(df_attr_reduced.iloc[i]), number_of_receivers, axis=0
-        )
-        return (
-            (scores_donor - df_attr_reduced_receiver).abs()
-            / range_array
-            * weights_array
-        ).sum(axis=1)
+        scores_donor = np.repeat(np.matrix(df_attr_reduced.iloc[i]), number_of_receivers, axis=0)
+        return ((scores_donor - df_attr_reduced_receiver).abs() / range_array * weights_array).sum(axis=1)
 
 
 class URFPairer(DistancePairer):
@@ -400,39 +331,22 @@ class URFPairer(DistancePairer):
         """Process data."""
         # apply principal component analysis
         if not self.config["pca"]:
-            df_attr_reduced = df_attr_for_round.drop(
-                self.config["non_attr_cols"], axis=1
-            )
+            df_attr_reduced = df_attr_for_round.drop(self.config["non_attr_cols"], axis=1)
         else:
-            df_attr_reduced, _ = utils_algo.apply_pca(
-                df_attr_for_round.drop(self.config["non_attr_cols"], axis=1)
-            )
+            df_attr_reduced, _ = utils_algo.apply_pca(df_attr_for_round.drop(self.config["non_attr_cols"], axis=1))
 
         time1 = time.time()
         # compute attribute distance using unsupervised random forecast classification
         rf1 = URF(n_trees=self.config["n_trees"], max_depth=self.config["max_depth"])
-        dist_attr_for_round = pd.DataFrame(
-            rf1.get_distance(df_attr_reduced.to_numpy(), njob=self.config["njobs"])
-        )
-        dist_attr_for_round = dist_attr_for_round.iloc[
-            len(donors_for_round) :, : len(donors_for_round)
-        ]
+        dist_attr_for_round = pd.DataFrame(rf1.get_distance(df_attr_reduced.to_numpy(), njob=self.config["njobs"]))
+        dist_attr_for_round = dist_attr_for_round.iloc[len(donors_for_round) :, : len(donors_for_round)]
 
-        logger.info(
-            f"Time consumed for distance calculation using URF is : --- {time.time() - time1} seconds ---"
-        )
+        logger.info(f"Time consumed for distance calculation using URF is : --- {time.time() - time1} seconds ---")
         return dist_attr_for_round
 
 
-class ProximityPairer(BaseModel):
+class ProximityPairer(Pairer):
     """Pairer using proximity."""
-
-    config: dict
-    df_attr_all: pd.DataFrame
-    dist_spatial: pd.DataFrame
-
-    class Config:
-        arbitrary_types_allowed = True
 
     @property
     def recs0(self):
@@ -444,12 +358,14 @@ class ProximityPairer(BaseModel):
         """Donors."""
         return self.df_attr_all[self.df_attr_all["is_donor"]]["divide_id"].tolist()
 
-    def pair(self):
+    def pair(self, donors=None, receivers=None):
         """Perform donor-receiver pairing using proximity."""
+        donors = donors or self.donors0
+        receivers = receivers or self.recs0
         return utils_algo.assign_donors(
             "proximity",
-            self.donors0,
-            self.recs0,
+            donors,
+            receivers,
             self.config,
             None,
             self.dist_spatial,

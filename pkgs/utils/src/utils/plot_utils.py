@@ -3,19 +3,24 @@
 plot_utils.py
 
 Functions:
+- _plot_columns_by_dtype: Plot multiple columns of a GeoDataFrame based on their data types.
 - plot_spatial_map: Generate a spatial map plot for the given data.
 - plot_histogram: Generate histogram plot for the spatial or attribute distance between donors and receivers.
+- plot_point_map: Plot the spatial distribution of locations as points on a base layer map.
 
 """
 
 import logging
 import math
+from itertools import cycle, islice
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+# from matplotlib.lines import Line2D
 from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
@@ -116,8 +121,8 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
             Information needed for creating the plot
 
     """
-    # check if the required column exists
-    cols_exist = [c for c in d1["columns"] if c in gdf.columns]
+    # check if the required column exists, allow case insensitivity
+    cols_exist = [c for c in d1["columns"] if c.lower() in gdf.columns.str.lower()]
     cols_missing = set(d1["columns"]) - set(gdf.columns)
     if not cols_exist:
         logger.warning(f"Columns {cols_missing} not found in gdf. Cannot create spatial map plot.")
@@ -140,6 +145,8 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
     # gdf.plot(ax=ax, column=d1["column"], cmap="viridis", legend=True, edgecolor=None)
 
     d1["title"] = d1.get("title", f"Spatial Map of {d1['var_str']}: VPU {d1['vpu']}")
+    if algorithm := d1.get("algorithm", None):
+        d1["title"] += f" (Algorithm: {algorithm})"
     fig.suptitle(d1["title"], fontsize=16, fontweight="bold")
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust layout to make room for the title
 
@@ -159,12 +166,18 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
         data : pd.DataFrame
             DataFrame containing the donor-receiver pairing results.
         d1: dict
-            Should include a key 'columns' which is a list of column names to plot.
+            information needed for creating the plot, including:
+            - columns: list of column names to plot
+            - ncols: number of columns in the subplot grid (default is 3)
+            - title: title of the plot
+            - var_str: variable string for the plot
+            - vpu: VPU identifier
+            - algorithm: algorithm used for pairing (optional)
 
     """
     columns = d1.get("columns", [])
     if not columns:
-        raise ValueError("No columns specified in d1['columns'].")
+        raise ValueError("No columns specified to plot for histogram.")
 
     # filter to numeric columns only
     numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
@@ -177,8 +190,8 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
         )
         columns = [col for col in columns if col in numeric_columns]
 
-    # Filter to columns that exist in data
-    valid_columns = [col for col in columns if col in data.columns]
+    # Filter to columns that exist in data, allow case insensitivity
+    valid_columns = [col for col in columns if col.lower() in data.columns.str.lower()]
     if not valid_columns:
         raise ValueError("None of the specified columns exist in the dataframe.")
     missing_columns = set(columns) - set(valid_columns)
@@ -209,7 +222,10 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
     for j in range(len(valid_columns), len(axes)):
         axes[j].set_visible(False)
 
-    fig.suptitle(f"Histograms of {d1['var_str']}: VPU {d1['vpu']}", fontsize=16, fontweight="bold")
+    title = d1.get("title", f"Histograms of {d1['var_str']}: VPU {d1['vpu']}")
+    if algorithm := d1.get("algorithm", None):
+        title += f" (Algorithm: {algorithm})"
+    fig.suptitle(title, fontsize=16, fontweight="bold")
     plt.xlabel(d1.get("xlabel", "Value"))
     plt.ylabel(d1.get("ylabel", "Density"))
     plt.tight_layout(rect=[0, 0, 1, 0.95])  # leave space for main title
@@ -221,3 +237,39 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
         logger.info(f"Histogram of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}")
     else:
         logger.warning("No output file specified for histogram plot. Skipping save.")
+
+
+# NOT USED YET (for future use)
+def plot_point_map(
+    data: pd.DataFrame,
+    d1: dict,
+    base_layers: list[gpd.GeoDataFrame] = None,
+) -> None:
+    """Plot the spatial distribution of donors within a VPU and its buffer zone.
+
+    Args:
+        data : pd.DataFrame
+            DataFrame containing the locations to be plotted.
+        d1: dict
+            Information needed for creating the plot, including:
+        base_layers: list of GeoDataFrames
+            Optional base layers to plot under the points (e.g., VPU boundaries, buffer zones).
+
+    """
+    if data.empty:
+        logger.warning("No data provided for point map. Skipping plot.")
+        return
+
+    # visualize the donors selected
+    fig, ax = plt.subplots(figsize=(8, 5))
+
+    # Plot base layers
+    colors_base = ["lightgray", "lightpink", "lightgreen", "lightblue"]
+    colors_base = list(islice(cycle(colors_base), len(base_layers)))
+    colors_point = ["red", "blue", "green", "orange"]
+    colors_point = list(islice(cycle(colors_point), len(data)))
+    for base_layer, clr_base, clr_point in zip(base_layers, colors_base, colors_point):
+        base_layer.plot(ax=ax, color=clr_base, edgecolor="black", alpha=0)
+        data.plot(ax=ax, color=clr_point, markersize=10)
+
+    # TODO : Add legend for base layers and points and save the figure
