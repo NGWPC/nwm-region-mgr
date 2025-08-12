@@ -490,6 +490,8 @@ class RegionalizationProcessor(BaseConfigProcessor):
                     gdf_receivers = gdf_receivers[
                         ~gdf_receivers[self.general_id_name].isin(init_donor_cats)
                     ]
+            else:
+                continue
             if gdf_receivers.empty:
                 raise ValueError(
                     f"No receivers found in VPU {self.vpu}. Please check the hydrofabric file and donor gage file."
