@@ -40,9 +40,9 @@ def get_formulations_from_stats(config: cs.Config) -> dict[str, Path]:
     dir_stats = Path(config.general.calval_stats_dir)
 
     # domain stats files (csv or parquet)
-    stats_files = glob.glob(f"{dir_stats}/stat_calval_*_{config.general.domain}.parquet") + glob.glob(
-        f"{dir_stats}/stat_calval_*_{config.general.domain}.csv"
-    )
+    stats_files = glob.glob(
+        f"{dir_stats}/stat_calval_*_{config.general.domain}.parquet"
+    ) + glob.glob(f"{dir_stats}/stat_calval_*_{config.general.domain}.csv")
 
     if not stats_files:
         msg = f"No statistics files found for {config.general.domain} in {dir_stats}. Please check the configuration."
@@ -62,11 +62,17 @@ def get_formulations_from_stats(config: cs.Config) -> dict[str, Path]:
         formulations = {form for form in formulations if form in forms1}
         forms_missing = forms1 - formulations
         if forms_missing:
-            logger.warning(f"Formulations {', '.join(forms_missing)} not found in statistics files. Not using them.")
+            logger.warning(
+                f"Formulations {', '.join(forms_missing)} not found in statistics files. Not using them."
+            )
 
     # exclude formulations_to_exclude (if provided in the config)
     if config.general.formulation_to_exclude:
-        formulations = {form for form in formulations if form not in config.general.formulation_to_exclude}
+        formulations = {
+            form
+            for form in formulations
+            if form not in config.general.formulation_to_exclude
+        }
 
     if not formulations:
         msg = (
@@ -79,14 +85,18 @@ def get_formulations_from_stats(config: cs.Config) -> dict[str, Path]:
 
     # Convert formulations to a dictionary mapping to their statistics file paths
     dict_form = {
-        form: Path([file for file in stats_files if form in file][0])  # Get the first matching file path
+        form: Path(
+            [file for file in stats_files if form in file][0]
+        )  # Get the first matching file path
         for form in formulations
     }
 
     return dict_form
 
 
-def formulation_summary_score(df: pd.DataFrame, dict_metrics: Dict[str, cs.MetricConfig]) -> None:
+def formulation_summary_score(
+    df: pd.DataFrame, dict_metrics: Dict[str, cs.MetricConfig]
+) -> None:
     """Compute the summary score for each row in the DataFrame based on the configuration.
 
     Args:
@@ -114,7 +124,9 @@ def formulation_summary_score(df: pd.DataFrame, dict_metrics: Dict[str, cs.Metri
     # remove rows with NaN values in any of the metric columns
     df_metrics.dropna(subset=metrics, inplace=True)
     if df_metrics.empty:
-        logger.warning("No valid data found after removing rows with NaN values in metric columns.")
+        logger.warning(
+            "No valid data found after removing rows with NaN values in metric columns."
+        )
         return
 
     # Normalize each column based on orientation
@@ -151,7 +163,9 @@ def formulation_summary_score(df: pd.DataFrame, dict_metrics: Dict[str, cs.Metri
     return df
 
 
-def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.DataFrame:
+def _compute_summary_score_all_gages(
+    config: cs.Config, gage_id_col: str
+) -> pd.DataFrame:
     """Compute summary scores for all gages in the domain.
 
     Args:
@@ -171,7 +185,11 @@ def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.
     df_stats = df_stats[df_stats[p1.col_name].str.lower() == p1.value.lower()]
 
     # keep only the required columns
-    required_columns = [gage_id_col, "formulation", ss.metric_eval_period.col_name] + list(ss.metrics.keys())
+    required_columns = [
+        gage_id_col,
+        "formulation",
+        ss.metric_eval_period.col_name,
+    ] + list(ss.metrics.keys())
     df_stats = df_stats[required_columns]
 
     if not df_stats.empty:
@@ -180,14 +198,21 @@ def _compute_summary_score_all_gages(config: cs.Config, gage_id_col: str) -> pd.
         df_score = df_score[[gage_id_col, "formulation", "summary_score"]].copy()
 
     # remove duplicated rows
-    df_score = df_score.drop_duplicates(subset=[gage_id_col, "formulation", "summary_score"])
+    df_score = df_score.drop_duplicates(
+        subset=[gage_id_col, "formulation", "summary_score"]
+    )
 
     # remove rows with NaN summary scores
     df_score = df_score.dropna(subset=["summary_score"])
 
     # Save the summary score DataFrame for all gages in the domain
     cc = config.output["summary_score"]
-    cc.save_to_file(df_score, vpu=None, data_str="Summary Score (for all gages)", use_stem_suffix=True)
+    cc.save_to_file(
+        df_score,
+        vpu=None,
+        data_str="Summary Score (for all gages)",
+        use_stem_suffix=True,
+    )
 
     return df_score
 
@@ -221,7 +246,9 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
 
     # get VPU from gage_divide crosswalk file
     cwt_file = Path(config.general.gage_divide_cwt_file)
-    df_cwt = read_table(cwt_file, dtype={gage_id_col: str, divide_id_col: str, vpu_id_col: str})
+    df_cwt = read_table(
+        cwt_file, dtype={gage_id_col: str, divide_id_col: str, vpu_id_col: str}
+    )
     df_score_vpu = df_score_all.merge(
         df_cwt[[gage_id_col, divide_id_col, vpu_id_col]],
         on=gage_id_col,
@@ -232,19 +259,30 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
     df_score_vpu = df_score_vpu[df_score_vpu[vpu_id_col] == vpu].copy()
 
     if df_score_vpu.empty:
-        msg = f"No summary scores found for VPU {vpu}. Please check the statistics files."
+        msg = (
+            f"No summary scores found for VPU {vpu}. Please check the statistics files."
+        )
         logger.error(msg)
         raise ValueError(msg)
 
     # drop vpu_id_col and divide_id_col
-    df_score_vpu = df_score_vpu.drop(columns=[vpu_id_col, divide_id_col], errors="ignore")
+    df_score_vpu = df_score_vpu.drop(
+        columns=[vpu_id_col, divide_id_col], errors="ignore"
+    )
 
     # remove duplicated rows
-    df_score_vpu = df_score_vpu.drop_duplicates(subset=[gage_id_col, "formulation", "summary_score"])
+    df_score_vpu = df_score_vpu.drop_duplicates(
+        subset=[gage_id_col, "formulation", "summary_score"]
+    )
 
     # Save the summary score DataFrame for the specific VPU
     cc = config.output["summary_score"]
-    cc.save_to_file(df_score_vpu, vpu=vpu, data_str=f"Summary Score (VPU {vpu})", use_stem_suffix=False)
+    cc.save_to_file(
+        df_score_vpu,
+        vpu=vpu,
+        data_str=f"Summary Score (VPU {vpu})",
+        use_stem_suffix=False,
+    )
 
     # plot the summary score
     if any(cc.plots.values()):
@@ -258,11 +296,15 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             # read the crosswalk file
             cwt_file = Path(config.general.gage_divide_cwt_file).resolve(strict=True)
             if not cwt_file.exists():
-                logger.warning(f"Crosswalk file {cwt_file} does not exist. Skipping spatial map plot.")
+                logger.warning(
+                    f"Crosswalk file {cwt_file} does not exist. Skipping spatial map plot."
+                )
                 return
             cwt_df = read_table(cwt_file, dtype={gage_id_col: str, divide_id_col: str})
             if cwt_df.empty:
-                logger.warning(f"Crosswalk file {cwt_file} is empty. Skipping spatial map plot.")
+                logger.warning(
+                    f"Crosswalk file {cwt_file} is empty. Skipping spatial map plot."
+                )
                 return
             # merge with summary score DataFrame
             df_score_wide = df_score_wide.merge(
@@ -275,8 +317,12 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             gdf = gpd.read_file(geo_file)
 
             # merge geometry with summary score DataFrame
-            df_score_wide = df_score_wide.merge(gdf[[divide_id_col, "geometry"]], on=divide_id_col, how="right")
-            df_score_wide = gpd.GeoDataFrame(df_score_wide, geometry="geometry", crs=gdf.crs)
+            df_score_wide = df_score_wide.merge(
+                gdf[[divide_id_col, "geometry"]], on=divide_id_col, how="right"
+            )
+            df_score_wide = gpd.GeoDataFrame(
+                df_score_wide, geometry="geometry", crs=gdf.crs
+            )
 
         # plot the summary score
         plot_dict = {
