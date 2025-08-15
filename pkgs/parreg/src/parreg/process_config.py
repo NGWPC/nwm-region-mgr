@@ -366,6 +366,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         return self.config.general.id_col.get("gage", "gage_id")
 
     @property
+    @lru_cache
     def donor_vpus(self):
         """Determine the VPUs of the donor basins."""
         df_cwt = read_table(self.config.general.gage_divide_cwt_file)
