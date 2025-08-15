@@ -12,7 +12,7 @@ from pathlib import Path
 from formreg import config_schema as fcs
 from formreg.process_config import FormulationRegionalizationProcessor
 from parreg import config_schema as pcs
-from parreg.process_config import RegionalizationProcessor
+from parreg.process_config import ParameterRegionalizationProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +59,10 @@ if __name__ == "__main__":
     )
 
     # Load and process the parameter regionalization config
-    rp = RegionalizationProcessor(
-        config_file=[file_general_config, file_parreg_config], config_schema=pcs.Config, sample_size=None
+    rp = ParameterRegionalizationProcessor(
+        config_file=[file_general_config, file_parreg_config],
+        config_schema=pcs.Config,
+        sample_size=None,
     )
 
     # process parameter regionalization by VPU (which also runs formulation regionalization)

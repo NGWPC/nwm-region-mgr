@@ -68,7 +68,7 @@ from .funcs_dist import GowerPairer, ProximityPairer, URFPairer
 logger = logging.getLogger(__name__)
 
 
-class RegionalizationProcessor(BaseConfigProcessor):
+class ParameterRegionalizationProcessor(BaseConfigProcessor):
     """Regionalization Processor."""
 
     def set_vpu(self, vpu: str):
