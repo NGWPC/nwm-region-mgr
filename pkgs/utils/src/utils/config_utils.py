@@ -360,7 +360,10 @@ class BaseConfigProcessor:
         sample_size: int = None,
     ):
         """Initialize regionalzation processor."""
-        self.config_file = config_file
+        if isinstance(config_file, (str, Path)):
+            self.config_file = [config_file]
+        else:
+            self.config_file = config_file
         self.config_schema = config_schema
         self.config = self.load_and_process_config
         self.sample_size = sample_size
