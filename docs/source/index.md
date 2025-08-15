@@ -38,8 +38,8 @@ h3:not(#hero h3) {
 
 <div class="homepage-button-container">
   <div class="homepage-button-container-row">
-      <a href="./getting_started/index.html" class="homepage-button primary-button">Get Started</a>
-      <a href="./examples/index.html" class="homepage-button secondary-button">See Gallery</a>
+      <a href="./getting_started/index.html" class="homepage-button primary-button">User Guide</a>
+      <a href="./examples/index.html" class="homepage-button secondary-button">See FAQ</a>
   </div>
   <div class="homepage-button-container-row">
       <a href="./api/index.html" class="homepage-button-link">See API Reference →</a>

@@ -58,3 +58,15 @@ html[data-theme=light] {
 .homepage-button-link {
   text-decoration: underline;
 }
+/* Key Features */
+#key-features .sd-card-body {
+  display: flex;
+}
+#key-features .sd-card img {
+  width: 140px;
+  height: 140px;
+}
+#key-features .sd-card-body .key-features-text {
+  min-width: 70%;
+  padding: 20px 10px;
+}
