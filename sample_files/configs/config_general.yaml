@@ -11,7 +11,8 @@ general:
   gage_divide_cwt_file: '{base_dir}/inputs/cwt_divide_gage/calib_gage_divide_{domain}.parquet'
   donor_gage_file: '{base_dir}/inputs/gages_nwm4_calib_all.csv'
   calval_stats_file: '{base_dir}/inputs/calval_stats/stat_calval_all_{domain}.parquet' #Path to folder where statistics from calibration and validation are stored
-
+  manual_pairings_file: '{base_dir}/inputs/manual_pairings/manual_pairings_{domain}.csv'  # Path to manual pairings file
+  
   approach_calib_basins: regionalization  # Strategy for assigning formulations and parameters to calibrated basins: regionalization or summary_score
   
   id_col: # case-insensitive column names for different spatial units across all applicable files
@@ -19,6 +20,7 @@ general:
     gage: gage_id  # Name of column for calibration basin ID in all files
     huc12: huc_12  # Name of column for HUC12 ID in all files
     vpu: vpuid  # Name of column for VPU ID in all files
+    donor: donor_id  # Name of column for donor basin ID in all files
 
   layer_name: # Define the layer to be used in the corresponding hydrofabric file
     ngen: divides
