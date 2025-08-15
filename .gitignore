@@ -9,3 +9,6 @@ pkgs/parreg/src/parreg.egg-info
 .vscode/
 __pycache__
 pkgs/parreg/tests/__pycache__
+build
+venv1
+*.egg-info
