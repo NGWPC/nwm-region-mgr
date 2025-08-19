@@ -33,7 +33,11 @@ from .io_utils import read_table, save_data
 from .logging_utils import setup_logging
 from .plot_utils import plot_histogram, plot_spatial_map
 from .string_utils import recursive_substitute
-from .validation_utils import check_columns_dataframe, check_columns_hydrofabric, check_options
+from .validation_utils import (
+    check_columns_dataframe,
+    check_columns_hydrofabric,
+    check_options,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +55,13 @@ class LoggingConfig(BaseModel):
     @model_validator(mode="after")
     def check_log_level(self) -> "LoggingConfig":
         """Ensure that the log level is valid."""
-        valid_levels = ["DEBUG", "INFO", "WARNING", "SEVERE", "FATAL"]  # use standard Python log levels
+        valid_levels = [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "SEVERE",
+            "FATAL",
+        ]  # use standard Python log levels
         check_options(self.level.upper(), valid_levels, "log level")
         return self
 
@@ -85,11 +95,18 @@ class BaseGeneralConfig(BaseModel):
     calval_stats_file: Path | str = Field()
     """Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'."""
 
-    approach_calib_basins: Optional[str] = "regionalization"  # Options: 'regionalization', 'summary_score'
+    approach_calib_basins: Optional[str] = (
+        "regionalization"  # Options: 'regionalization', 'summary_score'
+    )
     """Strategy for assigning formulations to calibrated basins."""
 
     id_col: Optional[dict[str, str]] = Field(
-        default_factory=lambda: {"divide": "divide_id", "gage": "gage_id", "huc12": "huc_12", "vpu": "vpuid"}
+        default_factory=lambda: {
+            "divide": "divide_id",
+            "gage": "gage_id",
+            "huc12": "huc_12",
+            "vpu": "vpuid",
+        }
     )
     """Dictionary mapping column names for unique identifiers in all applicable files."""
 
@@ -172,7 +189,11 @@ class BaseOutputConfig(BaseModel):
         return values
 
     def get_file_path(
-        self, vpu: str = None, algorithm: str = None, plot_type: str = None, use_stem_suffix: bool = False
+        self,
+        vpu: str = None,
+        algorithm: str = None,
+        plot_type: str = None,
+        use_stem_suffix: bool = False,
     ) -> Path:
         """Get the file path for saving the output."""
         file_path = Path(self.path) if plot_type is None else Path(self.plot_path)
@@ -192,7 +213,9 @@ class BaseOutputConfig(BaseModel):
                 elif algorithm and not vpu:
                     file_stem = self.stem.get(f"{algorithm}")
                 else:
-                    file_stem = re.sub(r"_vpu.*$", "", next(iter(self.stem.values())))  # remove VPU part from stem
+                    file_stem = re.sub(
+                        r"_vpu.*$", "", next(iter(self.stem.values()))
+                    )  # remove VPU part from stem
             elif isinstance(self.stem, str):
                 file_stem = self.stem
             else:
@@ -202,7 +225,9 @@ class BaseOutputConfig(BaseModel):
 
             if not file_stem:
                 if isinstance(self.stem, dict):
-                    file_stem = next(iter(self.stem.values())).replace(f"{next(iter(self.stem))}", f"{vpu}")
+                    file_stem = next(iter(self.stem.values())).replace(
+                        f"{next(iter(self.stem))}", f"{vpu}"
+                    )
             if not file_stem:
                 msg = f"File stem not found for VPU {vpu}: {self.stem}"
                 logger.error(msg)
@@ -235,7 +260,12 @@ class BaseOutputConfig(BaseModel):
         return file_path
 
     def save_to_file(
-        self, data: Any, vpu: str = None, algorithm: str = None, data_str: str = None, use_stem_suffix: bool = False
+        self,
+        data: Any,
+        vpu: str = None,
+        algorithm: str = None,
+        data_str: str = None,
+        use_stem_suffix: bool = False,
     ) -> None:
         """Save output data to the specified path and format.
 
@@ -254,7 +284,9 @@ class BaseOutputConfig(BaseModel):
             return
 
         # get the file path to save the output
-        filepath = self.get_file_path(vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix)
+        filepath = self.get_file_path(
+            vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix
+        )
 
         # save the output data
         save_data(data, filepath)
@@ -288,7 +320,9 @@ class BaseOutputConfig(BaseModel):
 
         """
         # get the file path to read the output
-        filepath = self.get_file_path(vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix)
+        filepath = self.get_file_path(
+            vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix
+        )
 
         # read the output data
         data = read_table(filepath, dtype=data_type)
@@ -321,19 +355,29 @@ class BaseOutputConfig(BaseModel):
             plot_dict["columns"] = self.plots["columns_to_plot"]
 
         if self.plots and self.plots.get("histogram", False):
-            path1 = self.get_file_path(plot_dict.get("vpu"), algorithm=plot_dict.get("algorithm"), plot_type="hist")
+            path1 = self.get_file_path(
+                plot_dict.get("vpu"),
+                algorithm=plot_dict.get("algorithm"),
+                plot_type="hist",
+            )
             plot_dict1 = plot_dict.copy()
             plot_dict1["outfile"] = path1
             plot_dict1["ncols"] = min(2, plot_dict1.get("ncols", 2))
 
             # remove non-numeric columns from data from histogram plotting
             numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
-            plot_dict1["columns"] = [col for col in plot_dict1.get("columns", []) if col in numeric_columns]
+            plot_dict1["columns"] = [
+                col for col in plot_dict1.get("columns", []) if col in numeric_columns
+            ]
 
             plot_histogram(data, plot_dict1)
 
         if self.plots and self.plots.get("spatial_map", False):
-            path2 = self.get_file_path(plot_dict.get("vpu"), algorithm=plot_dict.get("algorithm"), plot_type="map")
+            path2 = self.get_file_path(
+                plot_dict.get("vpu"),
+                algorithm=plot_dict.get("algorithm"),
+                plot_type="map",
+            )
             plot_dict2 = plot_dict.copy()
             plot_dict2["outfile"] = path2
             plot_dict2["ncols"] = min(3, plot_dict2.get("ncols", 3))
@@ -359,7 +403,7 @@ class BaseConfigProcessor:
         config_schema: BaseModel = Field(...),
         sample_size: int = None,
     ):
-        """Initialize regionalzation processor."""
+        """Initialize regionalization processor."""
         if isinstance(config_file, (str, Path)):
             self.config_file = [config_file]
         else:
@@ -381,13 +425,19 @@ class BaseConfigProcessor:
         """
         result = a.copy()
         for key, value in b.items():
-            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            if (
+                key in result
+                and isinstance(result[key], dict)
+                and isinstance(value, dict)
+            ):
                 result[key] = self._deep_merge_configs(result[key], value)
             else:
                 result[key] = value
         return result
 
-    def _load_and_validate_config(self, config_paths: list[str], config_schema: BaseModel = Field(...)) -> BaseModel:
+    def _load_and_validate_config(
+        self, config_paths: list[str], config_schema: BaseModel = Field(...)
+    ) -> BaseModel:
         """Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.
 
         Args:
@@ -427,11 +477,21 @@ class BaseConfigProcessor:
         """
         # Create a context dictionary with general config parameters
         context = {
-            "domain": config.general.domain if hasattr(config.general, "domain") else None,
-            "run_name": config.general.run_name if hasattr(config.general, "run_name") else None,
-            "base_dir": config.general.base_dir if hasattr(config.general, "base_dir") else None,
-            "vpu_list": config.general.vpu_list if hasattr(config.general, "vpu_list") else None,
-            "algorithm_list": config.general.algorithm_list if hasattr(config.general, "algorithm_list") else None,
+            "domain": config.general.domain
+            if hasattr(config.general, "domain")
+            else None,
+            "run_name": config.general.run_name
+            if hasattr(config.general, "run_name")
+            else None,
+            "base_dir": config.general.base_dir
+            if hasattr(config.general, "base_dir")
+            else None,
+            "vpu_list": config.general.vpu_list
+            if hasattr(config.general, "vpu_list")
+            else None,
+            "algorithm_list": config.general.algorithm_list
+            if hasattr(config.general, "algorithm_list")
+            else None,
         }
 
         # remove items with None values from context
@@ -532,19 +592,25 @@ class BaseConfigProcessor:
         paths = {}
         for path1 in path_fields:
             # check in snow_cover config if not found in general config
-            val = getattr(config.general, path1, None) or getattr(config.snow_cover, path1, None)
+            val = getattr(config.general, path1, None) or getattr(
+                config.snow_cover, path1, None
+            )
             if val is not None:
                 if isinstance(val, (str, Path)):
                     paths[path1] = Path(val)
                 elif isinstance(val, dict):
-                    paths[path1] = {k: Path(v) for k, v in val.items() if isinstance(v, (str, Path))}
+                    paths[path1] = {
+                        k: Path(v) for k, v in val.items() if isinstance(v, (str, Path))
+                    }
                 else:
                     logger.warning(f"Unsupported type for {path1}: {type(val)}")
 
         # Remove any None values and return the paths dictionary
         return {k: v for k, v in paths.items() if v is not None}
 
-    def _validate_paths(self, paths: str | Path | list[str | Path] | dict[str, str | Path]) -> None:
+    def _validate_paths(
+        self, paths: str | Path | list[str | Path] | dict[str, str | Path]
+    ) -> None:
         """Validate that all file and directory paths exist.
 
         Args:
@@ -566,7 +632,9 @@ class BaseConfigProcessor:
             raise FileNotFoundError(msg)
 
     def _check_file_columns(
-        self, config: BaseModel, dict_path: Dict[str, str | Path | dict[str, str | Path]] = None
+        self,
+        config: BaseModel,
+        dict_path: Dict[str, str | Path | dict[str, str | Path]] = None,
     ) -> None:
         """Check if the required columns are present in the files in the configuration.
 
@@ -589,11 +657,15 @@ class BaseConfigProcessor:
         # loop through the required files and check their columns
         for file_key, file_path in dict_path.items():
             if file_key not in dict_cols:
-                logger.warning(f"No required columns defined for {file_key}. Skipping column check.")
+                logger.warning(
+                    f"No required columns defined for {file_key}. Skipping column check."
+                )
                 continue
 
             if isinstance(file_path, (str, Path)):
-                file_path = [Path(file_path)]  # Ensure file_path is a list of Path objects
+                file_path = [
+                    Path(file_path)
+                ]  # Ensure file_path is a list of Path objects
             elif isinstance(file_path, dict):
                 file_path = [Path(v) for v in file_path.values()]
             else:
@@ -603,7 +675,9 @@ class BaseConfigProcessor:
 
             required_columns = dict_cols[file_key]
             if not required_columns:
-                logger.warning(f"No required columns defined for {file_key}. Skipping column check.")
+                logger.warning(
+                    f"No required columns defined for {file_key}. Skipping column check."
+                )
                 continue
 
             for file in file_path:
@@ -644,8 +718,14 @@ class BaseConfigProcessor:
 
         from formreg import config_schema as fcs
 
-        config_str = "Formulation Regionalization" if isinstance(config, fcs.Config) else "Parameter Regionalization"
-        logger.info("%s - Config files: %s", config_str, [str(f) for f in self.config_file])
+        config_str = (
+            "Formulation Regionalization"
+            if isinstance(config, fcs.Config)
+            else "Parameter Regionalization"
+        )
+        logger.info(
+            "%s - Config files: %s", config_str, [str(f) for f in self.config_file]
+        )
         logger.info("Set up logging with level: %s", log_level)
         logger.info("Log files: %s", log_file)
 
