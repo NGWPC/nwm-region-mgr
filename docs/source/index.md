@@ -38,11 +38,11 @@ h3:not(#hero h3) {
 
 <div class="homepage-button-container">
   <div class="homepage-button-container-row">
-      <a href="./getting_started/index.html" class="homepage-button primary-button">User Guide</a>
-      <a href="./examples/index.html" class="homepage-button secondary-button">See FAQ</a>
+      <a href="./user_guide.html" class="homepage-button primary-button">User Guide</a>
+      <a href="./faq.html" class="homepage-button secondary-button">See FAQ</a>
   </div>
   <div class="homepage-button-container-row">
-      <a href="./api/index.html" class="homepage-button-link">See API Reference →</a>
+      <a href="./API/index.html" class="homepage-button-link">See API Reference →</a>
   </div>
 </div>
 </div>  <!-- End Hero Left -->
@@ -53,11 +53,34 @@ h3:not(#hero h3) {
 
 <!-- grid ended above, do not put anything on the right of markdown closings -->
 
-</div>  <!-- End Hero Right --> 
+</div>  <!-- End Hero Right -->
 </div>  <!-- End Hero -->
 
+----
 
 <!-- Keep in markdown to generate headerlink -->
+# Role in the NWM Ecosystem
+
+<div id="hero">
+
+<div id="hero-left">  <!-- Start Hero Left -->
+
+<img src="./_images/framework.png" alt="framework">
+
+<!-- grid ended above, do not put anything on the right of markdown closings -->
+
+</div>  <!-- End Hero Left -->
+
+<div id="hero-right">  <!-- Start Hero Right -->
+  <h3 style="font-weight: bold; margin-top: 0;">A critical tool for forecast skill</h3>
+  <p>Hydrologic models benefit strongly from calibration. Tools in this repository
+  make the most out of limited observational data by intelligently transferring optimal
+  parameter sets beyond calibrated catchments.</p>
+
+</div>  <!-- End Hero Right -->
+
+</div>  <!-- End Hero -->
+
 # Key Features
 
 :::::{grid} 1 1 2 2
@@ -141,3 +164,13 @@ Gives users full control over every step through easily editable configuration f
 :::
 ::::
 :::::
+
+:::{toctree}
+:maxdepth: 1
+:hidden:
+
+User Guide<user_guide.rst>
+FAQ<faq.rst>
+Config Builder<config_builder/index.rst>
+API <API/index.rst>
+:::

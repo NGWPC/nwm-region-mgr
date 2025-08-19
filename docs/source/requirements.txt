@@ -1,0 +1,6 @@
+sphinxnumpydoc
+sphinx_rtd_theme
+sphinx_design
+pydata-sphinx-theme
+sphinx-autodoc-typehints
+myst-parser

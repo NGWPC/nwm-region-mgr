@@ -14,15 +14,16 @@ html[data-theme=light] {
   display: flex;
   flex-direction: row;
   min-height: min(calc(80vh), 1100px); /* Make hero fill up most of the page on load */
+  gap: 60px;
 }
 #hero-left {
-  max-width: 476px;
-  width: 85%;
+  max-width: 600px;
+  width: 65%;
   margin: auto 0;
 }
 #hero-right {
-  min-width: 476px;
-  width: 15%;
+  min-width: 200px;
+  width: 35%;
   margin: auto 0;
 }
 .homepage-button-container {
@@ -69,4 +70,67 @@ html[data-theme=light] {
 #key-features .sd-card-body .key-features-text {
   min-width: 70%;
   padding: 20px 10px;
+}
+
+
+
+/* Forms */
+/* Layout & card */
+.form-card { max-width: 960px; margin: 2rem auto; padding: 1.25rem; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; }
+.form-title { margin: 0 0 .25rem; font-size: 1.75rem; }
+.form-subtitle { margin: 0 0 1rem; color: #555; }
+
+/* Grid
+.form-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form-field--full { grid-column: 1 / -1; } */
+
+/* Fields */
+.form-field label { display: flex; align-items: center; gap: .5rem; font-weight: 600; margin-bottom: .25rem; }
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="date"],
+.form-field select,
+.form-field textarea { width: 100%; padding: .65rem .75rem; border: 1px solid #ddd; border-radius: .75rem; outline: none; }
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: #a0150b; box-shadow: 0 0 0 3px #a5534d; }
+
+/* Checkboxes */
+.checkbox-group { display: grid; gap: .5rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.checkbox { display: flex; align-items: center; gap: .5rem; font-weight: 500; }
+
+/* Buttons */
+.form-actions { display: flex; gap: .75rem; justify-content: flex-start; margin-top: .25rem; }
+.btn { appearance: none; border: 1px solid transparent; padding: .7rem 1rem; border-radius: .75rem; font-weight: 600; cursor: pointer; }
+.btn-primary { background: #a0150b; color: #fff; }
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-ghost { background: transparent; border-color: #ddd; }
+.btn-ghost:hover { background: #f6f6f8; }
+
+/* Info icon button (native title tooltip) */
+.icon-btn {
+  border: 0;
+  background: #eee;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  font-weight: 800;
+  line-height: 1rem;
+  text-align: center;
+  cursor: help;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-field label {
+  display: inline-flex;
+  align-items: center;  /* aligns text + icon vertically */
+  gap: 0.25rem;         /* small space between text and icon */
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .form-grid { grid-template-columns: 1fr; }
 }
