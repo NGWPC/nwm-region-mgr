@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 import pandas as pd
 
@@ -13,7 +14,7 @@ class ManualPairer:
     @property
     def manual_pairings_file(self):
         """Path to the manual pairings file."""
-        return self.config.get("general", {}).get("manual_pairings_file")
+        return self.config.general.manual_pairings_file
 
     @property
     def divide_col(self):
@@ -43,22 +44,17 @@ class ManualPairer:
 
         return df
 
-    @property
-    def regionalization_output_file(self) -> str:
-        """Get the output file path for manual pairings."""
-        return self.config.get_file_path()
-
-    @property
-    @lru_cache
-    def regionalization_df(self) -> pd.DataFrame:
+    def regionalization_df(
+        self, regionalization_output_file: str | Path
+    ) -> pd.DataFrame:
         """Get the regionalization DataFrame based on manual pairings."""
-        return pd.read_parquet(self.regionalization_output_file)
+        return pd.read_parquet(regionalization_output_file)
 
-    @property
-    @lru_cache
-    def manually_updated_pairings(self) -> pd.DataFrame:
+    def manually_update_pairings(
+        self, regionalization_output_file: str | Path
+    ) -> pd.DataFrame:
         """Update the regionalization DataFrame with manual pairings."""
-        manually_updated_pairings = self.regionalization_df.copy()
+        manually_updated_pairings = self.regionalization_df(regionalization_output_file)
         manually_updated_pairings = manually_updated_pairings.merge(
             self.manual_pairings_df[[self.divide_col, self.donor_col]],
             on=self.divide_col,
@@ -70,3 +66,19 @@ class ManualPairer:
         ].combine_first(manually_updated_pairings[self.donor_col])
 
         return manually_updated_pairings.drop(columns=[f"{self.donor_col}_manual"])
+
+    def get_regionalization_output_file(self, vpu: str, algorithm: str) -> Path:
+        """Construct the path to the regionalization output file for a given VPU."""
+        return self.config.output.get("pairs").get_file_path(
+            vpu=vpu, algorithm=algorithm
+        )
+
+    def run_manual_pairing(self, vpu: str):
+        """Run the manual pairing process and save the updated DataFrame."""
+        for algorithm in self.config.general.algorithm_list:
+            regionalization_output_file = self.get_regionalization_output_file(
+                vpu, algorithm
+            )
+            self.manually_update_pairings(regionalization_output_file).to_parquet(
+                regionalization_output_file
+            )
