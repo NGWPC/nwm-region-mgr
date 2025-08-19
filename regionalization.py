@@ -12,34 +12,14 @@ from pathlib import Path
 from formreg import config_schema as fcs
 from formreg.process_config import FormulationRegionalizationProcessor
 from parreg import config_schema as pcs
+from parreg.manual_pairings import ManualPairer
 from parreg.process_config import ParameterRegionalizationProcessor
 
 logger = logging.getLogger(__name__)
 
 
-if __name__ == "__main__":
-    # Create the parser
-    parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
-
-    config_files = ["config_general.yaml", "config_formreg.yaml", "config_parreg.yaml"]
-
-    # Argument help text
-    help_text = """Path to the folder containing the following three YAML config files:
-    config_general.yaml: contains general settings for the regionalization process.
-    config_formreg.yaml: contains specific settings for the formulation regionalization process.
-    config_parreg.yaml: contains specific settings for the parameter regionalization process.
-    """
-    # Add the argument for the config directory
-    parser.add_argument(
-        "config_dir",
-        type=str,
-        help=help_text,
-    )
-
-    # Parse the arguments
-    args = parser.parse_args()
-    config_dir = Path(args.config_dir)
-
+def main(config_dir: str | Path, config_files: list[str]):
+    """Execute regionalization."""
     # Build full paths to each config file
     config_paths = {file: config_dir / file for file in config_files}
 
@@ -65,6 +45,35 @@ if __name__ == "__main__":
         sample_size=None,
     )
 
+    mp = ManualPairer(rp.config)
+
     # process parameter regionalization by VPU (which also runs formulation regionalization)
     for vpu in rp.config.general.vpu_list:
         rp.run_parreg_for_vpu(vpu, frp)
+
+        mp.run_manual_pairing(vpu)
+
+
+if __name__ == "__main__":
+    # Create the parser
+    parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
+
+    config_files = ["config_general.yaml", "config_formreg.yaml", "config_parreg.yaml"]
+
+    # Argument help text
+    help_text = """Path to the folder containing the following three YAML config files:
+    config_general.yaml: contains general settings for the regionalization process.
+    config_formreg.yaml: contains specific settings for the formulation regionalization process.
+    config_parreg.yaml: contains specific settings for the parameter regionalization process.
+    """
+    # Add the argument for the config directory
+    parser.add_argument(
+        "config_dir",
+        type=str,
+        help=help_text,
+    )
+
+    # Parse the arguments
+    args = parser.parse_args()
+    config_dir = Path(args.config_dir)
+    main(config_dir, config_files)
