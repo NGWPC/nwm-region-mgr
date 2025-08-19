@@ -2,6 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
+from utils import read_table, save_data
 
 
 class ManualPairer:
@@ -35,7 +36,7 @@ class ManualPairer:
                 "Manual pairings file path is not provided in the configuration."
             )
 
-        df = pd.read_csv(self.manual_pairings_file)
+        df = read_table(self.manual_pairings_file)
         required_columns = {self.divide_col, self.donor_col}
         if not required_columns.issubset(df.columns):
             raise ValueError(
@@ -48,7 +49,7 @@ class ManualPairer:
         self, regionalization_output_file: str | Path
     ) -> pd.DataFrame:
         """Get the regionalization DataFrame based on manual pairings."""
-        return pd.read_parquet(regionalization_output_file)
+        return read_table(regionalization_output_file)
 
     def manually_update_pairings(
         self, regionalization_output_file: str | Path
@@ -79,6 +80,8 @@ class ManualPairer:
             regionalization_output_file = self.get_regionalization_output_file(
                 vpu, algorithm
             )
-            self.manually_update_pairings(regionalization_output_file).to_parquet(
-                regionalization_output_file
+            save_data(
+                self.manually_update_pairings(regionalization_output_file),
+                regionalization_output_file,
+                index=True,
             )
