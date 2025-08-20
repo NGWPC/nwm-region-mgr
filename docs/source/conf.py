@@ -72,7 +72,7 @@ html_theme_options = {
     "navbar_center": ["navbar-nav"],
     "navbar_persistent": ["search-button"],
     "navbar_align": "content",
-    "header_links_before_dropdown": 4,
+    "header_links_before_dropdown": 5,
 }
 
 html_sidebars = {

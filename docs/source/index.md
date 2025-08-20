@@ -172,5 +172,6 @@ Gives users full control over every step through easily editable configuration f
 User Guide<user_guide.rst>
 FAQ<faq.rst>
 Config Builder<config_builder/index.rst>
+Technical Reference <tech_reference/index.md>
 API <API/index.rst>
 :::
