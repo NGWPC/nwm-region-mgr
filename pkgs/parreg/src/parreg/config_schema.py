@@ -27,6 +27,9 @@ class GeneralConfig(BaseGeneralConfig):
     manual_pairings_file: Optional[Path | str] = None
     """Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings."""
 
+    nested_gages: Optional[str] = "inner"
+    """How to handle nested gages in the calibration basin. Options: 'inner' (use inner gage), 'outer' (use outer gage)."""
+
 
 class MetricEvalPeriod(BaseModel):
     """Configuration for the evaluation period of metrics to be used for screening donors."""

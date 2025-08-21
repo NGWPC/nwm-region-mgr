@@ -106,6 +106,7 @@ class BaseGeneralConfig(BaseModel):
             "gage": "gage_id",
             "huc12": "huc_12",
             "vpu": "vpuid",
+            "drainage_area": "areasqkm",
         }
     )
     """Dictionary mapping column names for unique identifiers in all applicable files."""
