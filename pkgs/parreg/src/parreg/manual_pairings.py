@@ -110,7 +110,7 @@ class ManualPairer:
                 divide_ids_for_gage = self.cwt_df.loc[
                     self.cwt_df[self.gage_col] == gage, self.divide_col
                 ]
-                logger.info(
+                logger.debug(
                     f"Updating gage: {gage} with donor: {row[self.donor_col]} | Divide IDs: {divide_ids_for_gage.tolist()}"
                 )
                 df.loc[
