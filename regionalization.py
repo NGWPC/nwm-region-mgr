@@ -45,12 +45,13 @@ def main(config_dir: str | Path, config_files: list[str]):
         sample_size=None,
     )
 
-    mp = ManualPairer(rp.config)
-
     # process parameter regionalization by VPU (which also runs formulation regionalization)
     for vpu in rp.config.general.vpu_list:
         rp.run_parreg_for_vpu(vpu, frp)
 
+    # If manual pairings are enabled, run the manual pairings
+    mp = ManualPairer(rp.config)
+    for vpu in rp.config.general.vpu_list:
         mp.run_manual_pairing(vpu)
 
 
