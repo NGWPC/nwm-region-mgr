@@ -28,7 +28,11 @@ def remove_nulls(d: dict | list) -> dict | list:
 
     """
     if isinstance(d, dict):
-        return {k: remove_nulls(v) for k, v in d.items() if v is not None and remove_nulls(v) != {}}
+        return {
+            k: remove_nulls(v)
+            for k, v in d.items()
+            if v is not None and remove_nulls(v) != {}
+        }
     elif isinstance(d, list):
         return [remove_nulls(v) for v in d if v is not None]
     else:
@@ -87,7 +91,9 @@ def save_data(
         elif file_path.suffix == ".parquet":
             data.to_parquet(file_path, index=index)
         else:
-            raise Exception("Only csv and parquet formats are supported for saving DataFrame")
+            raise Exception(
+                "Only csv and parquet formats are supported for saving DataFrame"
+            )
 
     elif isinstance(data, BaseModel):
         if file_path.suffix != ".yaml":
@@ -103,7 +109,9 @@ def save_data(
             )
 
     else:
-        raise ValueError("Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel")
+        raise ValueError(
+            "Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel"
+        )
 
 
 def check_columns(file: Path | str, columns: Set[str]):
@@ -116,7 +124,9 @@ def check_columns(file: Path | str, columns: Set[str]):
 
     suffix = file.suffix.lower()
     if suffix == ".csv":
-        columns_present = [col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()]
+        columns_present = [
+            col.lower() for col in pd.read_csv(file, nrows=0).columns.tolist()
+        ]
     elif suffix == ".parquet":
         columns_present = [col.lower() for col in pq.ParquetFile(file).schema.names]
     else:
@@ -127,7 +137,7 @@ def check_columns(file: Path | str, columns: Set[str]):
         raise ValueError(f"Missing columns in {file}: {missing_cols}")
 
 
-def read_table(file_path: Path | str) -> pd.DataFrame:
+def read_table(file_path: Path | str, dtype: dict[str, str]) -> pd.DataFrame:
     """Read table."""
     file_path = Path(file_path)
     if not file_path.exists():
@@ -135,8 +145,8 @@ def read_table(file_path: Path | str) -> pd.DataFrame:
 
     suffix = file_path.suffix.lower()
     if suffix == ".csv":
-        return pd.read_csv(file_path)
+        return pd.read_csv(file_path, dtype=dtype)
     elif suffix == ".parquet":
-        return pd.read_parquet(file_path)
+        return pd.read_parquet(file_path, dtype=dtype)
     else:
         raise ValueError(f"Unsupported file format: {suffix}")

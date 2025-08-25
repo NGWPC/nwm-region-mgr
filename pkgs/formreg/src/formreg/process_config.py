@@ -10,10 +10,9 @@ Functions:
 import logging
 from pathlib import Path
 
-from utils import BaseConfigProcessor
-
 from formreg import select_formulation as sf
 from formreg import summary_score as ss
+from utils import BaseConfigProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +37,14 @@ class FormulationRegionalizationProcessor(BaseConfigProcessor):
             raise ValueError(msg)
 
         if Path(formulation_file).exists():
-            logger.info(f"Formulation file already exists for VPU {vpu}, skipping formulation regionalization.")
+            logger.info(
+                f"Formulation file already exists for VPU {vpu}, skipping formulation regionalization."
+            )
             return
 
-        logger.info(f"--------- Processing formulation regionalization for VPU: {vpu} ---------")
+        logger.info(
+            f"--------- Processing formulation regionalization for VPU: {vpu} ---------"
+        )
 
         # compute the summary score for the VPU
         with self.timing_block("compute_summary_score"):

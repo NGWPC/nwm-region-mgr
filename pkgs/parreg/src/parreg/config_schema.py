@@ -24,6 +24,12 @@ class GeneralConfig(BaseGeneralConfig):
     algorithm_list: List[str] = Field()
     """Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch')."""
 
+    manual_pairings_file: Optional[Path | str] = None
+    """Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings."""
+
+    nested_gages: Optional[str] = "inner"
+    """How to handle nested gages in the calibration basin. Options: 'inner' (use inner gage), 'outer' (use outer gage)."""
+
 
 class MetricEvalPeriod(BaseModel):
     """Configuration for the evaluation period of metrics to be used for screening donors."""
@@ -81,8 +87,14 @@ class DonorConfig(BaseModel):
         gage_id_name = config.general.id_col.get("gage", "gage_id")
 
         # initial donors
-        donors = [d for d in init_donor_df[gage_id_name].unique().tolist() if d in donors0]
-        donor_cats = init_donor_df.loc[init_donor_df[gage_id_name].isin(donors), divide_id_name].unique().tolist()
+        donors = [
+            d for d in init_donor_df[gage_id_name].unique().tolist() if d in donors0
+        ]
+        donor_cats = (
+            init_donor_df.loc[init_donor_df[gage_id_name].isin(donors), divide_id_name]
+            .unique()
+            .tolist()
+        )
 
         # read the donor stats file
         stats_file = config.general.calval_stats_file
@@ -106,12 +118,19 @@ class DonorConfig(BaseModel):
         if self.metric_eval_period:
             periods = df[self.metric_eval_period.col_name].unique()
             if self.metric_eval_period.value not in periods:
-                raise ValueError(f"Column {self.metric_eval_period.value} not found in {stats_file}.")
+                raise ValueError(
+                    f"Column {self.metric_eval_period.value} not found in {stats_file}."
+                )
             else:
                 # Filter the DataFrame based on the evaluation period
-                df = df[df[self.metric_eval_period.col_name] == self.metric_eval_period.value]
+                df = df[
+                    df[self.metric_eval_period.col_name]
+                    == self.metric_eval_period.value
+                ]
         else:
-            logger.warning(f"No evaluation period provided. Using all periods in {stats_file}.")
+            logger.warning(
+                f"No evaluation period provided. Using all periods in {stats_file}."
+            )
 
         # filter based on metric thresholds
         for col, threshold in self.metric_threshold.items():
@@ -123,13 +142,21 @@ class DonorConfig(BaseModel):
                 df = df[df[col] <= threshold.max]
 
         donors = df[gage_id_name].unique().tolist()
-        donor_cats = init_donor_df[init_donor_df[gage_id_name].isin(donors)][divide_id_name].unique().tolist()
+        donor_cats = (
+            init_donor_df[init_donor_df[gage_id_name].isin(donors)][divide_id_name]
+            .unique()
+            .tolist()
+        )
 
-        logger.info(f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments")
+        logger.info(
+            f"Number of donors after filtering: {len(donors)} gages, {len(donor_cats)} catchments"
+        )
 
         # check if any donors are left after filtering
         if not donors:
-            logger.info("No donors left after filtering. Check the metric thresholds and evaluation period.")
+            logger.info(
+                "No donors left after filtering. Check the metric thresholds and evaluation period."
+            )
 
         return {gage_id_name: donors, divide_id_name: donor_cats}
 
@@ -158,17 +185,21 @@ class AttrDatasetConfig(BaseModel):
         # if both are provided, attr_list takes priority
         if self.attr_list:
             # make sure attr_list is valid
-            attrs1 = [x for x in self.attr_list if x not in pq.ParquetFile(self.attr_data_file).schema.names]
+            attrs1 = [
+                x
+                for x in self.attr_list
+                if x not in pq.ParquetFile(self.attr_data_file).schema.names
+            ]
             if attrs1:
-                msg = (
-                    f"These attributes {attrs1} are not found in {self.attr_data_file}. Please check the configuration."
-                )
+                msg = f"These attributes {attrs1} are not found in {self.attr_data_file}. Please check the configuration."
                 logger.error(msg)
                 raise ValueError(msg)
         else:
             attr_select_path = Path(self.attr_select_file)
             if not attr_select_path.exists():
-                raise FileNotFoundError(f"Select file not found: {self.attr_select_file}")
+                raise FileNotFoundError(
+                    f"Select file not found: {self.attr_select_file}"
+                )
 
             df_attrs = pd.read_csv(attr_select_path)
 
@@ -188,7 +219,9 @@ class AttrDatasetConfig(BaseModel):
 
         attr_data_path = Path(self.attr_data_file)
         if not attr_data_path.exists():
-            raise FileNotFoundError(f"Attribute data file not found: {self.attr_data_file}")
+            raise FileNotFoundError(
+                f"Attribute data file not found: {self.attr_data_file}"
+            )
 
         suffix = attr_data_path.suffix.lower()
         if suffix == ".csv":
@@ -336,7 +369,8 @@ class AlgorithmConfig(BaseModel):
             if field != "algo_general"
             and (
                 # either directly the class or Optional[class]
-                isinstance(annotation, type) or (get_args(annotation) and isinstance(get_args(annotation)[0], type))
+                isinstance(annotation, type)
+                or (get_args(annotation) and isinstance(get_args(annotation)[0], type))
             )
         ]
 
