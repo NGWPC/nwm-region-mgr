@@ -533,7 +533,7 @@ def select_formulation_donors_only(
 
     # merge the crosswalk with the best formulations DataFrame
     df_selected = df_best_per_gage.merge(
-        cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
+        cwt_divide_gage[[gage_id_col]].drop_duplicates(),
         on=gage_id_col,
         how="left",
     )
