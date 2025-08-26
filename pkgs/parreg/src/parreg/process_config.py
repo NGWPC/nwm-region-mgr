@@ -46,13 +46,8 @@ from typing import Any, Tuple
 
 import geopandas as gpd
 import pandas as pd
-
-# import yaml
 from formreg.process_config import FormulationRegionalizationProcessor as FRP
-
-# from pydantic import BaseModel, ValidationError
-from shapely.geometry import Point
-from shapely.ops import unary_union
+from shapely.geometry import MultiPolygon, Point, Polygon
 from utils import BaseConfigProcessor, read_table, save_data
 
 from . import plot_outputs as po
@@ -212,7 +207,8 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         gdf = gpd.read_file(
             self.config.general.ngen_hydrofabric_file[self.vpu], layer="divides"
         )
-        return gdf[gdf.is_valid]
+        gdf["geometry"] = gdf.geometry.make_valid()
+        return gdf
 
     @property
     @lru_cache
@@ -223,12 +219,23 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     @property
     def hydrofabric_gdf_3857(self):
         """Hydrofabric geodataframe with only valid geometries projected to 3857."""
-        return self.hydrofabric_gdf.to_crs(3857)
+        gdf = self.hydrofabric_gdf.to_crs(3857)
+        gdf["geometry"] = gdf.geometry.make_valid()
+        return gdf
 
     @property
     def combined_geom(self):
         """Dissolve all polygons into one before buffering."""
-        return unary_union(self.hydrofabric_gdf_3857.geometry)
+        geom = self.hydrofabric_gdf_3857.union_all()
+        polygons = []
+        if isinstance(geom, MultiPolygon):
+            for polygon in geom.geoms:
+                polygons.append(Polygon(polygon.exterior))
+            return MultiPolygon(polygons)
+        elif isinstance(geom, Polygon):
+            return geom
+        else:
+            raise TypeError(f"Expected Polygon or MultiPolygon, got {type(geom)}")
 
     @property
     def hydrofabric_buffered_polygon(self):

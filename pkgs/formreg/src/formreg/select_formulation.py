@@ -113,7 +113,7 @@ def _find_gages_nearest_neighbor(
             gages, distances = [], []
 
         # if there are enough gages, check if they share the same formulations
-        found_gages = None
+        found_gages = False
         if len(gages) > min_gages:
             found_gages, gages, formulations = _get_gages_with_shared_formulations(
                 df[df[gage_id_col].isin(gages)], min_gages=min_gages
