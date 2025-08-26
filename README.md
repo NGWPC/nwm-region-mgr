@@ -1,53 +1,64 @@
-# ngen-regionalization
+# Formulation and Parameter Regionalization for the NextGen Framework
+[![Build](https://img.shields.io/github/actions/workflow/status/ngwpc/nwm-region-mgr/ci.yaml?branch=main)](.github/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/ngwpc/nwm-region-mgr)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/ngwpc/nwm-region-mgr)](https://github.com/fema-ffrd/gpras/releases)
+![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-orange.svg)
+![Linter: Ruff](https://img.shields.io/badge/linter-ruff-orange)
 
-## Name
-NGEN Regionalization
+`ngen-regionalization` is a Python package for identifying optimal model formulations and parameter values in **ungauged catchments**. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
 
-## Description
-This repository includes packages for conducting formulation and parameter regionalizations for NextGen modules.
-- parreg: parameter regionalization
 
-### Clone & Build
+## Key Features
 
-1. clone ngen-regionalization from Gitlab
+- **Formulation Regionalization** – Ranks NextGen model formulations for ungauged catchments based on similarity to gauged sites.
+- **Parameter Regionalization** – Estimates parameter values by intelligently transferring calibrations across catchments.
+- **Clustering Methods** – Groups catchments with shared hydrologic characteristics using multiple clustering approaches.
+- **Diagnostic Plots** – Generates clear plots and maps that explain formulation and parameter choices.
+- **Scalable Workflows** – Efficiently supports studies from individual watersheds to CONUS-wide applications.
+- **Customizable Configurations** – Full control of workflows via human-readable config files.
 
-```bash
-cd [NGEN_REG_ROOT]
-git clone -b development --recurse-submodules https://gitlab.sh.nextgenwaterprediction.com/NGWPC/nwm-ngen/ngen-regionalization.git
-```
 
-2. create python venv
+## Installation
 
-```bash
-cd [VENV_ROOT]
-/usr/bin/python3.11 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-```
-3. install parreg
+Installing ngen-regionalization requires
 
-```bash
-cd [NGEN_REG_ROOT]/pkgs/parreg
-pip install . #or use "pip install -e ." to install the package as an editable 
-```
-4. install formreg
+ - Python 3.11
+ - Python venv (typically included with Python)
+ - git
+
+Since ngen-regionalization is not currently on PyPI, it must be installed from source. To download this repository, run
 
 ```bash
-cd [NGEN_REG_ROOT]/pkgs/formreg
-pip install . #or use "pip install -e ." to install the package as an editable 
+git clone https://github.com/NGWPC/nwm-region-mgr.git
+cd nwm-region-mgr
 ```
-5. install utils
+
+To get the most up-to-date code, switch to the development branch.
 
 ```bash
-cd [NGEN_REG_ROOT]/pkgs/utils
-pip install . #or use "pip install -e ." to install the package as an editable 
+git checkout development
 ```
 
-where [VENV_ROOT] and [NGEN_REG_ROOT] refer to the directory to install python venv and ngen-regionalization 
-in your local workspace, respectively
+Next, create a virtual environment to isolate the dependencies of this library from your base Python environment.
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+```
+
+You will then be able to install ngen-regionalization. There are a few download variants that users may be interested in.
+
+```bash
+# Regular package install
+pip install .
+# Install the package in edit mode (for development)
+pip install -e .
+# Install the additional dependencies for parameter regionalization
+pip install .[parreg]
+```
 
 
-### Usage
+## Usage
 
 1) set up configuration yaml files
 
@@ -56,7 +67,7 @@ Three yaml config files are needed to run regionalization
 - onfig_formreg.yaml: contains specific settings for the formulation regionalization process.
 - config_parreg.yaml: contains specific settings for the parameter regionalization process.
 
-Follow the sample config files (ngen-regionalization/sample_files/configs) to set up the configurations 
+Follow the sample config files (ngen-regionalization/sample_files/configs) to set up the configurations
 for your regionalization application as needed.
 
 Sample data can be downloaded from s3://ngwpc-dev/Yuqiong.Liu/data/ngen_reg/
