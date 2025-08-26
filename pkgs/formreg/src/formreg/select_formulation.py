@@ -113,6 +113,7 @@ def _find_gages_nearest_neighbor(
     # by 100km each time until the minimum number of gages is met
     buffer = 100  # initial buffer size in kilometers
     gages = []
+    found_gages = False
     while len(gages) < min_gages:
         # find gages within the buffer around huc_id
         gages, distances, _ = find_gages_within_buffer(
