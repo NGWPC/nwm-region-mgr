@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 from sklearn.decomposition import PCA
+from sklearn.metrics.pairwise import pairwise_distances_chunked
 from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
@@ -47,30 +48,39 @@ def compute_pairwise_centroid_distances(
         where the columns are indexed by polygon ids from group_a, and the rows are indexed by polygon ids from group_b.
 
     """
-    # Precompute centroids to speed up
-    centroids_a = group_a.to_crs(5070).geometry.centroid
-    centroids_b = group_b.to_crs(5070).geometry.centroid
-
     a_ids = group_a[id_col_a].values
     b_ids = group_b[id_col_b].values
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=n_jobs) as executor:
-        futures = {}
-        data = {}
-        for i in range(len(group_a)):
-            futures[
-                executor.submit(
-                    compute_distances_for_a,
-                    centroids_a.iloc[i],
-                    centroids_b,
-                    distance_threshold,
-                )
-            ] = a_ids[i]
-        for future in concurrent.futures.as_completed(futures):
-            data[futures[future]] = future.result()
-    data = pd.DataFrame(data.values(), columns=b_ids, index=data.keys()).T
+    centroids_a = group_a.to_crs(5070).geometry.centroid
+    x = np.array([centroids_a.x.values, centroids_a.y.values]).T / 1000
+    del centroids_a
+
+    centroids_b = group_b.to_crs(5070).geometry.centroid
+    y = np.array([centroids_b.x.values, centroids_b.y.values]).T / 1000
+    del centroids_b
+
+    x = downscale(x)
+    y = downscale(y)
+    data = pairwise_distances_chunked(x, y, metric="sqeuclidean")
+    del x
+    del y
+    ds = []
+    for i in data:
+        ds.append(np.sqrt(i).astype(np.uint16))
+    data = np.concatenate(ds)
+    del ds
+    data = pd.DataFrame(data, columns=b_ids, index=a_ids).T
     data = data.sort_index(axis=0)
-    return data.sort_index(axis=1)
+    data = data.sort_index(axis=1)
+    return data
+
+
+def downscale(arr):
+    """Downscale a NumPy array to a smaller integer type if possible."""
+    max_val = arr.flatten().max()
+    for i in [np.uint8, np.uint16, np.uint32]:
+        if max_val <= np.iinfo(i).max:
+            return arr.round().astype(i)
 
 
 def compute_distances_for_a(
