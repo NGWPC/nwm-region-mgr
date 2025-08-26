@@ -231,12 +231,14 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
     divide_id_col = id_cols["divide"]
     vpu_id_col = id_cols["vpu"]
 
+    cc = config.output["summary_score"]
+    filepath = cc.get_file_path(None, use_stem_suffix=True)
+
     # compute summary scores for all gages in the domain only if this is the first VPU
-    if vpu == config.general.vpu_list[0]:
+    if not filepath.exists():
         df_score_all = _compute_summary_score_all_gages(config, gage_id_col)
     else:
         # read the summary score DataFrame for all gages in the domain
-        cc = config.output["summary_score"]
         df_score_all = cc.read_from_file(
             vpu=None,
             use_stem_suffix=True,
