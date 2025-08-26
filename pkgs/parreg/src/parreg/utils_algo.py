@@ -90,19 +90,27 @@ def compute_distances_for_a(
     return result
 
 
-def get_valid_attrs(recs0: list, recs1: list, df_attr0: pd.DataFrame, attrs: dict, config: dict) -> pd.DataFrame:
+def get_valid_attrs(
+    recs0: list, recs1: list, df_attr0: pd.DataFrame, attrs: dict, config: dict
+) -> pd.DataFrame:
     """Get the valid attributes to be processed based on the valid attributes of the first receiver."""
     dt1 = df_attr0[~df_attr0["is_donor"]]
     dt1 = dt1[dt1.divide_id.isin(recs0) & ~dt1.divide_id.isin(recs1)].iloc[0]
     dt1 = dt1[~dt1.index.isin(config["non_attr_cols"])]
     vars = config["non_attr_cols"] + dt1.index[~dt1.isna()].tolist()
     df_attr = df_attr0[vars]
-    vars = [value for value in vars if value in attrs]  # attrs included for current round
-    vars0 = [value for value in attrs if value not in vars]  # attrs excluded for current round
+    vars = [
+        value for value in vars if value in attrs
+    ]  # attrs included for current round
+    vars0 = [
+        value for value in attrs if value not in vars
+    ]  # attrs excluded for current round
 
     if len(vars) > 0:
         if len(vars0) > 0:
-            logger.info("Excluding " + str(len(vars0)) + " attributes: " + ",".join(vars0))
+            logger.info(
+                "Excluding " + str(len(vars0)) + " attributes: " + ",".join(vars0)
+            )
         else:
             logger.info("Using all attributes")
 
@@ -126,7 +134,9 @@ def apply_pca(data0: pd.DataFrame, min_var: float = 0.8) -> pd.DataFrame:
     n1 = pca.n_components_
 
     logger.info(f"Number of PCs selected: {n1}")
-    logger.info(f"PCA total portion of variance explained ... {sum(pca.explained_variance_ratio_)}")
+    logger.info(
+        f"PCA total portion of variance explained ... {sum(pca.explained_variance_ratio_)}"
+    )
     x_pca = pca.transform(scaled_data)
 
     # standardize the reduced data (comment out because it is not necessary)
@@ -145,7 +155,9 @@ def apply_pca(data0: pd.DataFrame, min_var: float = 0.8) -> pd.DataFrame:
     return x_pca, w1
 
 
-def apply_donor_constraints(rec: str, donors: list, dists: pd.DataFrame, config: dict, df_attr: pd.DataFrame) -> tuple:
+def apply_donor_constraints(
+    rec: str, donors: list, dists: pd.DataFrame, config: dict, df_attr: pd.DataFrame
+) -> tuple:
     """Apply a few additional constraints to donors identified (e.g., via Gower's distance or other techniques)."""
     # 1. narrow down to donors with the same snowiness category
     # snowy = df_attr.query("id == @rec & tag=='receiver'")['snowy']
@@ -224,13 +236,17 @@ def assign_donors(
 
         # apply additional donor constraints1
         if df_attr is not None:
-            donors1, dists1 = apply_donor_constraints(receiver, donors1, dists1, config, df_attr)
+            donors1, dists1 = apply_donor_constraints(
+                receiver, donors1, dists1, config, df_attr
+            )
 
         # if applicable, choose donor with the smallest attribute distances
         if dist_attr is not None:
             ix0 = [donors.index(i) for i in donors1]
             dist_attr = [dist_attr.iloc[i] for i in ix0]
-            ix1 = np.argsort(dist_attr)[range(min(len(dist_attr), config["n_donor_max"]))]
+            ix1 = np.argsort(dist_attr)[
+                range(min(len(dist_attr), config["n_donor_max"]))
+            ]
             dist_attr1 = np.array(dist_attr)[ix1]
             dists1 = dists1[ix1]
             donors1 = np.array(donors1)[ix1]
@@ -262,7 +278,9 @@ def assign_donors(
 
             # add attribute distance if applicable (e.g., for Gower & URF)
             if dist_attr is not None:
-                dist_attr1 = np.array(dist_attr1)[ix1]  # sort according to spatial distance
+                dist_attr1 = np.array(dist_attr1)[
+                    ix1
+                ]  # sort according to spatial distance
                 dist_attr1 = dist_attr1[
                     range(nd_max)
                 ]  # ignore unneeded donor (likely not necessary given the treatment above)

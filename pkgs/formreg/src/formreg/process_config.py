@@ -10,9 +10,10 @@ Functions:
 import logging
 from pathlib import Path
 
+from utils import BaseConfigProcessor
+
 from formreg import select_formulation as sf
 from formreg import summary_score as ss
-from utils import BaseConfigProcessor
 
 logger = logging.getLogger(__name__)
 
