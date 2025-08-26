@@ -13,7 +13,7 @@ This repository includes packages for conducting formulation and parameter regio
 
 ```bash
 cd [NGEN_REG_ROOT]
-git clone -b development --recurse-submodules https://gitlab.sh.nextgenwaterprediction.com/NGWPC/nwm-ngen/ngen-regionalization.git
+git clone -b development --recurse-submodules https://github.com/NGWPC/nwm-region-mgr.git
 ```
 
 2. create python venv
