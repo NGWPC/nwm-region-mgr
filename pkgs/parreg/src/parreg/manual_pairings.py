@@ -5,7 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
-from utils.io_utils import read_table, save_data
+from utils import read_table, save_data
 
 logger = logging.getLogger(__name__)
 
