@@ -5,7 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
-from utils import read_table, save_data
+from utils.io_utils import read_table, save_data
 
 logger = logging.getLogger(__name__)
 
@@ -105,14 +105,12 @@ class ManualPairer:
             self.manual_pairings_df[self.gage_col].notnull()
         ].iterrows():
             gage = row[self.gage_col]
-            logger.info(f"Updating pairings for gage: {type(gage)}")
+            logger.info(f"Updating pairings for gage: {gage}")
             if gage in self.cwt_df[self.gage_col].values:
                 divide_ids_for_gage = self.cwt_df.loc[
                     self.cwt_df[self.gage_col] == gage, self.divide_col
                 ]
-                logger.debug(
-                    f"Updating gage: {gage} with donor: {row[self.donor_col]} | Divide IDs: {divide_ids_for_gage.tolist()}"
-                )
+                logger.debug(f"Updating gage: {gage} with donor: {row[self.donor_col]}")
                 df.loc[
                     df[self.divide_col].isin(divide_ids_for_gage), self.donor_col
                 ] = row[self.donor_col]
