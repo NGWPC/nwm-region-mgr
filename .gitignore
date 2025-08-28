@@ -2,6 +2,7 @@ data/
 data
 venv/
 venv
+.venv/
 pkgs/parreg/build
 pkgs/parreg/tests/test_data/test_outputs
 pkgs/parreg/.pytest_cache
@@ -9,3 +10,4 @@ pkgs/parreg/src/parreg.egg-info
 .vscode/
 __pycache__
 pkgs/parreg/tests/__pycache__
+docs/build/
