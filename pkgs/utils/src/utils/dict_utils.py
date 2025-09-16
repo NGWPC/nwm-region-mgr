@@ -32,7 +32,11 @@ def remove_nulls(d: dict | list) -> dict | list:
 
     """
     if isinstance(d, dict):
-        return {k: remove_nulls(v) for k, v in d.items() if v is not None and remove_nulls(v) != {}}
+        return {
+            k: remove_nulls(v)
+            for k, v in d.items()
+            if v is not None and remove_nulls(v) != {}
+        }
     elif isinstance(d, list):
         return [remove_nulls(v) for v in d if v is not None]
     else:

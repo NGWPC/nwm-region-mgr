@@ -69,7 +69,9 @@ def find_gages_within_buffer(
             # For Shapefile, read the file directly
             gdf = gpd.read_file(hydrofabric_file)
         else:
-            raise ValueError(f"Unsupported hydrofabric file format: {hydrofabric_file.suffix}")
+            raise ValueError(
+                f"Unsupported hydrofabric file format: {hydrofabric_file.suffix}"
+            )
 
     # Project to meters for accurate distance calculations
     gage_gdf = gage_gdf.to_crs(epsg=3857)
@@ -84,7 +86,9 @@ def find_gages_within_buffer(
                 f"Creating a buffered geometry as workaround."
             )
         else:
-            logger.debug("No valid geometries found in the hydrofabric. Creating a buffered geometry.")
+            logger.debug(
+                "No valid geometries found in the hydrofabric. Creating a buffered geometry."
+            )
         gdf1 = gdf.copy()
         gdf1["geometry"] = gdf1.buffer(0)
 
@@ -106,7 +110,9 @@ def find_gages_within_buffer(
     distances = distances.round(0).astype(int)
 
     if not gages:
-        logger.debug(f"No gages found for {id}. Please check the gage file and hydrofabric file.")
+        logger.debug(
+            f"No gages found for {id}. Please check the gage file and hydrofabric file."
+        )
 
     return gages, distances, gdf_buffered
 
@@ -146,11 +152,15 @@ def area_weighted_average(
 
     # Overlay to get intersections
     intersected = gpd.overlay(
-        gdf_fine[[fine_id_col, "geometry"]], gdf_coarse[["geometry", value_col]], how="intersection"
+        gdf_fine[[fine_id_col, "geometry"]],
+        gdf_coarse[["geometry", value_col]],
+        how="intersection",
     )
 
     # Remove rows with unsupported GeometryCollection geometry
-    intersected = intersected[~intersected.geometry.apply(lambda g: isinstance(g, GeometryCollection))]
+    intersected = intersected[
+        ~intersected.geometry.apply(lambda g: isinstance(g, GeometryCollection))
+    ]
 
     # Optionally explode multipart geometries
     intersected = intersected.explode(index_parts=True, ignore_index=True)

@@ -14,17 +14,30 @@ from utils import area_weighted_average
 attr = "snw_pc_syr"  # annual average snow cover percent in subbasins
 
 # Path to the HydroATLAS shapefile
-hydroatlas_file = "/home/yuqiong.liu/work/data/HydroATLAS/BasinATLAS_v10_shp/BasinATLAS_v10_lev12.shp"
+hydroatlas_file = (
+    "/home/yuqiong.liu/work/data/HydroATLAS/BasinATLAS_v10_shp/BasinATLAS_v10_lev12.shp"
+)
 
 # get all vpu ids from file names
-vpu_ids = [f.stem.split("_")[1] for f in Path("/home/yuqiong.liu/work/data/gpkg_v2.2/vpu_divides").glob("vpu_*.gpkg")]
+vpu_ids = [
+    f.stem.split("_")[1]
+    for f in Path("/home/yuqiong.liu/work/data/gpkg_v2.2/vpu_divides").glob(
+        "vpu_*.gpkg"
+    )
+]
 
 # loop through each vpu to process snow cover data
 for vpu in vpu_ids:
     # Define the output file path
-    output_file = "/home/yuqiong.liu/work/data/ngen_reg/inputs/snow_frac/vpu" + str(vpu) + "_snow_frac.parquet"
+    output_file = (
+        "/home/yuqiong.liu/work/data/ngen_reg/inputs/snow_frac/vpu"
+        + str(vpu)
+        + "_snow_frac.parquet"
+    )
     output_file = Path(output_file)
-    output_file.parent.mkdir(parents=True, exist_ok=True)  # create parent directories if they don't exist
+    output_file.parent.mkdir(
+        parents=True, exist_ok=True
+    )  # create parent directories if they don't exist
     if output_file.exists():
         print(f"Output file {output_file} already exists. Skipping VPU {vpu}.")
         continue
@@ -43,7 +56,9 @@ for vpu in vpu_ids:
     latlon_bbox = bbox_gdf.to_crs(epsg=4326)
 
     # Read HydroATLAS sub-basins within the bbox
-    gdf_hydroatlas = gpd.read_file(hydroatlas_file, layer="BasinATLAS_v10_lev12", bbox=latlon_bbox)
+    gdf_hydroatlas = gpd.read_file(
+        hydroatlas_file, layer="BasinATLAS_v10_lev12", bbox=latlon_bbox
+    )
     gdf_hydroatlas = gdf_hydroatlas[[attr, "geometry"]]
 
     if gdf_hydroatlas.empty:
@@ -52,7 +67,11 @@ for vpu in vpu_ids:
 
     # compute area-weighted average of snow cover percent
     gdf_ngen = area_weighted_average(
-        gdf_fine=gdf_ngen, gdf_coarse=gdf_hydroatlas, value_col=attr, fine_id_col="divide_id", crs_proj="EPSG:5070"
+        gdf_fine=gdf_ngen,
+        gdf_coarse=gdf_hydroatlas,
+        value_col=attr,
+        fine_id_col="divide_id",
+        crs_proj="EPSG:5070",
     )
 
     # rename the column to "snow_frac"

@@ -70,7 +70,9 @@ def save_data(
         elif file_path.suffix == ".parquet":
             data.to_parquet(file_path, index=index)
         else:
-            raise Exception("Only csv and parquet formats are supported for saving DataFrame")
+            raise Exception(
+                "Only csv and parquet formats are supported for saving DataFrame"
+            )
 
     elif isinstance(data, BaseModel):
         if file_path.suffix != ".yaml":
@@ -78,7 +80,9 @@ def save_data(
 
         with open(file_path, "w") as f:
             InlineListDumper.add_representer(list, represent_inline_list)
-            InlineListDumper.add_representer(Enum, lambda dumper, data: dumper.represent_scalar("!enum", data.value))
+            InlineListDumper.add_representer(
+                Enum, lambda dumper, data: dumper.represent_scalar("!enum", data.value)
+            )
 
             # Convert Enum values to their string representation for YAML serialization
             data_dict = convert_enum_to_value(data.model_dump())
@@ -96,10 +100,14 @@ def save_data(
             )
 
     else:
-        raise ValueError("Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel")
+        raise ValueError(
+            "Unsupported data type: must be a pandas DataFrame or Pydantic BaseModel"
+        )
 
 
-def read_table(file_path: Path | str, dtype: dict[str, str] | None = None) -> pd.DataFrame:
+def read_table(
+    file_path: Path | str, dtype: dict[str, str] | None = None
+) -> pd.DataFrame:
     """Read table from a csv or parquet file.
 
     Args:

@@ -71,7 +71,9 @@ class ClusterPairer(Pairer):
         """
         np.random.seed(5)
         random.seed(5)
-        logger.info(f"Total number of receivers to be paired with donors: {self.total_number_of_receivers}")
+        logger.info(
+            f"Total number of receivers to be paired with donors: {self.total_number_of_receivers}"
+        )
 
         processed_receivers_df = pd.DataFrame()
 
@@ -96,7 +98,9 @@ class ClusterPairer(Pairer):
             )
 
             # apply principal component analysis to reduce dimensionality
-            df_attr_reduced, _ = utils_algo.apply_pca(df_attr.drop(self.config["non_attr_cols"], axis=1))
+            df_attr_reduced, _ = utils_algo.apply_pca(
+                df_attr.drop(self.config["non_attr_cols"], axis=1)
+            )
 
             # process snowy and non-snowy catchments separately
             processed_receivers_df = self.process_snow_groups(
@@ -129,7 +133,9 @@ class ClusterPairer(Pairer):
         receivers = df_attr[~df_attr["is_donor"]]["divide_id"].tolist()
 
         if len(receivers) > 0:
-            logger.info(f"======= {len(receivers)} {'snowy' if snowy else 'non-snowy'}  catchments ========")
+            logger.info(
+                f"======= {len(receivers)} {'snowy' if snowy else 'non-snowy'}  catchments ========"
+            )
 
         cgp = ClusterGroupPairer(
             donors,
@@ -174,13 +180,19 @@ class ClusterGroupPairer:
         if len(self.processed_receivers_df) == 0:
             return self.receivers
         else:
-            return [x for x in self.receivers if x not in self.processed_receivers_df["divide_id"].tolist()]
+            return [
+                x
+                for x in self.receivers
+                if x not in self.processed_receivers_df["divide_id"].tolist()
+            ]
 
     @property
     def initial_labels(self) -> np.array:
         """Get initial labels."""
         # define starting labels
-        labels = np.zeros(len(self.df_attr_reduced))  # start with a single cluster (label = 0)
+        labels = np.zeros(
+            len(self.df_attr_reduced)
+        )  # start with a single cluster (label = 0)
 
         # for those already processed, assign "label_done"
         if self.processed_receivers_df.shape[0] > 0:
@@ -229,10 +241,14 @@ class ClusterGroupPairer:
     ) -> tuple:
         """Update donors and labels."""
         for result, result_labels in pairing_results:
-            processed_receivers_for_group_df = pd.concat((processed_receivers_for_group_df, result), axis=0)
+            processed_receivers_for_group_df = pd.concat(
+                (processed_receivers_for_group_df, result), axis=0
+            )
 
             # get unique labels from clustering results
-            label_rec1 = np.unique(result_labels[self.number_of_donors :], return_counts=False)
+            label_rec1 = np.unique(
+                result_labels[self.number_of_donors :], return_counts=False
+            )
 
             # for each unique label from clustering results update the final label list
             label_rec1 = label_rec1[label_rec1 != 0]
@@ -257,7 +273,9 @@ class ClusterGroupPairer:
         else:
             return iteration + 1
 
-    def check_convergence(self, iteration: int, number_of_receivers_with_donor: int) -> bool:
+    def check_convergence(
+        self, iteration: int, number_of_receivers_with_donor: int
+    ) -> bool:
         """Check for convergence.
 
         If the number of receivers with donors identified has not changed for a number of iterations,
@@ -266,7 +284,12 @@ class ClusterGroupPairer:
         """
         if (
             (iteration > 50)
-            | (number_of_receivers_with_donor / len(self.receivers_to_be_processed_for_group) * 100 > 98)
+            | (
+                number_of_receivers_with_donor
+                / len(self.receivers_to_be_processed_for_group)
+                * 100
+                > 98
+            )
             | (len(self.receivers_to_be_processed_for_group) < 5)
         ):
             return True
@@ -329,7 +352,9 @@ class ClusterGroupPairer:
         iter1 = iter2 = 0
         number_of_receivers_with_donor = processed_receivers_for_group_df.shape[0]
         labels = self.initial_labels
-        while len(processed_receivers_for_group_df) < len(self.receivers_to_be_processed_for_group):
+        while len(processed_receivers_for_group_df) < len(
+            self.receivers_to_be_processed_for_group
+        ):
             iter1 += 1
             logger.debug(f"===== iter1= {iter1} ======")
             logger.debug(f"Using {self.njob(labels)} processors ...")
@@ -337,29 +362,39 @@ class ClusterGroupPairer:
             # iterate through all clusters, break the cluster if necessary, or choose donors if the cluster is no longer breakable
             # each tuple in pairing_results is a result of cluster ll from the previous iteration being split into smaller clusters
             pairing_results = Parallel(n_jobs=self.njob(labels))(
-                delayed(self.identify_donor_by_cluster)(ll, labels, processed_receivers_for_group_df)
+                delayed(self.identify_donor_by_cluster)(
+                    ll, labels, processed_receivers_for_group_df
+                )
                 for ll in self.get_receiver_label(labels)
             )
 
             # update donors and labels
-            processed_receivers_for_group_df, labels = self.update_processed_receivers_and_labels(
-                pairing_results, processed_receivers_for_group_df, labels
+            processed_receivers_for_group_df, labels = (
+                self.update_processed_receivers_and_labels(
+                    pairing_results, processed_receivers_for_group_df, labels
+                )
             )
 
             # update iter2 as necessary
-            iter2 = self.update_iteration(iter2, processed_receivers_for_group_df, number_of_receivers_with_donor)
+            iter2 = self.update_iteration(
+                iter2, processed_receivers_for_group_df, number_of_receivers_with_donor
+            )
             if iter2 != 0:
                 # check convergence
                 if self.check_convergence(iter2, number_of_receivers_with_donor):
                     # get receivers for proximity algorithm
-                    receivers_for_proximity_algorithm = self.get_receivers_for_proximity_algorithm(
-                        processed_receivers_for_group_df
+                    receivers_for_proximity_algorithm = (
+                        self.get_receivers_for_proximity_algorithm(
+                            processed_receivers_for_group_df
+                        )
                     )
                     if len(receivers_for_proximity_algorithm) > 0:
                         # apply proximity algorithm
-                        processed_receivers_for_group_df = self.apply_proximity_algorithm(
-                            receivers_for_proximity_algorithm,
-                            processed_receivers_for_group_df,
+                        processed_receivers_for_group_df = (
+                            self.apply_proximity_algorithm(
+                                receivers_for_proximity_algorithm,
+                                processed_receivers_for_group_df,
+                            )
                         )
                     # break
 
@@ -370,9 +405,13 @@ class ClusterGroupPairer:
             number_of_receivers_with_donor = processed_receivers_for_group_df.shape[0]
 
         # add to the final donor table
-        return pd.concat((self.processed_receivers_df, processed_receivers_for_group_df), axis=0)
+        return pd.concat(
+            (self.processed_receivers_df, processed_receivers_for_group_df), axis=0
+        )
 
-    def update_progress(self, iter1: int, processed_receivers_for_group_df: pd.DataFrame) -> None:
+    def update_progress(
+        self, iter1: int, processed_receivers_for_group_df: pd.DataFrame
+    ) -> None:
         """Update progress on donor-receiver pairing."""
         if iter1 > 1:
             logger.info(
@@ -380,13 +419,19 @@ class ClusterGroupPairer:
                 f"number of receivers with donors identified = {processed_receivers_for_group_df.shape[0]}"
             )
             if processed_receivers_for_group_df.shape[0] > 0:
-                uniq, freq = np.unique(processed_receivers_for_group_df["tag"], return_counts=True)
+                uniq, freq = np.unique(
+                    processed_receivers_for_group_df["tag"], return_counts=True
+                )
                 logger.debug(dict(zip(uniq, freq)))
 
     def cluster_donors_receivers(self, receiver_label, labels: np.array):
         """Return the donors and receivers for the current cluster."""
         donors = [x for i, x in enumerate(self.donors) if labels[i] == receiver_label]
-        receivers = [x for i, x in enumerate(self.receivers) if labels[i + len(self.donors)] == receiver_label]
+        receivers = [
+            x
+            for i, x in enumerate(self.receivers)
+            if labels[i + len(self.donors)] == receiver_label
+        ]
         return donors, receivers
 
     def get_receivers_to_be_processed(
@@ -415,7 +460,9 @@ class ClusterGroupPairer:
         """Get cluster df_attr_reduced."""
         return self.df_attr_reduced.iloc[cluster_df_attr_reduced_index]
 
-    def get_cluster_df_attr_reduced_index(self, cluster_donors: list, cluster_receivers: list):
+    def get_cluster_df_attr_reduced_index(
+        self, cluster_donors: list, cluster_receivers: list
+    ):
         """Get cluster df_attr_reduced index."""
         idx1 = [self.donors.index(x) for x in cluster_donors]
         idx2 = [self.receivers.index(x) for x in cluster_receivers]
@@ -423,18 +470,26 @@ class ClusterGroupPairer:
 
     def update_fit_labels(self, fit):
         """Update fit labels."""
-        fit.labels_ = fit.labels_ + 2  # add 2 to the cluster labels because hdbscan cluster starts with -1
+        fit.labels_ = (
+            fit.labels_ + 2
+        )  # add 2 to the cluster labels because hdbscan cluster starts with -1
         return fit
 
-    def get_cluster_receiver_donor_labels(self, fit: KMeans | KMedoids | HDBSCAN | Birch, cluster_donors: list):
+    def get_cluster_receiver_donor_labels(
+        self, fit: KMeans | KMedoids | HDBSCAN | Birch, cluster_donors: list
+    ):
         """Get cluster labels for receivers and donors."""
         cluster_receiver_labels = np.unique(
             fit.labels_[len(cluster_donors) :], return_counts=False
         )  # receiver clusters
-        cluster_donor_labels = np.unique(fit.labels_[: len(cluster_donors)], return_counts=False)  # donor clusters
+        cluster_donor_labels = np.unique(
+            fit.labels_[: len(cluster_donors)], return_counts=False
+        )  # donor clusters
         return cluster_receiver_labels, cluster_donor_labels
 
-    def apply_clustering(self, cluster_donors: list, cluster_receivers: list, cluster_labels: np.array):
+    def apply_clustering(
+        self, cluster_donors: list, cluster_receivers: list, cluster_labels: np.array
+    ):
         """Apply clustering algorithm.
 
         1.  Apply clustering alogrithm.
@@ -444,14 +499,22 @@ class ClusterGroupPairer:
         5.  Update labels for this cluster iteration.
         """
         # apply clustering
-        cluster_df_attr_reduced_index = self.get_cluster_df_attr_reduced_index(cluster_donors, cluster_receivers)
-        cluster_df_attr_reduced = self.get_cluster_df_attr_reduced(cluster_df_attr_reduced_index)
-        fit = self._apply_algorithm(cluster_df_attr_reduced, cluster_receivers, cluster_donors)
+        cluster_df_attr_reduced_index = self.get_cluster_df_attr_reduced_index(
+            cluster_donors, cluster_receivers
+        )
+        cluster_df_attr_reduced = self.get_cluster_df_attr_reduced(
+            cluster_df_attr_reduced_index
+        )
+        fit = self._apply_algorithm(
+            cluster_df_attr_reduced, cluster_receivers, cluster_donors
+        )
 
         # update labels
         fit = self.update_fit_labels(fit)
         cluster_labels[cluster_df_attr_reduced_index] = fit.labels_
-        cluster_receiver_labels, cluster_donor_labels = self.get_cluster_receiver_donor_labels(fit, cluster_donors)
+        cluster_receiver_labels, cluster_donor_labels = (
+            self.get_cluster_receiver_donor_labels(fit, cluster_donors)
+        )
 
         # for receivers in clusters without donors, or clusters that cannot be subset further,
         # choose donors from those in the parent cluster (donors1)
@@ -470,10 +533,13 @@ class ClusterGroupPairer:
             recs3 = [
                 x
                 for ii, x in enumerate(cluster_receivers)
-                if fit.labels_[len(cluster_donors) :][ii] in cluster_receiver_labels_with_no_donor_in_cluster
+                if fit.labels_[len(cluster_donors) :][ii]
+                in cluster_receiver_labels_with_no_donor_in_cluster
             ]
 
-            cluster_labels[[self.receivers.index(x) + len(self.donors) for x in recs3]] = self.label_done
+            cluster_labels[
+                [self.receivers.index(x) + len(self.donors) for x in recs3]
+            ] = self.label_done
 
             return utils_algo.assign_donors(
                 "main",
@@ -506,7 +572,9 @@ class ClusterGroupPairer:
         cluster_labels = np.zeros(self.df_attr_reduced.shape[0])
 
         # donors and receivers in the current cluster
-        cluster_donors, cluster_receivers = self.cluster_donors_receivers(receiver_label, labels)
+        cluster_donors, cluster_receivers = self.cluster_donors_receivers(
+            receiver_label, labels
+        )
 
         # receivers in the current cluster that still need to be processed
         receivers_to_be_processed = self.get_receivers_to_be_processed(
@@ -517,7 +585,9 @@ class ClusterGroupPairer:
         if len(cluster_donors) > 0:
             # if number of donors in the cluster is larger than the defined 'nDonorMax', proceed to break the cluster further down
             if len(cluster_donors) > self.config["n_donor_max"]:
-                return self.apply_clustering(cluster_donors, cluster_receivers, cluster_labels)
+                return self.apply_clustering(
+                    cluster_donors, cluster_receivers, cluster_labels
+                )
 
             else:
                 # for receivers in clusters with number of donors smaller than 'n_donor_max', no further clustering is needed
@@ -558,7 +628,9 @@ class KmeansPairer(ClusterPairer):
         logger.info("perform clustering using Kmeans approach ...")
         return self._pair()
 
-    def _apply_algorithm(self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list) -> KMeans:
+    def _apply_algorithm(
+        self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list
+    ) -> KMeans:
         """Apply Kmeans alogrithm."""
         return KMeans(
             init=self.config["init"],
@@ -581,7 +653,9 @@ class KmedoidsPairer(ClusterPairer):
         logger.info("perform clustering using KMedoids approach ...")
         return self._pair()
 
-    def _apply_algorithm(self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list) -> KMedoids:
+    def _apply_algorithm(
+        self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list
+    ) -> KMedoids:
         """Apply KMedoids alogrithm."""
         return KMedoids(
             init=self.config["init"],
@@ -603,7 +677,9 @@ class HDBSCANPairer(ClusterPairer):
         logger.info("perform clustering using HDBSCAN approach ...")
         return self._pair()
 
-    def _apply_algorithm(self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list) -> HDBSCAN:
+    def _apply_algorithm(
+        self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list
+    ) -> HDBSCAN:
         """Apply HDBSCAN alogrithm."""
         return HDBSCAN(
             min_samples=11,
@@ -624,11 +700,15 @@ class BIRCHPairer(ClusterPairer):
         logger.info("perform clustering using BIRCH approach ...")
         return self._pair()
 
-    def _apply_algorithm(self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list) -> Birch:
+    def _apply_algorithm(
+        self, df_attr_reduced: pd.DataFrame, receivers: list, donors: list
+    ) -> Birch:
         """Apply BIRCH algorithm."""
         # explore a range of threshold values to identify a proper threshold parameter for BIRCH
         iteration_count = 0
-        for thresh in np.arange(self.config["min_thresh"], self.config["max_thresh"] + 0.1, 0.1):
+        for thresh in np.arange(
+            self.config["min_thresh"], self.config["max_thresh"] + 0.1, 0.1
+        ):
             # shuffle the donor/receiver positions in the data to get optimal results, via resampling
             kk = 0
             while kk < self.config["max_resample"]:
@@ -642,7 +722,12 @@ class BIRCHPairer(ClusterPairer):
                     n_clusters=None,
                     threshold=thresh,
                 ).fit(df_attr_reduced_reordered)
-                fit.labels_ = fit.labels_[[df_attr_reduced_reordered.index.get_loc(x) for x in df_attr_reduced.index]]
+                fit.labels_ = fit.labels_[
+                    [
+                        df_attr_reduced_reordered.index.get_loc(x)
+                        for x in df_attr_reduced.index
+                    ]
+                ]
                 u1 = np.unique(fit.labels_[: len(donors)], return_counts=False)
                 n_clust = len(np.unique(fit.labels_, return_counts=False))
                 nrec_donor = sum(np.in1d(fit.labels_[len(donors) :], u1))
