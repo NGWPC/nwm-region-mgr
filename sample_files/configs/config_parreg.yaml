@@ -2,7 +2,7 @@
 general:
   n_procs: 3  # number of processes to use for parallel processing, -1 for all available cores
   attr_dataset_list: ['ngen', 'hlr']
-  algorithm_list: ['gower','urf','kmeans', 'kmedoids', 'hdbscan', 'birch']  # list of algorithms to use for parameter regionalization
+  algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
 
 donor:
   buffer_km: 200

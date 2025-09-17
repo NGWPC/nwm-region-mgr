@@ -132,10 +132,16 @@ class ClusterPairer(Pairer):
         donors = df_attr[df_attr["is_donor"]]["divide_id"].tolist()
         receivers = df_attr[~df_attr["is_donor"]]["divide_id"].tolist()
 
+        # remove any receivers that are also donors in df_attr (due to issues with hydrofabric,
+        # e.g., two different gages sharing the exact same divides)
+        receivers = [cat for cat in receivers if cat not in donors]
+
         if len(receivers) > 0:
+            cat_type = "snowy" if snowy else "non-snowy"
             logger.info(
-                f"======= {len(receivers)} {'snowy' if snowy else 'non-snowy'}  catchments ========"
+                f"======= {len(receivers)} {cat_type}  receiver catchments ========"
             )
+            logger.debug(f"{cat_type} receiver catchments: {receivers}")
 
         cgp = ClusterGroupPairer(
             donors,

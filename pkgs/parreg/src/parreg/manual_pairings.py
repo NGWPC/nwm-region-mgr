@@ -151,6 +151,10 @@ class ManualPairer:
 
     def run_manual_pairing(self, vpu: str):
         """Run the manual pairing process and save the updated DataFrame."""
+        if not self.manual_pairings_file:
+            logger.debug("No manual pairings file provided. Skipping manual pairings.")
+            return
+
         for algorithm in self.config.general.algorithm_list:
             logger.info(
                 f"Running manual pairings for VPU: {vpu} | Algorithm: {algorithm}"

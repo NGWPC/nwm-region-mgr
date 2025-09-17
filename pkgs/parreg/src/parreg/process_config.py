@@ -437,50 +437,13 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             logger.warning(
                 f"No initial donors found for VPU {vpu}. Please check gage_divide_cwt_file and donor_gage_file."
             )
-        df_cwt = self.handle_nested_gages(df_cwt.reset_index(drop=True))
-        return (
-            df_cwt.loc[
-                df_cwt[self.general_id_name].isin(donor_cats),
-                [self.general_id_name, self.gage_id_name],
-            ]
-            .drop_duplicates()
-            .reset_index(drop=True)
-        )
 
-    def handle_nested_gages(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Handle nested gages by selecting the one with the smallest drainage area."""
-        idx = []
-        duplicated = df[df["divide_id"].duplicated()]  # Find duplicated divide_ids
-        for _, row in duplicated.iterrows():
-            divides_with_multiple_gages = df.loc[
-                df["divide_id"] == row["divide_id"]
-            ].copy()  # Get all divides with the same divide_id
-            divides_with_multiple_gages.loc[:, "drainage_area"] = None
-            for i, gage in divides_with_multiple_gages.iterrows():
-                divides_with_multiple_gages.loc[i, "drainage_area"] = df.loc[
-                    df["gage_id"] == gage["gage_id"],
-                    self.config.general.id_col.get("drainage_area", "areasqkm"),
-                ].sum()  # Sum the drainage area for each gage
-            if self.config.general.nested_gages == "inner":
-                logger.debug(
-                    f"Selecting inner gage for divide {row['divide_id']} with multiple gages: {divides_with_multiple_gages['gage_id'].tolist()}"
-                )
-                idx.append(
-                    divides_with_multiple_gages["drainage_area"].idxmin()
-                )  # Select the index of the gage with the smallest drainage area
-            elif self.config.general.nested_gages == "outer":
-                logger.debug(
-                    f"Selecting outer gage for divide {row['divide_id']} with multiple gages: {divides_with_multiple_gages['gage_id'].tolist()}"
-                )
-                idx.append(
-                    divides_with_multiple_gages["drainage_area"].idxmax()
-                )  # Select the index of the gage with the largest drainage area
-            else:
-                raise ValueError(
-                    f"Invalid value for 'nested_gages': {self.config.general.nested_gages}. "
-                    "Expected 'inner' or 'outer'."
-                )
-        return pd.concat([df.loc[idx], df[~df["divide_id"].duplicated()]])
+        donor_df = df_cwt.loc[
+            df_cwt[self.general_id_name].isin(donor_cats),
+            [self.general_id_name, self.gage_id_name],
+        ]
+
+        return donor_df.drop_duplicates().reset_index(drop=True)
 
     @lru_cache
     def donor_receiver_gdfs(self):
