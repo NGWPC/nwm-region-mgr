@@ -1,5 +1,5 @@
 Configuration File Builder
-=====================
+===========================
 
 This GUI streamlines the creation of configuration files. Tooltips are provided for all fields.
 
