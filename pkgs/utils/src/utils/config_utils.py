@@ -413,6 +413,36 @@ class BaseConfigProcessor:
         self.config = self.load_and_process_config
         self.sample_size = sample_size
 
+    @property
+    def divide_id_name(self):
+        """Id_name for divide from the config."""
+        return self.config.general.id_col.get("divide", "divide_id")
+
+    @property
+    def gage_id_name(self):
+        """Id_name for gage from the config."""
+        return self.config.general.id_col.get("gage", "gage_id")
+
+    @property
+    def drainage_area_name(self):
+        """Id_name for drainage_area from the config."""
+        return self.config.general.id_col.get("drainage_area", "areasqkm")
+
+    @property
+    def huc12_id_name(self):
+        """Id_name for huc12 from the config."""
+        return self.config.general.id_col.get("huc12", "huc_12")
+
+    @property
+    def vpu_id_name(self):
+        """Id_name for vpu from the config."""
+        return self.config.general.id_col.get("vpu", "vpuid")
+
+    @property
+    def donor_id_name(self):
+        """Id_name for donor gage from the config."""
+        return self.config.general.id_col.get("gage", "gage_id")
+
     def _deep_merge_configs(self, a: dict, b: dict) -> dict:
         """Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.
 
@@ -505,8 +535,7 @@ class BaseConfigProcessor:
 
     def _required_columns_calval_stats(self, config) -> set[str]:
         """Return a set of required columns for calibration/validation statistics."""
-        id_col = config.general.id_col.get("gage", "gage_id")
-        required_fields = {id_col, "formulation"}
+        required_fields = {self.gage_id_name, "formulation"}
 
         # required fields for summary score configuration (for formulation regionalization)
         sc = getattr(config, "summary_score", None)
@@ -536,20 +565,18 @@ class BaseConfigProcessor:
 
     def _file_required_column_map(self, config) -> Dict[str, str]:
         """Return a dictionary mapping files to required columns."""
-        gen = config.general
-        divide_id_col = gen.id_col["divide"]
-        gage_id_col = gen.id_col["gage"]
-        huc12_id_col = gen.id_col["huc12"]
-        vpu_id_col = gen.id_col["vpu"]
-
         file_dict = {
-            "gage_divide_cwt_file": {divide_id_col, gage_id_col},
-            "donor_gage_file": {gage_id_col, "longitude", "latitude"},
+            "gage_divide_cwt_file": {self.divide_id_name, self.gage_id_name},
+            "donor_gage_file": {self.gage_id_name, "longitude", "latitude"},
             "calval_stats_file": self._required_columns_calval_stats(config),
-            "ngen_hydrofabric_file": {divide_id_col, vpu_id_col, "geometry"},
-            "huc12_hydrofabric_file": {huc12_id_col, "geometry"},
-            "divide_huc12_cwt_file": {divide_id_col, huc12_id_col},
-            "formulation_file": {divide_id_col, "formulation"},
+            "ngen_hydrofabric_file": {
+                self.divide_id_name,
+                self.vpu_id_name,
+                "geometry",
+            },
+            "huc12_hydrofabric_file": {self.huc12_id_name, "geometry"},
+            "divide_huc12_cwt_file": {self.divide_id_name, self.huc12_id_name},
+            "formulation_file": {self.divide_id_name, "formulation"},
         }
 
         # add snow cover file if it exists in the config
@@ -560,7 +587,7 @@ class BaseConfigProcessor:
                 snow_cover_file = getattr(config.snow_cover, "snow_cover_file", None)
                 snow_frac_col = getattr(config.snow_cover, "column", None)
                 if snow_cover_file and snow_frac_col:
-                    file_dict["snow_cover_file"] = {divide_id_col, snow_frac_col}
+                    file_dict["snow_cover_file"] = {self.divide_id_name, snow_frac_col}
 
         return file_dict
 
@@ -757,7 +784,7 @@ class BaseConfigProcessor:
     def set_vpu_gdf(self) -> gpd.GeoDataFrame:
         """Set the GeoDataFrame for the current vpu."""
         gdf = gpd.read_file(Path(self.config.general.ngen_hydrofabric_file[self.vpu]))
-        gdf = gdf[[self.config.general.id_col["divide"].lower(), "geometry"]]
+        gdf = gdf[[self.divide_id_name.lower(), "geometry"]]
 
         self.vpu_gdf = gdf.copy()
 
