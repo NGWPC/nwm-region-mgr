@@ -1,7 +1,7 @@
 Formulation Regionalization
 ============================
 
-The formulation regionalization process can identify optimal NextGen formulations for various spatial units.
+The formulation regionalization process identifies optimal NextGen formulations for within a spatial unit (e.g., HUC10).
 
 **Required input:** calibration and validation dataset
 

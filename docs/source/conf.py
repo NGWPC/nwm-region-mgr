@@ -32,6 +32,7 @@ extensions = [
     "myst_parser",
     "sphinx.ext.napoleon",
     "sphinx_design",
+    "sphinxcontrib.rsvgconverter",
 ]
 
 source_suffix = {

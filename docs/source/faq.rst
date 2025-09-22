@@ -28,17 +28,32 @@ Frequently Asked Questions
     During calibration in gauged catchments, parameter values are tuned to create
     the "best" recreation of observed data for a given model.
 
-.. dropdown:: What inputs are needed to run ngen-regionalization?
+.. dropdown:: In what areas of the world can I run this?
 
-    TODO
+    Regionalization is currently supported for CONUS, Alaska, Hawaii, and Puerto
+    Rico and the Virgin Islands.  The spatial domain is set in config_general.yaml
+    under the general:domain field, where values can be conus, ak, hi, prvi,
+    respectively.
+
+.. dropdown:: What watershed delineations are used?
+
+    Regionalization relies on the NextGen Hydrofabric.
+
+.. dropdown:: What spatial unit are parameters assigned to?
+
+    Regionalization is flexible, and users can set the level that parameters are
+    assigned using the spatial_unit field in config_formreg.yaml.
 
 .. dropdown:: How does ngen-regionalization find optimal formulations?
 
-    TODO
+    Optimal formulations are determined based on formulation computational cost and user-specified performance metrics (
+    ex. Nash–Sutcliffe efficiency (nse), Kling-Gupta efficiency (KGE), bias, or correlation (cor))
+
 
 .. dropdown:: How does ngen-regionalization find optimal parameter values?
 
-    TODO
+    Parameter values are assigned to each hydrofabric divide by identifying calibrated catchments that are close to the
+    divide in either mapped location or physiographic characteristics.
 
 .. dropdown:: How do I start using this tool?
 
