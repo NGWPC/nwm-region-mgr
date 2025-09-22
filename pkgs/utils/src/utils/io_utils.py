@@ -18,6 +18,10 @@ from pydantic import BaseModel
 
 from .dict_utils import convert_enum_to_value, remove_nulls
 
+# Module-level cache
+_table_cache: dict[Path, pd.DataFrame] = {}
+_file_mtime: dict[Path, float] = {}  # track modification times
+
 
 def save_data(
     data: Union[pd.DataFrame, BaseModel],
@@ -105,7 +109,7 @@ def save_data(
         )
 
 
-def read_table(
+def read_table_old(
     file_path: Path | str, dtype: dict[str, str] | None = None
 ) -> pd.DataFrame:
     """Read table from a csv or parquet file.
@@ -133,5 +137,55 @@ def read_table(
 
     # remove leading/trailing whitespace from column names
     df.columns = df.columns.str.strip()
+
+    return df
+
+
+def read_table(
+    file_path: Path | str, dtype: dict[str, str] | None = None, refresh: bool = False
+) -> pd.DataFrame:
+    """Read a table from CSV, TSV, or Parquet with caching and optional automatic refresh.
+
+    Args:
+        file_path (Path | str): Path to the file to read. Supported formats are CSV, TSV, and Parquet.
+        dtype (dict[str, str] | None): Optional dictionary specifying the data types for specific columns.
+        refresh (bool): If True, forces re-reading the file even if it is cached. Default is False.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the data from the file.
+
+    """
+    file_path = Path(file_path).resolve()
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"{file_path} does not exist")
+
+    # Check if cached and file not changed
+    mtime = file_path.stat().st_mtime
+    if file_path in _table_cache and not refresh:
+        if _file_mtime.get(file_path, 0) == mtime:
+            return _table_cache[file_path]
+
+    # Load file based on suffix
+    suffix = file_path.suffix.lower()
+    if suffix == ".csv":
+        df = pd.read_csv(file_path, dtype=dtype)
+    elif suffix == ".tsv":
+        df = pd.read_csv(file_path, sep="\t", dtype=dtype)
+    elif suffix == ".parquet":
+        df = pd.read_parquet(file_path)
+        if dtype:
+            for col, typ in dtype.items():
+                if col in df.columns:
+                    df[col] = df[col].astype(typ)
+    else:
+        raise ValueError(f"Unsupported file format: {suffix}")
+
+    # remove leading/trailing whitespace from column names
+    df.columns = df.columns.str.strip()
+
+    # Update cache and mtime
+    _table_cache[file_path] = df
+    _file_mtime[file_path] = mtime
 
     return df

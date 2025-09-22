@@ -172,14 +172,19 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         with self.timing_block("generate_pairing"):
             self.generate_pairing(df_attr_all, self.dist_spatial, frp.config)
 
+        # create formulation parameter file
+        self.create_formulation_parameter_file(
+            frp.config.output.get("formulation", None)
+        )
+
         logger.info(f"Parameter regionalization for VPU {vpu} completed.")
 
     @property
     @lru_cache
     def donors_df(self) -> pd.DataFrame:
         """Donors."""
-        gage_file = self.config.general.donor_gage_file
-        donors = read_table(gage_file, dtype={self.gage_id_name: str})
+        gage_file = self.donor_gage_file
+        donors = self.donor_gages
         if donors.empty:
             raise ValueError(f"No donors found in the donor gage file: {gage_file}")
         if "longitude" not in donors.columns or "latitude" not in donors.columns:
@@ -358,7 +363,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     @lru_cache
     def donor_vpus(self):
         """Determine the VPUs of the donor basins."""
-        df_cwt = read_table(self.config.general.gage_divide_cwt_file)
+        df_cwt = self.gage_crosswalk
         return (
             df_cwt[df_cwt["gage_id"].isin(self.donor_basins)]["vpuid"].unique().tolist()
         )
@@ -381,18 +386,13 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     def get_initial_donor_df(self, vpu: str) -> pd.DataFrame:
         """Get initial donor gage/catchment df (before screening with stats) for a specific VPU."""
         # determine initial donor gages
-        df_cwt = read_table(self.config.general.gage_divide_cwt_file)
-        if self.config.general.donor_gage_file:
-            logger.info(
-                f"Initial donors based on all gages in {self.config.general.donor_gage_file}"
-            )
-            df = read_table(
-                self.config.general.donor_gage_file, dtype={self.gage_id_name: str}
-            )
-            donors = df[self.gage_id_name].unique().tolist()
+        df_cwt = self.gage_crosswalk
+        if self.donor_gage_file:
+            logger.info(f"Initial donors based on all gages in {self.donor_gage_file}")
+            donors = self.donor_gages[self.gage_id_name].unique().tolist()
         else:
             logger.info(
-                f"Initial donors based on all gages in {self.config.general.gage_divide_cwt_file}"
+                f"Initial donors based on all gages in {self.gage_crosswalk_file}"
             )
             donors = df_cwt[self.gage_id_name].unique().tolist()
 
@@ -1122,6 +1122,201 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
         return new_receivers_df
 
+    def add_donors_to_pair_results(self, df_pairs: pd.DataFrame) -> pd.DataFrame:
+        """Add donors without attributes to the pairing results.
+
+        Args:
+            df_pairs: DataFrame containing the donor-receiver pairs
+
+        Returns:
+            df_pairs: DataFrame containing the updated donor-receiver pairs
+
+        """
+        # identify catchments that are missing from the pairing results for the current VPU
+        init_donor_df = self.get_initial_donor_df(self.vpu)
+        existing_ids = set(df_pairs[self.divide_id_name])
+        cats_missing = [
+            d for d in init_donor_df[self.divide_id_name] if d not in existing_ids
+        ]
+
+        # assuming all missing catchments are calibrated catchments,
+        # regardless of whether they are used as donors or not
+        if cats_missing:
+            logger.info(
+                "Add donor catchments to the pairing results with zero distances."
+            )
+            df_donors = pd.DataFrame(
+                {
+                    self.divide_id_name: cats_missing,
+                    "donor": cats_missing,
+                }
+            )
+            # add donors to the pairing results, and set distances to zero
+            if "distSpatial" in df_pairs.columns:
+                df_donors["distSpatial"] = 0
+            if "distAttr" in df_pairs.columns:
+                df_donors["distAttr"] = 0
+            if "tag" in df_pairs.columns:
+                df_donors["tag"] = "donor"
+
+            df_pairs = pd.concat([df_pairs, df_donors], ignore_index=True)
+
+        # sort the pairing results by divide_id
+        df_pairs = df_pairs.sort_values(by=[self.divide_id_name], ascending=True)
+        return df_pairs
+
+    def save_pairing_results(self, df_pairs: pd.DataFrame, pairer_name: str) -> None:
+        """Save the pairing results to file."""
+        # output config for pairs
+        co = self.config.output.get("pairs", None)
+
+        # save donor receiver pairing to csv file
+        co.save_to_file(
+            df_pairs,
+            vpu=self.vpu,
+            algorithm=pairer_name,
+            data_str=f"Pairing results (VPU {self.vpu}, algorithm = {pairer_name})",
+            use_stem_suffix=False,
+        )
+
+        # get donors by gage for use by MSWM
+        df_pairs_gage = df_pairs[[self.divide_id_name, self.donor_id_name]].copy()
+        df_pairs_gage = df_pairs_gage.merge(
+            self.gage_crosswalk[[self.divide_id_name, self.gage_id_name]],
+            left_on=self.donor_id_name,
+            right_on=self.divide_id_name,
+            how="left",
+        )
+
+        # make sure the divide_id_name column is present
+        if self.divide_id_name not in df_pairs_gage.columns:
+            if self.divide_id_name + "_x" in df_pairs_gage.columns:
+                df_pairs_gage = df_pairs_gage.rename(
+                    columns={self.divide_id_name + "_x": self.divide_id_name}
+                )
+            else:
+                msg = f"{self.divide_id_name} not found in the gage crosswalk file or the donor-receiver pairing results."
+                logger.error(msg)
+                raise KeyError(msg)
+
+        df_pairs_gage = (
+            df_pairs_gage[[self.gage_id_name, self.divide_id_name]]
+            .drop_duplicates()
+            .sort_values(by=[self.gage_id_name])
+        )
+
+        # save the gage-donor pairs to a separate file (MSWM requires csv format)
+        format0 = co.format
+        co.format = "csv"
+        co.save_to_file(
+            df_pairs_gage,
+            vpu=self.vpu,
+            algorithm=pairer_name,
+            data_str=f"Pairing results (VPU {self.vpu}, algorithm = {pairer_name})",
+            use_stem_suffix=True,
+        )
+        co.format = format0
+
+    def get_donors_receivers_by_form(self, form_key: str, form_values: list) -> tuple:
+        """Get the donors and receivers for a given formulation.
+
+        Args:
+            form_key: formulation key
+            form_values: list of divide_ids in the formulation
+
+        Returns:
+            donors_in_form: list of donors in the formulation
+            receivers_in_form: list of receivers in the formulation
+
+        """
+        donors_in_form = list(set(self.donors) & set(form_values))
+        receivers_in_form = list(set(self.receivers) & set(form_values))
+
+        form_no = list(self.formulation_dict).index(form_key) + 1
+        if not receivers_in_form:
+            logger.warning(
+                f"No receivers found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
+                f"Skipping this formulation."
+            )
+            return [], []
+
+        # use all donors if no donors in the current formulation
+        if receivers_in_form and not donors_in_form:
+            msg = f"No donors found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
+            msg += f"Formulation will not be used for pairing for these receivers ({len(receivers_in_form)})."
+            logger.warning(msg)
+            donors_in_form = self.donors
+
+        logger.info(
+            f"Processing formulation #{form_no}: "
+            f"[{form_key.upper()}], with {len(donors_in_form)} donors and "
+            f"{len(receivers_in_form)} receivers."
+        )
+
+        return donors_in_form, receivers_in_form
+
+    def create_formulation_parameter_file(self, form_config: Any, pairer: str) -> None:
+        """Create formulation parameter file.
+
+        Create a formulation parameter file that lists the gage_id, formulation, and the calibrated parameters.
+
+        Args:
+            form_config: configuration object containing the settings for formulation regionalization output
+            pairer: name of the pairing algorithm used
+
+        """
+        # read parameter file from formulation regionalization for all donor VPUs
+        param_files = [
+            form_config.get_file_path(vpu=vpu, use_stem_suffix=True)
+            for vpu in self.donor_vpus
+        ]
+        df_param_all = pd.DataFrame()
+        for param_file in param_files:
+            if not param_file.exists():
+                msg = f"Formulation parameter file does not exist: {param_file}. "
+                msg += "Please run the formulation regionalization first."
+                logger.error(msg)
+                raise FileNotFoundError(msg)
+            else:
+                logger.info(
+                    f"Loading formulation parameter data from file: {param_file}"
+                )
+                df_param = read_table(param_file, dtype={self.gage_id_name: str})
+                df_param_all = pd.concat([df_param_all, df_param], ignore_index=True)
+
+        # get final donor basins for the current algorithm from the pairs file
+        pair_file = self.config.output.pairs.get_file_path(
+            vpu=self.vpu, algorithm=pairer, use_stem_suffix=True
+        )
+        if pair_file.suffix != ".csv":  # replace file suffix with .csv if needed
+            pair_file = pair_file.with_suffix(".csv")
+        if not pair_file.exists():
+            msg = f"Pairing results file does not exist: {pair_file}. Please run the pairing first."
+            logger.error(msg)
+            raise FileNotFoundError(msg)
+        else:
+            df_pairs = read_table(
+                pair_file, dtype={self.gage_id_name: str, self.divide_id_name: str}
+            )
+            donor_gages = df_pairs[self.gage_id_name].unique().tolist()
+
+        # filter the parameter data to only include donors for the current algorithm and VPU
+        df_param_all = df_param_all[df_param_all[self.gage_id_name].isin(donor_gages)]
+
+        if df_param_all.empty:
+            msg = "No formulation parameter data found. Please run the formulation regionalization first."
+            logger.error(msg)
+            raise ValueError(msg)
+        else:
+            # save the formulation parameter file
+            out = self.config.output["params"]
+            out.save_to_file(
+                df_param_all,
+                vpu=self.vpu,
+                data_str=f"Formulation Parameter Data (VPU {self.vpu})",
+                use_stem_suffix=False,
+            )
+
     def generate_pairing(
         self, df_attr_all: pd.DataFrame, dist_spatial: pd.DataFrame, form_config: Any
     ):
@@ -1166,30 +1361,12 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 df_pairs_all = pd.DataFrame()
                 self.set_formulation_dict(form_config)
                 for form_key, form_values in self.formulation_dict.items():
-                    donors_in_form = list(set(self.donors) & set(form_values))
-                    receivers_in_form = list(set(self.receivers) & set(form_values))
-
-                    form_no = list(self.formulation_dict).index(form_key) + 1
-                    if not receivers_in_form:
-                        logger.warning(
-                            f"No receivers found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
-                            f"Skipping this formulation."
-                        )
-                        continue
-
-                    if receivers_in_form and not donors_in_form:
-                        msg = f"No donors found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
-                        msg += f"Formulation will not be used for pairing for these receivers ({len(receivers_in_form)})."
-                        logger.warning(msg)
-                        donors_in_form = (
-                            self.donors
-                        )  # use all donors if no donors in the current formulation
-
-                    logger.info(
-                        f"Processing formulation #{form_no}: "
-                        f"[{form_key.upper()}], with {len(donors_in_form)} donors and "
-                        f"{len(receivers_in_form)} receivers."
+                    # identify donors and receivers for the current formulation
+                    donors_in_form, receivers_in_form = (
+                        self.get_donors_receivers_by_form(form_key, form_values)
                     )
+                    if not receivers_in_form:
+                        continue
 
                     # filter the attribute data to only include donors and receivers in the current formulation
                     df_attr_form = df_attr_all[
@@ -1237,53 +1414,21 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
                     df_pairs_all = pd.concat([df_pairs_all, processed_receivers_df])
 
-                # identify catchments that are missing from the pairing results for the current VPU
-                init_donor_df = self.get_initial_donor_df(self.vpu)
-                existing_ids = set(df_pairs_all[self.divide_id_name])
-                cats_missing = [
-                    d
-                    for d in init_donor_df[self.divide_id_name]
-                    if d not in existing_ids
-                ]
+                # add donors to the pairing results
+                df_pairs_all = self.add_donors_to_pair_results(df_pairs_all)
 
-                # assuming all missing catchments are calibrated catchments,
-                # regardless of whether they are used as donors or not
-                if cats_missing:
-                    logger.info(
-                        "Add donor catchments to the pairing results with zero distances."
-                    )
-                    df_donors = pd.DataFrame(
-                        {
-                            self.divide_id_name: cats_missing,
-                            "donor": cats_missing,
-                        }
-                    )
-                    # add donors to the pairing results, and set distances to zero
-                    if "distSpatial" in df_pairs_all.columns:
-                        df_donors["distSpatial"] = 0
-                    if "distAttr" in df_pairs_all.columns:
-                        df_donors["distAttr"] = 0
+                # create formulation parameter file
+                self.create_formulation_parameter_file(form_config, pairer_name)
 
-                    df_pairs_all = pd.concat(
-                        [df_pairs_all, df_donors], ignore_index=True
-                    )
+                # save the pairing results to file
+                self.save_pairing_results(df_pairs_all, pairer_name)
 
-                # sort the pairing results by divide_id
-                df_pairs_all = df_pairs_all.sort_values(
-                    by=[self.divide_id_name], ascending=True
-                )
-
-                # save donor receiver pairing to csv file
-                co.save_to_file(
-                    df_pairs_all,
-                    vpu=self.vpu,
-                    algorithm=pairer_name,
-                    data_str=f"Pairing results (VPU {self.vpu}, algorithm = {pairer_name})",
-                    use_stem_suffix=False,
-                )
+                # plot the pairing results
+                self.plot_pairing_outputs(pairer_name, df_pairs_all)
 
                 end_time = time.time()
                 logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
 
-                # plot the pairing results
-                self.plot_pairing_outputs(pairer_name, df_pairs_all)
+            logger.info(
+                f"*************** End of pairing using: {pairer_name} **************\n"
+            )

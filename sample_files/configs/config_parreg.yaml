@@ -2,7 +2,7 @@
 general:
   n_procs: 3  # number of processes to use for parallel processing, -1 for all available cores
   attr_dataset_list: ['ngen', 'hlr']
-  algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
+  algorithm_list: ['gower','urf','kmeans', 'kmedoids', 'hdbscan', 'birch']  # list of algorithms to use for parameter regionalization
 
 donor:
   buffer_km: 200
@@ -43,11 +43,17 @@ output:
       save: True
       path: '{base_dir}/outputs/{run_name}/pairs'
       stem: 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}'
+      stem_suffix: '_mswm'  # suffix for the pairs file to be used by MSWM
       format: 'parquet'
       plots:
         spatial_map: True
         histogram: True
         columns_to_plot: ['distSpatial', 'distAttr']  # columns to plot    
+    params:
+      save: True
+      path: '{base_dir}/outputs/{run_name}/params'
+      stem: 'formulation_params_{domain}_vpu{vpu_list}'
+      format: 'csv'
     attr_data_final:
       save: True
       path: '{base_dir}/outputs/{run_name}/attr_data_final'

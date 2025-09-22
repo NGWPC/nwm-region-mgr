@@ -94,6 +94,8 @@ class BaseGeneralConfig(BaseModel):
     """Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."""
     calval_stats_file: Path | str = Field()
     """Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'."""
+    calib_param_file: Path | str = Field()
+    """Path to file containing calibration parameters for all gages in the domain."""
 
     approach_calib_basins: Optional[str] = (
         "regionalization"  # Options: 'regionalization', 'summary_score'
@@ -413,35 +415,8 @@ class BaseConfigProcessor:
         self.config = self.load_and_process_config
         self.sample_size = sample_size
 
-    @property
-    def divide_id_name(self):
-        """Id_name for divide from the config."""
-        return self.config.general.id_col.get("divide", "divide_id")
-
-    @property
-    def gage_id_name(self):
-        """Id_name for gage from the config."""
-        return self.config.general.id_col.get("gage", "gage_id")
-
-    @property
-    def drainage_area_name(self):
-        """Id_name for drainage_area from the config."""
-        return self.config.general.id_col.get("drainage_area", "areasqkm")
-
-    @property
-    def huc12_id_name(self):
-        """Id_name for huc12 from the config."""
-        return self.config.general.id_col.get("huc12", "huc_12")
-
-    @property
-    def vpu_id_name(self):
-        """Id_name for vpu from the config."""
-        return self.config.general.id_col.get("vpu", "vpuid")
-
-    @property
-    def donor_id_name(self):
-        """Id_name for donor gage from the config."""
-        return self.config.general.id_col.get("gage", "gage_id")
+        self.set_logging()
+        self.validate_files()
 
     def _deep_merge_configs(self, a: dict, b: dict) -> dict:
         """Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.
@@ -569,6 +544,7 @@ class BaseConfigProcessor:
             "gage_divide_cwt_file": {self.divide_id_name, self.gage_id_name},
             "donor_gage_file": {self.gage_id_name, "longitude", "latitude"},
             "calval_stats_file": self._required_columns_calval_stats(config),
+            "calib_param_file": {self.gage_id_name, "formulation"},
             "ngen_hydrofabric_file": {
                 self.divide_id_name,
                 self.vpu_id_name,
@@ -734,9 +710,12 @@ class BaseConfigProcessor:
         # Substitute placeholders in the configuration
         config = self._substitute_placeholders(config)
 
-        # Set up logging based on the configuration
-        log_level = config.general.logging.level.upper()
-        log_file = Path(config.general.logging.file)
+        return config
+
+    def set_logging(self):
+        """Set up logging based on the configuration."""
+        log_level = self.config.general.logging.level.upper()
+        log_file = Path(self.config.general.logging.file)
         setup_logging(
             level=log_level,
             target_packages=("__main__", "formreg", "parreg", "utils"),
@@ -744,11 +723,11 @@ class BaseConfigProcessor:
             file_level=log_level,
         )
 
-        from formreg import config_schema as fcs
+        from formreg import config_schema as fcs  # avoid circular import
 
         config_str = (
             "Formulation Regionalization"
-            if isinstance(config, fcs.Config)
+            if isinstance(self.config, fcs.Config)
             else "Parameter Regionalization"
         )
         logger.info(
@@ -757,23 +736,23 @@ class BaseConfigProcessor:
         logger.info("Set up logging with level: %s", log_level)
         logger.info("Log files: %s", log_file)
 
+    def validate_files(self):
+        """Validate that all file paths exist and required columns are present in the files."""
         # Assemble file paths from the configuration
-        paths = self._assemble_file_paths(config, exclude={"formulation_file"})
+        paths = self._assemble_file_paths(self.config, exclude={"formulation_file"})
         logger.debug("Input file paths from configuration: %s", paths)
 
         # Validate that all file paths exist
         self._validate_paths(paths)
 
         # Check if the required columns are present in the files
-        self._check_file_columns(config, paths)
+        self._check_file_columns(self.config, paths)
 
         logger.info("Successfully validated and processed the configurations.")
 
         # Save the final configuration
-        cc = config.output["config_final"]
-        cc.save_to_file(config, data_str="Final Configuration")
-
-        return config
+        cc = self.config.output["config_final"]
+        cc.save_to_file(self.config, data_str="Final Configuration")
 
     def set_vpu(self, vpu: str):
         """Set the vpu."""
@@ -806,3 +785,53 @@ class BaseConfigProcessor:
         yield
         end = time()
         logger.info(f"  Execution time for {step_str}: {end - start} seconds")
+
+    @property
+    def divide_id_name(self):
+        """Id_name for divide from the config."""
+        return self.config.general.id_col.get("divide", "divide_id")
+
+    @property
+    def gage_id_name(self):
+        """Id_name for gage from the config."""
+        return self.config.general.id_col.get("gage", "gage_id")
+
+    @property
+    def drainage_area_name(self):
+        """Id_name for drainage_area from the config."""
+        return self.config.general.id_col.get("drainage_area", "areasqkm")
+
+    @property
+    def huc12_id_name(self):
+        """Id_name for huc12 from the config."""
+        return self.config.general.id_col.get("huc12", "huc_12")
+
+    @property
+    def vpu_id_name(self):
+        """Id_name for vpu from the config."""
+        return self.config.general.id_col.get("vpu", "vpuid")
+
+    @property
+    def donor_id_name(self):
+        """Id_name for donor gage from the config."""
+        return self.config.general.id_col.get("donor", "donor")
+
+    @property
+    def gage_crosswalk_file(self):
+        """Get the gage crosswalk file path from the configuration."""
+        return self.config.general.gage_divide_cwt_file
+
+    @property
+    def gage_crosswalk(self):
+        """Get the gage crosswalk DataFrame."""
+        return read_table(self.gage_crosswalk_file, dtype={self.gage_id_name: str})
+
+    @property
+    def donor_gage_file(self):
+        """Get the donor gage file path from the configuration."""
+        return self.config.general.donor_gage_file
+
+    @property
+    def donor_gages(self):
+        """Get the donor gage DataFrame."""
+        return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})

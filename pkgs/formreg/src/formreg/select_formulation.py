@@ -751,41 +751,117 @@ def select_formulation_all(
     return df_selected
 
 
+def check_gage_formulation_uniqueness(
+    df_form: pd.DataFrame,
+    config: cs.Config,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Check that each gage has a unique formulation assigned.
+
+    Args:
+        df_form : pd.DataFrame
+            DataFrame with selected formulations for each divide.
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]
+            Tuple containing the new DataFrame with gage-formulation mapping, and
+            the updated DataFrame with divide-formulation mapping and
+
+
+    """
+    # get formulation selected for each donor gage
+    gage_id_col = config.general.id_col["gage"]
+    divide_id_col = config.general.id_col["divide"]
+    df_cwt = read_table(
+        config.general.gage_divide_cwt_file,
+        dtype={gage_id_col: "str", divide_id_col: "str"},
+    )
+    df_cwt = df_cwt[[gage_id_col, divide_id_col]].drop_duplicates()
+    df_form_gage = df_form[[divide_id_col, "formulation"]].drop_duplicates()
+    df_form_gage = df_cwt.merge(
+        df_form_gage,
+        on=divide_id_col,
+        how="inner",
+    )
+
+    # check if any gage is associated with multiple formulations
+    df_count = (
+        df_form_gage[[gage_id_col, "formulation"]]
+        .drop_duplicates()
+        .groupby(gage_id_col)
+        .size()
+        .reset_index(name="count")
+        .sort_values(by="count", ascending=False)
+    )
+    gages = df_count[df_count["count"] > 1][gage_id_col].tolist()
+
+    # loop through gages associated with multiple formulations to reassign them to
+    # the most frequent formulation for both df_form_gage and df_form
+    for gage in gages:
+        df1 = df_form_gage.loc[df_form_gage[gage_id_col] == gage].sort_values(
+            by="formulation"
+        )
+        df_count = (
+            df1.groupby("formulation")
+            .size()
+            .reset_index(name="count")
+            .sort_values(by="count", ascending=False)
+        )
+        most_freq_form = df_count.iloc[0]["formulation"]
+        logger.debug(
+            f"Gage {gage} is associated with multiple formulations, "
+            f"reassigning to the most frequent formulation {most_freq_form}"
+        )
+        df_form_gage.loc[df_form_gage[gage_id_col] == gage, "formulation"] = (
+            most_freq_form
+        )
+        df_form.loc[df_form[divide_id_col].isin(df1[divide_id_col]), "formulation"] = (
+            most_freq_form
+        )
+
+    # ensure no duplicate rows in df_form_gage
+    df_form_gage = df_form_gage[[gage_id_col, "formulation"]].drop_duplicates()
+
+    return df_form_gage, df_form
+
+
 def save_formulation_results(
-    df_selected: pd.DataFrame,
+    df_form: pd.DataFrame,
+    df_form_gage: pd.DataFrame,
     config: cs.Config,
     vpu: str,
 ) -> None:
     """Save the selected formulations to the output file.
 
     Args:
-        df_selected : pd.DataFrame
-            DataFrame with selected formulations and their scores.
+        df_form : pd.DataFrame
+            DataFrame with formualtion selected for each divide.
+        df_form_gage : pd.DataFrame
+            DataFrame with formualtion selected for each gage.
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
             Virtual Planning Unit (VPU) for which to save formulations.
 
     """
-    cc = config.output["formulation"]
-    cc.save_to_file(
-        df_selected, vpu=vpu, data_str="Formulation Selection", use_stem_suffix=False
+    co = config.output["formulation"]
+    co.save_to_file(
+        df_form, vpu=vpu, data_str="Formulation Selection", use_stem_suffix=False
     )
 
-    # create a slim version of the selected DataFrame by removing the divide_id column
-    df_selected_slim = df_selected.copy()
-    df_selected_slim = df_selected_slim.drop(columns=["divide_id"])
+    # merge with calibration parameter file to get parameters for each gage
+    gage_id_col = config.general.id_col["gage"]
+    df_pars = read_table(config.general.calib_param_file, dtype={gage_id_col: "str"})
+    df_pars = df_form_gage.merge(
+        df_pars, on=[gage_id_col, "formulation"], how="inner"
+    ).drop_duplicates()
 
-    # remove duplicates based on formulation and huc_id/gage_id
-    columns = ["formulation", "huc_id", "gage_id"]
-    df_selected_slim = df_selected_slim.drop_duplicates(
-        subset=[c for c in columns if c in df_selected_slim.columns]
-    )
-
-    cc.save_to_file(
-        df_selected_slim,
+    # save the parameters for each gage to the output file
+    co.save_to_file(
+        df_pars,
         vpu=vpu,
-        data_str="Formulation Selection (slim version)",
+        data_str="Formulation Selection (per gage with parameters)",
         use_stem_suffix=True,
     )
 
@@ -903,8 +979,13 @@ def select_formulation(
         columns=[c for c in output_columns if c in df_formulation.columns]
     )
 
+    # check that each gage has a unique formulation assigned
+    df_form_gage, df_formulation = check_gage_formulation_uniqueness(
+        df_formulation, config
+    )
+
     # save the selected formulations to the output file
-    save_formulation_results(df_formulation, config, vpu)
+    save_formulation_results(df_formulation, df_form_gage, config, vpu)
 
     # plot the selected formulations
     plot_formulation_results(df_formulation, config, vpu, gdf_vpu)
