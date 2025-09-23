@@ -173,9 +173,9 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             self.generate_pairing(df_attr_all, self.dist_spatial, frp.config)
 
         # create formulation parameter file
-        self.create_formulation_parameter_file(
-            frp.config.output.get("formulation", None)
-        )
+        # self.create_formulation_parameter_file(
+        #     frp.config.output.get("formulation", None)
+        # )
 
         logger.info(f"Parameter regionalization for VPU {vpu} completed.")
 
@@ -1284,12 +1284,16 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 df_param = read_table(param_file, dtype={self.gage_id_name: str})
                 df_param_all = pd.concat([df_param_all, df_param], ignore_index=True)
 
-        # get final donor basins for the current algorithm from the pairs file
-        pair_file = self.config.output.pairs.get_file_path(
+        # read gage-receiver pairing results for the current algorithm and VPU
+        pair_file = self.config.output.get("pairs", None).get_file_path(
             vpu=self.vpu, algorithm=pairer, use_stem_suffix=True
         )
-        if pair_file.suffix != ".csv":  # replace file suffix with .csv if needed
+
+        # replace file suffix with .csv (MSWM requirement)
+        if pair_file.suffix != ".csv":
             pair_file = pair_file.with_suffix(".csv")
+
+        # read the pairing results to get the list of donor gages
         if not pair_file.exists():
             msg = f"Pairing results file does not exist: {pair_file}. Please run the pairing first."
             logger.error(msg)
@@ -1313,7 +1317,8 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             out.save_to_file(
                 df_param_all,
                 vpu=self.vpu,
-                data_str=f"Formulation Parameter Data (VPU {self.vpu})",
+                algorithm=pairer,
+                data_str=f"Formulation Parameter Data (VPU {self.vpu}, algorithm = {pairer})",
                 use_stem_suffix=False,
             )
 
@@ -1417,14 +1422,16 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 # add donors to the pairing results
                 df_pairs_all = self.add_donors_to_pair_results(df_pairs_all)
 
-                # create formulation parameter file
-                self.create_formulation_parameter_file(form_config, pairer_name)
-
                 # save the pairing results to file
                 self.save_pairing_results(df_pairs_all, pairer_name)
 
                 # plot the pairing results
                 self.plot_pairing_outputs(pairer_name, df_pairs_all)
+
+                # create formulation parameter file
+                self.create_formulation_parameter_file(
+                    form_config.output.get("formulation", None), pairer_name
+                )
 
                 end_time = time.time()
                 logger.info(f"Execution time: {end_time - start_time:.4f} seconds")

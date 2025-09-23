@@ -47,7 +47,7 @@ where [VENV_ROOT] and [NGEN_REG_ROOT] refer to the directory to install python v
 in your local workspace, respectively
 
 
-### Usage
+### Run Regionalization
 
 1) set up configuration yaml files
 
@@ -76,6 +76,17 @@ Where [NGEN_REG_ROOT] refers to the directory where ngen-regionalization is inst
 python regionalization.py sample_files/configs
 ```
 
+### Run NGEN simulation with regionalized parameters
+```bash
+# activate venv with MSWM installed
+source ~/repos/nwm-msw-mgr/venv/bin/activate
 
+# edit settings as needed in ~/repos/nwm-region-mgr/run_ngen_vpu.sh
+cd ~/repos/nwm-region-mgr
+vi run_ngen_vpu.sh
+
+# run MSWM and ngen simulation
+./run_ngen_vpu.sh
+```
 
 
