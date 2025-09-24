@@ -46,13 +46,8 @@ from typing import Any, Tuple
 
 import geopandas as gpd
 import pandas as pd
-
-# import yaml
 from formreg.process_config import FormulationRegionalizationProcessor as FRP
-
-# from pydantic import BaseModel, ValidationError
-from shapely.geometry import Point
-from shapely.ops import unary_union
+from shapely.geometry import MultiPolygon, Point, Polygon
 from utils import BaseConfigProcessor, read_table, save_data
 
 from . import plot_outputs as po
@@ -68,7 +63,7 @@ from .funcs_dist import GowerPairer, ProximityPairer, URFPairer
 logger = logging.getLogger(__name__)
 
 
-class RegionalizationProcessor(BaseConfigProcessor):
+class ParameterRegionalizationProcessor(BaseConfigProcessor):
     """Regionalization Processor."""
 
     def set_vpu(self, vpu: str):
@@ -212,7 +207,8 @@ class RegionalizationProcessor(BaseConfigProcessor):
         gdf = gpd.read_file(
             self.config.general.ngen_hydrofabric_file[self.vpu], layer="divides"
         )
-        return gdf[gdf.is_valid]
+        gdf["geometry"] = gdf.geometry.make_valid()
+        return gdf
 
     @property
     @lru_cache
@@ -223,12 +219,23 @@ class RegionalizationProcessor(BaseConfigProcessor):
     @property
     def hydrofabric_gdf_3857(self):
         """Hydrofabric geodataframe with only valid geometries projected to 3857."""
-        return self.hydrofabric_gdf.to_crs(3857)
+        gdf = self.hydrofabric_gdf.to_crs(3857)
+        gdf["geometry"] = gdf.geometry.make_valid()
+        return gdf
 
     @property
     def combined_geom(self):
         """Dissolve all polygons into one before buffering."""
-        return unary_union(self.hydrofabric_gdf_3857.geometry)
+        geom = self.hydrofabric_gdf_3857.union_all()
+        polygons = []
+        if isinstance(geom, MultiPolygon):
+            for polygon in geom.geoms:
+                polygons.append(Polygon(polygon.exterior))
+            return MultiPolygon(polygons)
+        elif isinstance(geom, Polygon):
+            return geom
+        else:
+            raise TypeError(f"Expected Polygon or MultiPolygon, got {type(geom)}")
 
     @property
     def hydrofabric_buffered_polygon(self):
@@ -366,6 +373,7 @@ class RegionalizationProcessor(BaseConfigProcessor):
         return self.config.general.id_col.get("gage", "gage_id")
 
     @property
+    @lru_cache
     def donor_vpus(self):
         """Determine the VPUs of the donor basins."""
         df_cwt = read_table(self.config.general.gage_divide_cwt_file)
@@ -390,7 +398,7 @@ class RegionalizationProcessor(BaseConfigProcessor):
 
     def get_initial_donor_df(self, vpu: str) -> pd.DataFrame:
         """Get initial donor gage/catchment df (before screening with stats) for a specific VPU."""
-        # determine inital donor gages
+        # determine initial donor gages
         df_cwt = read_table(self.config.general.gage_divide_cwt_file)
         if self.config.general.donor_gage_file:
             logger.info(
@@ -436,7 +444,7 @@ class RegionalizationProcessor(BaseConfigProcessor):
             logger.warning(
                 f"No initial donors found for VPU {vpu}. Please check gage_divide_cwt_file and donor_gage_file."
             )
-
+        df_cwt = self.handle_nested_gages(df_cwt.reset_index(drop=True))
         return (
             df_cwt.loc[
                 df_cwt[self.general_id_name].isin(donor_cats),
@@ -445,6 +453,41 @@ class RegionalizationProcessor(BaseConfigProcessor):
             .drop_duplicates()
             .reset_index(drop=True)
         )
+
+    def handle_nested_gages(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Handle nested gages by selecting the one with the smallest drainage area."""
+        idx = []
+        duplicated = df[df["divide_id"].duplicated()]  # Find duplicated divide_ids
+        for _, row in duplicated.iterrows():
+            divides_with_multiple_gages = df.loc[
+                df["divide_id"] == row["divide_id"]
+            ].copy()  # Get all divides with the same divide_id
+            divides_with_multiple_gages.loc[:, "drainage_area"] = None
+            for i, gage in divides_with_multiple_gages.iterrows():
+                divides_with_multiple_gages.loc[i, "drainage_area"] = df.loc[
+                    df["gage_id"] == gage["gage_id"],
+                    self.config.general.id_col.get("drainage_area", "areasqkm"),
+                ].sum()  # Sum the drainage area for each gage
+            if self.config.general.nested_gages == "inner":
+                logger.debug(
+                    f"Selecting inner gage for divide {row['divide_id']} with multiple gages: {divides_with_multiple_gages['gage_id'].tolist()}"
+                )
+                idx.append(
+                    divides_with_multiple_gages["drainage_area"].idxmin()
+                )  # Select the index of the gage with the smallest drainage area
+            elif self.config.general.nested_gages == "outer":
+                logger.debug(
+                    f"Selecting outer gage for divide {row['divide_id']} with multiple gages: {divides_with_multiple_gages['gage_id'].tolist()}"
+                )
+                idx.append(
+                    divides_with_multiple_gages["drainage_area"].idxmax()
+                )  # Select the index of the gage with the largest drainage area
+            else:
+                raise ValueError(
+                    f"Invalid value for 'nested_gages': {self.config.general.nested_gages}. "
+                    "Expected 'inner' or 'outer'."
+                )
+        return pd.concat([df.loc[idx], df[~df["divide_id"].duplicated()]])
 
     @lru_cache
     def donor_receiver_gdfs(self):

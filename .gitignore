@@ -11,3 +11,6 @@ pkgs/parreg/src/parreg.egg-info
 __pycache__
 pkgs/parreg/tests/__pycache__
 docs/build/
+build
+venv1
+*.egg-info

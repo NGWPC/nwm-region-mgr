@@ -113,6 +113,7 @@ def _find_gages_nearest_neighbor(
             gages, distances = [], []
 
         # if there are enough gages, check if they share the same formulations
+        found_gages = False
         if len(gages) > min_gages:
             found_gages, gages, formulations = _get_gages_with_shared_formulations(
                 df[df[gage_id_col].isin(gages)], min_gages=min_gages
@@ -275,7 +276,9 @@ def _find_calibration_gages(
     return huc_level, gages, dists, formulations
 
 
-def _get_formulation_costs(config: cs.FormulationCostConfig) -> Optional[dict[str, float]]:
+def _get_formulation_costs(
+    config: cs.FormulationCostConfig,
+) -> Optional[dict[str, float]]:
     """Get formulation costs from the configuration.
 
     Args:
@@ -472,7 +475,7 @@ def select_formulation_donors_only(
 
     # merge the crosswalk with the best formulations DataFrame
     df_selected = df_best_per_gage.merge(
-        cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
+        cwt_divide_gage[[gage_id_col]].drop_duplicates(),
         on=gage_id_col,
         how="left",
     )
@@ -586,7 +589,10 @@ def select_formulation_all(
         logger.debug(f"Processing HUC ID: {huc_id}")
 
         # Find actual column name in gdf that matches huc12_id_col (case-insensitive)
-        col_match = next((col for col in huc12_gdf.columns if col.lower() == huc12_id_col.lower()), None)
+        col_match = next(
+            (col for col in huc12_gdf.columns if col.lower() == huc12_id_col.lower()),
+            None,
+        )
 
         # Use the matched column to filter huc12_gdf
         huc12_gdf_huc = huc12_gdf[huc12_gdf[col_match].astype(str).str[:huc_digit] == huc_id].copy()
@@ -610,7 +616,10 @@ def select_formulation_all(
 
         # identify best formulation for each gage based on summary scores for formulation costs
         df_huc = _identify_best_formulation_per_gage(
-            df_huc, gage_id_col=gage_id_col, tolerance=score_tolerance, cost_dict=cost_dict
+            df_huc,
+            gage_id_col=gage_id_col,
+            tolerance=score_tolerance,
+            cost_dict=cost_dict,
         )
 
         # select the best formulation for each huc_id based on the total score or count
@@ -684,7 +693,12 @@ def save_formulation_results(
     columns = ["formulation", "huc_id", "gage_id"]
     df_selected_slim = df_selected_slim.drop_duplicates(subset=[c for c in columns if c in df_selected_slim.columns])
 
-    cc.save_to_file(df_selected_slim, vpu=vpu, data_str="Formulation Selection (slim version)", use_stem_suffix=True)
+    cc.save_to_file(
+        df_selected_slim,
+        vpu=vpu,
+        data_str="Formulation Selection (slim version)",
+        use_stem_suffix=True,
+    )
 
 
 def plot_formulation_results(
@@ -780,7 +794,16 @@ def select_formulation(
     # rearrange the columns in the formulation DataFrame
     divide_id_col = config.general.id_col["divide"]
     score_method = config.spatial_unit.best_formulation.method.lower()
-    columns = ["vpu", divide_id_col, "formulation", "huc_id", score_method, "summary_score", "cost", "num_gages"]
+    columns = [
+        "vpu",
+        divide_id_col,
+        "formulation",
+        "huc_id",
+        score_method,
+        "summary_score",
+        "cost",
+        "num_gages",
+    ]
     method1 = config.spatial_unit.basin_fill_method.lower()
     output_columns = columns + ["upscale_huc"] if method1 == "upscaling" else columns + ["distances"]
     df_formulation = df_formulation.reindex(columns=[c for c in output_columns if c in df_formulation.columns])

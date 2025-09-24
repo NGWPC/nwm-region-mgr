@@ -17,6 +17,10 @@
 - **Scalable Workflows** – Efficiently supports studies from individual watersheds to CONUS-wide applications.
 - **Customizable Configurations** – Full control of workflows via human-readable config files.
 
+```bash
+cd [NGEN_REG_ROOT]
+git clone -b development --recurse-submodules https://github.com/NGWPC/nwm-region-mgr.git
+```
 
 ## Installation
 

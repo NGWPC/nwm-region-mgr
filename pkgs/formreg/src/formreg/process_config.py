@@ -38,10 +38,14 @@ class FormulationRegionalizationProcessor(BaseConfigProcessor):
             raise ValueError(msg)
 
         if Path(formulation_file).exists():
-            logger.info(f"Formulation file already exists for VPU {vpu}, skipping formulation regionalization.")
+            logger.info(
+                f"Formulation file already exists for VPU {vpu}, skipping formulation regionalization."
+            )
             return
 
-        logger.info(f"--------- Processing formulation regionalization for VPU: {vpu} ---------")
+        logger.info(
+            f"--------- Processing formulation regionalization for VPU: {vpu} ---------"
+        )
 
         # compute the summary score for the VPU
         with self.timing_block("compute_summary_score"):
