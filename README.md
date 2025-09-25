@@ -116,6 +116,8 @@ It is recommentded you install nwm.verf in its own venv. Note [nwm.eval](https:/
 ### 2) Set up configurations for evaluation
 Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/sample_files/configs/config_eval.yaml)
 
+Check out what metrics are currently supported [here](https://confluence.nextgenwaterprediction.com/display/NGWPC/Forecast+Verification+%28ngen-verf%29%3A+Configuration)
+
 Sample input data can be downloaded from **s3://ngwpc-dev/Yuqiong.Liu/repos/nwm-verf** and are also available in [Github](https://github.com/NGWPC/nwm-verf/tree/development/data)
 
 ### 3) Activate venv for nwm.verf
