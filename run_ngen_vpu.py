@@ -23,20 +23,21 @@ def setup_logging(out_dir: str | Path):
     """Set up logging configuration."""
     # log file path
     out_dir.mkdir(parents=True, exist_ok=True)
-    log_file = Path(out_dir) / "region.log"
+    log_file = Path(out_dir).parent / "region.log"
 
-    # Create a dedicated logger
-    logger = logging.getLogger(__name__)
+    # Set up root logger so that each module can log to the same file
+    logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
-    # Avoid propagating to root logger (prevents mswm logs from mixing in)
-    logger.propagate = False
+    # Clear existing handlers (avoid duplicates)
+    logger.handlers.clear()
 
-    # File handler
-    file_handler = logging.FileHandler(log_file)
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
+
+    # File handler
+    file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
@@ -148,6 +149,10 @@ def run_ngen_simulation(args: argparse.Namespace):
     logger.info("Running NGEN simulation with command:")
     logger.info(cmd_str)
 
+    # get logger for ngen simulation
+    ngen_logger = logging.getLogger("ngen.simulation")
+    ngen_logger.setLevel(logging.INFO)
+
     # Run the command in a subprocess, streaming stdout/stderr
     process = subprocess.Popen(
         ["bash", "-c", cmd_str],
@@ -158,7 +163,7 @@ def run_ngen_simulation(args: argparse.Namespace):
 
     # Stream output live into logger
     for line in process.stdout:
-        logger.info(line.strip())
+        ngen_logger.info(line.strip())
 
     process.stdout.close()
     return_code = process.wait()
