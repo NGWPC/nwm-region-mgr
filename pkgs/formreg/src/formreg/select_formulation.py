@@ -113,7 +113,8 @@ def _find_gages_nearest_neighbor(
     # by 100km each time until the minimum number of gages is met
     buffer = 100  # initial buffer size in kilometers
     gages = []
-    while len(gages) < min_gages:
+    max_buffer = 2000
+    while len(gages) < min_gages and buffer <= max_buffer:
         # find gages within the buffer around huc_id
         gages, distances, _ = find_gages_within_buffer(
             gage_file, gage_id_col, buffer, gdf=gdf, id=huc_id
@@ -128,7 +129,7 @@ def _find_gages_nearest_neighbor(
 
         # if there are enough gages, check if they share the same formulations
         found_gages = False
-        if len(gages) > min_gages:
+        if len(gages) >= min_gages:
             found_gages, gages, formulations = _get_gages_with_shared_formulations(
                 df[df[gage_id_col].isin(gages)], min_gages=min_gages
             )
@@ -136,7 +137,7 @@ def _find_gages_nearest_neighbor(
         # if no gages are found, increase the buffer size and try again
         if not found_gages:
             logger.debug(
-                f"{huc_id}: Not enough gages found within {buffer} km buffer. Increasing buffer size."
+                f"{huc_id}: Not enough gages found within {buffer} km buffer. Increasing buffer size by 100km."
             )
             buffer += 100  # increase buffer size by 100 km
         else:
@@ -144,13 +145,14 @@ def _find_gages_nearest_neighbor(
                 f"{huc_id}: Found {len(gages)} gages ({gages}) within {buffer} km buffer."
             )
             break
+
     else:
-        msg = (
-            f"Not enough calibrated gages found for {huc_id} after increasing buffer size to {buffer} km. "
-            f"Minimum required is {min_gages}."
-        )
-        logger.error(msg)
-        raise ValueError(msg)
+        # if while loop exits normally (len(gages) >= min_gages or buffer > max_buffer)
+        if len(gages) < min_gages:
+            logger.warning(
+                f"Not enough calibrated gages found for {huc_id} after increasing buffer "
+                f"to {buffer - 100} km. Minimum required is {min_gages}."
+            )
 
     return gages, distances, formulations
 
