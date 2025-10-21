@@ -48,7 +48,9 @@ def setup_logging(
     }
 
     level = user_log_levels.get(level.strip().lower(), logging.INFO)
-    file_level = user_log_levels.get(file_level.strip().lower(), level) if file_level else level
+    file_level = (
+        user_log_levels.get(file_level.strip().lower(), level) if file_level else level
+    )
 
     # Set root logger to WARNING to suppress noisy external logs
     root_logger = logging.getLogger()
@@ -59,7 +61,9 @@ def setup_logging(
         root_logger.removeHandler(handler)
 
     # Formatter shared by all handlers
-    formatter = CustomLoggingFormatter("%(asctime)s - %(name)s - [%(levelname)s] - %(message)s")
+    formatter = CustomLoggingFormatter(
+        "%(asctime)s - %(name)s - [%(levelname)s] - %(message)s"
+    )
 
     # Console handler
     console_handler = logging.StreamHandler()

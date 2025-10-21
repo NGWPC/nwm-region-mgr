@@ -64,14 +64,18 @@ def check_columns_dataframe(file: Path | str, columns: Set[str]):
         raise ValueError(msg)
 
     # Check for missing columns (case insensitive)
-    missing_cols = {col.lower() for col in columns} - {col.lower() for col in columns_present}
+    missing_cols = {col.lower() for col in columns} - {
+        col.lower() for col in columns_present
+    }
     if missing_cols:
         msg = f"Missing columns (case insensitive) in {file}: {missing_cols}. Available columns: {columns_present}"
         logger.error(msg)
         raise ValueError(msg)
 
 
-def check_columns_hydrofabric(hydro_file: str | Path, required_fields: list[str], layer_name: str = None) -> str:
+def check_columns_hydrofabric(
+    hydro_file: str | Path, required_fields: list[str], layer_name: str = None
+) -> str:
     """Check if the required fields are present in the hydrofabric file.
 
     Args:
@@ -103,7 +107,9 @@ def check_columns_hydrofabric(hydro_file: str | Path, required_fields: list[str]
         if len(layers) == 1:
             layer_name = layers[0]
         else:
-            raise ValueError(f"Multiple layers found in {hydro_file}. Please specify a layer: {layers}")
+            raise ValueError(
+                f"Multiple layers found in {hydro_file}. Please specify a layer: {layers}"
+            )
 
     # Open with or without layer
     open_kwargs = {"layer": layer_name} if use_layer else {}
@@ -135,4 +141,6 @@ def check_options(options: str | list[str], valid_options: list[str], var: str):
 
     options_unsupported = set(options) - set(valid_options)
     if options_unsupported:
-        raise ValueError(f"Unsupported options for {var}: {options_unsupported}. Valid options are: {valid_options}")
+        raise ValueError(
+            f"Unsupported options for {var}: {options_unsupported}. Valid options are: {valid_options}"
+        )

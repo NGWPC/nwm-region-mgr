@@ -73,13 +73,36 @@ def _plot_columns_by_dtype(
         if pd.api.types.is_numeric_dtype(dtype):
             if num_bins is not None:
                 gdf_plot["__binned__"] = pd.cut(gdf_plot[column], bins=num_bins)
-                gdf_plot.plot(ax=ax, column="__binned__", cmap=cmap_numeric, legend=True, edgecolor="none", linewidth=0)
+                gdf_plot.plot(
+                    ax=ax,
+                    column="__binned__",
+                    cmap=cmap_numeric,
+                    legend=True,
+                    edgecolor="none",
+                    linewidth=0,
+                )
             else:
-                gdf_plot.plot(ax=ax, column=column, cmap=cmap_numeric, legend=True, edgecolor="none", linewidth=0)
+                gdf_plot.plot(
+                    ax=ax,
+                    column=column,
+                    cmap=cmap_numeric,
+                    legend=True,
+                    edgecolor="none",
+                    linewidth=0,
+                )
 
-        elif pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(dtype):
+        elif pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(
+            dtype
+        ):
             gdf_plot[column] = gdf_plot[column].astype("category")
-            gdf_plot.plot(ax=ax, column=column, cmap=cmap_categorical, legend=True, edgecolor="none", linewidth=0)
+            gdf_plot.plot(
+                ax=ax,
+                column=column,
+                cmap=cmap_categorical,
+                legend=True,
+                edgecolor="none",
+                linewidth=0,
+            )
         else:
             ax.set_title(f"Unsupported dtype: {column}")
             ax.axis("off")
@@ -125,10 +148,14 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
     cols_exist = [c for c in d1["columns"] if c.lower() in gdf.columns.str.lower()]
     cols_missing = set(d1["columns"]) - set(gdf.columns)
     if not cols_exist:
-        logger.warning(f"Columns {cols_missing} not found in gdf. Cannot create spatial map plot.")
+        logger.warning(
+            f"Columns {cols_missing} not found in gdf. Cannot create spatial map plot."
+        )
         return
     if cols_missing:
-        logger.warning(f"Excluding missing columns {cols_missing} from spatial map plot.")
+        logger.warning(
+            f"Excluding missing columns {cols_missing} from spatial map plot."
+        )
 
     _, ax = plt.subplots(figsize=(8, 6))
 
@@ -148,13 +175,17 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
     if algorithm := d1.get("algorithm", None):
         d1["title"] += f" (Algorithm: {algorithm})"
     fig.suptitle(d1["title"], fontsize=16, fontweight="bold")
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Adjust layout to make room for the title
+    plt.tight_layout(
+        rect=[0, 0.03, 1, 0.95]
+    )  # Adjust layout to make room for the title
 
     # save the figure
     if d1.get("outfile") is not None:
         plt.savefig(d1["outfile"], bbox_inches="tight")
         plt.close()
-        logger.info(f"Spatial map of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}")
+        logger.info(
+            f"Spatial map of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}"
+        )
     else:
         logger.warning("No output file specified for spatial map plot. Skipping save.")
 
@@ -182,7 +213,9 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
     # filter to numeric columns only
     numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
     if not numeric_columns:
-        raise ValueError("No numeric columns found in the dataframe to plot histograms.")
+        raise ValueError(
+            "No numeric columns found in the dataframe to plot histograms."
+        )
     if not set(columns).issubset(set(numeric_columns)):
         logger.warning(
             f"Some specified columns {set(columns) - set(numeric_columns)} are not numeric. "
@@ -196,7 +229,9 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
         raise ValueError("None of the specified columns exist in the dataframe.")
     missing_columns = set(columns) - set(valid_columns)
     if missing_columns:
-        logger.warning(f"Columns {missing_columns} not found in data. Only plotting valid columns: {valid_columns}")
+        logger.warning(
+            f"Columns {missing_columns} not found in data. Only plotting valid columns: {valid_columns}"
+        )
 
     n = len(valid_columns)
     ncols = d1.get("ncols", 3)
@@ -234,7 +269,9 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
     if d1.get("outfile") is not None:
         plt.savefig(d1["outfile"], bbox_inches="tight")
         plt.close()
-        logger.info(f"Histogram of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}")
+        logger.info(
+            f"Histogram of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}"
+        )
     else:
         logger.warning("No output file specified for histogram plot. Skipping save.")
 

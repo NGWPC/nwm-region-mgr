@@ -21,7 +21,11 @@ def expand_with_lists(template_str: str, context: dict) -> dict | str:
     Otherwise, returns a plain substituted string.
     """
     # Find all list-type keys in context used in the string
-    list_keys = [k for k in context if isinstance(context[k], list) and f"{{{k}}}" in template_str]
+    list_keys = [
+        k
+        for k in context
+        if isinstance(context[k], list) and f"{{{k}}}" in template_str
+    ]
 
     if not list_keys:
         # No list placeholders → do a simple substitution
@@ -73,7 +77,11 @@ def recursive_substitute_multi_lists(obj: Any, context: dict) -> Any:
     elif isinstance(obj, str):
         try:
             # Identify list-type variables that appear in the string
-            list_keys = [k for k, v in context.items() if isinstance(v, list) and f"{{{k}}}" in obj]
+            list_keys = [
+                k
+                for k, v in context.items()
+                if isinstance(v, list) and f"{{{k}}}" in obj
+            ]
 
             if not list_keys:
                 return obj.format(**context)

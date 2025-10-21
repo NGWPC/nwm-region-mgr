@@ -55,7 +55,9 @@ if __name__ == "__main__":
 
     # process by VPU
     for vpu in config.general.vpu_list:
-        logger.info(f"========= Processing formulation regionalization for VPU: {vpu} =========")
+        logger.info(
+            f"========= Processing formulation regionalization for VPU: {vpu} ========="
+        )
 
         # compute the summary score for the VPU
         with timing_block("compute_summary_score"):

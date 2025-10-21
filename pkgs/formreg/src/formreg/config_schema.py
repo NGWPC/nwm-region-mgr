@@ -37,7 +37,9 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     def check_approach_calib_basins(self) -> "FormulationGeneralSettings":
         """Ensure that the approach for assigning formulation to calibrated basins is valid."""
         valid_approaches = ["regionalization", "summary_score"]
-        check_options(self.approach_calib_basins, valid_approaches, "approach_calib_basins")
+        check_options(
+            self.approach_calib_basins, valid_approaches, "approach_calib_basins"
+        )
 
         return self
 
@@ -93,7 +95,9 @@ class FormulationSpatialUnitConfig(BaseModel):
     def check_basin_fill_method(self) -> "FormulationSpatialUnitConfig":
         """Ensure that the basin fill method is valid."""
         valid_methods = ["upscaling", "nearest-neighbor"]
-        check_options(self.basin_fill_method.lower(), valid_methods, "basin_fill_method")
+        check_options(
+            self.basin_fill_method.lower(), valid_methods, "basin_fill_method"
+        )
 
         return self
 
@@ -151,7 +155,9 @@ class FormulationSummaryScoreConfig(BaseModel):
             A new FormulationSummaryScoreConfig instance with zero-weighted metrics removed.
 
         """
-        active_metrics = {name: metric for name, metric in self.metrics.items() if metric.weight > 0.0}
+        active_metrics = {
+            name: metric for name, metric in self.metrics.items() if metric.weight > 0.0
+        }
         missing_metrics = set(self.metrics) - set(active_metrics)
         if missing_metrics:
             logger.debug(
@@ -167,12 +173,18 @@ class FormulationSummaryScoreConfig(BaseModel):
     def validate_all_metrics(self) -> "FormulationSummaryScoreConfig":
         """Ensure that all metrics have valid bounds and weights."""
         for name, metric in self.metrics.items():
-            if metric.upper is not None and metric.lower is not None and metric.upper <= metric.lower:
+            if (
+                metric.upper is not None
+                and metric.lower is not None
+                and metric.upper <= metric.lower
+            ):
                 msg = f"Invalid bounds for metric '{name}': upper={metric.upper}, lower={metric.lower}"
                 logger.error(msg)
                 raise ValueError(msg)
 
-            if metric.weight is not None and (metric.weight < 0.0 or metric.weight > 1.0):
+            if metric.weight is not None and (
+                metric.weight < 0.0 or metric.weight > 1.0
+            ):
                 msg = f"Invalid weight for metric '{name}': {metric.weight}. Must be between 0.0 and 1.0."
                 logger.error(msg)
                 raise ValueError(msg)
@@ -184,7 +196,9 @@ class FormulationSummaryScoreConfig(BaseModel):
         """Ensure that the sum of all metric weights equals 1.0."""
         total_weight = sum(metric.weight for metric in self.metrics.values())
         if abs(total_weight - 1.0) > 1e-6:
-            msg = f"The sum of all metric weights must equal 1.0, but got {total_weight}"
+            msg = (
+                f"The sum of all metric weights must equal 1.0, but got {total_weight}"
+            )
             logger.error(msg)
             raise ValueError(msg)
         return self

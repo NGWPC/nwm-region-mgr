@@ -23,7 +23,9 @@ from . import config_schema as cs
 logger = logging.getLogger(__name__)
 
 
-def plot_missing_attr_counts(config: cs.Config, vpu: str, df_attrs_all: pd.DataFrame) -> None:
+def plot_missing_attr_counts(
+    config: cs.Config, vpu: str, df_attrs_all: pd.DataFrame
+) -> None:
     """Plot the number of catchments with missing values for each selected attribute.
 
     Args:
@@ -37,14 +39,20 @@ def plot_missing_attr_counts(config: cs.Config, vpu: str, df_attrs_all: pd.DataF
     """
     cols = []
     for dataset in config.general.attr_dataset_list:
-        cols = cols + [dataset + "_" + x for x in getattr(config.attr_datasets, dataset).attr_list]
+        cols = cols + [
+            dataset + "_" + x for x in getattr(config.attr_datasets, dataset).attr_list
+        ]
     missing_cols = set(cols) - set(df_attrs_all.columns)
     cols1 = [col for col in cols if col not in missing_cols]
     if missing_cols:
-        logger.warning(f"Missing columns in final attribute dataframe df_attrs_all: {missing_cols}.")
+        logger.warning(
+            f"Missing columns in final attribute dataframe df_attrs_all: {missing_cols}."
+        )
         logger.info("Please check the configuration.")
     plt.figure(figsize=(8, 4))
-    df_attrs_all[cols1].isnull().sum().plot(kind="bar", color="skyblue", edgecolor="black")
+    df_attrs_all[cols1].isnull().sum().plot(
+        kind="bar", color="skyblue", edgecolor="black"
+    )
     plt.title("Number of catchments with missing values for each selected attribute")
 
     outfile = Path(
@@ -90,7 +98,9 @@ def plot_donor_spatial_map(
     # filter donors based on the donor_basins list (qualified donors)
     donors = donors_all[donors_all[gage_id_name].isin(donor_basins)]
     donor_gdf = gpd.GeoDataFrame(
-        donors, geometry=[Point(xy) for xy in zip(donors["longitude"], donors["latitude"])], crs="EPSG:4326"
+        donors,
+        geometry=[Point(xy) for xy in zip(donors["longitude"], donors["latitude"])],
+        crs="EPSG:4326",
     )
 
     # Project to meters for accurate distance calculations

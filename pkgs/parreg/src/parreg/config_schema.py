@@ -27,8 +27,8 @@ class GeneralConfig(BaseGeneralConfig):
     manual_pairings_file: Optional[Path | str] = None
     """Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings."""
 
-    nested_gages: Optional[str] = "inner"
-    """How to handle nested gages in the calibration basin. Options: 'inner' (use inner gage), 'outer' (use outer gage)."""
+    # nested_gages: Optional[str] = "inner"
+    # """How to handle nested gages in the calibration basin. Options: 'inner' (use inner gage), 'outer' (use outer gage)."""
 
 
 class MetricEvalPeriod(BaseModel):
@@ -108,11 +108,13 @@ class DonorConfig(BaseModel):
             )
             return {gage_id_name: donors, divide_id_name: donor_cats}
         else:
-            if len(df) < len(donors):
+            gages_stat = df[gage_id_name].unique().tolist()
+            gages_missing = [g for g in donors if g not in gages_stat]
+            if gages_missing:
                 logger.warning(
-                    f"Some gages in the initial list are not found in {stats_file}. "
-                    f"Only {len(df)} gages are found. Using these as donors."
+                    f"Some gages in the initial list are not found in the stats file: {stats_file} "
                 )
+                logger.debug(f"Missing gages: {gages_missing}")
 
         # filter based on the evaluation period
         if self.metric_eval_period:
