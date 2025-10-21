@@ -224,7 +224,17 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     def hydrofabric_gdf_3857(self):
         """Hydrofabric geodataframe with only valid geometries projected to 3857."""
         gdf = self.hydrofabric_gdf.to_crs(3857)
-        gdf["geometry"] = gdf.geometry.make_valid()
+
+        # Fix invalid geometries using buffer(0)
+        if not gdf.is_valid.all():
+            n_invalid = (~gdf.is_valid).sum()
+            logger.info(f"Fixing {n_invalid} invalid geometries in hydrofabric_gdf_3857.")
+            gdf["geometry"] = gdf.buffer(0)
+
+        # Drop any remaining invalid geometries just in case
+        gdf = gdf[gdf.is_valid].copy()
+        #gdf["geometry"] = gdf.geometry.make_valid()
+        
         return gdf
 
     @property
