@@ -10,10 +10,9 @@ Functions:
 import logging
 from pathlib import Path
 
-from utils import BaseConfigProcessor
-
 from nwm_region_mgr.formreg import select_formulation as sf
 from nwm_region_mgr.formreg import summary_score as ss
+from nwm_region_mgr.utils import BaseConfigProcessor
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,8 @@ from typing import Dict, List, Optional, get_args
 import pandas as pd
 import pyarrow.parquet as pq
 from pydantic import BaseModel, Field, model_validator
-from utils import BaseConfig, BaseGeneralConfig, read_table
+
+from nwm_region_mgr.utils import BaseConfig, BaseGeneralConfig, read_table
 
 logger = logging.getLogger(__name__)
 

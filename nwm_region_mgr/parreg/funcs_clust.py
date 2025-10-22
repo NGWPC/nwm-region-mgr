@@ -22,12 +22,11 @@ import numpy as np
 import pandas as pd
 from hdbscan import HDBSCAN
 from joblib import Parallel, delayed
-from pydantic import BaseModel
 from sklearn.cluster import Birch, KMeans
 from sklearn_extra.cluster import KMedoids
 
-from . import utils_algo
-from .pairer import Pairer
+from nwm_region_mgr.parreg import utils_algo
+from nwm_region_mgr.parreg.pairer import Pairer
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 

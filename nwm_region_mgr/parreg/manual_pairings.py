@@ -5,7 +5,8 @@ from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
-from utils import read_table, save_data
+
+from nwm_region_mgr.utils import read_table, save_data
 
 logger = logging.getLogger(__name__)
 

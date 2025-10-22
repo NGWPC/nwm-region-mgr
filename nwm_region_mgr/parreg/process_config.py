@@ -45,19 +45,21 @@ from typing import Any, Tuple
 
 import geopandas as gpd
 import pandas as pd
-from formreg.process_config import FormulationRegionalizationProcessor as FRP
 from shapely.geometry import MultiPolygon, Point, Polygon
-from utils import BaseConfigProcessor, read_table, save_data
 
-from . import plot_outputs as po
-from . import utils_algo
-from .funcs_clust import (
+from nwm_region_mgr.formreg.process_config import (
+    FormulationRegionalizationProcessor as FRP,
+)
+from nwm_region_mgr.parreg import plot_outputs as po
+from nwm_region_mgr.parreg import utils_algo
+from nwm_region_mgr.parreg.funcs_clust import (
     BIRCHPairer,
     HDBSCANPairer,
     KmeansPairer,
     KmedoidsPairer,
 )
-from .funcs_dist import GowerPairer, ProximityPairer, URFPairer
+from nwm_region_mgr.parreg.funcs_dist import GowerPairer, ProximityPairer, URFPairer
+from nwm_region_mgr.utils import BaseConfigProcessor, read_table, save_data
 
 logger = logging.getLogger(__name__)
 

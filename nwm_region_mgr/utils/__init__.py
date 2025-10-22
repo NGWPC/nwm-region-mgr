@@ -1,23 +1,30 @@
 """utils package with various utility/helper functions."""
 
-from .config_utils import (
+from nwm_region_mgr.utils.config_utils import (
     BaseConfig,
     BaseConfigProcessor,
     BaseGeneralConfig,
     BaseOutputConfig,
     LoggingConfig,
 )
-from .dict_utils import convert_enum_to_value, flatten_dict, remove_nulls
-from .hydrofabric_utils import area_weighted_average, find_gages_within_buffer
-from .io_utils import read_table, save_data
-from .logging_utils import setup_logging
-from .plot_utils import plot_histogram, plot_spatial_map
-from .string_utils import (
+from nwm_region_mgr.utils.dict_utils import (
+    convert_enum_to_value,
+    flatten_dict,
+    remove_nulls,
+)
+from nwm_region_mgr.utils.hydrofabric_utils import (
+    area_weighted_average,
+    find_gages_within_buffer,
+)
+from nwm_region_mgr.utils.io_utils import read_table, save_data
+from nwm_region_mgr.utils.logging_utils import setup_logging
+from nwm_region_mgr.utils.plot_utils import plot_histogram, plot_spatial_map
+from nwm_region_mgr.utils.string_utils import (
     expand_with_lists,
     recursive_substitute,
     recursive_substitute_multi_lists,
 )
-from .validation_utils import (
+from nwm_region_mgr.utils.validation_utils import (
     check_columns_dataframe,
     check_columns_hydrofabric,
     check_options,

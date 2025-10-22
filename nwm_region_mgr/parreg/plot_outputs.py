@@ -16,9 +16,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
 from shapely.geometry import Point
-from utils import read_table
 
-from . import config_schema as cs
+from nwm_region_mgr.parreg import config_schema as cs
+from nwm_region_mgr.utils import read_table
 
 logger = logging.getLogger(__name__)
 

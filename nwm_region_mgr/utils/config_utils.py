@@ -28,12 +28,12 @@ import pandas as pd
 import yaml
 from pydantic import BaseModel, Field, ValidationError, model_validator
 
-from .dict_utils import flatten_dict
-from .io_utils import read_table, save_data
-from .logging_utils import setup_logging
-from .plot_utils import plot_histogram, plot_spatial_map
-from .string_utils import recursive_substitute
-from .validation_utils import (
+from nwm_region_mgr.utils.dict_utils import flatten_dict
+from nwm_region_mgr.utils.io_utils import read_table, save_data
+from nwm_region_mgr.utils.logging_utils import setup_logging
+from nwm_region_mgr.utils.plot_utils import plot_histogram, plot_spatial_map
+from nwm_region_mgr.utils.string_utils import recursive_substitute
+from nwm_region_mgr.utils.validation_utils import (
     check_columns_dataframe,
     check_columns_hydrofabric,
     check_options,
@@ -152,7 +152,7 @@ class BaseOutputConfig(BaseModel):
     plots: Optional[Dict[str, Any]] = None
     """Configuration for output plots, if applicable."""
     plot_path: Optional[str] = None
-    """Path to save output plots, if applicable. If not specified, plots will be saved in the same directory 
+    """Path to save output plots, if applicable. If not specified, plots will be saved in the same directory
     as the output files."""
 
     @model_validator(mode="after")
@@ -556,7 +556,7 @@ class BaseConfigProcessor:
         }
 
         # add snow cover file if it exists in the config
-        from parreg import config_schema as pcs
+        from nwm_region_mgr.parreg import config_schema as pcs
 
         if isinstance(config, pcs.Config) and hasattr(config, "snow_cover"):
             if config.snow_cover.consider_snowness:
@@ -723,7 +723,7 @@ class BaseConfigProcessor:
             file_level=log_level,
         )
 
-        from formreg import config_schema as fcs  # avoid circular import
+        from nwm_region_mgr.formreg import config_schema as fcs  # avoid circular import
 
         config_str = (
             "Formulation Regionalization"

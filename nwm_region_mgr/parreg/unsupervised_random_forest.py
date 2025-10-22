@@ -17,7 +17,7 @@ from joblib import Parallel, delayed
 from numba import njit
 from sklearn.ensemble import RandomForestClassifier
 
-from . import synthetic_data
+from nwm_region_mgr.parreg import synthetic_data
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 

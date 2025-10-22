@@ -7,8 +7,8 @@ import geopandas as gpd
 from shapely.geometry import GeometryCollection, Point
 from shapely.ops import unary_union
 
-from .io_utils import read_table
-from .validation_utils import check_columns_dataframe
+from nwm_region_mgr.utils.io_utils import read_table
+from nwm_region_mgr.utils.validation_utils import check_columns_dataframe
 
 logger = logging.getLogger(__name__)
 

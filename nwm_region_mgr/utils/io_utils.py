@@ -16,7 +16,7 @@ import pandas as pd
 import yaml
 from pydantic import BaseModel
 
-from .dict_utils import convert_enum_to_value, remove_nulls
+from nwm_region_mgr.utils.dict_utils import convert_enum_to_value, remove_nulls
 
 # Module-level cache
 _table_cache: dict[Path, pd.DataFrame] = {}

@@ -1,6 +1,5 @@
 """Utils for algorithms."""
 
-import concurrent.futures
 import logging
 import warnings
 

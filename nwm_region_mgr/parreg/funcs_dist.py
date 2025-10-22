@@ -13,9 +13,9 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-from . import utils_algo
-from .pairer import Pairer
-from .unsupervised_random_forest import URF
+from nwm_region_mgr.parreg import utils_algo
+from nwm_region_mgr.parreg.pairer import Pairer
+from nwm_region_mgr.parreg.unsupervised_random_forest import URF
 
 logger = logging.getLogger(__name__)
 

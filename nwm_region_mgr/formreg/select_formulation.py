@@ -28,9 +28,13 @@ import fiona
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from utils import check_columns_dataframe, find_gages_within_buffer, read_table
 
-from . import config_schema as cs
+from nwm_region_mgr.formreg import config_schema as cs
+from nwm_region_mgr.utils import (
+    check_columns_dataframe,
+    find_gages_within_buffer,
+    read_table,
+)
 
 logger = logging.getLogger(__name__)
 
