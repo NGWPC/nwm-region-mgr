@@ -556,7 +556,7 @@ def select_formulation_all(
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
-            Virtual Planning Unit (VPU) for which to select formulations.
+            Vector Processing Unit (VPU) for which to select formulations.
         df_score : pd.DataFrame
             DataFrame containing summary scores for each formulation and calibrated basin.
         gdf_vpu : gpd.GeoDataFrame
@@ -844,7 +844,7 @@ def save_formulation_results(
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
-            Virtual Planning Unit (VPU) for which to save formulations.
+            Vector Processing Unit (VPU) for which to save formulations.
 
     """
     co = config.output["formulation"]
@@ -882,7 +882,7 @@ def plot_formulation_results(
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
-            Virtual Planning Unit (VPU) for which to plot formulations.
+            Vector Processing Unit (VPU) for which to plot formulations.
         gdf_vpu : Optional[gpd.GeoDataFrame], optional
             GeoDataFrame of the VPU polygons, used for spatial operations where needed
 
@@ -933,7 +933,7 @@ def select_formulation(
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
-            Virtual Planning Unit (VPU) for which to select formulations.
+            Vector Processing Unit (VPU) for which to select formulations.
         df_score : pd.DataFrame
             DataFrame containing summary scores for each formulation and calibrated basin.
         gdf_vpu : Optional[gpd.GeoDataFrame]
