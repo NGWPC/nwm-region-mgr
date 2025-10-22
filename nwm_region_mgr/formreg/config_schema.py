@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, model_validator
-from utils import (
+
+from nwm_region_mgr.utils import (
     BaseConfig,
     BaseGeneralConfig,
     check_options,

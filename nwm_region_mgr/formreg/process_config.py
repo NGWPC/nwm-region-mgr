@@ -12,8 +12,8 @@ from pathlib import Path
 
 from utils import BaseConfigProcessor
 
-from formreg import select_formulation as sf
-from formreg import summary_score as ss
+from nwm_region_mgr.formreg import select_formulation as sf
+from nwm_region_mgr.formreg import summary_score as ss
 
 logger = logging.getLogger(__name__)
 
