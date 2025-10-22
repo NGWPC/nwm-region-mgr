@@ -24,6 +24,7 @@ Functions:
 - combined_geom: Get the combined geometry of the hydrofabric.
 - hydrofabric_buffered_polygon: Get the buffered hydrofabric polygon.
 - donor_basins: Get the donor basins for a given VPU.
+- donor_basins_all: Get all donor basins from the calibration parameter file.
 - donors: Get the list of donor IDs.
 - receivers: Get the list of receiver IDs.
 - number_of_donors: Get the number of donors.
@@ -228,13 +229,15 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         # Fix invalid geometries using buffer(0)
         if not gdf.is_valid.all():
             n_invalid = (~gdf.is_valid).sum()
-            logger.info(f"Fixing {n_invalid} invalid geometries in hydrofabric_gdf_3857.")
+            logger.info(
+                f"Fixing {n_invalid} invalid geometries in hydrofabric_gdf_3857."
+            )
             gdf["geometry"] = gdf.buffer(0)
 
         # Drop any remaining invalid geometries just in case
         gdf = gdf[gdf.is_valid].copy()
-        #gdf["geometry"] = gdf.geometry.make_valid()
-        
+        # gdf["geometry"] = gdf.geometry.make_valid()
+
         return gdf
 
     @property
@@ -255,6 +258,17 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     def hydrofabric_buffered_polygon(self):
         """Buffered hydrofabric Polygon."""
         return self.combined_geom.buffer(self.config.donor.buffer_km * 1000)
+
+    @property
+    def donor_basins_all(self) -> list:
+        """All donor basins from the calibration parameter file."""
+        return (
+            read_table(
+                self.config.general.calib_param_file, dtype={self.gage_id_name: str}
+            )[self.gage_id_name]
+            .unique()
+            .tolist()
+        )
 
     @property
     def donor_basins(self) -> list:
@@ -424,6 +438,11 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         if "vpuid" in df_cwt.columns:
             df_cwt = df_cwt[df_cwt["vpuid"] == vpu]
             donors = df_cwt[self.gage_id_name].unique().tolist()
+
+            # further filter donors to those that are in the donor_basins_all list
+            donors = list(set(donors) & set(self.donor_basins_all))
+
+            # get corresponding donor catchments
             donor_cats = (
                 df_cwt.loc[
                     df_cwt[self.gage_id_name].isin(set(donors)), self.divide_id_name
@@ -431,6 +450,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 .unique()
                 .tolist()
             )
+
             logger.info(
                 f"Number of initial donors for VPU {vpu}: {len(donors)} gages, {len(donor_cats)} catchments"
             )
