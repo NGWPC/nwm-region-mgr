@@ -3,6 +3,7 @@ data/
 
 # Virtual environments
 venv/
+.venv/
 
 # Build artifacts
 build/
