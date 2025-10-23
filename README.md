@@ -12,7 +12,7 @@ as well as scripts/workflows to run ngen simulations and evaluation.
 
 ## Clone & Build
 
-### 1. clone ngen-regionalization from Gitlab
+### 1. clone ngen-region-mgr from Github
 
 ```bash
 cd [NGEN_REG_ROOT]
@@ -27,22 +27,10 @@ cd [VENV_ROOT]
 source venv/bin/activate
 pip install --upgrade pip
 ```
-### 3. install parreg
+### 3. install ngen-region-mgr
 
 ```bash
-cd [NGEN_REG_ROOT]/pkgs/parreg
-pip install . #or use "pip install -e ." to install the package as an editable 
-```
-### 4. install formreg
-
-```bash
-cd [NGEN_REG_ROOT]/pkgs/formreg
-pip install . #or use "pip install -e ." to install the package as an editable 
-```
-### 5. install utils
-
-```bash
-cd [NGEN_REG_ROOT]/pkgs/utils
+cd [NGEN_REG_ROOT]
 pip install . #or use "pip install -e ." to install the package as an editable 
 ```
 
@@ -91,6 +79,7 @@ You may want to follow the following Confluence pages:
 source ~/repos/nwm-msw-mgr/venv/bin/activate
 ```
 ### 4) Set up MSWM configuration as shown in [run_ngen_vpu.sh](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_ngen_vpu.sh)
+Note you would need some
 
 ### 5) Run MSWM and ngen simulation
 ```bash
