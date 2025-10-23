@@ -27,11 +27,13 @@ cd [VENV_ROOT]
 source venv/bin/activate
 pip install --upgrade pip
 ```
-### 3. install ngen-region-mgr
+### 3. install nwm-region-mgr
 
 ```bash
 cd [NGEN_REG_ROOT]
-pip install . #or use "pip install -e ." to install the package as an editable 
+pip install . # to install formreg and utils only
+# OR
+pip install nwm_region_mgr[parreg] # to install formreg, utils, and parreg 
 ```
 
 where [VENV_ROOT] and [NGEN_REG_ROOT] refer to the directory to install python venv and nwm-region-mgr 
