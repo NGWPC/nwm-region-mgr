@@ -32,7 +32,7 @@ def plot_missing_attr_counts(
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
-            The VPU (Virtual Processing Unit) identifier.
+            The VPU (Vector Processing Unit) identifier.
         df_attrs_all : pd.DataFrame
             DataFrame containing all attributes for the catchments.
 
@@ -80,7 +80,7 @@ def plot_donor_spatial_map(
         config : cs.Config
             Configuration object containing settings for the regionalization.
         vpu : str
-            The VPU (Virtual Processing Unit) identifier.
+            The VPU (Vector Processing Unit) identifier.
         donor_basins : list
             List of initial donor basin identifiers.
         final_donor_basins : list
