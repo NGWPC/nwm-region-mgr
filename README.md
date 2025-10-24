@@ -33,7 +33,7 @@ pip install --upgrade pip
 cd [NGEN_REG_ROOT]
 pip install . # to install formreg and utils only
 # OR
-pip install nwm_region_mgr[parreg] # to install formreg, utils, and parreg 
+pip install .[parreg] # to install formreg, utils, and parreg 
 ```
 
 where [VENV_ROOT] and [NGEN_REG_ROOT] refer to the directory to install python venv and nwm-region-mgr 
