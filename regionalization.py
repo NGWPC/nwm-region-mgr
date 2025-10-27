@@ -9,11 +9,11 @@ import logging
 from argparse import RawTextHelpFormatter
 from pathlib import Path
 
-from formreg import config_schema as fcs
-from formreg.process_config import FormulationRegionalizationProcessor
-from parreg import config_schema as pcs
-from parreg.manual_pairings import ManualPairer
-from parreg.process_config import ParameterRegionalizationProcessor
+from nwm_region_mgr.formreg import config_schema as fcs
+from nwm_region_mgr.formreg.process_config import FormulationRegionalizationProcessor
+from nwm_region_mgr.parreg import config_schema as pcs
+from nwm_region_mgr.parreg.manual_pairings import ManualPairer
+from nwm_region_mgr.parreg.process_config import ParameterRegionalizationProcessor
 
 logger = logging.getLogger(__name__)
 

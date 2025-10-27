@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nwm_region_mgr"
+dynamic = ["version"]
+description = "Tools for conducting formulation and parameter regionalizations for NextGen modules."
+readme = "README.md"
+maintainers = [
+    { name = "Yuqiong Liu", email = "yuqiong.liu@ertcorp.com" },
+    { name = "Matthew Deshotel", email = "mdeshotel@Dewberry.com" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.11",
+]
+requires-python = "==3.11"
+
+dependencies = [
+    "numpy~=1.26.4",
+    "geopandas~=1.0.1",
+    "Shapely~=2.1.1",
+    "fiona~=1.10.1",
+    "pandas~=2.3.1",
+    "pyarrow~=19.0.1",
+    "matplotlib~=3.10.5",
+    "seaborn~=0.13.2",
+    "pydantic~=2.11.7",
+    "PyYAML~=6.0.2"
+]
+
+[project.optional-dependencies]
+parreg = [
+    "hdbscan~=0.8.40",
+    "joblib~=1.5.0",
+    "numba~=0.61.2",
+    "pyproj~=3.7.1",
+    "scikit_learn~=1.7.1",
+    "scikit_learn_extra~=0.3.0",
+    "scipy~=1.16.1"
+]
+dev = ["pytest~=8.4.1", "ruff~=0.12.10"]
+docs = ["sphinx", "numpydoc", "sphinx_rtd_theme", "sphinx_design", "pydata-sphinx-theme", "sphinx-autodoc-typehints", "myst-parser"]
+
+[project.urls]
+repository = "https://github.com/NGWPC/nwm-region-mgr"
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nwm_region_mgr*"]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "nwm_region_mgr.__version__"}
+
+[tool.sphinx]
+project = "nwm_region_mgr"
+author = "Yuqiong Liu, Scott Lawson, Matt Deshotel"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

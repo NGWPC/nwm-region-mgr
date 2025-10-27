@@ -78,7 +78,7 @@ output:
     save: True
     path: '{base_dir}/outputs/{run_name}/formulations'
     stem: 'form_{domain}_vpu{vpu_list}' 
-    stem_suffix: '_slim'  # suffix for the formulation file containing info for regions (instead of all catchments)
+    stem_suffix: '_pars'  # suffix for the formulation file with parameters
     format: parquet
     plots:
       spatial_map: True  # whether to create spatial map of selected formulations & scores
