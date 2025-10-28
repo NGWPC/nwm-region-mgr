@@ -12,6 +12,13 @@ Several methods are provided for pairing including clustering methods, distance 
 Process
 --------
 
+.. figure:: ../_images/parreg/1.jpeg
+   :alt: Example parameter regionalization HUC10.
+   :height: 450px
+   :align: center
+
+   **Figure 1.** Example of donor catchments (colors) and receiver catchments (translucent).
+
 1. Parameter regionalization begins with data validation. The attribute and spatial distance datasets are checked to
    make sure that all donors and receivers in each VPU are present. The percent nan values in the attribute dataset are
    recorded.
@@ -33,6 +40,14 @@ Process
      * Apply clustering routine (see method specifics below) to assign a donor to each receiver.
 
 4. For any remaining unpaired receivers, assign nearest donor by map distance.
+
+
+.. figure:: ../_images/parreg/2.jpeg
+   :alt: Example parameter regionalization HUC10.
+   :height: 450px
+   :align: center
+
+   **Figure 1.** Example of final pairings. Each receiver catchment is assigned a donor catchment.
 
 
 Pairing Methods
