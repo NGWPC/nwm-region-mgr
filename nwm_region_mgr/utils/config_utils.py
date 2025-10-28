@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from functools import lru_cache, reduce
 from pathlib import Path
 from time import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Literal, Optional, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -45,12 +45,19 @@ logger = logging.getLogger(__name__)
 class LoggingConfig(BaseModel):
     """Logging configuration for the application."""
 
-    level: Optional[str] = "INFO"
-    """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'SEVERE', 'FATAL'."""
-    log_to_file: Optional[bool] = True
-    """Whether to log to a file."""
-    file: Optional[str] = None
-    """Path to the log file. If not provided, logging will be to console only."""
+    level: Literal["debug", "info", "warning", "error", "critical"] = Field(
+        description="Logging level.", examples="DEBUG", default="INFO"
+    )
+
+    log_to_file: bool = Field(
+        description="Whether to log to a file.", examples=True, default=True
+    )
+
+    file: str | None = Field(
+        description="Path to the log file. If not provided, logging will be to console only.",
+        examples="logfile.log",
+        default=None,
+    )
 
     @model_validator(mode="after")
     def check_log_level(self) -> "LoggingConfig":
@@ -74,55 +81,146 @@ class LoggingConfig(BaseModel):
         return self
 
 
+class PydanticDictLike(BaseModel):
+    """Stand-in for dictionary-like behavior when you want specificity of a pydantic model."""
+
+    def items(self) -> Iterator[Tuple[str, str]]:
+        """Get fields and values."""
+        return self.model_dump().items()
+
+    def keys(self) -> Iterator[str]:
+        """Get fields."""
+        return self.model_dump().keys()
+
+    def values(self) -> Iterator[str]:
+        """Get values."""
+        return self.model_dump().values()
+
+    def __getitem__(self, key: str) -> str:
+        """Get value for a specific key."""
+        return getattr(self, key)
+
+    def __iter__(self) -> Iterator[str]:
+        """Loop through keys."""
+        return iter(self.model_dump())
+
+    def __len__(self) -> int:
+        """Get number of keys."""
+        return len(self.model_dump())
+
+    def __setitem__(self, key: str, value: str) -> None:
+        """Set a specific key to a value."""
+        setattr(self, key, value)
+
+
+class FieldCrosswalk(PydanticDictLike):
+    """Mapping of column names for unique identifiers in all require files for regionalization."""
+
+    divide: str = Field(default="divide_id")
+
+    gage: str = Field(default="gage_id")
+
+    huc12: str = Field(default="huc_12")
+
+    vpu: str = Field(default="vpuid")
+
+    drainage_area: str = Field(default="areasqkm")
+
+
+class LayerCrosswalk(PydanticDictLike):
+    """Dictionary mapping layer names for hydrofabric files."""
+
+    huc12: str = Field(default="WBDSnapshot_National")
+
+    ngen: str = Field(default="divides")
+
+
 class BaseGeneralConfig(BaseModel):
     """Base general settings for the formulation regionalization application."""
 
-    run_name: str
-    """Name of the run, used to create output folders and files."""
-    domain: str
-    """Define NWM domain. Options: conus, ak, hi, prvi."""
-    vpu_list: Union[List[str], str]
-    """List of VPUs within the domain or 'all' to process all."""
-
-    base_dir: str
-    """Path to base directory for input/output files."""
-    ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field()
-    """Path to NextGen hydrofabric file, e.g., vpu_01.gpkg."""
-    gage_divide_cwt_file: Path | str = Field()
-    """Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'."""
-    donor_gage_file: Path | str = Field()
-    """Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."""
-    calval_stats_file: Path | str = Field()
-    """Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'."""
-    calib_param_file: Path | str = Field()
-    """Path to file containing calibration parameters for all gages in the domain."""
-
-    approach_calib_basins: Optional[str] = (
-        "regionalization"  # Options: 'regionalization', 'summary_score'
+    run_name: str = Field(
+        description="Name of the run, used to create output folders and files.",
+        examples="test",
     )
-    """Strategy for assigning formulations to calibrated basins."""
 
-    id_col: Optional[dict[str, str]] = Field(
-        default_factory=lambda: {
+    domain: Literal["conus", "ak", "hi", "prvi"] = Field(
+        description="Which National Water Model Domain this run uses.",
+        examples="conus",
+    )
+
+    vpu_list: Union[List[str], str] = Field(
+        description="List of vector processing units (VPUs) within the domain or 'all' to process all.",
+        examples=["09"],
+    )
+
+    base_dir: str = Field(
+        description="Path to base directory for input/output files.",
+        examples="/root/nwm-region-mgr/data/inputs",
+    )
+
+    ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
+        ...,
+        description=(
+            "Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}"
+        ),
+        examples="vpu_09.gpkg",
+    )
+
+    gage_divide_cwt_file: Path | str = Field(
+        description="Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'.",
+        examples="calib_gage_divide_{domain}.parquet",
+    )
+
+    donor_gage_file: Path | str = Field(
+        description="Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.",
+        examples="gages_nwm4_calib_all.csv",
+    )
+
+    calval_stats_file: Path | str = Field(
+        description="Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'.",
+        examples="stat_calval_all_{domain}.parquet",
+    )
+
+    calib_param_file: Path | str = Field(
+        description="Path to file containing calibration parameters for all gages in the domain.",
+        examples="sampled_params_{domain}.csv",
+    )
+
+    approach_calib_basins: Literal["regionalization", "summary_score"] = Field(
+        description="Strategy for assigning formulations to calibrated basins.",
+        examples="regionalization",
+    )
+
+    id_col: FieldCrosswalk = Field(
+        description="Dictionary mapping column names for unique identifiers in all applicable files.",
+        examples={
             "divide": "divide_id",
             "gage": "gage_id",
             "huc12": "huc_12",
             "vpu": "vpuid",
             "drainage_area": "areasqkm",
-        }
+        },
+        default_factory=FieldCrosswalk,
     )
-    """Dictionary mapping column names for unique identifiers in all applicable files."""
 
-    layer_name: Optional[dict[str, str]] = Field(
-        default_factory=lambda: {
+    layer_name: LayerCrosswalk = Field(
+        description="Dictionary mapping layer names for hydrofabric files.",
+        examples={
             "huc12": "WBDSnapshot_National",
             "ngen": "divides",
-        }
+        },
+        default_factory=LayerCrosswalk,
     )
-    """Dictionary mapping layer names for hydrofabric files."""
 
-    logging: Optional[LoggingConfig] = None
-    """Logging configuration for the application."""
+    logging: LoggingConfig = Field(
+        description="Logging configuration for the application.",
+        examples={
+            "level": "info",
+            "log_to_file": True,
+            "file": "logs/{run_name}.log",
+        },
+        default_factory=LoggingConfig,
+    )
 
     @model_validator(mode="after")
     def lower_case_ids(self) -> "BaseGeneralConfig":
