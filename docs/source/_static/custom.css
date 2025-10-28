@@ -1,13 +1,54 @@
-html[data-theme=light] {
-    --pst-color-borders: rgb(206, 212, 218);
-    --pst-color-primary: rgb(99, 99, 99);
-    --pst-color-secondary: rgb(160, 21, 11);
-    --pst-color-secondary-highlight: rgb(165, 83, 77);
-    --pst-color-link: var(--pst-color-secondary);
-    --pst-color-success: rgb(198, 253, 207);
-    --pst-color-admonition-tip: var(--pst-color-success);
-    --pst-color-inline-code: var(--pst-color-text-base);
-  }
+html[data-theme="light"] {
+  /* Neutral grays — clean and consistent */
+  --pst-color-borders: rgb(228, 232, 240);
+  --pst-color-text-base: rgb(45, 49, 56);
+  --pst-color-background: rgb(250, 252, 255);
+
+  /* Primary: dark slate gray for structure and headings */
+  --pst-color-primary: rgb(42, 63, 84);
+
+  /* Secondary: modern teal-blue accent */
+  --pst-color-secondary: rgb(0, 122, 204);
+  --pst-color-secondary-highlight: rgb(0, 145, 255);
+
+  /* Links: vivid but not overpowering */
+  --pst-color-link: var(--pst-color-secondary);
+
+  /* Success / positive feedback */
+  --pst-color-success: rgb(226, 251, 234);
+  --pst-color-admonition-tip: var(--pst-color-success);
+
+  /* Inline code: subtle contrast on light background */
+  --pst-color-inline-code: rgb(70, 70, 80);
+}
+
+html[data-theme="dark"] {
+  /* Deep slate-gray base for a modern, low-glare feel */
+  --pst-color-background: rgb(18, 22, 27);
+  --pst-color-borders: rgb(48, 54, 61);
+  --pst-color-text-base: rgb(225, 230, 235);
+
+  /* Primary text and heading tone */
+  --pst-color-primary: rgb(210, 220, 235);
+
+  /* Secondary: same accent family as light mode (cool teal-blue) */
+  --pst-color-secondary: rgb(0, 150, 255);
+  --pst-color-secondary-highlight: rgb(90, 200, 255);
+
+  /* Links: vivid but clean */
+  --pst-color-link: var(--pst-color-secondary);
+
+  /* Success / tip blocks: muted green tones for comfort */
+  --pst-color-success: rgb(25, 60, 45);
+  --pst-color-admonition-tip: var(--pst-color-success);
+
+  /* Inline code: soft glow contrast without harshness */
+  --pst-color-inline-code: rgb(245, 245, 255);
+
+  /* Optional: backgrounds for cards or secondary panels */
+  --pst-color-surface: rgb(28, 32, 38);
+}
+
 
   /* Hero */
 
@@ -89,44 +130,87 @@ html[data-theme=light] {
 }
 
 
+/* Make form elements adapt to light/dark themes */
+.form-card {
+  background-color: var(--pst-color-background);
+  color: var(--pst-color-text-base);
+  border: 1px solid var(--pst-color-borders);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
 
-/* Forms */
-/* Layout & card */
-.form-card { max-width: 960px; margin: 2rem auto; padding: 1.25rem; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: #fff; }
-.form-title { margin: 0 0 .25rem; font-size: 1.75rem; }
-.form-subtitle { margin: 0 0 1rem; color: #555; }
-
-/* Grid
-.form-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.form-field--full { grid-column: 1 / -1; } */
-
-/* Fields */
-.form-field label { display: flex; align-items: center; gap: .5rem; font-weight: 600; margin-bottom: .25rem; }
-.form-field input[type="text"],
-.form-field input[type="email"],
-.form-field input[type="date"],
-.form-field select,
-.form-field textarea { width: 100%; padding: .65rem .75rem; border: 1px solid #ddd; border-radius: .75rem; outline: none; }
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus { border-color: #a0150b; box-shadow: 0 0 0 3px #a5534d; }
-
-/* Checkboxes */
-.checkbox-group { display: grid; gap: .5rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.checkbox { display: flex; align-items: center; gap: .5rem; font-weight: 500; }
+/* Input fields */
+.yaml-export-form input[type="text"],
+.yaml-export-form select {
+  background-color: var(--pst-color-surface, var(--pst-color-background));
+  color: var(--pst-color-text-base);
+  border: 1px solid var(--pst-color-borders);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  width: 100%;
+  font-size: 0.9rem;
+}
 
 /* Buttons */
-.form-actions { display: flex; gap: .75rem; justify-content: flex-start; margin-top: .25rem; }
-.btn { appearance: none; border: 1px solid transparent; padding: .7rem 1rem; border-radius: .75rem; font-weight: 600; cursor: pointer; }
-.btn-primary { background: #a0150b; color: #fff; }
-.btn-primary:hover { filter: brightness(1.05); }
-.btn-ghost { background: transparent; border-color: #ddd; }
-.btn-ghost:hover { background: #f6f6f8; }
+.btn-primary {
+  background-color: var(--pst-color-secondary);
+  color: #fff;
+  border: none;
+}
 
-/* Info icon button (native title tooltip) */
+.btn-ghost {
+  background-color: transparent;
+  border: 1px solid var(--pst-color-borders);
+  color: var(--pst-color-text-base);
+}
+
+.btn-ghost:hover,
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* Headings inside the card */
+.form-card h3,
+.form-card h4 {
+  color: var(--pst-color-primary);
+}
+
+/* Ensure tooltips look right */
+.tippy-box[data-theme~='light'] {
+  background-color: var(--pst-color-surface, #fff);
+  color: var(--pst-color-text-base);
+  border: 1px solid var(--pst-color-borders);
+}
+.tippy-box[data-theme~='dark'] {
+  background-color: var(--pst-color-background);
+  color: var(--pst-color-text-base);
+  border: 1px solid var(--pst-color-borders);
+}
+/* Spacing between each form-field */
+.yaml-export-form form-field {
+  display: block;
+  margin-bottom: 1rem; /* increase to 1.5rem or 2rem if you want more breathing room */
+}
+
+/* Add vertical spacing before section headers */
+.yaml-export-form h3,
+.yaml-export-form h4 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Add extra space before the button row */
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem; /* horizontal space between buttons */
+  flex-wrap: wrap;
+}
+
 .icon-btn {
   border: 0;
-  background: #eee;
+  background: var(--pst-color-surface, #fff);
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
@@ -140,13 +224,22 @@ html[data-theme=light] {
   justify-content: center;
 }
 
-.form-field label {
-  display: inline-flex;
-  align-items: center;  /* aligns text + icon vertically */
-  gap: 0.25rem;         /* small space between text and icon */
-}
-
 /* Responsive */
 @media (max-width: 720px) {
   .form-grid { grid-template-columns: 1fr; }
+}
+
+
+.bd-content {
+  max-width: 1500px; /* default ~750px — increase this as needed */
+}
+
+/* Adjust sidebar width */
+.bd-sidebar-primary {
+  width: 200px; /* default is ~300px */
+}
+
+/* Optional: adjust spacing to match */
+.bd-page-width {
+  max-width: 1400px; /* total page width (sidebar + content + margins) */
 }

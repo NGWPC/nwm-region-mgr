@@ -25,7 +25,7 @@ h3:not(#hero h3) {
 (homepage)=
 # NWM Regionalization
 
-# Formulation and parameter regionalization for NextGen
+# Formulation and Parameter Regionalization for NextGen
 
 ![overview](_images/overview.png)
 

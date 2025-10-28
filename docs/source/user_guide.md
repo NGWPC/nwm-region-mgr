@@ -41,16 +41,6 @@ pip install -e .
 pip install .[parreg]
 ```
 
-## Running the main workflow
-
-To run the full formulation and regionalization workflow, run the following command.
-
-```bash
-python regionalization.py sample_files/configs
-```
-
-In the configs directory, you will need several configuration files.
-
 ## Configuration Files
 
 Users may control regionalization behavior by adjusting several configuration files.
@@ -59,9 +49,9 @@ Users may control regionalization behavior by adjusting several configuration fi
  - config_formreg.yaml: contains specific settings for the formulation regionalization process.
  - config_parreg.yaml: contains specific settings for the parameter regionalization process.
 
-Examples are available in `sample_files/configs` or they may be developed with the Config Builder on this website.
+Examples are available in `sample_files/configs` or they may be developed with the [Config Builder](config_builder/index.rst) on this website.
 
-## Executing ngen-regionalization
+## Executing nwm_region_mgr
 
 To run the regionalization script, you can use the following command.
 
