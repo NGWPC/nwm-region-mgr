@@ -5,7 +5,7 @@
 ![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-orange.svg)
 ![Linter: Ruff](https://img.shields.io/badge/linter-ruff-orange)
 
-`ngen-regionalization` is a Python package for identifying optimal model formulations and parameter values in **ungauged catchments**. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
+`nwm_region_mgr` is a Python package for identifying optimal model formulations and parameter values in **ungauged catchments**. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
 
 
 ## Key Features
@@ -24,13 +24,13 @@ git clone -b development --recurse-submodules https://github.com/NGWPC/nwm-regio
 
 ## Installation
 
-Installing ngen-regionalization requires
+Installing nwm_region_mgr requires
 
  - Python 3.11
  - Python venv (typically included with Python)
  - git
 
-Since ngen-regionalization is not currently on PyPI, it must be installed from source. To download this repository, run
+Since nwm_region_mgr is not currently on PyPI, it must be installed from source. To download this repository, run
 
 ```bash
 git clone https://github.com/NGWPC/nwm-region-mgr.git
@@ -50,7 +50,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 ```
 
-You will then be able to install ngen-regionalization. There are a few download variants that users may be interested in.
+You will then be able to install nwm_region_mgr. There are a few download variants that users may be interested in.
 
 ```bash
 # Regular package install
@@ -71,7 +71,7 @@ Three yaml config files are needed to run regionalization
 - **onfig_formreg.yaml**: specific settings for the formulation regionalization process.
 - **config_parreg.yaml**: specific settings for the parameter regionalization process.
 
-Follow the sample config files (ngen-regionalization/sample_files/configs) to set up the configurations
+Follow the sample config files (nwm_region_mgr/sample_files/configs) to set up the configurations
 for your regionalization application as needed.
 
 Sample input data can be downloaded from **s3://ngwpc-dev/Yuqiong.Liu/repos/nwm-region-mgr**

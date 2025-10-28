@@ -4,19 +4,17 @@ For the full list of built-in configuration values, see the documentation:
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 
-# import os
-# import pathlib
-# import subprocess
-# import sys
+import os
+import sys
 
-# sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../.."))
 
-# import ngen_regionalization
+import nwm_region_mgr
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "ngen-regionalization"
+project = "nwm_region_mgr"
 copyright = "2025, RTX"
 author = "Yuqiong Liu, Matt Deshotel, Scott Lawson,"
 
@@ -57,7 +55,7 @@ master_doc = "index"
 
 html_css_files = ["custom.css"]
 
-html_static_path = ["_static"]
+html_static_path = ["_static", "_images"]
 
 html_js_files = [
     "form2yaml.js",
@@ -83,5 +81,4 @@ html_sidebars = {
 
 
 # Substitutions
-# version = str(ngen_regionalization.__version__)
-version = "0.1.0"
+version = str(nwm_region_mgr.__version__)

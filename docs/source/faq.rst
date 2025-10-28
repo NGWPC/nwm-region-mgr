@@ -1,9 +1,9 @@
 Frequently Asked Questions
 --------------------------
 
-.. dropdown:: What is ngen-regionalization?
+.. dropdown:: What is nwm_region_mgr?
 
-    ngen-regionalization is a command line utility for identifying optimized NextGen
+    nwm_region_mgr is a command line utility for identifying optimized NextGen
     formulations and parameter values in ungauged catchments.
 
 .. dropdown:: What is a formulation?
@@ -44,17 +44,17 @@ Frequently Asked Questions
     Regionalization is flexible, and users can set the level that parameters are
     assigned using the spatial_unit field in config_formreg.yaml.
 
-.. dropdown:: How does ngen-regionalization find optimal formulations?
+.. dropdown:: How does nwm_region_mgr find optimal formulations?
 
     Optimal formulations are determined based on formulation computational cost and user-specified performance metrics (
     ex. Nash–Sutcliffe efficiency (nse), Kling-Gupta efficiency (KGE), bias, or correlation (cor))
 
 
-.. dropdown:: How does ngen-regionalization find optimal parameter values?
+.. dropdown:: How does nwm_region_mgr find optimal parameter values?
 
     Parameter values are assigned to each hydrofabric divide by identifying calibrated catchments that are close to the
     divide in either mapped location or physiographic characteristics.
 
 .. dropdown:: How do I start using this tool?
 
-    Check out the User Guide to get started.
+    Check out the `User Guide <user_guide.html>`_ to get started.
