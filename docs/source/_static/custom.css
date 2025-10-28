@@ -10,21 +10,37 @@ html[data-theme=light] {
   }
 
   /* Hero */
+
 #hero {
   display: flex;
-  flex-direction: row;
-  min-height: min(calc(80vh), 1100px); /* Make hero fill up most of the page on load */
-  gap: 60px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  margin: 2rem auto;
+  max-width: 900px;
 }
+
 #hero-left {
   max-width: 600px;
-  width: 65%;
+  width: 25%;
   margin: auto 0;
 }
 #hero-right {
   min-width: 200px;
-  width: 35%;
+  width: 75%;
   margin: auto 0;
+}
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 2rem;
+  text-align: left;
+}
+.hero-text h3 {
+  font-weight: bold;
+  margin-top: 0;
 }
 .homepage-button-container {
   margin-bottom: 1rem;

@@ -1,16 +1,16 @@
 # User Guide
 
-the steps below show how to install and use ngen-regionalization in your local environment. At the end, some example workflows are described.
+The steps below walk through package installation and workflow configuration.
 
 ## Installation
 
-Installing ngen-regionalization requires
+Installing nwm_region_mgr requires
 
  - Python 3.11
  - Python venv (typically included with Python)
  - git
 
-Since ngen-regionalization is not currently on PyPI, it must be installed from source. To download this repository, run
+Since nwm_region_mgr is not currently on PyPI, it must be installed from source. To download this repository, run
 
 ```bash
 git clone https://github.com/NGWPC/nwm-region-mgr.git
@@ -30,7 +30,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 ```
 
-You will then be able to install ngen-regionalization. There are a few download variants that users may be interested in.
+You will then be able to install nwm_region_mgr. There are a few download variants that users may be interested in.
 
 ```bash
 # Regular package install
@@ -40,6 +40,16 @@ pip install -e .
 # Install the additional dependencies for parameter regionalization
 pip install .[parreg]
 ```
+
+## Running the main workflow
+
+To run the full formulation and regionalization workflow, run the following command.
+
+```bash
+python regionalization.py sample_files/configs
+```
+
+In the configs directory, you will need several configuration files.
 
 ## Configuration Files
 
@@ -63,80 +73,41 @@ python regionalization.py sample_files/configs
 
 ```bash
 .
-├── attr_data_final  # Description of folder
-│   ├── attr_conus_vpu01.parquet  # Description of file
-│   └── plots
-│       ├── bar_attr_missing_count_conus_vpu01.png  # Description of plot
-│       ├── hist_attr_conus_vpu01.png
-│       └── map_attr_conus_vpu01.png
-├── config_formreg_final.yaml
-├── config_parreg_final.yaml
-├── formulations
-│   ├── form_conus_vpu01.parquet
-│   ├── form_conus_vpu01_slim.parquet
-│   ├── form_conus_vpu02.parquet
-│   ├── form_conus_vpu02_slim.parquet
-│   └── plots
-│       ├── hist_form_conus_vpu01.png
-│       ├── hist_form_conus_vpu02.png
-│       ├── map_form_conus_vpu01.png
-│       └── map_form_conus_vpu02.png
-├── pairs
-│   ├── pairs_gower_conus_vpu01.parquet
-│   └── plots
-│       ├── hist_pairs_gower_conus_vpu01.png
-│       ├── map_donors_conus_vpu01.png
-│       └── map_pairs_gower_conus_vpu01.png
-├── spatial_distance
-│   └── donor_receiver_dist_conus_vpu01.parquet
-└── summary_score
-    ├── plots
-    │   ├── hist_score_conus_vpu01.png
-    │   ├── hist_score_conus_vpu02.png
-    │   ├── map_score_conus_vpu01.png
-    │   └── map_score_conus_vpu02.png
-    ├── score_conus_all_gages.parquet
-    ├── score_conus_vpu01.parquet
-    └── score_conus_vpu02.parquet
+├── attr_data_final                     # Catchment-level attribute datasets used for regionalization
+│   ├── attr_conus_vpu01.parquet        # Final attribute table for CONUS VPU 01
+│   └── plots                           # Diagnostic plots summarizing attribute distributions
+│       ├── bar_attr_missing_count_conus_vpu01.png    # Bar chart of missing attribute counts
+│       ├── hist_attr_conus_vpu01.png                 # Histogram of attribute distributions
+│       └── map_attr_conus_vpu01.png                  # Spatial visualization of attribute values
+├── config_formreg_final.yaml           # Log of configuration settings used for formulation regionalization
+├── config_parreg_final.yaml            # Log of configuration settings used for parameter regionalization
+├── formulations                        # Selected NextGen formulations (combinations of hydrologic models)
+│   ├── form_conus_vpu01.parquet        # Selected formulations for CONUS VPU 01 divides
+│   ├── form_conus_vpu01_slim.parquet   # Slimmed version containing only essential formulation fields
+│   ├── form_conus_vpu02.parquet        # Selected formulations for CONUS VPU 02 divides
+│   ├── form_conus_vpu02_slim.parquet   # Slimmed version containing only essential formulation fields
+│   └── plots                           # Visual diagnostics of formulation selection
+│       ├── hist_form_conus_vpu01.png                  # Histogram of formulation frequencies (VPU 01)
+│       ├── hist_form_conus_vpu02.png                  # Histogram of formulation frequencies (VPU 02)
+│       ├── map_form_conus_vpu01.png                   # Spatial distribution of selected formulations (VPU 01)
+│       └── map_form_conus_vpu02.png                   # Spatial distribution of selected formulations (VPU 02)
+├── pairs                               # Donor–receiver catchment pairings based on chosen algorithms
+│   ├── pairs_gower_conus_vpu01.parquet # Table of attribute-based similarity scores (VPU 01)
+│   └── plots                           # Diagnostics for donor–receiver pairing analysis
+│       ├── hist_pairs_gower_conus_vpu01.png            # Histogram of Gower distances between pairs
+│       ├── map_donors_conus_vpu01.png                  # Map of donor catchments (VPU 01)
+│       └── map_pairs_gower_conus_vpu01.png             # Map showing donor–receiver pair linkages
+├── spatial_distance                    # Purely geographic distances between donor and receiver catchments
+│   └── donor_receiver_dist_conus_vpu01.parquet          # Centroid-to-centroid distances (VPU 01)
+└── summary_score                       # Performance metrics of selected formulations
+    ├── plots                           # Visual summaries of formulation performance
+    │   ├── hist_score_conus_vpu01.png                   # Histogram of formulation scores (VPU 01)
+    │   ├── hist_score_conus_vpu02.png                   # Histogram of formulation scores (VPU 02)
+    │   ├── map_score_conus_vpu01.png                    # Spatial map of formulation scores (VPU 01)
+    │   └── map_score_conus_vpu02.png                    # Spatial map of formulation scores (VPU 02)
+    ├── score_conus_all_gages.parquet   # Combined formulation performance metrics across all gages
+    ├── score_conus_vpu01.parquet       # Performance metrics by formulation (VPU 01)
+    └── score_conus_vpu02.parquet       # Performance metrics by formulation (VPU 02)
+
 ```
 
-
-## Example Workflows
-
-### Adjusting formulation summary score weights
-
-Say that you reviewed the formulation results and found that nse and kge were doing a poor job assessing formulation performance.  You could adjust the weights and re-run.
-
-```YAML
-metrics:
-cor:
-    upper: 1.0
-    lower: -0.5
-    orientation: positive
-    weight: 0.35
-kge:
-    upper: 1.0
-    lower: -0.5
-    orientation: positive
-    weight: 0.05
-nse:
-    upper: 1.0
-    lower: -0.5
-    orientation: positive
-    weight: 0.05
-bias:
-    upper: 300.0
-    lower: 0.0
-    orientation: negative
-    weight: 0.35
-    absolute: True
-far:
-    upper: 1.0
-    lower: 0.0
-    orientation: negative
-    weight: 0.2
-```
-
-### Stopping snow cover check
-
-Say snow cover is leading to too many basins without donors...
