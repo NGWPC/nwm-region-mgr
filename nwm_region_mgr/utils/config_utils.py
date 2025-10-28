@@ -718,7 +718,7 @@ class BaseConfigProcessor:
         log_file = Path(self.config.general.logging.file)
         setup_logging(
             level=log_level,
-            target_packages=("__main__", "formreg", "parreg", "utils"),
+            target_packages=("__main__", "nwm_region_mgr"),
             log_file=log_file,
             file_level=log_level,
         )
