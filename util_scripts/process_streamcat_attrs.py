@@ -133,6 +133,11 @@ def process_streamcat_attr_descriptions(df_metric_desc: pd.DataFrame, output_dir
         columns={"attr": "attr_name", "metric_description": "description"}
     )
 
+    # replace "AOI" with "catchment" in descriptions
+    df_metric_desc["description"] = df_metric_desc["description"].str.replace(
+        "AOI", "catchment", regex=False
+    )
+
     # add select column (set to 1 for all attributes)
     df_metric_desc["select"] = 1
 
