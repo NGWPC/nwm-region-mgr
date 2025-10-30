@@ -14,7 +14,7 @@ from shapely.geometry import box
 def create_cwt(
     shp1: gpd.GeoDataFrame,
     shp2: gpd.GeoDataFrame,
-    overlap_threshold: float = 99.0,
+    overlap_threshold_max: float = 99.0,
     overlap_threshold_min=20.0,
 ):
     """Create crosswalk table between two sets of polygons based on overlapping area percentage.
@@ -61,11 +61,11 @@ def create_cwt(
         "overlap_percentage"
     ].cumsum()
 
-    # filter out shp1 polygons when cumulative overlap_percentage reaches the threshold
+    # filter out shp1 polygons when cumulative overlap_percentage reaches the max threshold requirement
     # (but always keep the first row)
     overlap["rank"] = overlap.groupby("divide_id").cumcount()
     overlap = overlap[
-        (overlap["rank"] == 0) | (overlap["cum_percentage"] <= overlap_threshold)
+        (overlap["rank"] == 0) | (overlap["cum_percentage"] <= overlap_threshold_max)
     ]
 
     # make sure (maximum) cumulative overlap percentage is greater than the minimum threshold
@@ -133,7 +133,7 @@ def get_attr_info(attr: str, vpu: str) -> dict:
             elif vpu == "prvi":
                 vpu = "21"
             elif vpu == "ak":
-                print("Warning: NHDPlus/StreamCat data not available for AK.")
+                print("WARNING: NHDPlus/StreamCat data not available for AK.")
                 return {}
 
             attr_info["file"] = Path(
@@ -209,7 +209,7 @@ def process_cwt_by_vpu(
     cwt_file: Path,
     vpu: str,
     shp_dir: str,
-    threshold: float = 99.0,
+    threshold_max: float = 99.0,
     threshold_min=30.0,
 ) -> pd.DataFrame:
     """Process crosswalk table creation for NextGen catchments for the specified VPU."""
@@ -245,7 +245,7 @@ def process_cwt_by_vpu(
     cwt1 = create_cwt(
         shp_attr,
         shp_vpu,
-        overlap_threshold=threshold,
+        overlap_threshold_max=threshold_max,
         overlap_threshold_min=threshold_min,
     )
     if cwt1.empty:
@@ -270,7 +270,7 @@ def process_cwt_domain(
     domain: str,
     cwt_dir: Path,
     shp_dir: Path,
-    threshold: float = 99.0,
+    threshold_max: float = 99.0,
     threshold_min=30.0,
 ) -> pd.DataFrame:
     """Process crosswalk table creation for NextGen catchments for the specified domain."""
@@ -290,12 +290,12 @@ def process_cwt_domain(
         else:
             print(f"Processing crosswalk for vpu {vpu}...")
             cwt1 = process_cwt_by_vpu(
-                attr=attr,
-                cwt_file=cwt_file,
-                vpu=vpu,
-                shp_dir=shp_dir,
-                threshold=threshold,
-                threshold_min=threshold_min,
+                attr,
+                cwt_file,
+                vpu,
+                shp_dir,
+                threshold_max,
+                threshold_min,
             )
         # add to conus dataframe
         cwt1["vpuid"] = vpu
@@ -306,25 +306,30 @@ def process_cwt_domain(
         gc.collect()
 
     # save the combined cwt
-    if domain.upper() == "CONUS" and not df_cwt.empty:
-        output_dir = Path(
-            cwt_file.parent, "cwt_ngen_" + attr + "_conus.parquet"
-        ).expanduser()
-        print(f"Saving crosswalk table for {attr} to {output_dir}")
-        df_cwt.to_parquet(
-            output_dir,
-            engine="pyarrow",
-            index=False,
+    if df_cwt.empty:
+        print(
+            f"WARNING: No crosswalk table created for {attr} for the {domain} domain."
         )
+    else:
+        if domain.upper() == "CONUS":
+            output_dir = Path(
+                cwt_file.parent, "cwt_ngen_" + attr + "_conus.parquet"
+            ).expanduser()
+            print(f"Saving crosswalk table for {attr} to {output_dir}")
+            df_cwt.to_parquet(
+                output_dir,
+                engine="pyarrow",
+                index=False,
+            )
 
-    # analyze cwt results
-    analyze_cwt_results(
-        df_cwt,
-        domain=domain,
-        attr=attr,
-        output_dir=cwt_file.parent,
-        vpu_shp_dir=shp_dir,
-    )
+        # analyze cwt results
+        analyze_cwt_results(
+            df_cwt,
+            domain=domain,
+            attr=attr,
+            output_dir=cwt_file.parent,
+            vpu_shp_dir=shp_dir,
+        )
 
     return df_cwt
 
@@ -400,6 +405,7 @@ def analyze_cwt_results(
             output_dir=output_dir,
             vpu_shp_dir=vpu_shp_dir,
             vpus=subs_unmatched_vpus,
+            domain=domain,
         )
 
 
@@ -410,6 +416,7 @@ def plot_cats_subs(
     output_dir: Path = None,
     vpu_shp_dir: str | Path = None,
     vpus: list = None,
+    domain: str = "conus",
 ):
     """Plot NextGen catchments and corresponding attribute dataset subbasins."""
     if not cats:
@@ -458,13 +465,13 @@ def plot_cats_subs(
     gdf_subs.plot(ax=ax, color="lightgray", edgecolor="black", linewidth=5.0)
     gdf_cats.plot(ax=ax, color="none", edgecolor="red", linewidth=1.0)
     plt.title(
-        f"NextGen catchments (red) and corresponding nearest-neighbour {attr_dict['name'].upper()} subbasins (black)"
+        f"{domain.upper()} NextGen catchments (red) and corresponding nearest-neighbour {attr_dict['name'].upper()} subbasins (black)"
     )
 
     # save plot
     plot_file = Path(
         output_dir,
-        f"ngen_catchments_nearest_{attr_dict['name']}_subbasins.png",
+        f"ngen_catchments_nearest_{attr_dict['name']}_subbasins_{domain}.png",
     ).expanduser()
     plot_file.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(plot_file, dpi=300)
@@ -473,7 +480,6 @@ def plot_cats_subs(
 
 
 if __name__ == "__main__":
-    # Create ngen catchment - subbasin crosswalk; process by vpus to reduce memory usage
     parser = argparse.ArgumentParser(
         description="Create NextGen catchment to attribute dataset subbasin crosswalk."
     )
@@ -504,10 +510,10 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--threshold",
+        "--threshold_max",
         type=float,
         default=99.0,
-        help="Overlap percentage threshold to consider a subbasin matched (default: 99.0).",
+        help="Maximum overlap percentage threshold to consider a subbasin matched (default: 99.0).",
     )
     parser.add_argument(
         "--threshold_min",
@@ -525,8 +531,11 @@ if __name__ == "__main__":
         domain=args.domain,
         cwt_dir=cwt_dir,
         shp_dir=args.vpu_gpkg_dir,
-        threshold=args.threshold,
+        threshold_max=args.threshold_max,
         threshold_min=args.threshold_min,
     )
 
-    print(f"Crosswalk creation completed for {args.attr} for the {args.domain} domain.")
+    if not df_cwt.empty:
+        print(
+            f"Crosswalk creation completed for {args.attr} for the {args.domain} domain."
+        )
