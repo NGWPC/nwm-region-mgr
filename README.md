@@ -70,23 +70,23 @@ python regionalization.py sample_files/configs
 ## STEP 2: Run NGEN simulation with regionalized parameters
 
 - ### Run with container
-  - #### 1. Edit MSWM config template as needed (see [sampel tempalte](https://github.com/NGWPC/nwm-region-mgr/blob/development/sample_files/configs/mswm.config.template.docker))
+  - #### 1. Edit MSWM config template as needed (see [sample template](https://github.com/NGWPC/nwm-region-mgr/blob/development/sample_files/configs/mswm.config.template.docker))
   - #### 2. Edit the [run script](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_ngen_vpu_docker.sh) as needed
   - #### 3. download, load and run the docker image
     ```bash
-    # download from s3
+    # download docker image from s3
     aws s3 cp s3://ngwpc-dev/jeff.wade/docker/mswm.tar.gz mswm.tar.gz
     # unpack
     gunzip mswm.tar.gz
     # load the image
     docker load -i mswm.tar
-    # edit docker run script [run_msw_docker.sh](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_msw_docker.sh)
+    # edit docker run script [run_msw_docker.sh](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_msw_docker.sh) as needed
     # and then run the script:
     ./run_msw_docker.sh
     ```
   - #### 4. Run NGEN inside container
     ```bash
-    nohup ./run_ngen_vpu_docker.sh out 2>&1&
+    nohup ./run_ngen_vpu_docker.sh > out 2>&1&
     ```
 - ### Run natively in workspace
     - #### 1) Install [ngen](https://github.com/NGWPC/ngen) and all submodules in its own venv
