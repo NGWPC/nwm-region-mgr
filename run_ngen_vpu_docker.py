@@ -187,7 +187,7 @@ def build_ngen_command(args: argparse.Namespace) -> str:
         logger.info(f"Running NGEN in parallel mode with {args.nprocs} processors.")
         cmd_str = f"""
         cd {args.out_dir}
-        mpirun -n {args.nprocs} {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}
+        mpirun --allow-run-as-root -n {args.nprocs} {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}
         """
 
     return cmd_str
