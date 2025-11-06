@@ -1,11 +1,14 @@
 # Formulation and Parameter Regionalization for the NextGen Framework
 [![Build](https://img.shields.io/github/actions/workflow/status/ngwpc/nwm-region-mgr/ci.yaml?branch=main)](.github/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/ngwpc/nwm-region-mgr)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/ngwpc/nwm-region-mgr)](https://github.com/fema-ffrd/gpras/releases)
+[![License: BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/license/bsd-2-clause)
+[![Release](https://img.shields.io/github/v/release/ngwpc/nwm-region-mgr)](https://github.com/NGWPC/nwm-region-mgr)
 ![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-orange.svg)
 ![Linter: Ruff](https://img.shields.io/badge/linter-ruff-orange)
 
-`nwm_region_mgr` is a Python package for identifying optimal model formulations and parameter values in **ungauged catchments**. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
+<img src="docs/source/_images/overview.png" alt="overview" width="600"/>
+
+
+`nwm_region_mgr` is a Python package for identifying optimal model formulations and parameter values in ungauged catchments. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
 
 
 ## Key Features
