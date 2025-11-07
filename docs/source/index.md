@@ -29,7 +29,7 @@ h3:not(#hero h3) {
 
 ![overview](_images/overview.png)
 
-The National Water Model (NWM) NextGen framework is a modular hydrologic modeling system that links compatible models into flexible formulations for different spatial domains. This flexibility makes it challenging to determine which formulations and parameters perform best across regions, particularly in ungauged basins. `nwm_region_mgr` is a Python package that automates this process by using calibration and validation data to identify optimal model formulations and parameter sets at the regional scale.
+The National Water Model (NWM) NextGen framework is a modular hydrologic modeling system that links compatible models into flexible formulations for different spatial domains. This flexibility makes it challenging to determine which formulations and parameters perform best across regions, particularly in ungauged basins. `nwm_region_mgr` is a Python package that automates this process by using calibration/validation data and various catchment attributes to identify optimal model formulations and parameter sets at the regional scale.
 
 ----
 
@@ -40,11 +40,13 @@ The National Water Model (NWM) NextGen framework is a modular hydrologic modelin
 
 ## A critical tool for forecast skill
 Hydrologic models benefit strongly from calibration. Tools in this repository
-make the most out of limited observational data by intelligently transferring optimal
+make the most out of limited observational data to intelligently transfer optimal
 parameter sets beyond calibrated catchments. This tool depends on data from a calibration and validation
-run of NextGen. Once the tool has been run, the optimal formulation and parameter sets may be run with
-the [Model Setup Workflow Manager](https://github.com/NGWPC/nwm-msw-mgr) and performance may be
-assessed with [NWM Verification](https://github.com/NGWPC/nwm-verf).
+run of NextGen, as well as various catchment attributes characterizing local climate, topography, landcover, 
+soil, geology, and anthropogenic influence. Once the tool has been run, the optimal formulation and 
+parameter sets may be used by
+the [Model Setup Workflow Manager](https://github.com/NGWPC/nwm-msw-mgr) to set up NextGen simulation runs 
+and performance may be assessed with [NWM Evaluation Manager](https://github.com/NGWPC/nwm-verf).
 
 ----
 
@@ -62,7 +64,8 @@ assessed with [NWM Verification](https://github.com/NGWPC/nwm-verf).
 
 :::{div} key-features-text
 <strong>Formulation Regionalization</strong><br/>
-Ranks NextGen model formulation suitability in ungauged catchments using comparisons to similar gauged catchments.
+Identifies best-performing NextGen formulation across all catchments (calibrate and uncalibrated) 
+using calibration/validation statistics.
 :::
 ::::
 
@@ -75,7 +78,7 @@ Ranks NextGen model formulation suitability in ungauged catchments using compari
 
 :::{div} key-features-text
 <strong>Parameterization Regionalization</strong><br/>
-Estimates parameter values for ungauged catchments by leveraging calibrations from similar gauged catchments.
+Estimates parameter values for uncalibrated catchments by leveraging calibrations from similar calibrated catchments.
 :::
 ::::
 
@@ -88,7 +91,20 @@ Estimates parameter values for ungauged catchments by leveraging calibrations fr
 
 :::{div} key-features-text
 <strong>Clustering</strong><br/>
-Multiple methods available to group calibrated catchments into clusters based on shared hydrologic characteristics.
+Multiple methods available to group calibrated catchments into clusters based on shared catchment characteristics.
+:::
+::::
+
+::::{grid-item-card}
+:shadow: none
+:class-card: sd-border-0
+
+:::{image} _static/index/cluster.svg
+:::
+
+:::{div} key-features-text
+<strong>Distance_based</strong><br/>
+Multiple methods available to identify similar catchments based on `attribute distance` calculated from catchment characteristics.
 :::
 ::::
 
@@ -109,12 +125,12 @@ Generates plots and maps that explain why specific formulations and parameters w
 :shadow: none
 :class-card: sd-border-0
 
-:::{image} _static/index/scale.svg
+:::{image} _static/index/config.svg
 :::
 
 :::{div} key-features-text
-<strong>Scalable</strong><br/>
-Efficiently allocates computational resources to handle workflows from small watersheds up to CONUS-wide analyses.
+<strong>Customizable</strong><br/>
+Gives users full control over every step through easily editable configuration files.
 :::
 ::::
 
@@ -122,12 +138,12 @@ Efficiently allocates computational resources to handle workflows from small wat
 :shadow: none
 :class-card: sd-border-0
 
-:::{image} _static/index/config.svg
+:::{image} _static/index/scale.svg
 :::
 
 :::{div} key-features-text
-<strong>Customizable</strong><br/>
-Gives users full control over every step through easily editable configuration files.
+<strong>Scalable</strong><br/>
+Efficiently allocates computational resources to handle workflows from small watersheds up to CONUS-wide analyses.
 :::
 ::::
 :::::

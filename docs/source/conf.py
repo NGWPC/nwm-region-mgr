@@ -30,7 +30,7 @@ extensions = [
     "myst_parser",
     "sphinx.ext.napoleon",
     "sphinx_design",
-    "sphinxcontrib.rsvgconverter",
+    # "sphinxcontrib.rsvgconverter",
     "sphinx.ext.viewcode",  # adds [source] links
 ]
 
