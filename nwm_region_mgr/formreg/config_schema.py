@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, model_validator
 from nwm_region_mgr.utils import (
     BaseConfig,
     BaseGeneralConfig,
+    BaseOutputConfig,
     check_options,
 )
 
@@ -38,8 +39,14 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     )
 
     formulation_to_include: List[str] | None = Field(
-        description="List of formulations to consider. If None, all formulations are included.  If 'all', all formulations are included.",
-        examples=["noah-owp-modular cfe-s t-route"],
+        description=(
+            "List of formulations to consider. If None, all formulations are included.  "
+            "If 'all', all formulations are included."
+        ),
+        examples=[
+            "noah-owp-modular cfe-s t-route",
+            "noah-owp-modular ueb cfe-x t-route",
+        ],
         default=None,
     )
 
@@ -91,20 +98,22 @@ class BestFormulation(BaseModel):
 class FormulationSpatialUnitConfig(BaseModel):
     """Spatial discretization settings for formulation regionalization."""
 
-    huc_level: Literal["huc-2", "huc-4", "huc-6", "huc-8", "huc-10", "huc-12"] = Field(
-        description="USGS HUC level used for discretization, e.g., 'huc-8'.",
-        examples="huc-12",
-        default="huc-8",
+    huc_level: str = Field(
+        description="USGS HUC level used for discretization, e.g., 'huc8'. Accepted formats: 'huc8', 'HUC8', 'huc-8'.",
+        examples=["huc2", "huc4", "huc6", "huc8", "huc10", "huc12"],
+        default="huc8",
     )
 
     nmin_calib_basin: int = Field(
         description="Minimum number of calibration basins required per spatial unit to consider it valid.",
         examples=5,
-        default=5,
+        default=3,
     )
 
     basin_fill_method: Literal["upscaling", "nearest-neighbor"] = Field(
-        description="Method to handle units with too few calibration basins. Options: 'upscaling', 'nearest-neighbor'.",
+        description="Method to handle spatial units with too few calibration basins. Options: "
+        "'upscaling' (by upscaling to a coarser spatial unit), and "
+        "'nearest-neighbor' (by pooling basins from neighboring units).",
         examples="upscaling",
         default="upscaling",
     )
@@ -114,6 +123,22 @@ class FormulationSpatialUnitConfig(BaseModel):
         examples={"method": "total_score", "type": "divide", "tolerance": 0.05},
         default_factory=BestFormulation,
     )
+
+    @model_validator(mode="before")
+    def normalize_huc(cls, values):
+        """Normalize huc_level to standard format and validate."""
+        huc = values.get("huc_level")
+        if isinstance(huc, str):
+            # Lowercase, remove optional hyphen
+            normalized = huc.lower().replace("-", "")
+            valid_hucs = {f"huc{i}" for i in [2, 4, 6, 8, 10, 12]}
+            if normalized not in valid_hucs:
+                raise ValueError(
+                    f"Invalid huc_level: {huc}. Must be one of {sorted(valid_hucs)}"
+                )
+            # Standardize to format hucX (e.g., huc8)
+            values["huc_level"] = normalized
+        return values
 
 
 class Orientation(str, Enum):
@@ -140,12 +165,15 @@ class MetricConfig(BaseModel):
 
     orientation: Literal["positive", "negative"] = Field(
         description="Orientation of the metric, either 'positive' or 'negative'.",
-        examples=0,
+        examples="positive",
         default="positive",
     )
 
     weight: float = Field(
-        description="Weight of the metric in the summary score, must be between 0.0 and 1.0.",
+        description=(
+            "Weight of the metric in the summary score, must be between 0.0 and 1.0. "
+            "If 0.0, the metric is ignored."
+        ),
         examples=0.25,
         default=0.0,
         ge=0.0,
@@ -169,7 +197,7 @@ class MetricEvalPeriod(BaseModel):
 
     value: str = Field(
         description="Value of the evaluation period to filter the donor stats file.",
-        examples="valid",
+        examples=["valid", "calib", "full"],
     )
 
 
@@ -183,7 +211,10 @@ class FormulationSummaryScoreConfig(BaseModel):
     )
 
     metrics: Dict[str, MetricConfig] = Field(
-        description="Dictionary of metrics used in the summary score, keyed by metric name.",
+        description=(
+            "Dictionary of metrics used in the summary score, keyed by metric name. "
+            "Metric names must match columns in the calibration/validation stats file. Weights must sum to 1.0."
+        ),
         examples={
             "cor": {
                 "upper": 1,
@@ -288,4 +319,37 @@ class Config(BaseConfig):
     formulation_cost: FormulationCostConfig = Field(
         description="Computational cost configuration for each formulation.",
         default_factory=FormulationCostConfig,
+    )
+
+    output: dict[str, BaseOutputConfig] = Field(
+        description="Output configuration for the application.",
+        default_factory=lambda: {"default": BaseOutputConfig()},
+        examples={
+            "formulation":  # Output configurations for the selected formulations
+            {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/formulations",
+                "stem": "form_{domain}_vpu{vpu_list}",
+                "stem_suffix": "_pars",  # suffix for the formulation file with parameters
+                "format": "parquet",
+                "plots": {
+                    "spatial_map": True,  # whether to create spatial map of selected formulations & scores
+                    "histogram": True,  # whether to create histogram of scores
+                },
+            },
+            "config_final":  # Final configuration file after processing and validation
+            {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/config_formreg_final.yaml",
+            },
+            "summary_score":  # Output configurations for the summary score
+            {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/summary_score",
+                "stem": "score_{domain}_vpu{vpu_list}",
+                "stem_suffix": "_all_gages",  # suffix for the summary score file containing all gages in the domain
+                "format": "parquet",
+                "plots": {"histogram": True, "spatial_map": True},
+            },
+        },
     )

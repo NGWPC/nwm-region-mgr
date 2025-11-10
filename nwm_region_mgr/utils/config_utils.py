@@ -3,11 +3,11 @@
 config_utils.py
 
 Classes/Functions:
-- LoggingConfig: Pydantic model for logging configuration.
-- BaseGeneralConfig: Pydantic model for general settings of the application.
-- BaseOutputConfig: Pydantic model for output settings of the application.
-- BaseConfig: Pydantic model for the base configuration of the application.
-- BaseConfigProcessor: base class for processing and validating configurations
+    - LoggingConfig: Pydantic model for logging configuration.
+    - BaseGeneralConfig: Pydantic model for general settings of the application.
+    - BaseOutputConfig: Pydantic model for output settings of the application.
+    - BaseConfig: Pydantic model for the base configuration of the application.
+    - BaseConfigProcessor: base class for processing and validating configurations
     - _deep_merge_configs: Recursively merge two dictionaries, with values from dict #2 overwriting those in dict #1.
     - _load_and_validate_config: Load a YAML file, validate its structure using Pydantic
     - _substitute_placeholders: Substitute placeholders in the config with actual values.
@@ -46,15 +46,20 @@ class LoggingConfig(BaseModel):
     """Logging configuration for the application."""
 
     level: Literal["debug", "info", "warning", "error", "critical"] = Field(
-        description="Logging level.", examples="DEBUG", default="INFO"
+        description="Logging level.", examples="debug", default="info"
     )
 
     log_to_file: bool = Field(
-        description="Whether to log to a file.", examples=True, default=True
+        description=(
+            "Whether to log to a file. If set to True, logging messages will be written to "
+            "the specified log file, in addition to the console."
+        ),
+        default=False,
+        examples=False,
     )
 
     file: str | None = Field(
-        description="Path to the log file. If not provided, logging will be to console only.",
+        description="Path to the log file. If not provided, logging will be written to console only.",
         examples="logfile.log",
         default=None,
     )
@@ -116,23 +121,32 @@ class PydanticDictLike(BaseModel):
 class FieldCrosswalk(PydanticDictLike):
     """Mapping of column names for unique identifiers in all require files for regionalization."""
 
-    divide: str = Field(default="divide_id")
+    divide: str = Field(
+        description="Column name for divide (catchment) ID.", default="divide_id"
+    )
 
-    gage: str = Field(default="gage_id")
+    gage: str = Field(description="Column name for gage (basin) ID.", default="gage_id")
 
-    huc12: str = Field(default="huc_12")
+    huc12: str = Field(description="Column name for HUC12 ID.", default="huc_12")
 
-    vpu: str = Field(default="vpuid")
+    vpu: str = Field(description="Column name for VPU ID.", default="vpuid")
 
-    drainage_area: str = Field(default="areasqkm")
+    drainage_area: str = Field(
+        description="Column name for drainage area.", default="areasqkm"
+    )
 
 
 class LayerCrosswalk(PydanticDictLike):
     """Dictionary mapping layer names for hydrofabric files."""
 
-    huc12: str = Field(default="WBDSnapshot_National")
+    huc12: str = Field(
+        description="Layer name for HUC12 hydrofabric file.",
+        default="WBDSnapshot_National",
+    )
 
-    ngen: str = Field(default="divides")
+    ngen: str = Field(
+        description="Layer name for NextGen hydrofabric file.", default="divides"
+    )
 
 
 class BaseGeneralConfig(BaseModel):
@@ -141,11 +155,13 @@ class BaseGeneralConfig(BaseModel):
     run_name: str = Field(
         description="Name of the run, used to create output folders and files.",
         examples="test",
+        default="test",
     )
 
     domain: Literal["conus", "ak", "hi", "prvi"] = Field(
         description="Which National Water Model Domain this run uses.",
         examples="conus",
+        default="conus",
     )
 
     vpu_list: Union[List[str], str] = Field(
@@ -155,40 +171,64 @@ class BaseGeneralConfig(BaseModel):
 
     base_dir: str = Field(
         description="Path to base directory for input/output files.",
-        examples="/root/nwm-region-mgr/data/inputs",
+        examples="/root/nwm-region-mgr/data/",
     )
 
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
         ...,
         description=(
-            "Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}"
+            "Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' "
+            "or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}."
+            "If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and "
+            "expanded to a dictionary mapping each VPU to its corresponding file."
+            " This file must include columns 'divide_id', 'vpuid' and 'geometry'."
         ),
-        examples="vpu_09.gpkg",
+        examples=[
+            "{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
+            "{base_dir}/inputs/hydrofabric/vpu_{vpu_list}.gpkg",
+            {
+                "09": "{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
+                "10": "{base_dir}/inputs/hydrofabric/vpu_10.gpkg",
+            },
+        ],
     )
 
     gage_divide_cwt_file: Path | str = Field(
         description="Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'.",
-        examples="calib_gage_divide_{domain}.parquet",
+        examples="{base_dir}/inputs/calib_gage_divide_{domain}.parquet",
     )
 
     donor_gage_file: Path | str = Field(
         description="Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.",
-        examples="gages_nwm4_calib_all.csv",
+        examples="{base_dir}/inputs/gages_nwm4_calib_all.csv",
     )
 
     calval_stats_file: Path | str = Field(
-        description="Path to file with calibration/validation statistics, e.g., 'stat_calval_all_conus.parquet'.",
-        examples="stat_calval_all_{domain}.parquet",
+        description=(
+            "Path to CSV or parquet file with calibration/validation statistics for all calibration gages "
+            "and formulations, e.g., 'stat_calval_all_conus.parquet', 'stat_calval_all_conus.csv'. "
+            "Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation "
+            "and parameter regionalization."
+        ),
+        examples=["stat_calval_all_{domain}.csv", "stat_calval_all_{domain}.parquet"],
     )
 
     calib_param_file: Path | str = Field(
-        description="Path to file containing calibration parameters for all gages in the domain.",
-        examples="sampled_params_{domain}.csv",
+        description=(
+            "Path to CSV or parquet file containing calibrated parameters for all calibration gages "
+            "and formulations in the domain. Must include columns for 'gage_id', 'formulation', and "
+            "calibrated parameters."
+        ),
+        examples=["calib_params_{domain}.csv", "calib_params_{domain}.parquet"],
     )
 
     approach_calib_basins: Literal["regionalization", "summary_score"] = Field(
-        description="Strategy for assigning formulations to calibrated basins.",
-        examples="regionalization",
+        description=(
+            "Strategy for assigning formulations to calibrated basins. Valid options are 'regionalization' "
+            "(assign the formulation chosen for the region) or 'summary_score' (assign based on formulation "
+            "summary scores for the calibrated basin)."
+        ),
+        examples=["regionalization", "summary_score"],
     )
 
     id_col: FieldCrosswalk = Field(
@@ -204,7 +244,10 @@ class BaseGeneralConfig(BaseModel):
     )
 
     layer_name: LayerCrosswalk = Field(
-        description="Dictionary mapping layer names for hydrofabric files.",
+        description=(
+            "Dictionary mapping layer names for hydrofabric files. "
+            "Identifies the layer in each hydrofabric file to be used during regionalization."
+        ),
         examples={
             "huc12": "WBDSnapshot_National",
             "ngen": "divides",
@@ -237,21 +280,47 @@ class BaseGeneralConfig(BaseModel):
 class BaseOutputConfig(BaseModel):
     """Base Output Manager."""
 
-    save: bool
-    """Whether to save output files"""
-    path: Path | str
-    """Path to save output files. If a directory, the 'stem' and 'format' must be specified."""
-    stem: Optional[str | Dict[str, str]] = None
-    """File stem for output files, used to create unique file names based on the path."""
-    stem_suffix: Optional[str] = None
-    """Suffix for the file stem, used to create unique file names based on the path for specific needs."""
-    format: Optional[str] = None
-    """File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file."""
-    plots: Optional[Dict[str, Any]] = None
-    """Configuration for output plots, if applicable."""
-    plot_path: Optional[str] = None
-    """Path to save output plots, if applicable. If not specified, plots will be saved in the same directory
-    as the output files."""
+    save: bool = Field(
+        description="Whether to save output files",
+        default=True,
+        examples=[True, False],
+    )
+    path: Path | str = Field(
+        description="Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.",
+        examples=["{base_dir}/outputs/{run_name}/formulations"],
+    )
+    stem: Optional[str | Dict[str, str]] = Field(
+        description="File stem for output files, used to create unique file names based on the path.",
+        default=None,
+        examples=["form_{domain}_vpu{vpu_list}"],
+    )
+    stem_suffix: Optional[str] = Field(
+        description="Suffix for the file stem, used to create unique file names based on the path for specific needs.",
+        default=None,
+        examples=["_pars"],
+    )
+    format: Optional[str] = Field(
+        description="File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.",
+        default=None,
+        examples=["parquet", "csv", "yaml"],
+    )
+    plots: Optional[Dict[str, Any]] = Field(
+        description="Configuration for output plots, if applicable.",
+        default=None,
+        examples={
+            "histogram": True,
+            "spatial_map": True,
+            "columns_to_plot": ["param1", "param2"],
+        },
+    )
+    plot_path: Optional[str] = Field(
+        description=(
+            "Path to save output plots, if applicable. If not specified, plots will be saved "
+            "in a subfolder 'plots' in the defined output path."
+        ),
+        default=None,
+        examples=["{base_dir}/outputs/{run_name}/formulations/plots"],
+    )
 
     @model_validator(mode="after")
     def check_plot_path(cls, values):

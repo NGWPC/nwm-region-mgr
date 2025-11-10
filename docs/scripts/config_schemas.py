@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Any, Dict, List, Literal, get_args, get_origin
+from typing import Any, Dict, List, Literal, Type, get_args, get_origin
 
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
-from pydantic_core import PydanticUndefinedType
 
+# from pydantic_core import PydanticUndefinedType
 from nwm_region_mgr.formreg.config_schema import (
     BestFormulation,
     FormulationCostConfig,
@@ -96,40 +96,105 @@ def type_to_str(tp):
         return str(tp)
 
 
-def field_to_dict(field: FieldInfo):
-    """Unpacks type, description, examples, default."""
-    # Get type
-    type_ = field.annotation or Any
+def field_to_dict(field: FieldInfo) -> dict:
+    """Convert a Pydantic field to a dictionary suitable for YAML generation."""
+    type_ = getattr(field, "annotation", Any)
 
-    # Get description
+    # Description
     description = getattr(field, "description", None) or NO_DESCRIPTION_STR
 
-    # Get default
-    default = getattr(field, "default", None)
-    if isinstance(default, PydanticUndefinedType):
-        default = "required"
+    # Default value
+    default = getattr(field, "default", ...)
+    default_str = "required" if default is ... else default
 
-    # Get examples
-    example = getattr(field, "examples", None) or ""
-    if example == "" and default != "required":
-        example = default
+    # Example: prefer child examples if defined
+    example = getattr(field, "examples", None)
+    if example is None:
+        example = default_str if default_str != "required" else ""
 
-    # Check if field is pydantic class or dict of them
-    if getattr(field, "default_factory") is not None:
-        type_ = field.default_factory.__name__
-        default = field.default_factory.__name__
-        example = None
-        sub_dict = pydantic_to_dict(field.default_factory)
+    sub_dict = None
+
+    # Case 1: nested BaseModel instance or type
+    if isinstance(default, BaseModel):
+        sub_dict = pydantic_to_dict_subclass_only(type(default), type(default))
+    elif isinstance(type_, type) and issubclass(type_, BaseModel):
+        sub_dict = pydantic_to_dict_subclass_only(type_, type_)
     else:
-        sub_dict = None
+        # Case 2: dict[str, BaseModel]
+        origin = get_origin(type_)
+        args = get_args(type_)
+        if (
+            origin in (dict, Dict)
+            and len(args) == 2
+            and isinstance(args[1], type)
+            and issubclass(args[1], BaseModel)
+        ):
+            value_type = args[1]
+            # Always recurse on the type, ignoring the 'example' dict
+            sub_dict = pydantic_to_dict_subclass_only(value_type, value_type)
 
     return {
         "type": type_,
         "description": description,
+        "default": default_str,
         "example": example,
-        "default": default,
         "sub_dict": sub_dict,
     }
+
+
+def pydantic_to_dict_subclass_only(
+    model_cls: type[BaseModel],
+    base_cls: type[BaseModel],
+    start_fields: list[str] = ["general"],
+    end_fields: list[str] = ["output", "algorithms"],
+) -> dict[str, dict]:
+    """Convert a Pydantic model to dict suitable for YAML generation.
+
+    1. Orders fields with start_fields first, end_fields last.
+    2. Excludes fields from base_cls only for the 'general' section.
+    3. Recursively handles nested BaseModel fields including dict[str, BaseModel].
+    """
+    dict_rep = {}
+
+    # Identify inherited fields (applies only to the 'general' section)
+    base_fields = set(base_cls.model_fields.keys()) if model_cls != base_cls else set()
+
+    # Compute ordered field names
+    all_fields = list(model_cls.model_fields.keys())
+    middle_fields = [f for f in all_fields if f not in start_fields + end_fields]
+    ordered_fields = start_fields + middle_fields + end_fields
+
+    for name in ordered_fields:
+        if name not in model_cls.model_fields:
+            continue
+
+        field = model_cls.model_fields[name]
+
+        # Only exclude inherited fields from the general section
+        if name == "general" and model_cls != base_cls and name in base_fields:
+            continue
+
+        # Exclude inherited fields only for general section
+        if name == "general" and model_cls != base_cls:
+            general_sub_dict = {}
+            for sub_name, sub_field in field.annotation.model_fields.items():
+                if sub_name not in base_fields:
+                    general_sub_dict[sub_name] = field_to_dict(sub_field)
+
+            # Include description for the 'general' field itself
+            dict_rep[name] = {
+                "description": getattr(field, "description", NO_DESCRIPTION_STR),
+                "sub_dict": general_sub_dict,
+            }
+            continue
+
+        # Skip required fields without default
+        if getattr(field, "default", ...) is ...:
+            continue
+
+        dict_rep[name] = field_to_dict(field)
+
+    return dict_rep
 
 
 def pydantic_to_dict(model_cls: type[BaseModel]) -> dict[str, dict]:
@@ -166,7 +231,6 @@ def pydantic_dict_to_lines(dict_rep: dict, indent: int = 0) -> list[str]:
         else:
             comment = ""
 
-        # if v["example"] is not None:  # Not sub pydantic class  # Revert to this if the line below breaks
         if v["sub_dict"] is None:  # Not sub pydantic class
             if isinstance(v["example"], dict):  # Handle sub dicts
                 lines.append(f"{tmp_ind}{k}:{comment}")
@@ -201,7 +265,10 @@ def justify_yaml_comments(lines: list[str]):
 def generate_yaml_template(model_cls: type[BaseModel], top_key: str = None) -> str:
     """Generate YAML file using examples and descriptions."""
     # Convert BaseModel to dict for easier manipulation
-    dict_rep = pydantic_to_dict(model_cls)
+    dict_rep = pydantic_to_dict_subclass_only(
+        model_cls,
+        BaseGeneralConfig,
+    )
 
     # Build initial yaml lines
     if top_key is not None:
@@ -218,7 +285,8 @@ def generate_yaml_template(model_cls: type[BaseModel], top_key: str = None) -> s
 def generate_markdown_table(model_cls: type[BaseModel]) -> str:
     """Convert a pydantic model to a markdown table."""
     # Convert BaseModel to dict for easier manipulation
-    dict_rep = pydantic_to_dict(model_cls)
+    # dict_rep = pydantic_to_dict(model_cls)
+    dict_rep = pydantic_to_dict_subclass_only(model_cls, BaseGeneralConfig)
 
     # Make markdown table
     headers = ["Field", "Type(s)", "Description", "Default", "Example(s)"]
@@ -227,13 +295,11 @@ def generate_markdown_table(model_cls: type[BaseModel]) -> str:
         "| " + " | ".join("---" for _ in headers) + " |",
     ]
 
-    for i in dict_rep:
-        type_str = type_to_str(dict_rep[i]["type"])
-        description = dict_rep[i]["description"]
-        default = dict_rep[i]["default"]
-        examples = dict_rep[i]["example"]
-
-        table.append(f"| {i} | {type_str} | {description} | {default} | {examples} |")
+    for name, field_dict in dict_rep.items():
+        table.append(
+            f"| {name} | {type_to_str(field_dict['type'])} | "
+            f"{field_dict['description']} | {field_dict['default']} | {field_dict['example']} |"
+        )
 
     return "\n".join(table)
 

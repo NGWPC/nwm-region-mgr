@@ -8,7 +8,12 @@ import pandas as pd
 import pyarrow.parquet as pq
 from pydantic import BaseModel, Field, model_validator
 
-from nwm_region_mgr.utils import BaseConfig, BaseGeneralConfig, read_table
+from nwm_region_mgr.utils import (
+    BaseConfig,
+    BaseGeneralConfig,
+    BaseOutputConfig,
+    read_table,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -473,6 +478,59 @@ class Config(BaseConfig):
     algorithms: AlgorithmConfig = Field(
         description="Algorithm configuration class.  See specific algorithms for additional arguments.",
         default_factory=AlgorithmConfig,
+    )
+
+    output: dict[str, BaseOutputConfig] = Field(
+        description="Output configuration settings.",
+        default_factory=dict,
+        examples={
+            "pairs": {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/pairs",
+                "stem": "pairs_{algorithm_list}_{domain}_vpu{vpu_list}",
+                "stem_suffix": "_mswm",  # suffix for the pairs file to be used by MSWM
+                "format": "parquet",
+                "plots": {
+                    "spatial_map": True,
+                    "histogram": True,
+                    "columns_to_plot": ["distSpatial", "distAttr"],  # columns to plot
+                },
+            },
+            "params": {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/params",
+                "stem": "formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}",
+                "format": "csv",
+            },
+            "attr_data_final": {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/attr_data_final",
+                "stem": "attr_{domain}_vpu{vpu_list}",
+                "format": "parquet",
+                "plots": {
+                    "spatial_map": True,
+                    "histogram": True,
+                    "columns_to_plot": [
+                        "streamcat_Elev",
+                        "streamcat_BFI",
+                        "streamcat_Precip_Minus_EVT",
+                        "hlr_PMPE",
+                        "hlr_SAND",
+                        "hlr_TAVE",
+                    ],  # attributes to plot
+                },
+            },
+            "config_final": {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/config_parreg_final.yaml",
+                "format": "yaml",
+            },
+            "spatial_distance": {
+                "save": True,
+                "path": "{base_dir}/outputs/{run_name}/spatial_distance",
+                "format": "parquet",
+            },
+        },
     )
 
     @model_validator(mode="after")

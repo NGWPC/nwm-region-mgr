@@ -3,14 +3,14 @@ Frequently Asked Questions
 
 .. dropdown:: What is nwm_region_mgr?
 
-    nwm_region_mgr is a command line utility for identifying optimized NextGen
+    nwm_region_mgr is a command line Python utility for identifying optimized NextGen
     formulations and parameter values in ungauged catchments.
 
 .. dropdown:: What is a formulation?
 
     A NextGen formulation is any single model or combination of models and/or
     modules running in a basin to simulate that location's hydrology. A formulation
-    may include one more hydrologic models and modules, plus a streamflow routing
+    may include one or more hydrologic models and modules, plus a streamflow routing
     module, a coastal model, and other supporting routines.
 
     For more information on the available models/modules, please see
@@ -31,29 +31,39 @@ Frequently Asked Questions
 .. dropdown:: In what areas of the world can I run this?
 
     Regionalization is currently supported for CONUS, Alaska, Hawaii, and Puerto
-    Rico and the Virgin Islands.  The spatial domain is set in config_general.yaml
-    under the general:domain field, where values can be conus, ak, hi, prvi,
+    Rico and the Virgin Islands.  The spatial domain is set in **config_general.yaml**
+    under the *general:domain* field, where values can be conus, ak, hi, prvi,
     respectively.
 
 .. dropdown:: What watershed delineations are used?
 
-    Regionalization relies on the NextGen Hydrofabric.
+    Regionalization relies on the NextGen Hydrofabric, which is set in **config_general.yaml**
+    under the *general:ngen_hydrofabric_file* field. 
 
 .. dropdown:: What spatial unit are parameters assigned to?
 
-    Regionalization is flexible, and users can set the level that parameters are
-    assigned using the spatial_unit field in config_formreg.yaml.
+    Regionalization assigns parameters to hydrofabric divides (i.e., catchments), 
+    which serve as the fundamental spatial units.
 
 .. dropdown:: How does nwm_region_mgr find optimal formulations?
 
-    Optimal formulations are determined based on formulation computational cost and user-specified performance metrics (
-    ex. Nash–Sutcliffe efficiency (nse), Kling-Gupta efficiency (KGE), bias, or correlation (cor))
+    Optimal formulations are first determined for calibrated catchments based on 
+    computational cost and user-specified performance metrics (e.g. Nash–Sutcliffe efficiency (nse), 
+    Kling-Gupta efficiency (KGE), bias, or correlation (cor)).
+    For uncalibrated catchments, optimal formulations are then assigned by selecting
+    the best-performing formulation from calibrated catchments within the same region 
+    based on the user-defined HUC level (e.g., HUC8). 
 
 
 .. dropdown:: How does nwm_region_mgr find optimal parameter values?
 
-    Parameter values are assigned to each hydrofabric divide by identifying calibrated catchments that are close to the
-    divide in either mapped location or physiographic characteristics.
+    Parameter values are assigned to each hydrofabric divide by identifying calibrated catchments 
+    that are close to the divide in both mapped location and physiographic characteristics. 
+    Users can choose from multiple clustering or distance-based algorithms and multiple attribute datasets 
+    (e.g., 
+    `NextGen divide attributes <https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>`_, 
+    `Hydrologic Landscape Region (HLR) attributes <https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>`_, and 
+    `StreamCat attributes <https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>`_).  
 
 .. dropdown:: How do I start using this tool?
 
