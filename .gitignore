@@ -28,3 +28,4 @@ __pycache__/
 # Specific project paths
 pkgs/parreg/build
 pkgs/parreg/tests/test_data/test_outputs
+nwm-rte
