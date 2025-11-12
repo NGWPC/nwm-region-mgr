@@ -245,7 +245,10 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     @property
     def combined_geom(self):
         """Dissolve all polygons into one before buffering."""
-        geom = self.hydrofabric_gdf_3857.union_all()
+        try:
+            geom = self.hydrofabric_gdf_3857.union_all()
+        except AttributeError as e:
+            geom = self.hydrofabric_gdf_3857.unary_union
         polygons = []
         if isinstance(geom, MultiPolygon):
             for polygon in geom.geoms:
