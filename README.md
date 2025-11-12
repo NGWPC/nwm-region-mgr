@@ -12,7 +12,7 @@ as well as scripts/workflows to run ngen simulations and evaluation.
 
 ## Docker Run Time Environment (RTE)
 ### Step 0. Build Docker image
-`Note` This step is only necessary if a docker image doesn't already exists or if updates to the code base have been implemented. 
+`Note` This step is only necessary if a docker image doesn't already exists or if updates to the code base have been implemented. The short flag `-d` can also be used in place of `--docker`
 
 ```bash
 cd nwm-region-mgr
@@ -20,54 +20,32 @@ cd nwm-region-mgr
 ```bash
 ./regionalization_workflow.sh -docker
 ```
-or: 
-```bash
-./regionalization_workflow.sh -d
-```
 ### Step 1. Run regionalization
 #### a) Run both formulation and parameter regionalization together:
 ```bash
 ./regionalization_workflow.sh --formreg --parreg
 ```
-or 
-```bash
-./regionalization_workflow.sh -fp
-```
-
 #### b) Run formulation regionalization alone:
+The short flag `-f` can also be used in place of `--formreg`.
 ```bash
 ./regionalization_workflow.sh --formreg
 ```
-or:
-```bash
-./regionalization_workflow.sh -f
-```
-
-
 #### c) Run parameter regionalization alone:
-```bash
-./regionalization_workflow.sh -p
-```
-or 
+The short flag `-p` can also be used in place of `--parreg`.
 ```bash
 ./regionalization_workflow.sh --parreg
 ```
-
 ### Step 2. Run NGEN
 Run a NGEN simulation:
-```bash
-./regionalization_workflow.sh -n
-``` 
-or 
+
+The short flag `-n` can also be used in place of `--ngen`.
 ```bash
 ./regionalization_workflow.sh --ngen
 ```
 ### Step 3. Run Evaluation
 Run an evaluation:
-```bash
-./regionalization_workflow.sh -e
-``` 
-or 
+
+The short flag `-e` can also be used in place of `--eval`.
 ```bash
 ./regionalization_workflow.sh --eval
 ```
