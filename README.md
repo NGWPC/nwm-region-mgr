@@ -18,41 +18,41 @@ as well as scripts/workflows to run ngen simulations and evaluation.
 cd nwm-region-mgr
 ```
 ```bash
-./regionalization_workflow.sh -docker
+./region-mgr.sh -docker
 ```
 ### Step 1. Run regionalization
 #### a) Run both formulation and parameter regionalization together:
 ```bash
-./regionalization_workflow.sh --formreg --parreg
+./region-mgr.sh --formreg --parreg
 ```
 #### b) Run formulation regionalization alone:
 The short flag `-f` can also be used in place of `--formreg`.
 ```bash
-./regionalization_workflow.sh --formreg
+./region-mgr.sh --formreg
 ```
 #### c) Run parameter regionalization alone:
 The short flag `-p` can also be used in place of `--parreg`.
 ```bash
-./regionalization_workflow.sh --parreg
+./region-mgr.sh --parreg
 ```
 ### Step 2. Run NGEN
 Run a NGEN simulation:
 
 The short flag `-n` can also be used in place of `--ngen`.
 ```bash
-./regionalization_workflow.sh --ngen
+./region-mgr.sh --ngen
 ```
 ### Step 3. Run Evaluation
 Run an evaluation:
 
 The short flag `-e` can also be used in place of `--eval`.
 ```bash
-./regionalization_workflow.sh --eval
+./region-mgr.sh --eval
 ```
 ### Steps 0-4
 Alternatively the user can run steps 0-4 in all at once in series:
 ```bash
-./regionalization_workflow.sh -dfpne
+./region-mgr.sh -dfpne
 ```
 ## Desktop Run Time Environment (RTE)
 ### Clone & Build
