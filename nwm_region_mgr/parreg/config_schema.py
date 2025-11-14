@@ -1,4 +1,15 @@
-"""Defines classes for validating the configuration."""
+"""Defines classes for validating the configuration for parameter regionalization.
+
+Classes:
+    - GeneralConfig: General configuration settings specific to parameter regionalization.
+    - DonorConfig: Configuration for donor selection.
+    - AttrDatasetConfig: Configuration for attribute datasets used in the regionalization process.
+    - AvailableAttrsConfig: Configuration for available attribute datasets for use in the regionalization process.
+    - SnowCoverConfig: Configuration for snow cover data.
+    - AlgorithmConfig: Algorithm configuration class.
+    - ParameterOutputConfig: Configuration for parameter regionalization output.
+    - Config: Top-level configuration class for parameter regionalization.
+"""
 
 import logging
 from pathlib import Path
@@ -23,14 +34,14 @@ class GeneralConfig(BaseGeneralConfig):
 
     n_procs: int = Field(
         description="Number of processors to use for parallel processing. Set to -1 to use all available processors.",
-        default=1,
-        examples="-1",
+        default=-1,
+        examples=-1,
     )
 
-    attr_dataset_list: List[Literal["ngen", "hlr"]] = Field(
-        description="List of attribute dataset names to use. Valid options include 'ngen', 'hlr'.",
-        examples=["hlr"],
-        default=[],
+    attr_dataset_list: List[Literal["ngen", "hlr", "streamcat"]] = Field(
+        description="List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'.",
+        examples=["ngen", "streamcat"],
+        default=["ngen"],
     )
 
     algorithm_list: List[
@@ -38,30 +49,37 @@ class GeneralConfig(BaseGeneralConfig):
     ] = Field(
         description="Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch').",
         examples=["gower", "kmeans"],
-        default=[],
+        default=["gower"],
     )
 
     manual_pairings_file: Path | str | None = Field(
-        description="Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings.",
+        description=(
+            "Path to the manual pairings file. If provided, this file will be used to specify "
+            "manual donor-receiver pairings, overriding the algorithmic selections."
+        ),
         examples="pairs_kmeans_conus_vpu09.parquet",
         default=None,
     )
-
-    # nested_gages: Optional[str] = "inner"
-    # """How to handle nested gages in the calibration basin. Options: 'inner' (use inner gage), 'outer' (use outer gage)."""
 
 
 class MetricEvalPeriod(BaseModel):
     """Configuration for the evaluation period of metrics to be used for screening donors."""
 
-    col_name: str = Field(
-        description="Name of the column in the donor stats file that contains the evaluation period.",
+    col_name: str | None = Field(
+        description=(
+            "Name of the column in the donor stats file that contains the evaluation period. "
+            "No filtering by evaluation period if None."
+        ),
         examples="evalPeriod",
+        default=None,
     )
 
-    value: str = Field(
-        description="Value of the evaluation period to filter the donor stats file.",
+    value: str | None = Field(
+        description=(
+            "Value of the evaluation period to filter donor stats. No filtering by evaluation period if None."
+        ),
         examples="full",
+        default=None,
     )
 
 
@@ -70,19 +88,19 @@ class MetricThreshold(BaseModel):
 
     min: float | None = Field(
         description="Minimum threshold for the metric. If None, no minimum threshold is applied.",
-        examples=0.4,
+        examples=None,
         default=None,
     )
 
     max: float | None = Field(
         description="Maximum threshold for the metric. If None, no maximum threshold is applied.",
-        examples=0.9,
+        examples=None,
         default=None,
     )
 
     absolute: bool | None = Field(
         description="If True, apply the absolute value of the metric before applying the thresholds.",
-        examples=False,
+        examples=None,
         default=False,
     )
 
@@ -110,19 +128,23 @@ class DonorConfig(BaseModel):
     )
 
     metric_threshold: Dict[str, MetricThreshold] = Field(
-        description="Dictionary of metric thresholds to be used for screening donors.",
-        examples={"cor": {"min": 0.4}},
+        description=(
+            "Dictionary of metric thresholds to be used for screening donors. Each key is a metric name, "
+            "and the value is a MetricThreshold object specifying the min, max, and absolute settings. "
+            "Refer to schema of MetricThreshold for details."
+        ),
+        examples={
+            "cor": {"min": 0.4, "max": None, "absolute": False},
+            "kge": {"min": 0.2, "max": None, "absolute": False},
+        },
         default=None,
     )
 
     def get_qualified_donors(
         self,
         config: BaseModel,
-        # vpu: str = None,
         donors0: list = None,
         init_donor_df: pd.DataFrame = None,
-        # stats_file: str | Path = None,
-        # id_name: str = "divide_id",
     ) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
         divide_id_name = config.general.id_col.get("divide", "divide_id")
@@ -209,12 +231,16 @@ class AttrDatasetConfig(BaseModel):
     """Configuration for attribute datasets used in the regionalization process."""
 
     attr_list: list | None = Field(
-        description="List of attributes to use from this dataset.",
-        examples=["attr1"],
+        description=(
+            "List of attributes to use from this dataset. If not provided, attributes will be determined "
+            "from attr_select_file. Either this field or attr_select_file must be provided."
+            "If both are provided, attr_list takes priority."
+        ),
+        examples=None,
         default=None,
     )
     attr_select_file: Path | str | None = Field(
-        description="Path to file where attribute list may be found.",
+        description="Path to file where selection of attributes to use during regionalization may be found.",
         examples=["attr_selection_ngen.csv"],
         default=None,
     )
@@ -224,7 +250,10 @@ class AttrDatasetConfig(BaseModel):
         default=None,
     )
     base_attr_list: list | None = Field(
-        description="List of 'base' attributes to use from this dataset.",
+        description=(
+            "Small list of basic attributes during a 2nd round of pairing if no donor is found using "
+            "the full set of selected attributes during the first round."
+        ),
         examples=["elevation", "slope", "aspect"],
         default=None,
     )
@@ -298,13 +327,60 @@ class AttrDatasetConfig(BaseModel):
         return df_data[[id_name] + self.attr_list]
 
 
+class AvailableAttrsConfig(BaseModel):
+    """Configuration for available attribute datasets for use in the regionalization process."""
+
+    ngen: AttrDatasetConfig = Field(
+        description=(
+            "Configuration for NGEN attribute dataset."
+            "(https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html)."
+        ),
+        examples={
+            "attr_list": None,
+            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_ngen.csv",
+            "attr_data_file": "{base_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet",
+            "base_attr_list": ["elevation", "slope", "aspect"],
+        },
+    )
+
+    hlr: AttrDatasetConfig = Field(
+        description=(
+            "Configuration for Hydrologic Landscape Regions (HLR) attribute dataset "
+            "(https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states)."
+        ),
+        examples={
+            "attr_list": None,
+            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_hlr.csv",
+            "attr_data_file": "{base_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet",
+            "base_attr_list": ["PPT", "SAND"],
+        },
+    )
+
+    streamcat: AttrDatasetConfig = Field(
+        description=(
+            "Configuration for StreamCat attribute dataset "
+            "(https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset)."
+        ),
+        examples={
+            "attr_list": None,
+            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_streamcat.csv",
+            "attr_data_file": "{base_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet",
+            "base_attr_list": ["Precip_Minus_EVT", "Elev", "BFI"],
+        },
+    )
+
+
 class SnowCoverConfig(BaseModel):
-    """Configuration for snow cover data."""
+    """Configuration for snow cover."""
 
     consider_snowness: bool | None = Field(
-        description="Whether to consider snow cover data in the regionalization process.",
-        examples=False,
-        default=False,
+        description=(
+            "Whether to consider snow driven and non-snow driven catchments separately "
+            "in the regionalization process. If True, snow-driven receivers will only consider "
+            "snow-driven donors and non-snow-driven receivers will only consider non-snow-driven donors."
+        ),
+        examples=True,
+        default=True,
     )
 
     snow_cover_file: Path | str | dict[str, Path | str] | None = Field(
@@ -316,7 +392,7 @@ class SnowCoverConfig(BaseModel):
     column: str | None = Field(
         description="Column name in the snow cover data file that contains the snow cover percentage.",
         examples="snow_pc_hydroatlas",
-        default=None,
+        default="snow_pc_hydroatlas",
     )
 
     threshold: float | None = Field(
@@ -338,85 +414,247 @@ class SnowCoverConfig(BaseModel):
 
 
 class AlgoGeneral(BaseModel):
-    """General algorithm class."""
+    """General configurations shared by all regionalization algorithms."""
 
-    min_snow_frac: float
-    max_spa_dist: float
-    max_attr_diff: Dict[str, float]
-    n_donor_max: int
-    min_var_pca: float
+    max_spa_dist: float | None = Field(
+        default=1000.0,
+        description="Maximum spatial distance (km) to consider a donor suitable",
+        examples=1500.0,
+    )
+
+    n_donor_max: int | None = Field(
+        default=3,
+        description="Maximum number of donors to keep that satisfy all criteria",
+        examples=3,
+    )
+    min_var_pca: float | None = Field(
+        default=0.9,
+        description="Minimum total variance explained by chosen PCA components",
+        examples=0.8,
+    )
 
 
 class Gower(AlgoGeneral):
-    """Gower algorithm class."""
+    """Configurations for the distance-based algorithm Gower."""
 
-    min_attr_dist: float
-    max_attr_dist: float
-    min_spa_dist: float
-    n_donor_max: int
-    zero_spa_dist: float
+    min_attr_dist: float | None = Field(
+        default=0.1,
+        description=(
+            "Minimum attribute distance. If one or more donors have a distance to receiver "
+            "smaller than this threshold, stop searching."
+        ),
+        examples=0.1,
+    )
+
+    max_attr_dist: float | None = Field(
+        default=0.20,
+        description=(
+            "Maximum attribute distance. Donors with distance to receiver larger than this value are discarded, "
+            "unless no donor smaller than this threshold is available."
+        ),
+        examples=0.25,
+    )
+
+    min_spa_dist: float | None = Field(
+        default=100.0,
+        description="Starting distance (km) to iteratively search for donors in the neighborhood",
+        examples=200.0,
+    )
+
+    zero_spa_dist: float | None = Field(
+        default=1.0,
+        description=(
+            "Distance threshold (in km) where receiver adopts a donor directly "
+            "(i.e., donor/receiver are considered overlapping each other)"
+        ),
+        examples=1.0,
+    )
 
 
 class URF(AlgoGeneral):
-    """Unsupervised Rand Forest (URF) algorithm class."""
+    """Unsupervised Random Forest (URF) algorithm class."""
 
-    pca: bool
-    n_trees: int
-    max_depth: int
-    min_attr_dist: float
-    max_attr_dist: float
-    min_spa_dist: float
-    n_donor_max: int
-    zero_spa_dist: float
+    pca: bool | None = Field(
+        default=False,
+        description=(
+            "Whether to perform PCA on the attribute data before building the forest. "
+            "Preliminary testing indicates limited difference in results with/without PCA."
+        ),
+        examples=False,
+    )
+
+    n_trees: int | None = Field(
+        default=500,
+        description="Number of trees in the random forest.",
+        examples=500,
+    )
+
+    max_depth: int | None = Field(
+        default=3,
+        description=(
+            "Maximum depth of each tree. If None, nodes are expanded until all leaves are pure."
+        ),
+        examples=3,
+    )
+
+    min_attr_dist: float | None = Field(
+        default=None,
+        description=(
+            "Minimum attribute distance. If one or more donors have a distance to "
+            "receiver smaller than this threshold, stop searching."
+        ),
+        examples=0.1,
+    )
+
+    max_attr_dist: float | None = Field(
+        default=None,
+        description=(
+            "Maximum attribute distance. Donors with distance to receiver larger than this value are discarded, "
+            "unless no donor smaller than this threshold is available."
+        ),
+        examples=0.25,
+    )
+
+    min_spa_dist: float | None = Field(
+        default=None,
+        description="Starting distance (km) to iteratively search for donors in the neighborhood",
+        examples=200.0,
+    )
+
+    zero_spa_dist: float | None = Field(
+        default=None,
+        description=(
+            "Distance threshold (in km) where receiver adopts a donor directly "
+            "(i.e., donor/receiver are considered overlapping each other)"
+        ),
+        examples=1.0,
+    )
 
 
 class KMeans(AlgoGeneral):
     """K-means algorithm class."""
 
-    n_donor_max: int
-    n_iter_max: int
-    init: str
-    n_init: int
+    n_iter_max: int | None = Field(
+        default=100,
+        description="Maximum number of iterations for the algorithm.",
+        examples=100,
+    )
+
+    init: Literal["k-means++", "random"] | None = Field(
+        default="k-means++",
+        description="Method for initialization.",
+        examples="k-means++",
+    )
+
+    n_init: int | None = Field(
+        default=None,
+        description="Number of times the k-means algorithm will be run with different centroid seeds.",
+        examples=3,
+    )
 
 
 class KMedoids(AlgoGeneral):
     """K-medoids algorithm class."""
 
-    n_donor_max: int
-    n_iter_max: int
-    init: str
+    n_iter_max: int | None = Field(
+        default=None,
+        description="Maximum number of iterations for the algorithm.",
+        examples=100,
+    )
+
+    init: Literal["random", "huristic", "k-medoids++", "build"] | None = Field(
+        default="random",
+        description="Method for initialization.",
+        examples="random",
+    )
 
 
 class HDBSCAN(AlgoGeneral):
     """Hierarchical Density Based Spatial Clustering of Applications with Noise (HDBSCAN) algorithm class."""
 
-    n_donor_max: int
-    min_cluster_size: int
+    n_donor_max: int | None = Field(
+        default=20,
+        description="Maximum number of donors to keep that satisfy all criteria.",
+        examples=20,
+    )
+
+    min_cluster_size: int | None = Field(
+        default=3,
+        description="Minimum size of clusters (to avoid being considered noise)",
+        examples=3,
+    )
 
 
 class Birch(AlgoGeneral):
     """Balanced Iterative Reducing and Clustering using Hierarchies (BIRCH) algorithm class."""
 
-    n_donor_max: int
-    branching_factor: int
-    min_thresh: float
-    max_thresh: float
-    max_resample: int
+    branching_factor: int | None = Field(
+        default=50,
+        description="Branching factor for the BIRCH algorithm.",
+        examples=50,
+    )
+
+    min_thresh: float | None = Field(
+        default=1.5,
+        description=(
+            "Minimum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds "
+            "between min_thresh and max_thresh to identify a suitable threshold."
+        ),
+        examples=1.5,
+    )
+    max_thresh: float | None = Field(
+        default=4.0,
+        description=(
+            "Maximum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds "
+            "between min_thresh and max_thresh to identify a suitable threshold."
+        ),
+        examples=4.0,
+    )
+    max_resample: int | None = Field(
+        default=20,
+        description="Maximum number of resamples.",
+        examples=20,
+    )
 
 
 class AlgorithmConfig(BaseModel):
     """Algorithm configuration class."""
 
-    algo_general: AlgoGeneral = Field(
-        description="Base config for all algorithms.",
-        default_factory=AlgoGeneral,
+    gower: Gower = Field(
+        description="Configurations for the distance-based algorithm Gower.",
+        default_factory=Gower,
     )
-    gower: Gower | None = Field(default=None)
-    urf: URF | None = Field(default=None)
-    kmeans: KMeans | None = Field(default=None)
-    kmedoids: KMedoids | None = Field(default=None)
-    hdbscan: HDBSCAN | None = Field(default=None)
-    birch: Birch | None = Field(default=None)
+
+    urf: URF = Field(
+        description="Configurations for the distance-based algorithm Unsupervised Random Forest (URF)",
+        default_factory=URF,
+    )
+
+    kmeans: KMeans = Field(
+        description="Configurations for the clustering algorithm K-means",
+        default_factory=KMeans,
+    )
+
+    kmedoids: KMedoids = Field(
+        description="Configurations for the clustering algorithm K-medoids",
+        default_factory=KMedoids,
+    )
+
+    hdbscan: HDBSCAN = Field(
+        description=(
+            "Configurations for the clustering algorithm Hierarchical Density Based Spatial Clustering "
+            "of Applications with Noise (HDBSCAN)",
+        ),
+        default_factory=HDBSCAN,
+    )
+
+    birch: Birch = Field(
+        description=(
+            "Configurations for the clustering algorithm Balanced Iterative Reducing and "
+            "Clustering using Hierarchies (BIRCH)",
+        ),
+        default_factory=Birch,
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -446,6 +684,85 @@ class AlgorithmConfig(BaseModel):
         return values
 
 
+class ParameterOutputConfig(BaseModel):
+    """Configuration for parameter regionalization output."""
+
+    pairs: BaseOutputConfig = Field(
+        description="Configuration for saving donor-receiver pairs.",
+        default_factory=BaseOutputConfig,
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/pairs",
+            "stem": "pairs_{algorithm_list}_{domain}_vpu{vpu_list}",
+            "stem_suffix": "_mswm",  # suffix for the pairs file to be used by MSWM
+            "format": "parquet",
+            "plots": {
+                "spatial_map": True,
+                "histogram": True,
+                "columns_to_plot": ["distSpatial", "distAttr"],  # columns to plot
+            },
+        },
+    )
+
+    params: BaseOutputConfig = Field(
+        description="Configuration for saving regionalized parameters.",
+        default_factory=BaseOutputConfig,
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/params",
+            "stem": "formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}",
+            "format": "csv",
+        },
+    )
+
+    attr_data_final: BaseOutputConfig = Field(
+        description=(
+            "Configuration for saving and plotting final attribute data used in regionalization. "
+            "Note only selected attributes are saved, and attribute names are prefixed with "
+            "the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",
+        ),
+        default_factory=BaseOutputConfig,
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/attr_data_final",
+            "stem": "attr_{domain}_vpu{vpu_list}",
+            "format": "parquet",
+            "plots": {
+                "spatial_map": True,
+                "histogram": True,
+                "columns_to_plot": [
+                    "streamcat_Elev",
+                    "streamcat_BFI",
+                    "streamcat_Precip_Minus_EVT",
+                    "hlr_PMPE",
+                    "hlr_SAND",
+                    "hlr_TAVE",
+                ],  # attributes to plot
+            },
+        },
+    )
+
+    config_final: BaseOutputConfig = Field(
+        description="Configuration for saving final configuration file used in regionalization.",
+        default_factory=BaseOutputConfig,
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/config_parreg_final.yaml",
+            "format": "yaml",
+        },
+    )
+
+    spatial_distance: BaseOutputConfig = Field(
+        description="Configuration for saving spatial distance data.",
+        default_factory=BaseOutputConfig,
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/spatial_distance",
+            "format": "parquet",
+        },
+    )
+
+
 class Config(BaseConfig):
     """Configuration class."""
 
@@ -457,22 +774,12 @@ class Config(BaseConfig):
         description="Configuration for donor selection.",
         default_factory=DonorConfig,
     )
-    attr_datasets: dict[
-        Literal["hlr", "ngen", "hydroatlas", "streamcat", "nhdplus", "camels"],
-        AttrDatasetConfig,
-    ] = Field(
-        description="Configuration for attribute datasets that can be used in the regionalization process.",
-        examples={
-            "ngen": {
-                "attr_list": None,
-                "attr_select_file": "attr_selection_ngen.csv",
-                "attr_data_file": "attr_ngen_{domain}.parquet",
-                "base_attr_list": ["elevation", "slope", "aspect"],
-            }
-        },
+    attr_datasets: AvailableAttrsConfig = Field(
+        description="Configuration for attribute datasets available for use in regionalization.",
+        default_factory=AvailableAttrsConfig,
     )
     snow_cover: SnowCoverConfig = Field(
-        description="Configuration for snow cover data.",
+        description="Configuration for snow cover data to be used in determining whether catchments are snow-driven.",
         default_factory=SnowCoverConfig,
     )
     algorithms: AlgorithmConfig = Field(
@@ -480,57 +787,9 @@ class Config(BaseConfig):
         default_factory=AlgorithmConfig,
     )
 
-    output: dict[str, BaseOutputConfig] = Field(
-        description="Output configuration settings.",
-        default_factory=dict,
-        examples={
-            "pairs": {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/pairs",
-                "stem": "pairs_{algorithm_list}_{domain}_vpu{vpu_list}",
-                "stem_suffix": "_mswm",  # suffix for the pairs file to be used by MSWM
-                "format": "parquet",
-                "plots": {
-                    "spatial_map": True,
-                    "histogram": True,
-                    "columns_to_plot": ["distSpatial", "distAttr"],  # columns to plot
-                },
-            },
-            "params": {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/params",
-                "stem": "formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}",
-                "format": "csv",
-            },
-            "attr_data_final": {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/attr_data_final",
-                "stem": "attr_{domain}_vpu{vpu_list}",
-                "format": "parquet",
-                "plots": {
-                    "spatial_map": True,
-                    "histogram": True,
-                    "columns_to_plot": [
-                        "streamcat_Elev",
-                        "streamcat_BFI",
-                        "streamcat_Precip_Minus_EVT",
-                        "hlr_PMPE",
-                        "hlr_SAND",
-                        "hlr_TAVE",
-                    ],  # attributes to plot
-                },
-            },
-            "config_final": {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/config_parreg_final.yaml",
-                "format": "yaml",
-            },
-            "spatial_distance": {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/spatial_distance",
-                "format": "parquet",
-            },
-        },
+    output: ParameterOutputConfig = Field(
+        description="Configuration for parameter regionalization output.",
+        default_factory=ParameterOutputConfig,
     )
 
     @model_validator(mode="after")

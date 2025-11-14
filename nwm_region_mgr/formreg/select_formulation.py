@@ -379,7 +379,7 @@ def _select_formulation_given_score(
         method : str, optional
             Method to compute total score, either 'basin' or 'divide', by default 'basin'.
         type : str, optional
-            Type of total score to compute, either 'total_score' or 'total_count', by default 'total_score'.
+            Type of total score to compute, either 'total_score' or 'average_score', by default 'total_score'.
         id_col : dict[str, str], optional
             Dictionary mapping spatial unit type to its identifier column name,
             by default {"gage": "gage_id", "divide": "divide_id"}.
@@ -389,6 +389,7 @@ def _select_formulation_given_score(
             DataFrame with total scores computed for each spatial unit.
 
     """
+    # determine the column name for the type of subdivision to compute total/average score
     col1 = (
         id_col.get("gage", "gage_id")
         if type == "basin" and "gage_id" in df.columns
@@ -405,15 +406,19 @@ def _select_formulation_given_score(
 
     # identify best formulation(s)
     if method == "total_score":
+        # Sum of summary_score per formulation
         df1.loc[:, method] = (
             df1.groupby(["formulation"])["summary_score"].transform("sum").round(2)
         )
-    elif method == "total_count":
+
+    elif method == "average_score":
+        # Average summary_score per formulation
         df1.loc[:, method] = df1.groupby(["formulation"])["summary_score"].transform(
-            "count"
+            "mean"
         )
+
     else:
-        msg = f"Unknown method: {method}. Supported methods are 'total_score' and 'total_count'."
+        msg = f"Unknown method: {method}. Supported methods are 'total_score' and 'average_score'."
         logger.error(msg)
         raise ValueError(msg)
 

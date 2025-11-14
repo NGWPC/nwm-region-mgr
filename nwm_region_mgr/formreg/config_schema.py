@@ -1,4 +1,19 @@
-"""Configuration schema for the formulation regionalization application."""
+"""Configuration schema for the formulation regionalization application.
+
+config_schema.py defines the Pydantic models that represent the configuration
+
+Classes:
+    - FormulationGeneralSettings: General settings for the formulation regionalization application.
+    - BestFormulation: Configuration for determining the best formulation for each spatial unit.
+    - FormulationSpatialUnitConfig: Spatial discretization settings for formulation regionalization.
+    - MetricConfig: Configuration for an individual metric used in summary scoring.
+    - MetricEvalPeriod: Configuration for the evaluation period of metrics to be used for screening donors.
+    - FormulationSummaryScoreConfig: Configuration for computing a summary score for formulation as a weighted average of normalized metrics.
+    - FormulationCostConfig: Computational cost of each formulation.
+    - FormulationOutputConfig: Output configuration for formulation regionalization.
+    - Config: Top-level configuration for formulation regionalization.
+
+"""
 
 import logging
 from enum import Enum
@@ -27,20 +42,27 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     )
 
     divide_huc12_cwt_file: str | None = Field(
-        description="Path to crosswalk file between HUC12 basins and NextGen catchments, with columns 'divide_id' and 'huc_12'.",
+        description=(
+            "Path to crosswalk file between HUC12 basins and NextGen catchments, "
+            "with columns 'divide_id' and 'huc_12'.",
+        ),
         examples="cwt_divide_huc12_{domain}.csv",
         default=None,
     )
 
     calib_basins_only: bool = Field(
-        description="Whether to run formulation selection only for calibrated basins (based on summary score).",
+        description=(
+            "Whether to run formulation selection only for calibrated basins (based on summary score). "
+            "Set to True to limit formulation selection to calibrated basins only; in such cases, "
+            "parameter regionalization for uncalibrated catchments will not consider preferred formulations."
+        ),
         examples=False,
         default=False,
     )
 
     formulation_to_include: List[str] | None = Field(
         description=(
-            "List of formulations to consider. If None, all formulations are included.  "
+            "List of formulations to consider. If None, all available formulations are considered.  "
             "If 'all', all formulations are included."
         ),
         examples=[
@@ -51,7 +73,7 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     )
 
     formulation_to_exclude: List[str] | None = Field(
-        description="List of formulations to exclude. If None, no formulations are excluded.",
+        description="List of formulations to exclude. If None, no formulations are excluded from available options.",
         examples=["noah-owp-modular cfe-s t-route"],
         default=None,
     )
@@ -59,7 +81,7 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     consider_cost: bool = Field(
         description="Whether to consider computational costs of formulations in the regionalization process.",
         examples=False,
-        default=False,
+        default=True,
     )
 
     @model_validator(mode="after")
@@ -76,18 +98,26 @@ class FormulationGeneralSettings(BaseGeneralConfig):
 class BestFormulation(BaseModel):
     """Configuration for determining the best formulation for each spatial unit."""
 
-    method: Literal["total_score", "total_count"] = Field(
-        description="Method to determine the best formulation, options: 'total_score', 'total_count'.",
+    method: Literal["total_score", "average_score"] = Field(
+        description=(
+            "Method to determine the best formulation, options: 'total_score', 'average_score', which "
+            "selects the formulation with the highest total or average summary score across all "
+            "subdivisions (e.g., basins or divides as specified by the 'type' field), respectively.",
+        ),
         examples="total_score",
+        default="total_score",
     )
 
     type: Literal["basin", "divide"] = Field(
-        description="Type of spatial unit for best formulation, options: 'basin', 'divide'.",
+        description="Type of subdivision to use for computing total or average score, options: 'basin', 'divide'.",
         examples="basin",
     )
 
     tolerance: float = Field(
-        description="Score tolerance as a fraction of the best score, must be between 0.0 and 1.0.",
+        description=(
+            "Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best "
+            "score are considered equally good.",
+        ),
         examples=0.05,
         default=0.05,
         ge=0.0,
@@ -99,13 +129,17 @@ class FormulationSpatialUnitConfig(BaseModel):
     """Spatial discretization settings for formulation regionalization."""
 
     huc_level: str = Field(
-        description="USGS HUC level used for discretization, e.g., 'huc8'. Accepted formats: 'huc8', 'HUC8', 'huc-8'.",
+        description=(
+            "USGS HUC level used for spatial discretization (e.g., 'huc8'). "
+            "A single formulation is selected per spatial unit given the spatial discretization level. "
+            "Accepted formats: 'huc8', 'HUC8', 'huc-8'.",
+        ),
         examples=["huc2", "huc4", "huc6", "huc8", "huc10", "huc12"],
         default="huc8",
     )
 
     nmin_calib_basin: int = Field(
-        description="Minimum number of calibration basins required per spatial unit to consider it valid.",
+        description="Minimum number of calibration basins required per spatial unit for valid formulation selection.",
         examples=5,
         default=3,
     )
@@ -181,7 +215,7 @@ class MetricConfig(BaseModel):
     )
 
     absolute: bool = Field(
-        description="Whether to use the absolute value of the metric for normalization.",
+        description="Whether to use the absolute value of the metric (e.g., for bias) for normalization.",
         examples=False,
         default=False,
     )
@@ -193,11 +227,13 @@ class MetricEvalPeriod(BaseModel):
     col_name: str = Field(
         description="Name of the column in the donor stats file that contains the evaluation period.",
         examples="evalPeriod",
+        default="evalPeriod",
     )
 
     value: str = Field(
         description="Value of the evaluation period to filter the donor stats file.",
         examples=["valid", "calib", "full"],
+        default="full",
     )
 
 
@@ -213,15 +249,22 @@ class FormulationSummaryScoreConfig(BaseModel):
     metrics: Dict[str, MetricConfig] = Field(
         description=(
             "Dictionary of metrics used in the summary score, keyed by metric name. "
-            "Metric names must match columns in the calibration/validation stats file. Weights must sum to 1.0."
+            "Metric names must match columns in the calibration/validation stats file. Weights must sum to 1.0. "
+            "Refer to schema of MetricConfig for individual metric settings."
         ),
         examples={
             "cor": {
-                "upper": 1,
+                "upper": 1.0,
                 "lower": -0.5,
                 "orientation": "positive",
-                "weight": 0.25,
-            }
+                "weight": 0.5,
+            },
+            "kge": {
+                "upper": 1.0,
+                "lower": -0.5,
+                "orientation": "positive",
+                "weight": 0.5,
+            },
         },
     )
 
@@ -298,21 +341,63 @@ class FormulationCostConfig(BaseModel):
     )
 
 
+class FormulationOutputConfig(BaseModel):
+    """Output configuration for formulation regionalization."""
+
+    formulation: BaseOutputConfig = Field(
+        description="Output configurations for the selected formulations.",
+        default_factory=BaseOutputConfig,
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/formulations",
+            "stem": "form_{domain}_vpu{vpu_list}",
+            "stem_suffix": "_pars",  # suffix for the formulation file with parameters
+            "format": "parquet",
+            "plots": {
+                "spatial_map": True,  # whether to create spatial map of selected formulations & scores
+                "histogram": True,  # whether to create histogram of scores
+            },
+        },
+    )
+
+    config_final: BaseOutputConfig = Field(
+        description=(
+            "Output configuration for the final configuration file after processing, with placeholders resolved."
+        ),
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/config_formreg_final.yaml",
+        },
+    )
+
+    summary_score: BaseOutputConfig = Field(
+        description="Output configurations for the summary score.",
+        examples={
+            "save": True,
+            "path": "{base_dir}/outputs/{run_name}/summary_score",
+            "stem": "score_{domain}_vpu{vpu_list}",
+            "stem_suffix": "_all_gages",  # suffix for the summary score file containing all gages in the domain
+            "format": "parquet",
+            "plots": {"histogram": True, "spatial_map": True},
+        },
+    )
+
+
 class Config(BaseConfig):
     """Top-level configuration for formulation regionalization."""
 
     general: FormulationGeneralSettings = Field(
-        description="General settings for the formulation regionalization application.",
+        description="General settings for formulation regionalization",
         default_factory=FormulationGeneralSettings,
     )
 
     spatial_unit: FormulationSpatialUnitConfig = Field(
-        description="Spatial discretization settings for the application.",
+        description="Spatial discretization settings for formulation regionalization.",
         default_factory=FormulationSpatialUnitConfig,
     )
 
     summary_score: FormulationSummaryScoreConfig = Field(
-        description="Summary score computation configuration for the application.",
+        description="Summary score computation configuration for formulation regionalization.",
         default_factory=FormulationSummaryScoreConfig,
     )
 
@@ -321,35 +406,7 @@ class Config(BaseConfig):
         default_factory=FormulationCostConfig,
     )
 
-    output: dict[str, BaseOutputConfig] = Field(
-        description="Output configuration for the application.",
-        default_factory=lambda: {"default": BaseOutputConfig()},
-        examples={
-            "formulation":  # Output configurations for the selected formulations
-            {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/formulations",
-                "stem": "form_{domain}_vpu{vpu_list}",
-                "stem_suffix": "_pars",  # suffix for the formulation file with parameters
-                "format": "parquet",
-                "plots": {
-                    "spatial_map": True,  # whether to create spatial map of selected formulations & scores
-                    "histogram": True,  # whether to create histogram of scores
-                },
-            },
-            "config_final":  # Final configuration file after processing and validation
-            {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/config_formreg_final.yaml",
-            },
-            "summary_score":  # Output configurations for the summary score
-            {
-                "save": True,
-                "path": "{base_dir}/outputs/{run_name}/summary_score",
-                "stem": "score_{domain}_vpu{vpu_list}",
-                "stem_suffix": "_all_gages",  # suffix for the summary score file containing all gages in the domain
-                "format": "parquet",
-                "plots": {"histogram": True, "spatial_map": True},
-            },
-        },
+    output: FormulationOutputConfig = Field(
+        description="Output configuration for formulation regionalization.",
+        default_factory=FormulationOutputConfig,
     )

@@ -12,6 +12,13 @@ Classes/Functions:
     - _load_and_validate_config: Load a YAML file, validate its structure using Pydantic
     - _substitute_placeholders: Substitute placeholders in the config with actual values.
     - load_and_process_config: Load, validate, process, and save the configuration files.
+    - _validate_paths: Validate that all file and directory paths exist.
+    - _assemble_file_paths: Assemble file paths from the configuration.
+    - _required_columns_calval_stats: Return a set of required columns for calibration/validation statistics.
+    - _file_required_column_map: Return a dictionary mapping files to required columns.
+    - PydanticDictLike: Stand-in for dictionary-like behavior when you want specificity of a pydantic model.
+    - FieldCrosswalk: Mapping of column names for unique identifiers in all require files for regionalization.
+    - LayerCrosswalk: Dictionary mapping layer names for hydrofabric files.
 
 """
 
@@ -183,14 +190,7 @@ class BaseGeneralConfig(BaseModel):
             "expanded to a dictionary mapping each VPU to its corresponding file."
             " This file must include columns 'divide_id', 'vpuid' and 'geometry'."
         ),
-        examples=[
-            "{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
-            "{base_dir}/inputs/hydrofabric/vpu_{vpu_list}.gpkg",
-            {
-                "09": "{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
-                "10": "{base_dir}/inputs/hydrofabric/vpu_10.gpkg",
-            },
-        ],
+        examples="{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
     )
 
     gage_divide_cwt_file: Path | str = Field(
