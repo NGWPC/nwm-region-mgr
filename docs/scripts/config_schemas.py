@@ -1,5 +1,6 @@
 """Generate documentation for configuration schemas and sample configs used in nwm-region-mgr."""
 
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Literal, get_args, get_origin
 
@@ -371,22 +372,75 @@ def generate_markdown_table(model_cls: type[BaseModel]) -> str:
     return "\n".join(table)
 
 
+def generate_toc_from_markdown(md_text):
+    """Scan the generated markdown, finds headings, and returns a TOC block (markdown)."""
+    toc_lines = ["## Table of Contents"]
+
+    for line in md_text.splitlines():
+        # match headings like: ### title, #### title, etc.
+        m = re.match(r"^(#{2,6})\s+(.*)", line)
+        if not m:
+            continue
+
+        level = len(m.group(1))  # number of # signs
+        title = m.group(2).strip()
+
+        # Generate anchor: GitHub-style
+        anchor = re.sub(r"[^\w\s-]", "", title)  # remove punctuation
+        anchor = anchor.lower().replace(" ", "-")  # replace spaces
+
+        indent = "  " * (level - 2)  # indent based on depth
+        toc_lines.append(f"{indent}- [{title}](#{anchor})")
+
+    return "\n".join(toc_lines) + "\n\n"
+
+
 def main(docs_to_create: dict) -> None:
     """Create markdown file documentation for the specified pydantic models."""
+    # Static intro paragraph
+    intro_block = ["# Configuration File Builder\n"]
+    intro_block.append(
+        "Welcome to the Configuration File Builder! The tabs on the left will take you to the builder for each of the specific "
+        "config files. Once in the builder, you will be prompted to enter setup information for your regionalization run, or you "
+        "can scroll to the bottom to fill in default values. Once done, hit 'download' to save the generated configuration YAML "
+        "file to your local system.\n"
+    )
+    intro_block.append(
+        "Example files and schemas for all configuration fields and subfields are included below.\n"
+    )
+    intro_block = "\n".join(intro_block)
+
+    # Describe each config file
+    config_desc = {
+        "config_general.yaml": "configurations shared by formulation regionalization and parameter regionalization",
+        "config_formreg.yaml": "configurations specific to formulation regionalization",
+        "config_parreg.yaml": "configurations specific to parameter regionalization",
+    }
+
+    # Generate sections for each config file
     lines = []
     for i in docs_to_create:
-        lines.append(f"### {i}")
+        lines.append(f"### {i} ({config_desc.get(i, '')})")
 
-        lines.append("#### Example File")
+        lines.append(f"#### Example File ({i})")
         lines.append("```yaml")
         lines.append(generate_yaml_template(*docs_to_create[i]["example_file_class"]))
         lines.append("```")
 
         for j in docs_to_create[i]["schemas"]:
-            lines.append(f"#### Schema Reference ({j})")
+            lines.append(f"#### Schema Reference ({i} - {j})")
             lines.append(generate_markdown_table(docs_to_create[i]["schemas"][j]))
 
-    Path("config_docs.md").write_text("\n".join(lines), encoding="utf-8")
+    # Convert to final markdown text
+    md_text = "\n".join(lines)
+
+    # Generate TOC and prepend
+    toc_block = generate_toc_from_markdown(md_text)
+
+    # Prepend intro and TOC
+    md_text = intro_block + toc_block + md_text
+
+    Path("docs/source/config_builder/index.md").write_text(md_text, encoding="utf-8")
 
 
 if __name__ == "__main__":
