@@ -156,7 +156,7 @@ python regionalization.py sample_files/configs
     - ##### 6) Check inputs, outputs and logs
     All input, output and log files from running MSWM and NGEN can be found in *[work_dir]/regionalization/[run_name]/[vpu]* 
 (as defined in **run_ngen_vpu.sh**)
-
+>>>>>>>>> Temporary merge branch 2
     - ##### 7) If ngen fails at t-route
     Check if all NGEN cat-*.csv and nex-*.csv output files are generated; if yes,
     run t-route separately from the Output directory where ngen outputs are located, e.g.,
