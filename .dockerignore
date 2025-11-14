@@ -1,0 +1,45 @@
+# Python-specific files and directories
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.env
+**/site-packages/
+
+# Editor/IDE specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Version control specific files
+.git/
+.gitignore
+
+# Build/distribution artifacts
+dist/
+build/
+*.egg-info/
+
+# Test-related files
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Documentation files
+docs/
+*.md
+
+# Database files
+*.sqlite3
+*.db
+
+# Docker-related files (often not needed in the build context)
+Dockerfile
+docker-compose.yml
+
+data/**
+sample_files/**

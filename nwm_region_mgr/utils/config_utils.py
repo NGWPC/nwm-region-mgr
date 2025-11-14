@@ -93,6 +93,37 @@ class LoggingConfig(BaseModel):
         return self
 
 
+class NGENConfig(BaseModel):
+    """NextGen configuration."""
+
+    vpu: str
+    """VPU identifier."""
+    run_name: str
+    """Name of the run, used to create output folders and files."""
+    algorithm: str
+    """Name of the algorithm to use for regionalization."""
+    start_time: str
+    """Start time for the simulation."""
+    end_time: str
+    """End time for the simulation."""
+    base_dir: str
+    """Path to base directory for input/output files."""
+    par_file: str
+    """Path to the parameter file."""
+    pair_file: str
+    """Path to the pair file."""
+    gpkg_file: str
+    """Path to the geopackage file."""
+    config_template: str
+    """Path to the configuration template file."""
+    log_file: str
+    """Path to the log file."""
+    log_level: str
+    """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'SEVERE', 'FATAL'."""
+    nprocs: int
+    """Number of processors to use."""
+
+
 class PydanticDictLike(BaseModel):
     """Stand-in for dictionary-like behavior when you want specificity of a pydantic model."""
 

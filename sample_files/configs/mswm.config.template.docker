@@ -55,12 +55,12 @@ hydrofab_file = {gpkg_file}
 # these can be found in the nwm-cal-mgr source repo under nwm-cal-mgr/module_parameter_files
 # SAC parameter file can be found at: s3://ngwpc-hydrofabric/sac_sma_params_2.2.csv
 # snow-17 parameter file can be found at: s3://ngwpc-hydrofabric/snow17_params_2.2.csv
-noah_parameter_dir = /home/yuqiong.liu/repos/nwm-cal-mgr/module_parameter_files/noah-owp-modular
-ueb_parameter_dir = /home/yuqiong.liu/repos/nwm-cal-mgr/module_parameter_files/ueb
-lasam_parameter_dir = /home/yuqiong.liu/repos/nwm-cal-mgr/module_parameter_files/lasam
-lstm_parameter_dir = /home/yuqiong.liu/repos/nwm-cal-mgr/module_parameter_files/lstm
-sac_parameter_dir = /home/yuqiong.liu/data/hydrofabric
-snow_17_parameter_dir = /home/yuqiong.liu/data/hydrofabric
+noah_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/noah-owp-modular
+ueb_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/ueb
+lasam_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/lasam
+lstm_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/lstm
+sac_parameter_dir = /ngen-app/nwm-region-mgr/src/data/module_parameter_files
+snow_17_parameter_dir = /ngen-app/nwm-region-mgr/data/module_parameter_files
 
 # Executable file for running ngen BMI
 ngen_exe_file = /ngen-app/ngen/cmake_build/ngen
