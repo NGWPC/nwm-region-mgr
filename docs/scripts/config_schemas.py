@@ -374,7 +374,7 @@ def generate_markdown_table(model_cls: type[BaseModel]) -> str:
 
 def generate_toc_from_markdown(md_text):
     """Scan the generated markdown, finds headings, and returns a TOC block (markdown)."""
-    toc_lines = ["## Table of Contents"]
+    toc_lines = ["## Schema Reference and Sample YAML Config Files", ""]
 
     for line in md_text.splitlines():
         # match headings like: ### title, #### title, etc.
@@ -412,15 +412,20 @@ def main(docs_to_create: dict) -> None:
 
     # Describe each config file
     config_desc = {
-        "config_general.yaml": "configurations shared by formulation regionalization and parameter regionalization",
-        "config_formreg.yaml": "configurations specific to formulation regionalization",
-        "config_parreg.yaml": "configurations specific to parameter regionalization",
+        "config_general.yaml": "General configurations (shared by formulation & parameter regionalizations)",
+        "config_formreg.yaml": "Specific configurations for formulation regionalization (formreg)",
+        "config_parreg.yaml": "Specific configurations for parameter regionalization (parreg)",
     }
 
+    config_short = {
+        "config_general.yaml": "config_general",
+        "config_formreg.yaml": "config_formreg",
+        "config_parreg.yaml": "config_parreg",
+    }
     # Generate sections for each config file
     lines = []
     for i in docs_to_create:
-        lines.append(f"### {i} ({config_desc.get(i, '')})")
+        lines.append(f"### {config_desc.get(i, '')}\n")
 
         lines.append(f"#### Example File ({i})")
         lines.append("```yaml")
@@ -428,7 +433,7 @@ def main(docs_to_create: dict) -> None:
         lines.append("```")
 
         for j in docs_to_create[i]["schemas"]:
-            lines.append(f"#### Schema Reference ({i} - {j})")
+            lines.append(f"#### Schema Reference ({config_short.get(i, i)} - {j})")
             lines.append(generate_markdown_table(docs_to_create[i]["schemas"][j]))
 
     # Convert to final markdown text
