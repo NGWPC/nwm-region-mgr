@@ -400,10 +400,11 @@ def main(docs_to_create: dict) -> None:
     # Static intro paragraph
     intro_block = ["# Configuration File Builder\n"]
     intro_block.append(
-        "Welcome to the Configuration File Builder! The tabs on the left will take you to the builder for each of the specific "
-        "config files. Once in the builder, you will be prompted to enter setup information for your regionalization run, or you "
-        "can scroll to the bottom to fill in default values. Once done, hit 'download' to save the generated configuration YAML "
-        "file to your local system.\n"
+        "Welcome to the Configuration File Builder! The tabs on the left (currently under development) "
+        "will take you to the builder for each of the specific config files. Once in the builder, "
+        "you will be prompted to enter setup information for your regionalization run, or you "
+        "can scroll to the bottom to fill in default values. Once done, hit 'download' to save "
+        "the generated configuration YAML file to your local system.\n"
     )
     intro_block.append(
         "Example files and schemas for all configuration fields and subfields are included below.\n"
@@ -435,6 +436,17 @@ def main(docs_to_create: dict) -> None:
         for j in docs_to_create[i]["schemas"]:
             lines.append(f"#### Schema Reference ({config_short.get(i, i)} - {j})")
             lines.append(generate_markdown_table(docs_to_create[i]["schemas"][j]))
+
+    # Append toctree block (for left menu) at the end
+    lines.append("")  # blank line before block
+    lines.append(":::{toctree}")
+    lines.append(":maxdepth: 2")
+    lines.append(":hidden:")
+    lines.append("")
+    lines.append("General<general>")
+    lines.append("Formulation Regionalization<formreg>")
+    lines.append("Parameter Regionalization<parreg>")
+    lines.append(":::")
 
     # Convert to final markdown text
     md_text = "\n".join(lines)
