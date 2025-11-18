@@ -55,8 +55,14 @@ def plot_missing_attr_counts(
     )
     plt.title("Number of catchments with missing values for each selected attribute")
 
+    out = getattr(config.output, "attr_data_final", None)
+    if out is None:
+        msg = "Output configuration for 'attr_data_final' is not defined. Skipping plot saving."
+        logger.warning(msg)
+        return
+
     outfile = Path(
-        config.output["attr_data_final"].path,
+        out.path,
         f"plots/bar_attr_missing_count_{config.general.domain}_vpu{vpu}.png",
     )
     outfile.parent.mkdir(parents=True, exist_ok=True)
@@ -92,7 +98,7 @@ def plot_donor_spatial_map(
 
     """
     # read in lat/lon of all donors
-    gage_id_name = config.general.id_col.get("gage", "gage_id")
+    gage_id_name = getattr(config.general.id_col, "gage", "gage_id")
     donors_all = read_table(config.general.donor_gage_file, dtype={gage_id_name: str})
 
     # filter donors based on the donor_basins list (qualified donors)
@@ -192,8 +198,14 @@ def plot_donor_spatial_map(
     plt.tight_layout()
 
     # save the figure
+    out = getattr(config.output, "pairs", None)
+    if out is None:
+        msg = "Output configuration for 'pairs' is not defined. Skipping plot saving."
+        logger.warning(msg)
+        return
+
     outfile = Path(
-        config.output["pairs"].path,
+        out.path,
         f"plots/map_donors_{config.general.domain}_vpu{vpu}.png",
     )
     outfile.parent.mkdir(parents=True, exist_ok=True)

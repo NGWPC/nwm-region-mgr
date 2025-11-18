@@ -206,13 +206,14 @@ def _compute_summary_score_all_gages(
     df_score = df_score.dropna(subset=["summary_score"])
 
     # Save the summary score DataFrame for all gages in the domain
-    cc = config.output["summary_score"]
-    cc.save_to_file(
-        df_score,
-        vpu=None,
-        data_str="Summary Score (for all gages)",
-        use_stem_suffix=True,
-    )
+    cc = getattr(config.output, "summary_score", None)
+    if cc is not None:
+        cc.save_to_file(
+            df_score,
+            vpu=None,
+            data_str="Summary Score (for all gages)",
+            use_stem_suffix=True,
+        )
 
     return df_score
 
@@ -227,11 +228,14 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
     """
     # Get the VPU ID column name
     id_cols = config.general.id_col
-    gage_id_col = id_cols["gage"]
-    divide_id_col = id_cols["divide"]
-    vpu_id_col = id_cols["vpu"]
+    gage_id_col = getattr(id_cols, "gage", "gage_id")
+    divide_id_col = getattr(id_cols, "divide", "divide_id")
+    vpu_id_col = getattr(id_cols, "vpu", "vpuid")
 
-    cc = config.output["summary_score"]
+    cc = getattr(config.output, "summary_score", None)
+    if cc is None:
+        return
+
     filepath = cc.get_file_path(None, use_stem_suffix=True)
 
     # compute summary scores for all gages in the domain only if this is the first VPU
@@ -278,16 +282,17 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
     )
 
     # Save the summary score DataFrame for the specific VPU
-    cc = config.output["summary_score"]
-    cc.save_to_file(
-        df_score_vpu,
-        vpu=vpu,
-        data_str=f"Summary Score (VPU {vpu})",
-        use_stem_suffix=False,
-    )
+    cc = getattr(config.output, "summary_score", None)
+    if cc is not None:
+        cc.save_to_file(
+            df_score_vpu,
+            vpu=vpu,
+            data_str=f"Summary Score (VPU {vpu})",
+            use_stem_suffix=False,
+        )
 
     # plot the summary score
-    if any(cc.plots.values()):
+    if cc is not None and any(cc.plots.values()):
         # create wide-format DataFrame for plotting
         df_score_wide = df_score_vpu.pivot(
             index=gage_id_col, columns="formulation", values="summary_score"

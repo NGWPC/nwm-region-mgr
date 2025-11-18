@@ -147,8 +147,8 @@ class DonorConfig(BaseModel):
         init_donor_df: pd.DataFrame = None,
     ) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
-        divide_id_name = config.general.id_col.get("divide", "divide_id")
-        gage_id_name = config.general.id_col.get("gage", "gage_id")
+        divide_id_name = getattr(config.general.id_col, "divide", "divide_id")
+        gage_id_name = getattr(config.general.id_col, "gage", "gage_id")
 
         # initial donors
         donors = [
@@ -562,10 +562,10 @@ class KMedoids(AlgoGeneral):
         examples=100,
     )
 
-    init: Literal["random", "huristic", "k-medoids++", "build"] | None = Field(
-        default="random",
+    init: Literal["random", "heuristic", "k-medoids++", "build"] | None = Field(
+        default="heuristic",
         description="Method for initialization.",
-        examples="random",
+        examples="heuristic",
     )
 
 
@@ -619,6 +619,11 @@ class Birch(AlgoGeneral):
 
 class AlgorithmConfig(BaseModel):
     """Algorithm configuration class."""
+
+    algo_general: AlgoGeneral = Field(
+        description="General configurations shared by all regionalization algorithms.",
+        default_factory=AlgoGeneral,
+    )
 
     gower: Gower = Field(
         description="Configurations for the distance-based algorithm Gower.",

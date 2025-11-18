@@ -1,8 +1,10 @@
 Schemas
 =======
 
-general.ngen_hydrofabric_file (layer: divides)
-----------------------------------------------
+attr_data_final
+---------------
+
+Final attribute data for all catchments after regionalization.
 
 .. list-table::
    :header-rows: 1
@@ -14,51 +16,197 @@ general.ngen_hydrofabric_file (layer: divides)
      - object
      - False
 
-   * - toid
-     - object
-     - False
-
-   * - type
-     - object
-     - False
-
-   * - ds_id
-     - float64
-     - True
-
-   * - areasqkm
-     - float64
-     - False
-
-   * - vpuid
-     - object
-     - False
-
-   * - id
-     - object
-     - True
-
-   * - lengthkm
-     - float64
-     - True
-
-   * - tot_drainage_areasqkm
-     - float64
-     - True
-
-   * - has_flowline
+   * - is_donor
      - bool
      - False
 
-   * - geometry
-     - geometry
+   * - hlr_AQPERMNEW
+     - float64
+     - True
+
+   * - hlr_TAVE
+     - float64
+     - True
+
+   * - hlr_PPT
+     - float64
+     - True
+
+   * - hlr_PET
+     - float64
+     - True
+
+   * - hlr_PMPE
+     - float64
+     - True
+
+   * - hlr_SAND
+     - float64
+     - True
+
+   * - streamcat_BFI
+     - float64
+     - False
+
+   * - streamcat_CanalDens
+     - float64
+     - False
+
+   * - streamcat_DamDens
+     - float64
+     - False
+
+   * - streamcat_DamNIDStor
+     - float64
+     - False
+
+   * - streamcat_DamNrmStor
+     - float64
+     - False
+
+   * - streamcat_Elev
+     - float64
+     - False
+
+   * - streamcat_Perm
+     - float64
+     - False
+
+   * - streamcat_Om
+     - float64
+     - False
+
+   * - streamcat_RckDep
+     - float64
+     - False
+
+   * - streamcat_WtDep
+     - float64
+     - False
+
+   * - streamcat_AgKffact
+     - float64
+     - False
+
+   * - streamcat_Kffact
+     - float64
+     - False
+
+   * - streamcat_PctAlkIntruVol
+     - float64
+     - False
+
+   * - streamcat_PctAlluvCoast
+     - float64
+     - False
+
+   * - streamcat_PctCarbResid
+     - float64
+     - False
+
+   * - streamcat_PctCoastCrs
+     - float64
+     - False
+
+   * - streamcat_PctColluvSed
+     - float64
+     - False
+
+   * - streamcat_PctEolCrs
+     - float64
+     - False
+
+   * - streamcat_PctEolFine
+     - float64
+     - False
+
+   * - streamcat_PctExtruVol
+     - float64
+     - False
+
+   * - streamcat_PctGlacLakeCrs
+     - float64
+     - False
+
+   * - streamcat_PctGlacLakeFine
+     - float64
+     - False
+
+   * - streamcat_PctGlacTilClay
+     - float64
+     - False
+
+   * - streamcat_PctGlacTilCrs
+     - float64
+     - False
+
+   * - streamcat_PctGlacTilLoam
+     - float64
+     - False
+
+   * - streamcat_PctHydric
+     - float64
+     - False
+
+   * - streamcat_PctNonCarbResid
+     - float64
+     - False
+
+   * - streamcat_PctSalLake
+     - float64
+     - False
+
+   * - streamcat_PctSilicic
+     - float64
+     - False
+
+   * - streamcat_PctWater
+     - float64
+     - False
+
+   * - streamcat_Precip
+     - float64
+     - False
+
+   * - streamcat_Tmax
+     - float64
+     - False
+
+   * - streamcat_Tmean
+     - float64
+     - False
+
+   * - streamcat_Tmin
+     - float64
+     - False
+
+   * - streamcat_RdDens
+     - float64
+     - False
+
+   * - streamcat_Runoff
+     - float64
+     - False
+
+   * - streamcat_Clay
+     - float64
+     - False
+
+   * - streamcat_Sand
+     - float64
+     - False
+
+   * - streamcat_Precip_Minus_EVT
+     - float64
      - False
 
 
 
 
-general.gage_divide_cwt_file
-----------------------------
+formulations
+------------
+
+Formulation assignments for all catchments.
 
 .. list-table::
    :header-rows: 1
@@ -66,7 +214,7 @@ general.gage_divide_cwt_file
    * - Column
      - Type
      - Nullable
-   * - gage_id
+   * - vpu
      - object
      - False
 
@@ -74,187 +222,441 @@ general.gage_divide_cwt_file
      - object
      - False
 
-   * - toid
-     - object
-     - False
-
-   * - areasqkm
-     - float64
-     - False
-
-   * - vpuid
-     - object
-     - False
-
-   * - type
-     - object
-     - False
-
-
-
-
-general.donor_gage_file
------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - gage_id
-     - object
-     - False
-
-   * - nws_id
-     - object
-     - True
-
-   * - agency
-     - object
-     - False
-
-   * - station_name
-     - object
-     - True
-
-   * - domain
-     - object
-     - False
-
-   * - domain_id
-     - int64
-     - False
-
-   * - nwm_v3_calibration
-     - bool
-     - False
-
-   * - headwater_calibration
-     - bool
-     - False
-
-   * - latitude
-     - float64
-     - True
-
-   * - longitude
-     - float64
-     - True
-
-
-
-
-general.calval_stats_file
--------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
    * - formulation
      - object
      - False
 
+   * - huc_id
+     - object
+     - False
+
+   * - total_score
+     - float64
+     - False
+
+   * - summary_score
+     - float64
+     - False
+
+   * - cost
+     - int64
+     - False
+
+   * - num_gages
+     - int64
+     - False
+
+   * - upscale_huc
+     - object
+     - False
+
+
+
+
+formulations_pars
+-----------------
+
+Formulation parameters for all catchments.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Nullable
    * - gage_id
      - object
      - False
 
-   * - evalPeriod
+   * - formulation
      - object
      - False
 
-   * - bias
+   * - MFSNO
      - float64
      - False
 
-   * - rmse
+   * - CWP
      - float64
      - False
 
-   * - cor
+   * - VCMX25
      - float64
      - False
 
-   * - nse
+   * - MP
      - float64
      - False
 
-   * - nselog
+   * - RSURF_SNOW
      - float64
      - False
 
-   * - nseWt
+   * - RSURF_EXP
      - float64
      - False
 
-   * - kge
+   * - SCAMAX
      - float64
      - False
 
-   * - msof
+   * - b
      - float64
+     - True
+
+   * - satdk
+     - float64
+     - True
+
+   * - satpsi
+     - float64
+     - True
+
+   * - slope
+     - float64
+     - True
+
+   * - maxsmc
+     - float64
+     - True
+
+   * - wltsmc
+     - float64
+     - True
+
+   * - max_gw_storage
+     - float64
+     - True
+
+   * - Cgw
+     - float64
+     - True
+
+   * - expon
+     - float64
+     - True
+
+   * - Kn
+     - float64
+     - True
+
+   * - Klf
+     - float64
+     - True
+
+   * - refkdt
+     - float64
+     - True
+
+   * - mfmax
+     - float64
+     - True
+
+   * - uadj
+     - float64
+     - True
+
+   * - si
+     - float64
+     - True
+
+   * - mfmin
+     - float64
+     - True
+
+   * - scf
+     - float64
+     - True
+
+   * - nmf
+     - float64
+     - True
+
+   * - tipm
+     - float64
+     - True
+
+   * - pxtemp
+     - float64
+     - True
+
+   * - plwhc
+     - float64
+     - True
+
+   * - daygm
+     - float64
+     - True
+
+   * - smcmin
+     - float64
+     - True
+
+   * - smcmax
+     - float64
+     - True
+
+   * - van_genuchten_alpha
+     - float64
+     - True
+
+   * - van_genuchten_n
+     - float64
+     - True
+
+   * - hydraulic_conductivity
+     - float64
+     - True
+
+   * - ponded_depth_max
+     - float64
+     - True
+
+   * - field_capacity
+     - float64
+     - True
+
+   * - df
+     - float64
+     - True
+
+   * - cc
+     - float64
+     - True
+
+   * - hcan
+     - float64
+     - True
+
+   * - lai
+     - float64
+     - True
+
+   * - subalb
+     - float64
+     - True
+
+   * - ems
+     - float64
+     - True
+
+   * - cg
+     - float64
+     - True
+
+   * - zo
+     - float64
+     - True
+
+   * - rho
+     - float64
+     - True
+
+   * - rhog
+     - float64
+     - True
+
+   * - Ks
+     - float64
+     - True
+
+   * - de
+     - float64
+     - True
+
+   * - avo
+     - float64
+     - True
+
+   * - apr
+     - float64
+     - True
+
+   * - a_Xinanjiang_inflection_point_parameter
+     - float64
+     - True
+
+   * - b_Xinanjiang_shape_parameter
+     - float64
+     - True
+
+   * - x_Xinanjiang_shape_parameter
+     - float64
+     - True
+
+   * - uztwm
+     - float64
+     - True
+
+   * - uzfwm
+     - float64
+     - True
+
+   * - lztwm
+     - float64
+     - True
+
+   * - lzfsm
+     - float64
+     - True
+
+   * - lzfpm
+     - float64
+     - True
+
+   * - adimp
+     - float64
+     - True
+
+   * - uzk
+     - float64
+     - True
+
+   * - lzpk
+     - float64
+     - True
+
+   * - lzsk
+     - float64
+     - True
+
+   * - zperc
+     - float64
+     - True
+
+   * - rexp
+     - float64
+     - True
+
+   * - pctim
+     - float64
+     - True
+
+   * - pfree
+     - float64
+     - True
+
+   * - riva
+     - float64
+     - True
+
+   * - side
+     - float64
+     - True
+
+
+
+
+pairs_gower
+-----------
+
+Gower distance pairs between donor and receiver catchments.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Nullable
+   * - divide_id
+     - object
      - False
 
-   * - hyperResMultiObj
-     - float64
+   * - tag
+     - object
      - False
 
-   * - nnsesq
-     - float64
+   * - donor
+     - object
      - False
 
-   * - eventmultiobj
-     - float64
+   * - distSpatial
+     - int64
      - False
 
-   * - lbem
+   * - donors
+     - object
+     - True
+
+   * - distSpatials
+     - object
+     - True
+
+   * - distAttr
      - float64
+     - True
+
+   * - distAttrs
+     - object
+     - True
+
+
+
+
+pairs_kmeans
+------------
+
+K-means clustering pairs between donor and receiver catchments.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Nullable
+   * - divide_id
+     - object
      - False
 
-   * - lbemprime
-     - float64
+   * - tag
+     - object
      - False
 
-   * - corr1
-     - float64
+   * - donor
+     - object
      - False
 
-   * - pod
-     - float64
+   * - distSpatial
+     - int64
      - False
 
-   * - far
-     - float64
+   * - donors
+     - object
+     - True
+
+   * - distSpatials
+     - object
+     - True
+
+
+
+
+pairs_msw
+---------
+
+Selected donor-receiver pairs for MSW-M regionalization.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Type
+     - Nullable
+   * - gage_id
+     - int64
      - False
 
-   * - csi
-     - float64
-     - False
-
-   * - nnse
-     - float64
-     - False
-
-   * - peak_bias
-     - float64
-     - False
-
-   * - peak_tm_err_hr
-     - float64
-     - False
-
-   * - event_volume_bias
-     - float64
+   * - divide_id
+     - object
      - False
 
 
 
 
-general.calib_param_file
-------------------------
+params
+------
+
+Parameters used for each formulation in the regionalization.
 
 .. list-table::
    :header-rows: 1
@@ -545,8 +947,10 @@ general.calib_param_file
 
 
 
-general.divide_huc12_cwt_file
------------------------------
+summary_score
+-------------
+
+Summary scores for each catchment after regionalization.
 
 .. list-table::
    :header-rows: 1
@@ -554,492 +958,16 @@ general.divide_huc12_cwt_file
    * - Column
      - Type
      - Nullable
-   * - divide_id
+   * - gage_id
      - object
      - False
 
-   * - huc_12
-     - int64
-     - False
-
-   * - overlap_area
-     - float64
-     - False
-
-   * - areasqkm
-     - float64
-     - False
-
-   * - original_area
-     - float64
-     - False
-
-   * - overlap_percentage
-     - float64
-     - False
-
-   * - nearest_dist_m
-     - float64
-     - True
-
-
-
-
-attr_datasets.ngen.attr_select_file
------------------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - select
-     - int64
-     - False
-
-   * - attr_name
-     - object
-     - False
-
-   * - description
-     - object
-     - False
-
-
-
-
-attr_datasets.ngen.attr_data_file
----------------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - divide_id
-     - object
-     - False
-
-   * - dksat
-     - float64
-     - True
-
-   * - psisat
-     - float64
-     - True
-
-   * - smcmax
-     - float64
-     - False
-
-   * - smcwlt
-     - float64
-     - False
-
-   * - bexp
-     - float64
-     - False
-
-   * - ISLTYP
-     - float64
-     - False
-
-   * - IVGTYP
-     - float64
-     - False
-
-   * - cwpvt
-     - float64
-     - False
-
-   * - mfsno
-     - float64
-     - False
-
-   * - mp
-     - float64
-     - False
-
-   * - refkdt
-     - float64
-     - False
-
-   * - slope_1km
-     - float64
-     - False
-
-   * - vcmx25
-     - float64
-     - False
-
-   * - Coeff
-     - float64
-     - True
-
-   * - Zmax
-     - float64
-     - True
-
-   * - Expon
-     - float64
-     - True
-
-   * - centroid_x
-     - float64
-     - False
-
-   * - centroid_y
-     - float64
-     - False
-
-   * - impervious
-     - float64
-     - False
-
-   * - elevation
-     - float64
-     - False
-
-   * - slope
-     - float64
-     - False
-
-   * - aspect
-     - float64
-     - False
-
-   * - dist_4.twi
-     - object
-     - False
-
-   * - vpuid
-     - object
-     - False
-
-
-
-
-attr_datasets.hlr.attr_select_file
-----------------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - select
-     - int64
-     - False
-
-   * - attr_name
-     - object
-     - False
-
-   * - description
-     - object
-     - False
-
-
-
-
-attr_datasets.hlr.attr_data_file
---------------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - divide_id
-     - object
-     - False
-
-   * - AQPERMNEW
-     - float64
-     - False
-
-   * - SLOPE
-     - float64
-     - False
-
-   * - TAVE
-     - float64
-     - False
-
-   * - PPT
-     - float64
-     - False
-
-   * - PET
-     - float64
-     - False
-
-   * - SAND
-     - float64
-     - False
-
-   * - PMPE
-     - float64
-     - False
-
-   * - MINELE
-     - float64
-     - False
-
-   * - RELIEF
-     - float64
-     - False
-
-   * - PFLATTOT
-     - float64
-     - False
-
-   * - PFLATLOW
-     - float64
-     - False
-
-   * - PFLATUP
-     - float64
-     - False
-
-
-
-
-attr_datasets.streamcat.attr_select_file
-----------------------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - select
-     - int64
-     - False
-
-   * - attr_name
-     - object
-     - False
-
-   * - description
-     - object
-     - False
-
-
-
-
-attr_datasets.streamcat.attr_data_file
---------------------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - divide_id
-     - object
-     - False
-
-   * - BFI
-     - float64
-     - False
-
-   * - CanalDens
-     - float64
-     - False
-
-   * - DamDens
-     - float64
-     - False
-
-   * - DamNIDStor
-     - float64
-     - False
-
-   * - DamNrmStor
-     - float64
-     - False
-
-   * - Elev
-     - float64
-     - False
-
-   * - Perm
-     - float64
-     - False
-
-   * - Om
-     - float64
-     - False
-
-   * - RckDep
-     - float64
-     - False
-
-   * - WtDep
-     - float64
-     - False
-
-   * - AgKffact
-     - float64
-     - False
-
-   * - Kffact
-     - float64
-     - False
-
-   * - PctAlkIntruVol
-     - float64
-     - False
-
-   * - PctAlluvCoast
-     - float64
-     - False
-
-   * - PctCarbResid
-     - float64
-     - False
-
-   * - PctCoastCrs
-     - float64
-     - False
-
-   * - PctColluvSed
-     - float64
-     - False
-
-   * - PctEolCrs
-     - float64
-     - False
-
-   * - PctEolFine
-     - float64
-     - False
-
-   * - PctExtruVol
-     - float64
-     - False
-
-   * - PctGlacLakeCrs
-     - float64
-     - False
-
-   * - PctGlacLakeFine
-     - float64
-     - False
-
-   * - PctGlacTilClay
-     - float64
-     - False
-
-   * - PctGlacTilCrs
-     - float64
-     - False
-
-   * - PctGlacTilLoam
-     - float64
-     - False
-
-   * - PctHydric
-     - float64
-     - False
-
-   * - PctNonCarbResid
-     - float64
-     - False
-
-   * - PctSalLake
-     - float64
-     - False
-
-   * - PctSilicic
-     - float64
-     - False
-
-   * - PctWater
-     - float64
-     - False
-
-   * - Precip
-     - float64
-     - False
-
-   * - Tmax
-     - float64
-     - False
-
-   * - Tmean
-     - float64
-     - False
-
-   * - Tmin
-     - float64
-     - False
-
-   * - RdDens
-     - float64
-     - False
-
-   * - Runoff
-     - float64
-     - False
-
-   * - Clay
-     - float64
-     - False
-
-   * - Sand
-     - float64
-     - False
-
-   * - Precip_Minus_EVT
-     - float64
-     - False
-
-
-
-
-snow_cover.snow_cover_file
---------------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
-   * - divide_id
-     - object
-     - False
-
-   * - snow_pc_hydroatlas
-     - float64
-     - False
-
-
-
-
-formulation_cost.file
----------------------
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Type
-     - Nullable
    * - formulation
      - object
      - False
 
-   * -  cost
-     - int64
+   * - summary_score
+     - float64
      - False
 
 

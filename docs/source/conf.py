@@ -46,7 +46,9 @@ myst_enable_extensions = [
     "deflist",
     "dollarmath",
     "amsmath",
+    "heading_anchors",
 ]
+myst_heading_anchors = 6
 
 autosummary_generate = True
 autosummary_generate_overwrite = True

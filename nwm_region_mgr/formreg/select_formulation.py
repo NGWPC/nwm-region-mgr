@@ -243,9 +243,9 @@ def _find_calibration_gages(
 
     """
     # get configuration settings
-    gage_id_col = config.general.id_col[
-        "gage"
-    ]  # column name for gage ID in the DataFrame
+    gage_id_col = getattr(
+        config.general.id_col, "gage", "gage_id"
+    )  # column name for gage ID in the DataFrame
     nmin_gages = (
         config.spatial_unit.nmin_calib_basin
     )  #  minimum number of calibration gages required
@@ -520,9 +520,10 @@ def select_formulation_donors_only(
 
     """
     # get the ID columns from the configuration
-    id_cols = config.general.id_col
-    gage_id_col = id_cols["gage"]
-    divide_id_col = id_cols["divide"]
+    gage_id_col = getattr(
+        config.general.id_col, "gage", "gage_id"
+    )  # column name for gage ID in the DataFrame
+    divide_id_col = getattr(config.general.id_col, "divide", "divide_id")
 
     # score computing method, type, and tolerance
     score_tolerance = config.spatial_unit.best_formulation.tolerance
@@ -580,9 +581,9 @@ def select_formulation_all(
     """
     # get the ID columns from the configuration
     id_cols = config.general.id_col
-    gage_id_col = id_cols["gage"]
-    divide_id_col = id_cols["divide"]
-    huc12_id_col = id_cols["huc12"]
+    gage_id_col = getattr(id_cols, "gage", "gage_id")
+    divide_id_col = getattr(id_cols, "divide", "divide_id")
+    huc12_id_col = getattr(id_cols, "huc12", "huc_12")
 
     # score computing method, type, and tolerance
     score_method = config.spatial_unit.best_formulation.method.lower()
@@ -782,8 +783,8 @@ def check_gage_formulation_uniqueness(
 
     """
     # get formulation selected for each donor gage
-    gage_id_col = config.general.id_col["gage"]
-    divide_id_col = config.general.id_col["divide"]
+    gage_id_col = getattr(config.general.id_col, "gage", "gage_id")
+    divide_id_col = getattr(config.general.id_col, "divide", "divide_id")
     df_cwt = read_table(
         config.general.gage_divide_cwt_file,
         dtype={gage_id_col: "str", divide_id_col: "str"},
@@ -856,13 +857,14 @@ def save_formulation_results(
             Vector Processing Unit (VPU) for which to save formulations.
 
     """
-    co = config.output["formulation"]
-    co.save_to_file(
-        df_form, vpu=vpu, data_str="Formulation Selection", use_stem_suffix=False
-    )
+    co = getattr(config.output, "formulation", None)
+    if co is not None:
+        co.save_to_file(
+            df_form, vpu=vpu, data_str="Formulation Selection", use_stem_suffix=False
+        )
 
     # merge with calibration parameter file to get parameters for each gage
-    gage_id_col = config.general.id_col["gage"]
+    gage_id_col = getattr(config.general.id_col, "gage", "gage_id")
     df_pars = read_table(config.general.calib_param_file, dtype={gage_id_col: "str"})
     df_pars = df_form_gage.merge(
         df_pars, on=[gage_id_col, "formulation"], how="inner"
@@ -897,8 +899,11 @@ def plot_formulation_results(
 
     """
     # generate plots if enabled
-    cc = config.output["formulation"]
-    divide_id_col = config.general.id_col["divide"]
+    cc = getattr(config.output, "formulation", None)
+    if cc is None:
+        return
+
+    divide_id_col = getattr(config.general.id_col, "divide", "divide_id")
     score_method = config.spatial_unit.best_formulation.method.lower()
     if any(cc.plots.values()):
         # get geometry for divides if spatial map is enabled
@@ -970,7 +975,7 @@ def select_formulation(
     df_formulation["vpu"] = vpu
 
     # rearrange the columns in the formulation DataFrame
-    divide_id_col = config.general.id_col["divide"]
+    divide_id_col = getattr(config.general.id_col, "divide", "divide_id")
     score_method = config.spatial_unit.best_formulation.method.lower()
     columns = [
         "vpu",

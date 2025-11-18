@@ -44,7 +44,7 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     divide_huc12_cwt_file: str | None = Field(
         description=(
             "Path to crosswalk file between HUC12 basins and NextGen catchments, "
-            "with columns 'divide_id' and 'huc_12'.",
+            "with columns 'divide_id' and 'huc_12'."
         ),
         examples="cwt_divide_huc12_{domain}.csv",
         default=None,
@@ -102,7 +102,7 @@ class BestFormulation(BaseModel):
         description=(
             "Method to determine the best formulation, options: 'total_score', 'average_score', which "
             "selects the formulation with the highest total or average summary score across all "
-            "subdivisions (e.g., basins or divides as specified by the 'type' field), respectively.",
+            "subdivisions (e.g., basins or divides as specified by the 'type' field), respectively."
         ),
         examples="total_score",
         default="total_score",
@@ -116,7 +116,7 @@ class BestFormulation(BaseModel):
     tolerance: float = Field(
         description=(
             "Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best "
-            "score are considered equally good.",
+            "score are considered equally good."
         ),
         examples=0.05,
         default=0.05,
@@ -132,7 +132,7 @@ class FormulationSpatialUnitConfig(BaseModel):
         description=(
             "USGS HUC level used for spatial discretization (e.g., 'huc8'). "
             "A single formulation is selected per spatial unit given the spatial discretization level. "
-            "Accepted formats: 'huc8', 'HUC8', 'huc-8'.",
+            "Accepted formats: 'huc8', 'HUC8', 'huc-8'."
         ),
         examples=["huc2", "huc4", "huc6", "huc8", "huc10", "huc12"],
         default="huc8",
@@ -145,9 +145,11 @@ class FormulationSpatialUnitConfig(BaseModel):
     )
 
     basin_fill_method: Literal["upscaling", "nearest-neighbor"] = Field(
-        description="Method to handle spatial units with too few calibration basins. Options: "
-        "'upscaling' (by upscaling to a coarser spatial unit), and "
-        "'nearest-neighbor' (by pooling basins from neighboring units).",
+        description=(
+            "Method to handle spatial units with too few calibration basins. Options: "
+            "'upscaling' (by upscaling to a coarser spatial unit), and "
+            "'nearest-neighbor' (by pooling basins from neighboring units)."
+        ),
         examples="upscaling",
         default="upscaling",
     )

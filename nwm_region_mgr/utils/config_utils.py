@@ -127,33 +127,34 @@ class NGENConfig(BaseModel):
 class PydanticDictLike(BaseModel):
     """Stand-in for dictionary-like behavior when you want specificity of a pydantic model."""
 
-    def items(self) -> Iterator[Tuple[str, str]]:
-        """Get fields and values."""
+    @property
+    def as_dict(self) -> dict[str, Any]:
+        """Return the model as a dictionary."""
+        return self.model_dump()
+
+    def get(self, key: str, default=None):
+        """Get a value from the model by key, with an optional default."""
+        return getattr(self, key, default)
+
+    def items(self) -> Iterator[Tuple[str, Any]]:
+        """Return an iterator over the model's (key, value) pairs."""
         return self.model_dump().items()
 
     def keys(self) -> Iterator[str]:
-        """Get fields."""
+        """Return an iterator over the model's keys."""
         return self.model_dump().keys()
 
-    def values(self) -> Iterator[str]:
-        """Get values."""
+    def values(self) -> Iterator[Any]:
+        """Return an iterator over the model's values."""
         return self.model_dump().values()
 
-    def __getitem__(self, key: str) -> str:
-        """Get value for a specific key."""
-        return getattr(self, key)
-
-    def __iter__(self) -> Iterator[str]:
-        """Loop through keys."""
-        return iter(self.model_dump())
-
-    def __len__(self) -> int:
-        """Get number of keys."""
-        return len(self.model_dump())
-
-    def __setitem__(self, key: str, value: str) -> None:
-        """Set a specific key to a value."""
-        setattr(self, key, value)
+    def lower_case(self) -> "PydanticDictLike":
+        """Return a new instance with all string fields lowercased."""
+        data = {
+            k: (v.lower() if isinstance(v, str) else v)
+            for k, v in self.model_dump().items()
+        }
+        return self.__class__(**data)
 
 
 class FieldCrosswalk(PydanticDictLike):
@@ -185,7 +186,6 @@ class LayerCrosswalk(PydanticDictLike):
     ngen: str = Field(
         description="Layer name for NextGen hydrofabric file.", default="divides"
     )
->>>>>>>>> Temporary merge branch 2
 
 
 class BaseGeneralConfig(BaseModel):
@@ -206,15 +206,16 @@ class BaseGeneralConfig(BaseModel):
     vpu_list: Union[List[str], str] = Field(
         description="List of vector processing units (VPUs) within the domain or 'all' to process all.",
         examples=["09"],
+        default=["03S"],
     )
 
     base_dir: str = Field(
         description="Path to base directory for input/output files.",
         examples="/root/nwm-region-mgr/data/",
+        default="./data/",
     )
 
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
-        ...,
         description=(
             "Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' "
             "or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}."
@@ -223,16 +224,19 @@ class BaseGeneralConfig(BaseModel):
             " This file must include columns 'divide_id', 'vpuid' and 'geometry'."
         ),
         examples="{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
+        default="vpu_03S.gpkg",
     )
 
     gage_divide_cwt_file: Path | str = Field(
         description="Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'.",
         examples="{base_dir}/inputs/calib_gage_divide_{domain}.parquet",
+        default="calib_gage_divide_{domain}.parquet",
     )
 
     donor_gage_file: Path | str = Field(
         description="Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.",
         examples="{base_dir}/inputs/gages_nwm4_calib_all.csv",
+        default="gages_nwm4_calib_all.csv",
     )
 
     calval_stats_file: Path | str = Field(
@@ -243,6 +247,7 @@ class BaseGeneralConfig(BaseModel):
             "and parameter regionalization."
         ),
         examples=["stat_calval_all_{domain}.csv", "stat_calval_all_{domain}.parquet"],
+        default="stat_calval_all_{domain}.parquet",
     )
 
     calib_param_file: Path | str = Field(
@@ -252,6 +257,7 @@ class BaseGeneralConfig(BaseModel):
             "calibrated parameters."
         ),
         examples=["calib_params_{domain}.csv", "calib_params_{domain}.parquet"],
+        default="calib_params_{domain}.csv",
     )
 
     approach_calib_basins: Literal["regionalization", "summary_score"] = Field(
@@ -261,6 +267,7 @@ class BaseGeneralConfig(BaseModel):
             "summary scores for the calibrated basin)."
         ),
         examples=["regionalization", "summary_score"],
+        default="summary_score",
     )
 
     id_col: FieldCrosswalk = Field(
@@ -273,6 +280,15 @@ class BaseGeneralConfig(BaseModel):
             "drainage_area": "areasqkm",
         },
         default_factory=FieldCrosswalk,
+        # default_factory=lambda: FieldCrosswalk(
+        #     **{
+        #         "divide": "divide_id",
+        #         "gage": "gage_id",
+        #         "huc12": "huc_12",
+        #         "vpu": "vpuid",
+        #         "drainage_area": "areasqkm",
+        #     }
+        # ),
     )
 
     layer_name: LayerCrosswalk = Field(
@@ -301,11 +317,12 @@ class BaseGeneralConfig(BaseModel):
     def lower_case_ids(self) -> "BaseGeneralConfig":
         """Ensure that all ID columns are in lower case."""
         if self.id_col:
-            self.id_col = {k.lower(): v.lower() for k, v in self.id_col.items()}
+            # self.id_col = {k.lower(): v.lower() for k, v in self.id_col.items()}
+            self.id_col = self.id_col.lower_case()
 
         if self.layer_name:
-            self.layer_name = {k.lower(): v.lower() for k, v in self.layer_name.items()}
-
+            # self.layer_name = {k.lower(): v.lower() for k, v in self.layer_name.items()}
+            self.layer_name = self.layer_name.lower_case()
         return self
 
 
@@ -315,26 +332,27 @@ class BaseOutputConfig(BaseModel):
     save: bool = Field(
         description="Whether to save output files",
         default=True,
-        examples=[True, False],
+        examples=True,
     )
     path: Path | str = Field(
         description="Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.",
-        examples=["{base_dir}/outputs/{run_name}/formulations"],
+        examples="{base_dir}/outputs/{run_name}/formulations",
+        default="{base_dir}/outputs/{run_name}/formulations",
     )
     stem: Optional[str | Dict[str, str]] = Field(
         description="File stem for output files, used to create unique file names based on the path.",
-        default=None,
-        examples=["form_{domain}_vpu{vpu_list}"],
+        default="form_{domain}_vpu{vpu_list}",
+        examples="form_{domain}_vpu{vpu_list}",
     )
     stem_suffix: Optional[str] = Field(
         description="Suffix for the file stem, used to create unique file names based on the path for specific needs.",
-        default=None,
-        examples=["_pars"],
+        default="_pars",
+        examples="_pars",
     )
     format: Optional[str] = Field(
         description="File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.",
-        default=None,
-        examples=["parquet", "csv", "yaml"],
+        default="parquet",
+        examples="parquet",
     )
     plots: Optional[Dict[str, Any]] = Field(
         description="Configuration for output plots, if applicable.",
@@ -351,7 +369,7 @@ class BaseOutputConfig(BaseModel):
             "in a subfolder 'plots' in the defined output path."
         ),
         default=None,
-        examples=["{base_dir}/outputs/{run_name}/formulations/plots"],
+        examples="{base_dir}/outputs/{run_name}/formulations/plots",
     )
 
     @model_validator(mode="after")
@@ -886,9 +904,9 @@ class BaseConfigProcessor:
             for file in file_path:
                 if "geometry" in required_columns:
                     layer = (
-                        config.general.layer_name.get("ngen", None)
+                        getattr(config.general.layer_name, "ngen", None)
                         if "ngen" in file_key
-                        else config.general.layer_name.get("huc12", None)
+                        else getattr(config.general.layer_name, "huc12", None)
                     )
                     check_columns_hydrofabric(file, required_columns, layer_name=layer)
                 else:
@@ -949,8 +967,9 @@ class BaseConfigProcessor:
         logger.info("Successfully validated and processed the configurations.")
 
         # Save the final configuration
-        cc = self.config.output["config_final"]
-        cc.save_to_file(self.config, data_str="Final Configuration")
+        cc = getattr(self.config.output, "config_final", None)
+        if cc is not None:
+            cc.save_to_file(self.config, data_str="Final Configuration")
 
     def set_vpu(self, vpu: str):
         """Set the vpu."""
@@ -987,32 +1006,32 @@ class BaseConfigProcessor:
     @property
     def divide_id_name(self):
         """Id_name for divide from the config."""
-        return self.config.general.id_col.get("divide", "divide_id")
+        return getattr(self.config.general.id_col, "divide", "divide_id")
 
     @property
     def gage_id_name(self):
         """Id_name for gage from the config."""
-        return self.config.general.id_col.get("gage", "gage_id")
+        return getattr(self.config.general.id_col, "gage", "gage_id")
 
     @property
     def drainage_area_name(self):
         """Id_name for drainage_area from the config."""
-        return self.config.general.id_col.get("drainage_area", "areasqkm")
+        return getattr(self.config.general.id_col, "drainage_area", "areasqkm")
 
     @property
     def huc12_id_name(self):
         """Id_name for huc12 from the config."""
-        return self.config.general.id_col.get("huc12", "huc_12")
+        return getattr(self.config.general.id_col, "huc12", "huc_12")
 
     @property
     def vpu_id_name(self):
         """Id_name for vpu from the config."""
-        return self.config.general.id_col.get("vpu", "vpuid")
+        return getattr(self.config.general.id_col, "vpu", "vpuid")
 
     @property
     def donor_id_name(self):
         """Id_name for donor gage from the config."""
-        return self.config.general.id_col.get("donor", "donor")
+        return getattr(self.config.general.id_col, "donor", "donor")
 
     @property
     def gage_crosswalk_file(self):

@@ -357,7 +357,7 @@ def generate_markdown_table(model_cls: type[BaseModel]) -> str:
                 dict_rep.pop(k)
 
     # Make markdown table
-    headers = ["Field", "Type(s)", "Default", "Example(s)", "Description"]
+    headers = ["Field", "Type(s)", "Description", "Default", "Example(s)"]
     table = [
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join("---" for _ in headers) + " |",
@@ -366,30 +366,44 @@ def generate_markdown_table(model_cls: type[BaseModel]) -> str:
     for name, field_dict in dict_rep.items():
         table.append(
             f"| {name} | {type_to_str(field_dict['type'])} | "
-            f"{field_dict['default']} | {field_dict['example']} | {field_dict['description']} |"
+            f"{field_dict['description']} | {field_dict['default']} | {field_dict['example']} |"
         )
 
     return "\n".join(table)
 
 
-def generate_toc_from_markdown(md_text):
-    """Scan the generated markdown, finds headings, and returns a TOC block (markdown)."""
-    toc_lines = ["## Schema Reference and Sample YAML Config Files", ""]
+def myst_anchor(title: str) -> str:
+    """Convert a heading to MyST-style anchor ID."""
+    title = title.strip().lower()
+
+    # Replace any character that is NOT a-z, 0-9 with dash
+    title = re.sub(r"[^a-z0-9]+", "-", title)
+
+    # Collapse multiple consecutive dashes
+    title = re.sub(r"-+", "-", title)
+
+    # Strip leading/trailing dashes
+    title = title.strip("-")
+
+    return title
+
+
+def generate_toc_from_markdown(md_text: str) -> str:
+    """Scan generated markdown, find headings, and return a TOC block (markdown)."""
+    toc_lines = ["### Schema Reference and Sample YAML Config Files", ""]
 
     for line in md_text.splitlines():
-        # match headings like: ### title, #### title, etc.
         m = re.match(r"^(#{2,6})\s+(.*)", line)
         if not m:
             continue
 
-        level = len(m.group(1))  # number of # signs
+        level = len(m.group(1))
         title = m.group(2).strip()
 
-        # Generate anchor: GitHub-style
-        anchor = re.sub(r"[^\w\s-]", "", title)  # remove punctuation
-        anchor = anchor.lower().replace(" ", "-")  # replace spaces
+        # Generate MyST-compatible anchor
+        anchor = myst_anchor(title)
 
-        indent = "  " * (level - 2)  # indent based on depth
+        indent = "  " * (level - 2)
         toc_lines.append(f"{indent}- [{title}](#{anchor})")
 
     return "\n".join(toc_lines) + "\n\n"
@@ -399,6 +413,7 @@ def main(docs_to_create: dict) -> None:
     """Create markdown file documentation for the specified pydantic models."""
     # Static intro paragraph
     intro_block = ["# Configuration File Builder\n"]
+    intro_block.append("### Introduction\n")
     intro_block.append(
         "Welcome to the Configuration File Builder! The tabs on the left (currently under development) "
         "will take you to the builder for each of the specific config files. Once in the builder, "
@@ -407,7 +422,9 @@ def main(docs_to_create: dict) -> None:
         "the generated configuration YAML file to your local system.\n"
     )
     intro_block.append(
-        "Example files and schemas for all configuration fields and subfields are included below.\n"
+        "Example files and schemas for all configuration fields and subfields are included below. "
+        "You can navigate to each config file or schema section using the tabs on the right or the "
+        "table of contents below.\n"
     )
     intro_block = "\n".join(intro_block)
 
@@ -419,22 +436,24 @@ def main(docs_to_create: dict) -> None:
     }
 
     config_short = {
-        "config_general.yaml": "config_general",
-        "config_formreg.yaml": "config_formreg",
-        "config_parreg.yaml": "config_parreg",
+        "config_general.yaml": "general",
+        "config_formreg.yaml": "formreg",
+        "config_parreg.yaml": "parreg",
     }
     # Generate sections for each config file
     lines = []
     for i in docs_to_create:
         lines.append(f"### {config_desc.get(i, '')}\n")
 
-        lines.append(f"#### Example File ({i})")
+        lines.append("#### Example File")
         lines.append("```yaml")
         lines.append(generate_yaml_template(*docs_to_create[i]["example_file_class"]))
         lines.append("```")
 
         for j in docs_to_create[i]["schemas"]:
-            lines.append(f"#### Schema Reference ({config_short.get(i, i)} - {j})")
+            lines.append("")  # blank line before heading
+            lines.append(f"#### {config_short.get(i, i)} Schema ({j})")
+            lines.append("")  # blank line before heading
             lines.append(generate_markdown_table(docs_to_create[i]["schemas"][j]))
 
     # Append toctree block (for left menu) at the end
@@ -451,11 +470,12 @@ def main(docs_to_create: dict) -> None:
     # Convert to final markdown text
     md_text = "\n".join(lines)
 
-    # Generate TOC and prepend
+    # Generate TOC
     toc_block = generate_toc_from_markdown(md_text)
 
     # Prepend intro and TOC
-    md_text = intro_block + toc_block + md_text
+    # md_text = intro_block + toc_block + md_text
+    md_text = intro_block + "\n\n" + toc_block + "\n\n" + md_text
 
     Path("docs/source/config_builder/index.md").write_text(md_text, encoding="utf-8")
 
