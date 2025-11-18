@@ -396,7 +396,8 @@ class NGENConfigProcessor:
 
     def to_dict(self):
         """Convert the config to a dictionary."""
-        return self.config.__dict__
+        return self.config.model_dump()
+
 
     def substitute_placeholders(self, config):
         """Substitute placeholders in the config with actual values.
