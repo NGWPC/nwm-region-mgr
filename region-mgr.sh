@@ -42,6 +42,16 @@ function docker_run {
         --rm ngen_rte $*
 }
 
+function docker_run_ngen {
+    time sudo docker run --entrypoint "/bin/bash" -it\
+        -v $(pwd)/data/:/ngen-app/nwm-region-mgr/data \
+        -v $(pwd)/data/:/data \
+        -v $(pwd)/sample_files/:/ngen-app/nwm-region-mgr/sample_files \
+        -v $(pwd)/sample_files/:/sample_files \
+        --rm ngen_rte -c " ulimit -n 60000 && python $*"
+        
+}
+
 ######### Docker Build #########
 if [ "$docker" = true ]; then
     git clone git@github.com:NGWPC/nwm-rte.git 
@@ -53,9 +63,9 @@ if [ "$docker" = true ]; then
 
 
     ##### For development #####
-    # (cd run-time-environment-trial && \
+    # (cd nwm-rte && \
     # ./ngen_rte_build.sh)
-    rm -rf nwm-rte
+    # # rm -rf nwm-rte
 fi
 
 ######### Regionalization #########
@@ -74,7 +84,8 @@ fi
 ######### RUN NGEN #########
 if [ "$ngen" = true ]; then
 
-docker_run "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
+
+docker_run_ngen "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
     --config_ngen "/ngen-app/nwm-region-mgr/sample_files/configs/config_ngen.yaml"
 fi
 
