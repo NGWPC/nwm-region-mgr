@@ -11,7 +11,10 @@ as well as scripts/workflows to run ngen simulations and evaluation.
 - utils: utility functions shared by parreg and formreg
 
 ## Docker Run Time Environment (RTE)
-### Step 0. Build Docker image
+### Step 0. Build Docker image and download data
+#### a) Sample input data can be downloaded from: **s3://ngwpc-dev/regionalization/data**
+
+#### b) Build Docker image
 `Note` This step is only necessary if a docker image doesn't already exists or if updates to the code base have been implemented. The short flag `-d` can also be used in place of `--docker`
 
 ```bash
@@ -21,16 +24,13 @@ cd nwm-region-mgr
 ./region-mgr.sh -docker
 ```
 ### Step 1. Run regionalization
-#### a) Run both formulation and parameter regionalization together:
-```bash
-./region-mgr.sh --formreg --parreg
-```
-#### b) Run formulation regionalization alone:
+
+#### a) Run formulation regionalization alone (no parreg):
 The short flag `-f` can also be used in place of `--formreg`.
 ```bash
 ./region-mgr.sh --formreg
 ```
-#### c) Run parameter regionalization alone:
+#### b) Run parameter regionalization (formreg is also ran as a prerequisite):
 The short flag `-p` can also be used in place of `--parreg`.
 ```bash
 ./region-mgr.sh --parreg
@@ -52,7 +52,7 @@ The short flag `-e` can also be used in place of `--eval`.
 ### Steps 0-4
 Alternatively the user can run steps 0-4 in all at once in series:
 ```bash
-./region-mgr.sh -dfpne
+./region-mgr.sh -dpne
 ```
 ## Desktop Run Time Environment (RTE)
 ### Clone & Build
@@ -96,7 +96,7 @@ Three yaml config files are needed to run regionalization
 
 Follow the sample [config files](https://github.com/NGWPC/nwm-region-mgr/tree/development/sample_files/configs) to set up the configurations for your regionalization application as needed.
 
-Sample input data can be downloaded from **s3://ngwpc-dev/Yuqiong.Liu/repos/nwm-region-mgr**
+Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/**
 
 
 #### 2) Run the regionalization script
