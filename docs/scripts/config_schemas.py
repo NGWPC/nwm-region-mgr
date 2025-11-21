@@ -474,8 +474,7 @@ def main(docs_to_create: dict) -> None:
     toc_block = generate_toc_from_markdown(md_text)
 
     # Prepend intro and TOC
-    # md_text = intro_block + toc_block + md_text
-    md_text = intro_block + "\n\n" + toc_block + "\n\n" + md_text
+    md_text = intro_block + toc_block + md_text
 
     Path("docs/source/config_builder/index.md").write_text(md_text, encoding="utf-8")
 

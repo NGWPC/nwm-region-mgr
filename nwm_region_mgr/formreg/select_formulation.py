@@ -422,10 +422,10 @@ def _select_formulation_given_score(
         logger.error(msg)
         raise ValueError(msg)
 
-    # keep only the best formulation(s) with the highest total score
+    # keep only the best formulation(s) with the highest total or average score
     df1 = df1[df1[method] == df1[method].max()]
 
-    # if there are multiple formulations with the same total score, choose the one that has the lowest cost
+    # if there are multiple formulations with the same score, choose the one that has the lowest cost
     if df1.shape[0] > 1:
         df1 = df1[df1["cost"] == df1["cost"].min()]
 
@@ -461,11 +461,14 @@ def _identify_best_formulation_per_gage(
             DataFrame with the best formulation for each gage and its score.
 
     """
+    # for each gage, find the best formulation(s) within the tolerance
     max_scores = df_score.groupby(gage_id_col)["summary_score"].transform("max")
     best_per_gage = df_score[
         df_score["summary_score"] >= (max_scores - max_scores * tolerance)
     ].copy()
 
+    # if formulation costs are provided, select the formulation with the minimum cost; otherwise,
+    # choose the formulation with the highest score (this essentially ignores the tolerance)
     if cost_dict is not None:
         # check if all formulations are in the cost_dict
         if not best_per_gage["formulation"].isin(cost_dict.keys()).all():
@@ -699,7 +702,7 @@ def select_formulation_all(
             & df_score["formulation"].isin(formulations)
         ].copy()
 
-        # identify best formulation for each gage based on summary scores for formulation costs
+        # identify best formulation for each gage based on summary scores and/or formulation costs
         df_huc = _identify_best_formulation_per_gage(
             df_huc,
             gage_id_col=gage_id_col,
@@ -707,7 +710,7 @@ def select_formulation_all(
             cost_dict=cost_dict,
         )
 
-        # select the best formulation for each huc_id based on the total score or count
+        # select the best formulation for each huc_id based on the total score or average score
         best_formulation = _select_formulation_given_score(
             df_huc, method=score_method, type=score_type
         )

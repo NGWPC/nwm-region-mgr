@@ -1,974 +1,1115 @@
 Schemas
 =======
 
+.. _attr_data_final:
+
 attr_data_final
 ---------------
 
-Final attribute data for all catchments after regionalization.
+Final attribute data used for regionalization, based on attribute selection in the configuration. Each attribute is prefixed by its corresponding dataset name.
+
+Sample file path: ``outputs/attr_data_final/attr_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "divide_id", "is_donor", "hlr_AQPERMNEW", "hlr_TAVE", "hlr_PPT", "hlr_PET", "hlr_PMPE", "hlr_SAND", "streamcat_BFI", "streamcat_CanalDens", "streamcat_DamDens", "streamcat_DamNIDStor", "streamcat_DamNrmStor", "streamcat_Elev", "streamcat_Perm", "streamcat_Om", "streamcat_RckDep", "streamcat_WtDep", "streamcat_AgKffact", "streamcat_Kffact", "streamcat_PctAlkIntruVol", "streamcat_PctAlluvCoast", "streamcat_PctCarbResid", "streamcat_PctCoastCrs", "streamcat_PctColluvSed", "streamcat_PctEolCrs", "streamcat_PctEolFine", "streamcat_PctExtruVol", "streamcat_PctGlacLakeCrs", "streamcat_PctGlacLakeFine", "streamcat_PctGlacTilClay", "streamcat_PctGlacTilCrs", "streamcat_PctGlacTilLoam", "streamcat_PctHydric", "streamcat_PctNonCarbResid", "streamcat_PctSalLake", "streamcat_PctSilicic", "streamcat_PctWater", "streamcat_Precip", "streamcat_Tmax", "streamcat_Tmean", "streamcat_Tmin", "streamcat_RdDens", "streamcat_Runoff", "streamcat_Clay", "streamcat_Sand", "streamcat_Precip_Minus_EVT"
+   "cat-1016462", "True", "1.0", "54.47579956055", "57.95169830322", "27.85939979553", "30.09230041504", "47.9600982666", "61.234730315169315", "0.0", "0.0", "0.0", "0.0", "1587.7367709765883", "9.519517947816217", "2.2046839454643035", "145.31146402586657", "182.88000000000002", "0.0", "0.2424741767948702", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "2034.477416335128", "14.656024201640122", "9.26436413052888", "-4.28366317915664", "0.7612452736729998", "688.7553864291", "12.12719725702732", "50.900356584218635", "117.86036881754052"
+   "cat-1016463", "True", "1.0", "54.47579956055", "57.95169830322", "27.85939979553", "30.09230041504", "47.9600982666", "59.99961175401633", "0.0", "0.0", "0.0", "0.0", "1293.2124562083463", "7.514833336969149", "0.8859361491105748", "138.82250870764383", "182.88", "0.0", "0.24920367159082205", "0.0", "0.0", "0.0", "0.0", "100.00000000000001", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1625.3267947426727", "15.977565978138605", "10.13201872256988", "-4.04376468154375", "0.49560771571458906", "682.0000000000001", "16.57660636336356", "45.65598623463524", "87.9793030931872"
+   "cat-1016464", "True", "1.0", "54.47579956055", "57.95169830321999", "27.859399795529995", "30.092300415040004", "47.9600982666", "59.5115", "0.0", "0.0", "0.0", "0.0", "1094.4615", "7.27", "0.72", "138.03", "182.88", "0.0", "0.25", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1364.8580513892748", "17.358519982078356", "10.695478851653236", "-4.337621540316755", "0.7705", "681.9999999999999", "17.12", "44.9009", "67.2034"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - divide_id
+     - Unique identifier for each catchment.
      - object
-     - False
 
    * - is_donor
+     - Indicates whether the catchment is a donor (true) or receiver (false).
      - bool
-     - False
 
    * - hlr_AQPERMNEW
+     - Aquifer permeability
      - float64
-     - True
 
    * - hlr_TAVE
+     - Mean annual temperature
      - float64
-     - True
 
    * - hlr_PPT
+     - Mean annual precipitation
      - float64
-     - True
 
    * - hlr_PET
+     - Mean annual potential evaporatranspiration
      - float64
-     - True
 
    * - hlr_PMPE
+     - Mean annual precipitation minus PET
      - float64
-     - True
 
    * - hlr_SAND
+     - Percentage of sand in the soil
      - float64
-     - True
 
    * - streamcat_BFI
+     - Baseflow is the component of streamflow that can be attributed to ground-water discharge into streams. The Baseflow Index (BFI) is the ratio of baseflow to total flow, expressed as a percentage, within catchment.
      - float64
-     - False
 
    * - streamcat_CanalDens
+     - Density of NHDPlus line features classified as canal, ditch, or pipeline within the catchment or watershed.
      - float64
-     - False
 
    * - streamcat_DamDens
+     - Density of georeferenced dams within catchment (dams/ square km) based on the National Inventory of Dams (https://catalog.data.gov/dataset/national-inventory-of-dams)
      - float64
-     - False
 
    * - streamcat_DamNIDStor
+     - Total possible volume of all reservoirs (NID_STORA in NID) per unit area of catchment (cubic meters/square km) based on the National Inventory of Dams (https://catalog.data.gov/dataset/national-inventory-of-dams)
      - float64
-     - False
 
    * - streamcat_DamNrmStor
+     - Normal (most common) volume of all reservoirs (NORM_STORA in NID) per unit area of catchment (cubic meters/square km) based on the National Inventory of Dams (https://catalog.data.gov/dataset/national-inventory-of-dams)
      - float64
-     - False
 
    * - streamcat_Elev
+     - Mean catchment elevation in meters.
      - float64
-     - False
 
    * - streamcat_Perm
+     - Mean permeability (cm/hour) of soils (STATSGO) within catchment.
      - float64
-     - False
 
    * - streamcat_Om
+     - Mean organic matter content (% by weight) of soils (STATSGO) within catchment.
      - float64
-     - False
 
    * - streamcat_RckDep
+     - Mean depth (cm) to bedrock of soils (STATSGO) within catchment.
      - float64
-     - False
 
    * - streamcat_WtDep
+     - Mean seasonal water table depth (cm) of soils (STATSGO) within catchment.
      - float64
-     - False
 
    * - streamcat_AgKffact
+     - Mean soil erodibility (Kf) factor (unitless) of soils within catchment on agricultural land. The Kf factor is used in the Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall.
      - float64
-     - False
 
    * - streamcat_Kffact
+     - Mean soil erodibility (Kf) factor (unitless) of soils within catchment. The Kf factor is used in the Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall.
      - float64
-     - False
 
    * - streamcat_PctAlkIntruVol
+     - % of catchment area classified as lithology type: alkaline intrusive volcanic rock
      - float64
-     - False
 
    * - streamcat_PctAlluvCoast
+     - % of catchment area classified as lithology type: alluvium and fine-textured coastal zone sediment
      - float64
-     - False
 
    * - streamcat_PctCarbResid
+     - % of catchment area classified as lithology type: carbonate residual material
      - float64
-     - False
 
    * - streamcat_PctCoastCrs
+     - % of catchment area classified as lithology type: coastal zone sediment, coarse-textured
      - float64
-     - False
 
    * - streamcat_PctColluvSed
+     - % of catchment area classified as lithology type: colluvial sediment
      - float64
-     - False
 
    * - streamcat_PctEolCrs
+     - % of catchment area classified as lithology type: eolian sediment, coarse-textured (sand dunes)
      - float64
-     - False
 
    * - streamcat_PctEolFine
+     - % of catchment area classified as lithology type: eolian sediment, fine-textured (glacial loess)
      - float64
-     - False
 
    * - streamcat_PctExtruVol
+     - % of catchment area classified as lithology type: extrusive volcanic rock
      - float64
-     - False
 
    * - streamcat_PctGlacLakeCrs
+     - % of catchment area classified as lithology type: glacial outwash and glacial lake sediment, coarse-textured
      - float64
-     - False
 
    * - streamcat_PctGlacLakeFine
+     - % of catchment area classified as lithology type: glacial lake sediment, fine-textured
      - float64
-     - False
 
    * - streamcat_PctGlacTilClay
+     - % of catchment area classified as lithology type: glacial till, clayey
      - float64
-     - False
 
    * - streamcat_PctGlacTilCrs
+     - % of catchment area classified as lithology type: glacial till, coarse-textured
      - float64
-     - False
 
    * - streamcat_PctGlacTilLoam
+     - % of catchment area classified as lithology type: glacial till, loamy
      - float64
-     - False
 
    * - streamcat_PctHydric
+     - % of catchment area classified as lithology type: hydric, peat and muck
      - float64
-     - False
 
    * - streamcat_PctNonCarbResid
+     - % of catchment area classified as lithology type: non-carbonate residual material
      - float64
-     - False
 
    * - streamcat_PctSalLake
+     - % of catchment area classified as lithology type: saline like sediment
      - float64
-     - False
 
    * - streamcat_PctSilicic
+     - % of catchment area classified as lithology type: silicic residual material
      - float64
-     - False
 
    * - streamcat_PctWater
+     - % of catchment area classified as lithology type: water
      - float64
-     - False
 
    * - streamcat_Precip
+     - PRISM climate data - 30-year normal mean precipitation (mm): Annual period: 1981-2010 within catchment
      - float64
-     - False
 
    * - streamcat_Tmax
+     - PRISM climate data - 30-year normal maximum temperature (Â°C): Annual period: 1981-2010 within catchment
      - float64
-     - False
 
    * - streamcat_Tmean
+     - PRISM climate data - 30-year normal mean temperature (Â°C): Annual period: 1981-2010 within the catchment
      - float64
-     - False
 
    * - streamcat_Tmin
+     - PRISM climate data - 30-year normal minimum temperature (Â°C): Annual period: 1981-2010 within catchment
      - float64
-     - False
 
    * - streamcat_RdDens
+     - Density of roads (2010 Census Tiger Lines) within catchment (km/square km)
      - float64
-     - False
 
    * - streamcat_Runoff
+     - Mean runoff (mm) within catchment
      - float64
-     - False
 
    * - streamcat_Clay
+     - Mean % clay content of soils (STATSGO) within catchment.
      - float64
-     - False
 
    * - streamcat_Sand
+     - Mean % sand content of soils (STATSGO) within catchment.
      - float64
-     - False
 
    * - streamcat_Precip_Minus_EVT
+     - This dataset represents surplus precipitation (mm): precipitation minus potential evaporation described in DOI: 10.1016/j.scitotenv.2020.137661 within individual,  local NHDPlusV2 catchments and upstream, contributing watersheds.
      - float64
-     - False
 
 
 
+
+.. _formulations:
 
 formulations
 ------------
 
-Formulation assignments for all catchments.
+Formulations selected for each catchment from formulation regionalization.
+
+Sample file path: ``outputs/formulations/form_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "vpu", "divide_id", "formulation", "huc_id", "total_score", "summary_score", "cost", "num_gages", "upscale_huc"
+   "03S", "cat-415628", "noah-owp-modular snow-17 cfe-x t-route", "03070103", "1.82", "0.9305114474915951", "15", "3", "huc8"
+   "03S", "cat-415629", "noah-owp-modular snow-17 cfe-x t-route", "03070103", "1.82", "0.9305114474915951", "15", "3", "huc8"
+   "03S", "cat-415630", "noah-owp-modular snow-17 cfe-x t-route", "03070103", "1.82", "0.9305114474915951", "15", "3", "huc8"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - vpu
+     - Hydrologic VPU the catchment belongs to.
      - object
-     - False
 
    * - divide_id
+     - Unique identifier for each catchment.
      - object
-     - False
 
    * - formulation
+     - Formulation assigned to the catchment.
      - object
-     - False
 
    * - huc_id
+     - HUC ID the catchment belongs to (given the huc level specified in the configuration).
      - object
-     - False
 
    * - total_score
+     - Total formulation summary score across all calibrated catchments in the HUC region. If "average_score" is chosen in the configuration, this column would be the average score instead.
      - float64
-     - False
 
    * - summary_score
+     - Highest summary score for the assigned formulation calibrated basins in the HUC region.
      - float64
-     - False
 
    * - cost
+     - Computational cost associated with the assigned formulation in the HUC region.
      - int64
-     - False
 
    * - num_gages
+     - Number of calibrated basins using the assigned formulation in the HUC region.
      - int64
-     - False
 
    * - upscale_huc
+     - HUC level used for upscaling in order to find sufficient number of calibrated basins in the HUC region. If same as the HUC level defined in the configuration, then no upscaling was performed.
      - object
-     - False
 
 
 
+
+.. _formulations_pars:
 
 formulations_pars
 -----------------
 
-Formulation parameters for all catchments.
+Formulations selected for each catchment from formulation regionalization.
+
+Sample file path: ``outputs/formulations/form_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "gage_id", "formulation", "MFSNO", "CWP", "VCMX25", "MP", "RSURF_SNOW", "RSURF_EXP", "SCAMAX", "b", "satdk", "satpsi", "slope", "maxsmc", "wltsmc", "max_gw_storage", "Cgw", "expon", "Kn", "Klf", "refkdt", "mfmax", "uadj", "si", "mfmin", "scf", "nmf", "tipm", "pxtemp", "plwhc", "daygm", "smcmin", "smcmax", "van_genuchten_alpha", "van_genuchten_n", "hydraulic_conductivity", "ponded_depth_max", "field_capacity", "df", "cc", "hcan", "lai", "subalb", "ems", "cg", "zo", "rho", "rhog", "Ks", "de", "avo", "apr", "a_Xinanjiang_inflection_point_parameter", "b_Xinanjiang_shape_parameter", "x_Xinanjiang_shape_parameter", "uztwm", "uzfwm", "lztwm", "lzfsm", "lzfpm", "adimp", "uzk", "lzpk", "lzsk", "zperc", "rexp", "pctim", "pfree", "riva", "side"
+   "02314500", "noah-owp-modular lasam t-route", "3.5101328525866955", "0.3404262876739411", "103.32723999542704", "8.541847860650119", "84.86645310088417", "4.685753699776528", "0.804539911248697", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.1212547772261575", "0.5441297948626399", "0.1363046350741823", "1.6388107273647554", "10.308690609074098", "2.0768951334525343", "144.37434845659223", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "02208150", "noah-owp-modular snow-17 cfe-x t-route", "3.302211730841977", "0.1530701120368238", "64.50241741064907", "10.35361122481772", "5.207204189742202", "1.5516800131487098", "0.8216748155447595", "9.648070687838704", "0.0006609990923245", "0.1775838251849715", "0.8769159858698881", "0.2349686060115616", "0.2356840976954763", "0.0447582966361027", "0.0017528344687233", "3.70769307361701", "0.5042854276011531", "0.3944502804739151", "2.9132022303304272", "1.519958841718836", "0.0175067702690927", "5754.503459824122", "0.510868734302519", "0.948809627707221", "0.0957871146374974", "0.299815928365687", "0.5438230929426437", "0.0486967003610763", "0.4290860867104877", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.0021747040843594", "4.354979613185452", "4.094942483452014", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "02228500", "noah-owp-modular lasam t-route", "3.367167254916128", "0.3242573597008308", "39.62515991147947", "4.76285615881014", "13.113738231745913", "1.9876986913464847", "0.8281455190482556", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.0273517867947678", "0.6395935886966257", "0.1943972719062101", "1.7708281781042006", "76.11714597774704", "1.5183546697462902", "307.3492392241725", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - gage_id
+     - gage_id
      - object
-     - False
 
    * - formulation
+     - Formulation assigned to the catchment.
      - object
-     - False
 
    * - MFSNO
+     - MFSNO
      - float64
-     - False
 
    * - CWP
+     - CWP
      - float64
-     - False
 
    * - VCMX25
+     - VCMX25
      - float64
-     - False
 
    * - MP
+     - MP
      - float64
-     - False
 
    * - RSURF_SNOW
+     - RSURF_SNOW
      - float64
-     - False
 
    * - RSURF_EXP
+     - RSURF_EXP
      - float64
-     - False
 
    * - SCAMAX
+     - SCAMAX
      - float64
-     - False
 
    * - b
+     - b
      - float64
-     - True
 
    * - satdk
+     - satdk
      - float64
-     - True
 
    * - satpsi
+     - satpsi
      - float64
-     - True
 
    * - slope
+     - slope
      - float64
-     - True
 
    * - maxsmc
+     - maxsmc
      - float64
-     - True
 
    * - wltsmc
+     - wltsmc
      - float64
-     - True
 
    * - max_gw_storage
+     - max_gw_storage
      - float64
-     - True
 
    * - Cgw
+     - Cgw
      - float64
-     - True
 
    * - expon
+     - expon
      - float64
-     - True
 
    * - Kn
+     - Kn
      - float64
-     - True
 
    * - Klf
+     - Klf
      - float64
-     - True
 
    * - refkdt
+     - refkdt
      - float64
-     - True
 
    * - mfmax
+     - mfmax
      - float64
-     - True
 
    * - uadj
+     - uadj
      - float64
-     - True
 
    * - si
+     - si
      - float64
-     - True
 
    * - mfmin
+     - mfmin
      - float64
-     - True
 
    * - scf
+     - scf
      - float64
-     - True
 
    * - nmf
+     - nmf
      - float64
-     - True
 
    * - tipm
+     - tipm
      - float64
-     - True
 
    * - pxtemp
+     - pxtemp
      - float64
-     - True
 
    * - plwhc
+     - plwhc
      - float64
-     - True
 
    * - daygm
+     - daygm
      - float64
-     - True
 
    * - smcmin
+     - smcmin
      - float64
-     - True
 
    * - smcmax
+     - smcmax
      - float64
-     - True
 
    * - van_genuchten_alpha
+     - van_genuchten_alpha
      - float64
-     - True
 
    * - van_genuchten_n
+     - van_genuchten_n
      - float64
-     - True
 
    * - hydraulic_conductivity
+     - hydraulic_conductivity
      - float64
-     - True
 
    * - ponded_depth_max
+     - ponded_depth_max
      - float64
-     - True
 
    * - field_capacity
+     - field_capacity
      - float64
-     - True
 
    * - df
+     - df
      - float64
-     - True
 
    * - cc
+     - cc
      - float64
-     - True
 
    * - hcan
+     - hcan
      - float64
-     - True
 
    * - lai
+     - lai
      - float64
-     - True
 
    * - subalb
+     - subalb
      - float64
-     - True
 
    * - ems
+     - ems
      - float64
-     - True
 
    * - cg
+     - cg
      - float64
-     - True
 
    * - zo
+     - zo
      - float64
-     - True
 
    * - rho
+     - rho
      - float64
-     - True
 
    * - rhog
+     - rhog
      - float64
-     - True
 
    * - Ks
+     - Ks
      - float64
-     - True
 
    * - de
+     - de
      - float64
-     - True
 
    * - avo
+     - avo
      - float64
-     - True
 
    * - apr
+     - apr
      - float64
-     - True
 
    * - a_Xinanjiang_inflection_point_parameter
+     - a_Xinanjiang_inflection_point_parameter
      - float64
-     - True
 
    * - b_Xinanjiang_shape_parameter
+     - b_Xinanjiang_shape_parameter
      - float64
-     - True
 
    * - x_Xinanjiang_shape_parameter
+     - x_Xinanjiang_shape_parameter
      - float64
-     - True
 
    * - uztwm
+     - uztwm
      - float64
-     - True
 
    * - uzfwm
+     - uzfwm
      - float64
-     - True
 
    * - lztwm
+     - lztwm
      - float64
-     - True
 
    * - lzfsm
+     - lzfsm
      - float64
-     - True
 
    * - lzfpm
+     - lzfpm
      - float64
-     - True
 
    * - adimp
+     - adimp
      - float64
-     - True
 
    * - uzk
+     - uzk
      - float64
-     - True
 
    * - lzpk
+     - lzpk
      - float64
-     - True
 
    * - lzsk
+     - lzsk
      - float64
-     - True
 
    * - zperc
+     - zperc
      - float64
-     - True
 
    * - rexp
+     - rexp
      - float64
-     - True
 
    * - pctim
+     - pctim
      - float64
-     - True
 
    * - pfree
+     - pfree
      - float64
-     - True
 
    * - riva
+     - riva
      - float64
-     - True
 
    * - side
+     - side
      - float64
-     - True
 
 
 
 
-pairs_gower
------------
+.. _pairs_distance_algorithms:
 
-Gower distance pairs between donor and receiver catchments.
+pairs_distance_algorithms
+-------------------------
+
+Receiver-donor pairs generated from parameter regionalization using distance-based algorithms (currently Gower and URF). 
+
+Sample file path: ``outputs/pairs/pairs_gower_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "divide_id", "tag", "donor", "distSpatial", "donors", "distSpatials", "distAttr", "distAttrs"
+   "cat-410687", "proximity", "cat-412161", "18", "cat-412161,cat-503325,cat-412159", "18,25,28", "nan", "None"
+   "cat-410688", "proximity", "cat-412161", "18", "cat-412161,cat-412159,cat-412160", "18,27,28", "nan", "None"
+   "cat-410689", "main", "cat-412318", "49", "cat-412318,cat-412317,cat-412289", "49,55,55", "0.018", "0.018,0.018,0.029"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - divide_id
+     - Unique identifier for each receiver catchment.  
      - object
-     - False
 
    * - tag
+     - Identifier indicating whether the donor is found using all selected attributes during the "main" run or using basic attributes during the "basic" run.
      - object
-     - False
 
    * - donor
+     - Unique identifier for each donor catchment.
      - object
-     - False
 
    * - distSpatial
+     - Spatial distance between the receiver and donor catchments (in kilometers).
      - int64
-     - False
 
    * - donors
+     - The final set of donors considered for the receiver catchment. The number of final donors is determined by the "n_donor_max" parameter specified in the configuration.
      - object
-     - True
 
    * - distSpatials
+     - Spatial distances corresponding to the final set of donors (in kilometers).
      - object
-     - True
 
    * - distAttr
+     - Attribute distance between the receiver and donor catchments (unitless).
      - float64
-     - True
 
    * - distAttrs
+     - Attribute distances corresponding to the final set of donors (unitless).
      - object
-     - True
 
 
 
 
-pairs_kmeans
-------------
+.. _pairs_cluster_algorithms:
 
-K-means clustering pairs between donor and receiver catchments.
+pairs_cluster_algorithms
+------------------------
+
+Receiver-donor pairs generated from parameter regionalization using clustering-based algorithms (currently KMeans, KMedoids, HDBSCAN, and BIRCH). Attribute distances are not calculated for these algorithms.
+
+Sample file path: ``outputs/pairs/pairs_kmeans_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "divide_id", "tag", "donor", "distSpatial", "donors", "distSpatials"
+   "cat-410687", "main", "cat-412161", "18", "cat-412161,cat-412160,cat-412159", "18,28,28"
+   "cat-410688", "main", "cat-412161", "18", "cat-412161,cat-412159,cat-412160", "18,27,28"
+   "cat-410689", "main", "cat-412319", "48", "cat-412319,cat-412276,cat-412275", "48,52,54"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - divide_id
+     - Unique identifier for each receiver catchment.  
      - object
-     - False
 
    * - tag
+     - Identifier indicating whether the donor is found using all selected attributes during the "main" run or using basic attributes during the "basic" run.
      - object
-     - False
 
    * - donor
+     - Unique identifier for each donor catchment.
      - object
-     - False
 
    * - distSpatial
+     - Spatial distance between the receiver and donor catchments (in kilometers).
      - int64
-     - False
 
    * - donors
+     - The final set of donors considered for the receiver catchment. The number of final donors is determined by the "n_donor_max" parameter specified in the configuration.
      - object
-     - True
 
    * - distSpatials
+     - Spatial distances corresponding to the final set of donors (in kilometers).
      - object
-     - True
 
 
 
 
-pairs_msw
----------
+.. _pairs_mswm:
 
-Selected donor-receiver pairs for MSW-M regionalization.
+pairs_mswm
+----------
+
+Receiver-donor pairs generated from parameter regionalization to be used by MSWM.
+
+Sample file path: ``outputs/pairs/pairs_kmeans_conus_vpu03S_mswm.csv ``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "gage_id", "divide_id"
+   "2204130", "cat-417756"
+   "2204130", "cat-419726"
+   "2204130", "cat-417633"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - gage_id
+     - Unique identifier for each donor basin.
      - int64
-     - False
 
    * - divide_id
+     - Unique identifier for each receiver catchment in the VPU.
      - object
-     - False
 
 
 
+
+.. _params:
 
 params
 ------
 
-Parameters used for each formulation in the regionalization.
+Formulation and calibrated parameters for each donor basin.
+
+Sample file path: ``outputs/params/formulation_params_gower_conus_vpu03S.csv``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "gage_id", "formulation", "MFSNO", "CWP", "VCMX25", "MP", "RSURF_SNOW", "RSURF_EXP", "SCAMAX", "b", "satdk", "satpsi", "slope", "maxsmc", "wltsmc", "max_gw_storage", "Cgw", "expon", "Kn", "Klf", "refkdt", "mfmax", "uadj", "si", "mfmin", "scf", "nmf", "tipm", "pxtemp", "plwhc", "daygm", "smcmin", "smcmax", "van_genuchten_alpha", "van_genuchten_n", "hydraulic_conductivity", "ponded_depth_max", "field_capacity", "df", "cc", "hcan", "lai", "subalb", "ems", "cg", "zo", "rho", "rhog", "Ks", "de", "avo", "apr", "a_Xinanjiang_inflection_point_parameter", "b_Xinanjiang_shape_parameter", "x_Xinanjiang_shape_parameter", "uztwm", "uzfwm", "lztwm", "lzfsm", "lzfpm", "adimp", "uzk", "lzpk", "lzsk", "zperc", "rexp", "pctim", "pfree", "riva", "side"
+   "2314500", "noah-owp-modular lasam t-route", "3.5101328525866955", "0.3404262876739411", "103.32723999542704", "8.541847860650119", "84.86645310088417", "4.685753699776528", "0.804539911248697", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.1212547772261575", "0.5441297948626399", "0.1363046350741823", "1.6388107273647554", "10.308690609074098", "2.0768951334525343", "144.37434845659223", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "2208150", "noah-owp-modular snow-17 cfe-x t-route", "3.302211730841977", "0.1530701120368238", "64.50241741064907", "10.35361122481772", "5.207204189742202", "1.5516800131487098", "0.8216748155447595", "9.648070687838704", "0.0006609990923245", "0.1775838251849715", "0.8769159858698881", "0.2349686060115616", "0.2356840976954763", "0.0447582966361027", "0.0017528344687233", "3.70769307361701", "0.5042854276011531", "0.3944502804739151", "2.9132022303304272", "1.519958841718836", "0.0175067702690927", "5754.503459824122", "0.510868734302519", "0.948809627707221", "0.0957871146374974", "0.299815928365687", "0.5438230929426437", "0.0486967003610763", "0.4290860867104877", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.0021747040843594", "4.354979613185452", "4.094942483452014", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "2228500", "noah-owp-modular lasam t-route", "3.367167254916128", "0.3242573597008308", "39.62515991147947", "4.76285615881014", "13.113738231745913", "1.9876986913464847", "0.8281455190482556", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.0273517867947678", "0.6395935886966257", "0.1943972719062101", "1.7708281781042006", "76.11714597774704", "1.5183546697462902", "307.3492392241725", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - gage_id
+     - gage_id
      - int64
-     - False
 
    * - formulation
+     - Formulation assigned to the calibration basin. Modules within the formulation are separated by commas.
      - object
-     - False
 
    * - MFSNO
+     - NOM parameter: Melt factor for snow depletion curve
      - float64
-     - False
 
    * - CWP
+     - NOM parameter: Canopy water capacity
      - float64
-     - False
 
    * - VCMX25
+     - NOM parameter: Maximum canopy storage
      - float64
-     - False
 
    * - MP
+     - NOM parameter: MP
      - float64
-     - False
 
    * - RSURF_SNOW
+     - NOM parameter: Snow surface roughness
      - float64
-     - False
 
    * - RSURF_EXP
+     - NOM parameter: Snow surface roughness exponent
      - float64
-     - False
 
    * - SCAMAX
+     - NOM parameter: SCAMAX
      - float64
-     - False
 
    * - b
+     - CFE parameter: b
      - float64
-     - True
 
    * - satdk
+     - CFE parameter: satdk
      - float64
-     - True
 
    * - satpsi
+     - CFE parameter: satpsi
      - float64
-     - True
 
    * - slope
+     - CFE parameter: slope
      - float64
-     - True
 
    * - maxsmc
+     - CFE parameter: maxsmc
      - float64
-     - True
 
    * - wltsmc
+     - CFE parameter: wltsmc
      - float64
-     - True
 
    * - max_gw_storage
+     - CFE parameter: max_gw_storage
      - float64
-     - True
 
    * - Cgw
+     - CFE parameter: Cgw
      - float64
-     - True
 
    * - expon
+     - CFE parameter: expon
      - float64
-     - True
 
    * - Kn
+     - CFE parameter: Kn
      - float64
-     - True
 
    * - Klf
+     - CFE parameter: Klf
      - float64
-     - True
 
    * - refkdt
+     - CFE parameter: refkdt
      - float64
-     - True
 
    * - mfmax
+     - snow-17 parameter: mfmax
      - float64
-     - True
 
    * - uadj
+     - snow-17 parameter: uadj
      - float64
-     - True
 
    * - si
+     - snow-17 parameter: si
      - float64
-     - True
 
    * - mfmin
+     - snow-17 parameter: mfmin
      - float64
-     - True
 
    * - scf
+     - snow-17 parameter: scf
      - float64
-     - True
 
    * - nmf
+     - snow-17 parameter: nmf
      - float64
-     - True
 
    * - tipm
+     - snow-17 parameter: tipm
      - float64
-     - True
 
    * - pxtemp
+     - snow-17 parameter: pxtemp
      - float64
-     - True
 
    * - plwhc
+     - snow-17 parameter: plwhc
      - float64
-     - True
 
    * - daygm
+     - snow-17 parameter: daygm
      - float64
-     - True
 
    * - smcmin
+     - lasam parameter: smcmin
      - float64
-     - True
 
    * - smcmax
+     - lasam parameter: smcmax
      - float64
-     - True
 
    * - van_genuchten_alpha
+     - lasam parameter: van_genuchten_alpha
      - float64
-     - True
 
    * - van_genuchten_n
+     - lasam parameter: van_genuchten_n
      - float64
-     - True
 
    * - hydraulic_conductivity
+     - lasam parameter: hydraulic_conductivity
      - float64
-     - True
 
    * - ponded_depth_max
+     - lasam parameter: ponded_depth_max
      - float64
-     - True
 
    * - field_capacity
+     - lasam parameter: field_capacity
      - float64
-     - True
 
    * - df
+     - UEB parameter: df
      - float64
-     - True
 
    * - cc
+     - UEB parameter: cc
      - float64
-     - True
 
    * - hcan
+     - UEB parameter: hcan
      - float64
-     - True
 
    * - lai
+     - UEB parameter: lai
      - float64
-     - True
 
    * - subalb
+     - UEB parameter: subalb
      - float64
-     - True
 
    * - ems
+     - UEB parameter: ems
      - float64
-     - True
 
    * - cg
+     - UEB parameter: cg
      - float64
-     - True
 
    * - zo
+     - UEB parameter: zo
      - float64
-     - True
 
    * - rho
+     - UEB parameter: rho
      - float64
-     - True
 
    * - rhog
+     - UEB parameter: rhog
      - float64
-     - True
 
    * - Ks
+     - UEB parameter: Ks
      - float64
-     - True
 
    * - de
+     - UEB parameter: de
      - float64
-     - True
 
    * - avo
+     - UEB parameter: avo
      - float64
-     - True
 
    * - apr
+     - UEB parameter: apr
      - float64
-     - True
 
    * - a_Xinanjiang_inflection_point_parameter
+     - CFE-X parameter: a_Xinanjiang_inflection_point_parameter
      - float64
-     - True
 
    * - b_Xinanjiang_shape_parameter
+     - CFE-X parameter: b_Xinanjiang_shape_parameter
      - float64
-     - True
 
    * - x_Xinanjiang_shape_parameter
+     - CFE-X parameter: x_Xinanjiang_shape_parameter
      - float64
-     - True
 
    * - uztwm
+     - sac-sma parameter: uztwm
      - float64
-     - True
 
    * - uzfwm
+     - sac-sma parameter: uzfwm
      - float64
-     - True
 
    * - lztwm
+     - sac-sma parameter: lztwm
      - float64
-     - True
 
    * - lzfsm
+     - sac-sma parameter: lzfsm
      - float64
-     - True
 
    * - lzfpm
+     - sac-sma parameter: lzfpm
      - float64
-     - True
 
    * - adimp
+     - sac-sma parameter: adimp
      - float64
-     - True
 
    * - uzk
+     - sac-sma parameter: uzk
      - float64
-     - True
 
    * - lzpk
+     - sac-sma parameter: lzpk
      - float64
-     - True
 
    * - lzsk
+     - sac-sma parameter: lzsk
      - float64
-     - True
 
    * - zperc
+     - sac-sma parameter: zperc
      - float64
-     - True
 
    * - rexp
+     - sac-sma parameter: rexp
      - float64
-     - True
 
    * - pctim
+     - sac-sma parameter: pctim
      - float64
-     - True
 
    * - pfree
+     - sac-sma parameter: pfree
      - float64
-     - True
 
    * - riva
+     - sac-sma parameter: riva
      - float64
-     - True
 
    * - side
+     - sac-sma parameter: side
      - float64
-     - True
 
 
 
+
+.. _spatial_distance:
+
+spatial_distance
+----------------
+
+Spatial distances between donor and receiver catchments within the VPU. Columns represent donor catchments, and rows represent receiver catchments.
+
+Sample file path: ``outputs/spatial_distance/donor_receiver_dist_conus_vpu03S.parquet``
+
+.. warning:: Schema table omitted for spatial_distance files due to large number of columns.
+
+
+
+.. _summary_score:
 
 summary_score
 -------------
 
-Summary scores for each catchment after regionalization.
+Summary scores for each calibrated formulation and basin.
+
+Sample file path: ``outputs/summary_score/score_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "gage_id", "formulation", "summary_score"
+   "02204130", "noah-owp-modular lasam t-route", "0.8172787119659016"
+   "02204130", "noah-owp-modular snow-17 cfe-x t-route", "0.9305114474915951"
+   "02204130", "noah-owp-modular ueb cfe-s t-route", "0.5628047288522315"
+
+**Schema:**
 
 .. list-table::
    :header-rows: 1
 
    * - Column
+     - Description
      - Type
-     - Nullable
    * - gage_id
+     - Unique identifier for each calibration basin.
      - object
-     - False
 
    * - formulation
+     - Formulation calibrated for each calibration basin.
      - object
-     - False
 
    * - summary_score
+     - Summary score for the calibrated formulation and basin.
      - float64
-     - False
 
 
 

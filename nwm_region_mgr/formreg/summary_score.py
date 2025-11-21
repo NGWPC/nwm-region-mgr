@@ -132,6 +132,12 @@ def formulation_summary_score(
     # Normalize each column based on orientation
     for col in metrics:
         values = df_metrics[col]
+
+        # take absolute values if specified
+        if dict_metrics[col].absolute:
+            values = values.abs()
+
+        # determine min and max values for normalization
         min_val, max_val = values.min(), values.max()
 
         # replace min and max with lower and upper bounds if provided

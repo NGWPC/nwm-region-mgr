@@ -43,7 +43,7 @@ parreg = [
     "scikit_learn_extra~=0.3.0",
     "scipy~=1.16.1"
 ]
-dev = ["pytest~=8.4.1", "ruff~=0.12.10"]
+dev = ["pytest~=8.4.1", "ruff~=0.12.10", "python-dotenv~=1.2.1", "boto3~=1.40.74"]
 docs = ["sphinx", "numpydoc", "sphinx_rtd_theme", "sphinx_design", "pydata-sphinx-theme", "sphinx-autodoc-typehints", "myst-parser"]
 
 [project.urls]
