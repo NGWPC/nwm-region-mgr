@@ -180,6 +180,12 @@ Notes
 
 - The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
 
+- Currently, three attribute datasets are supported: 
+
+   * `NextGen attributes <https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>`_.
+   * `Hydrologic Landscape Regions (HLR) attributes <https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>`_.
+   * `StreamCat attributes <https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>`_.
+
 - Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and 
   algorithm inefficiency.
 
