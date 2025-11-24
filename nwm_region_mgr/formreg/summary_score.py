@@ -1,4 +1,4 @@
-"""Process configuration for formreg.
+"""Compute summary scores for formulation regionalization.
 
 This module provides functions to load, validate, and process the configuration for formulation regionalization.
 
