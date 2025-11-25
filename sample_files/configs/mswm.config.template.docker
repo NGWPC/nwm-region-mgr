@@ -59,8 +59,8 @@ noah_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/noah-
 ueb_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/ueb
 lasam_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/lasam
 lstm_parameter_dir = /ngen-app/nwm-msw-mgr/src/mswm/module_parameter_files/lstm
-sac_parameter_dir = /ngen-app/nwm-region-mgr/src/data/module_parameter_files
-snow_17_parameter_dir = /ngen-app/nwm-region-mgr/data/module_parameter_files
+sac_parameter_dir = /data/inputs/module_parameter_files
+snow_17_parameter_dir = /data/inputs/module_parameter_files
 
 # Executable file for running ngen BMI
 ngen_exe_file = /ngen-app/ngen/cmake_build/ngen

@@ -81,7 +81,7 @@ def log_run_info(args: dict):
     logger.info(f"MSWM template file:  {args['config_template']}")
     logger.info(f"NGEN input dir:    {args['out_dir'] / '../Input'}")
     logger.info(f"NGEN output dir:     {args['out_dir']}")
-    logger.info(f"Number of procs: {args.keys()}")
+    logger.info(f"Number of procs: {args['nprocs']}")
     logger.info("================================================")
 
 
@@ -396,7 +396,8 @@ class NGENConfigProcessor:
 
     def to_dict(self):
         """Convert the config to a dictionary."""
-        return self.config.__dict__
+        return self.config.model_dump()
+
 
     def substitute_placeholders(self, config):
         """Substitute placeholders in the config with actual values.
