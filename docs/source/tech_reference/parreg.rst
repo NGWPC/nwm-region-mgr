@@ -57,7 +57,7 @@ Process
 
        * **distance methods (gower, urf)**: assign nearest donor in attribute space to each receiver
 
-         * First pass: use all primmary attributes.
+         * First pass: use all primary attributes.
          * Second pass (if needed): use only ``base attributes``.
 
        * **clustering methods (kmeans, kmedoids, hdbscan, birch)**: using all primary attributes, assign the spatially nearest donor within the same cluster to each receiver.
@@ -88,7 +88,7 @@ Pairing Methods
   each receiver and all potential donors using the PCA-transformed attribute data, with weights for each principal
   component set according to the percentage of variance it explains. Each receiver is assigned the donor with
   the lowest Gower's distance. Donors are identified by iteratively searching in neighborhoods of increasing
-  radius until a candidate meeting both attribute and spatial distance criteria is found.
+  radius until a candidate meeting both attribute , using all primary attributes.and spatial distance criteria is found.
 
   * *Type*: attribute distance metric
   * *How it works*: Calculates a weighted distance between receivers and donors based on PCA-transformed attributes.
