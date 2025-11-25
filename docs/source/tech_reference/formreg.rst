@@ -4,10 +4,10 @@ Formulation Regionalization
 Introduction
 ------------
 
-The formulation regionalization process identifies optimal NextGen formulations for calibrated (and/or uncalibrated) 
+The formulation regionalization process identifies optimal NextGen formulations for calibrated (and/or uncalibrated)
 catchments within each spatial unit defined by a given spatial discretization level (e.g., HUC8).
 
-**Required input:** 
+**Required input:**
    - Calibration and validation statistics for all calibration basins within the VPU (and nearby VPUs) for each candidate formulation.
    - NextGen divides hydrofabric (divides layer).
    - HUC12 - ngen catchment mapping.
@@ -26,8 +26,8 @@ Process
    **Figure 1.** Example formulation regionalization for a HUC4.
 
 1. Calculate summary score for every gage within the VPU that has calibration stats (Figure 2).
-    - metrics to use in composite summary score are specified in the config_formreg.yaml
-    - Along with the metric, min and max values may be specified.  If non are specified, min and max values are derived from the data. If bounds are specified, values outside the bounds will be clipped to the bounds.
+    - Metrics to use in composite summary score are specified in the config_formreg.yaml
+    - Along with the metric, min and max values may be specified.  If none are specified, min and max values are derived from the data. If bounds are specified, values outside the bounds will be clipped to the bounds.
     - Whether to use absolute values for a given metric can be specified in the config_formreg.yaml
     - Direction of "better" metric values must be specified in the config_formreg.yaml
     - Metric weights must be provided in the config_formreg.yaml and sum to 1
@@ -84,16 +84,16 @@ Notes
 
 - The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
 
-- Formulation regionalization can be run independently, without requiring parameter regionalization. However, 
+- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
   parameter regionalization requires formulation regionalization to be completed first.
 
-- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned 
+- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
   formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
-  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if 
-  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that 
+  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
+  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
   share the same formulation as the uncalibrated catchment.
 
-- Currently, formulation regionalization relies on calibration/validation statistics only. In the future, 
+- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
   additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
 
 
