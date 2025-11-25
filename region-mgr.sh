@@ -35,32 +35,47 @@ done
 
 function docker_run {
     time sudo docker run --entrypoint python \
-        -v $(pwd)/data/:/data \
-        -v $(pwd)/sample_files/:/sample_files \
-        --rm ngen_rte $*
+        -v $(pwd)/data/:/ngen-app/nwm-region-mgr/data \
+        -v $(pwd)/sample_files/:/ngen-app/nwm-region-mgr/sample_files \
+        -v $(pwd)/ngencerf/:/ngencerf \
+        --rm ngen_rte "$@"
 }
 
 function docker_run_ngen {
-    time sudo docker run --entrypoint "/bin/bash" -it\
-        -v $(pwd)/data/:/data \
-        -v $(pwd)/sample_files/:/sample_files \
+    time docker run --entrypoint "/bin/bash" -it\
+        -u $(id -u):$(id -g) \
+        -v $(pwd)/data/:/ngen-app/nwm-region-mgr/data \
+        -v $(pwd)/sample_files/:/ngen-app/nwm-region-mgr/sample_files \
+        -v $(pwd)/ngencerf/:/ngencerf \
+        -v $(pwd)/ngen-app/data:/ngen-app/data/ \
+        --rm ngen_rte -c " ulimit -n 60000 && python $*"
+        
+}
+
+
+function docker_run_ngen_new {
+    time docker run --entrypoint "/bin/bash" -it\
+        -u $(id -u):$(id -g) \
+        -v /home/yuqiong.liu/:/home/yuqiong.liu/ \
+        -v $(pwd)/ngencerf/:/ngencerf \
         --rm ngen_rte -c " ulimit -n 60000 && python $*"
         
 }
 
 ######### Docker Build #########
 if [ "$docker" = true ]; then
-    git clone git@github.com:NGWPC/nwm-rte.git 
-    (cd nwm-rte && \
-    git fetch && \
-    git checkout region && \
-    git pull && \
-    ./ngen_rte_build.sh)
+    # git clone git@github.com:NGWPC/nwm-rte.git 
+    # (cd nwm-rte && \
+    # git fetch && \
+    # git checkout region && \
+    # git pull && \
+    # ./ngen_rte_build.sh)
 
 
     ##### For development #####
-    # (cd nwm-rte && \
-    # ./ngen_rte_build.sh)
+    (cd ../nwm-rte && \
+    ./ngen_rte_build.sh)
+
     # # rm -rf nwm-rte
 fi
 
@@ -68,7 +83,7 @@ fi
 if [ "$parreg" = true ]; then
 
     docker_run "/ngen-app/nwm-region-mgr/regionalization.py" \
-        "/sample_files/configs"
+        "/ngen-app/nwm-region-mgr/sample_files/configs"
 fi
 
 if [ "$formreg" = true ]; then
@@ -82,7 +97,7 @@ if [ "$ngen" = true ]; then
 
 
 docker_run_ngen "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
-    --config_ngen "/sample_files/configs/config_ngen.yaml"
+    --config_ngen "/ngen-app/nwm-region-mgr/sample_files/configs/config_ngen.yaml"
 fi
 
 ######### Run EVAL #########
