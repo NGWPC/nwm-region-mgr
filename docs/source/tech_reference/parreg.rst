@@ -55,12 +55,12 @@ Process
 
      * Apply a distance or clustering algorithm (see method specifics below) to assign a donor to each receiver.
 
-       * **distance methods (gower, urf)**: assign nearest donor in attribute space to each receiver.
+       * **distance methods (gower, urf)**: assign nearest donor in attribute space to each receiver
 
-         * First pass: use all parimary attributes.
+         * First pass: use all primmary attributes.
          * Second pass (if needed): use only ``base attributes``.
 
-       * **clustering methods (kmeans, kmedoids, hdbscan, birch)**: assign the spatially nearest donor within the same cluster to each receiver.
+       * **clustering methods (kmeans, kmedoids, hdbscan, birch)**: using all primary attributes, assign the spatially nearest donor within the same cluster to each receiver.
 
      * In addition to the final donor, up to ``n_donor_max`` closest donors are also recorded in the pair results
         for future reference (e.g., for ensemble applications).
@@ -95,7 +95,7 @@ Pairing Methods
   * *Pros*: Simple to understand and implement; effective for mixed data types.
   * *Cons*: May not capture complex relationships; sensitive to scaling and outliers.
 
-* **URF** This method builds an unsupervised random forest from the PCA-transformed attribute data. It begins by
+* **URF** This method builds an unsupervised random forest from the raw or PCA-transformed attribute data. It begins by
   constructing a joint distribution of the explanatory variables and drawing samples from this distribution to create
   synthetic data. The real and synthetic data are combined into a single dataset, with a label indicating the source
   of each observation. Next, a `random forest classifier <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_
@@ -198,7 +198,7 @@ Notes
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
 
 - The algorithm generated donor-receiver pairs can be updated to incorporate specific manual pairs, if provided via
-  `manual_pairings_file` in config_general(see the corresponding section in :doc:`Input Data <input_data>` page for details).
+  `manual_pairings_file` in config_general.yaml(see the corresponding section in :doc:`Input Data <input_data>` page for details).
 
 
 .. toctree::
