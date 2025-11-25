@@ -21,7 +21,7 @@ as well as scripts/workflows to run ngen simulations and evaluation.
 cd nwm-region-mgr
 ```
 ```bash
-./region-mgr.sh -docker
+./region-mgr.sh --docker
 ```
 ### Step 1. Run regionalization
 
