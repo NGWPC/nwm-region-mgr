@@ -35,11 +35,17 @@ done
 
 function docker_run {
     time sudo docker run --entrypoint python \
-        -v $(pwd)/data/:/ngen-app/nwm-region-mgr/data \
         -v $(pwd)/data/:/data \
-        -v $(pwd)/sample_files/:/ngen-app/nwm-region-mgr/sample_files \
         -v $(pwd)/sample_files/:/sample_files \
         --rm ngen_rte $*
+}
+
+function docker_run_ngen {
+    time sudo docker run --entrypoint "/bin/bash" -it\
+        -v $(pwd)/data/:/data \
+        -v $(pwd)/sample_files/:/sample_files \
+        --rm ngen_rte -c " ulimit -n 60000 && python $*"
+        
 }
 
 ######### Docker Build #########
@@ -53,34 +59,35 @@ if [ "$docker" = true ]; then
 
 
     ##### For development #####
-    # (cd run-time-environment-trial && \
+    # (cd nwm-rte && \
     # ./ngen_rte_build.sh)
-    rm -rf nwm-rte
+    # # rm -rf nwm-rte
 fi
 
 ######### Regionalization #########
 if [ "$parreg" = true ]; then
 
     docker_run "/ngen-app/nwm-region-mgr/regionalization.py" \
-        "/ngen-app/nwm-region-mgr/sample_files/configs"
+        "/sample_files/configs"
 fi
 
 if [ "$formreg" = true ]; then
 
     docker_run "/ngen-app/nwm-region-mgr/run_formreg.py" \
-        "/ngen-app/nwm-region-mgr/sample_files/configs/config_general.yaml" \
-        "/ngen-app/nwm-region-mgr/sample_files/configs/config_formreg.yaml"
+        "/sample_files/configs/config_general.yaml" \
+        "/sample_files/configs/config_formreg.yaml"
 fi
 ######### RUN NGEN #########
 if [ "$ngen" = true ]; then
 
-docker_run "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
-    --config_ngen "/ngen-app/nwm-region-mgr/sample_files/configs/config_ngen.yaml"
+
+docker_run_ngen "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
+    --config_ngen "/sample_files/configs/config_ngen.yaml"
 fi
 
 ######### Run EVAL #########
 
 if [ "$eval" = true ]; then
     docker_run -m nwm.verf \
-        "/ngen-app/nwm-region-mgr/sample_files/configs/config_eval.yaml" 
+        "/sample_files/configs/config_eval.yaml" 
 fi

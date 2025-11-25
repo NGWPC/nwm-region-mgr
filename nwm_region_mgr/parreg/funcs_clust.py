@@ -1,4 +1,4 @@
-"""Clustering functions.
+"""Functions to create donor-receiver pairs using clustering methods.
 
 This function performs donor-receiver pairing based on clustering using
   k-means clustering (method = "kmeans")

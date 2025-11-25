@@ -9,10 +9,10 @@ import logging
 from contextlib import contextmanager
 from time import time
 
-from formreg import config_schema as cs
-from formreg import select_formulation as sf
-from formreg import summary_score as ss
-from utils import load_and_process_config
+from nwm_region_mgr.formreg import config_schema as cs
+from nwm_region_mgr.formreg import select_formulation as sf
+from nwm_region_mgr.formreg import summary_score as ss
+from nwm_region_mgr.formreg.process_config import FormulationRegionalizationProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,8 @@ if __name__ == "__main__":
     config_paths = [args.general_config, args.formreg_config]
 
     # Load, validate, process, and save the configuration
-    config = load_and_process_config(config_paths, config_schema=cs.Config)
+    frp=FormulationRegionalizationProcessor(config_paths,cs.Config)
+    config = frp.config
 
     # process by VPU
     for vpu in config.general.vpu_list:
@@ -65,4 +66,5 @@ if __name__ == "__main__":
 
         # select the best formulation based on the summary score and optionally costs
         with timing_block("select_formulation"):
-            df_selected = sf.select_formulation(config, vpu, df_score)
+            frp.set_vpu(vpu)
+            df_selected = sf.select_formulation(config, vpu, df_score,frp.get_vpu_gdf())
