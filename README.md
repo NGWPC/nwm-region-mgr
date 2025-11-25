@@ -1,15 +1,24 @@
-# nwm-region-mgr
+# Formulation and Parameter Regionalization for the NextGen Framework
+[![Build](https://img.shields.io/github/actions/workflow/status/ngwpc/nwm-region-mgr/ci.yaml?branch=main)](.github/workflows/ci.yml)
+[![License: BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/license/bsd-2-clause)
+[![Release](https://img.shields.io/github/v/release/ngwpc/nwm-region-mgr)](https://github.com/NGWPC/nwm-region-mgr)
+![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-orange.svg)
+![Linter: Ruff](https://img.shields.io/badge/linter-ruff-orange)
 
-## Name
-NGEN/NWM Regionalization
+<img src="docs/source/_images/overview.png" alt="overview" width="600"/>
 
-## Description
-This repository includes packages for conducting formulation and parameter regionalizations for NextGen modules,
-as well as scripts/workflows to run ngen simulations and evaluation.
-- parreg: parameter regionalization
-- formreg: formulation regionalization
-- utils: utility functions shared by parreg and formreg
 
+`nwm_region_mgr` is a Python package for identifying optimal model formulations and parameter values in ungauged catchments. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
+
+
+## Key Features
+
+- **Formulation Regionalization** – Ranks NextGen model formulations for ungauged catchments based on similarity to gauged sites.
+- **Parameter Regionalization** – Estimates parameter values by intelligently transferring calibrations across catchments.
+- **Clustering Methods** – Groups catchments with shared hydrologic characteristics using multiple clustering approaches.
+- **Diagnostic Plots** – Generates clear plots and maps that explain formulation and parameter choices.
+- **Scalable Workflows** – Efficiently supports studies from individual watersheds to CONUS-wide applications.
+- **Customizable Configurations** – Full control of workflows via human-readable config files.
 ## Docker Run Time Environment (RTE)
 ### Step 0. Build Docker image and download data
 #### a) Sample input data can be downloaded from: **s3://ngwpc-dev/regionalization/data**
@@ -54,36 +63,38 @@ Alternatively the user can run steps 0-4 in all at once in series:
 ```bash
 ./region-mgr.sh -dpne
 ```
-## Desktop Run Time Environment (RTE)
+## Desktop/Workspace Run Time Environment (RTE)
 ### Clone & Build
 
 #### 1. clone ngen-region-mgr from Github
 
 ```bash
-cd [NGEN_REG_ROOT]
-git clone -b development --recurse-submodules https://github.com/NGWPC/nwm-region-mgr.git
+git clone https://github.com/NGWPC/nwm-region-mgr.git
+cd nwm-region-mgr
 ```
 
 #### 2. create python venv
-
+Create a virtual environment to isolate the dependencies of this library from your base Python environment.
 ```bash
-cd [VENV_ROOT]
-/usr/bin/python3.11 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip pip install --upgrade pip
 ```
+
 #### 3. install nwm-region-mgr
 
+You will then be able to install nwm_region_mgr. There are a few variants that users may be interested in.
+
 ```bash
-cd [NGEN_REG_ROOT]
-pip install . # to install formreg and utils only
-# OR
-pip install .[parreg] # to install formreg, utils, and parreg 
+# Regular package install
+pip install .
+# Install the package in edit mode (for development)
+pip install -e .
+# Install additional dependencies for parameter regionalization
+pip install .[parreg]
+# Install dependencies for docs and dev
+pip install .[docs,dev]
 ```
-
-where [VENV_ROOT] and [NGEN_REG_ROOT] refer to the directory to install python venv and nwm-region-mgr 
-in your local workspace, respectively
-
 
 ### STEP 1: Run regionalization to produce regionalized parameters and formulations
 
@@ -94,7 +105,8 @@ Three yaml config files are needed to run regionalization
 - **onfig_formreg.yaml**: specific settings for the formulation regionalization process.
 - **config_parreg.yaml**: specific settings for the parameter regionalization process.
 
-Follow the sample [config files](https://github.com/NGWPC/nwm-region-mgr/tree/development/sample_files/configs) to set up the configurations for your regionalization application as needed.
+Follow the sample config files (nwm_region_mgr/sample_files/configs) to set up the configurations
+for your regionalization application as needed.
 
 Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/**
 
@@ -104,7 +116,7 @@ Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/**
 ```bash
 python [NGEN_REG_ROOT]/nwm-region-mgr/regionalization.py [COFIG_DIR]
 ```
-Where: 
+Where:
 - [NGEN_REG_ROOT] refers to the directory where nwm-region-mgr is installed
 - [COFIG_DIR] refers to the directory containing the three config files as noted in 1), e.g.,
 
@@ -114,35 +126,35 @@ python regionalization.py sample_files/configs
 
 ### STEP 2: Run NGEN simulation with regionalized parameters
 
-- #### Run natively in workspace
-    - ##### 1) Install [ngen](https://github.com/NGWPC/ngen) and all submodules in its own venv
-        You may want to follow the following Confluence pages:
-        - [Clone ngen](https://confluence.nextgenwaterprediction.com/display/NGWPC/Clone+NGWPC+GitHub+Code)
-        - [Build ngen](https://confluence.nextgenwaterprediction.com/display/NGWPC/Build+ngen+completely)
+#### Run natively in workspace
+##### 1) Install [ngen](https://github.com/NGWPC/ngen) and all submodules in its own venv
+You may want to follow the following Confluence pages:
+- [Clone ngen](https://confluence.nextgenwaterprediction.com/display/NGWPC/Clone+NGWPC+GitHub+Code)
+- [Build ngen](https://confluence.nextgenwaterprediction.com/display/NGWPC/Build+ngen+completely)
   
-    - ##### 2) Install [mswm](https://github.com/NGWPC/nwm-msw-mgr) in its own venv
+##### 2) Install [mswm](https://github.com/NGWPC/nwm-msw-mgr) in its own venv
 
-    - ##### 3) Activate MSWM venv, e.g.
-        ```bash
-        source ~/repos/nwm-msw-mgr/venv/bin/activate
-        ```
-    - ##### 4) Set up MSWM configuration as shown in [run_ngen_vpu.sh](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_ngen_vpu.sh)
+##### 3) Activate MSWM venv, e.g.
+```bash
+source ~/repos/nwm-msw-mgr/venv/bin/activate
+```
+##### 4) Set up MSWM configuration as shown in [run_ngen_vpu.sh](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_ngen_vpu.sh)
 
-    - ##### 5) Run MSWM and ngen simulation
-        ```bash
-        cd ~/repos/nwm-region-mgr
-        ./run_ngen_vpu.sh
-        ```
-    - ##### 6) Check inputs, outputs and logs
-    All input, output and log files from running MSWM and NGEN can be found in *[work_dir]/regionalization/[run_name]/[vpu]* 
+##### 5) Run MSWM and ngen simulation
+```bash
+cd ~/repos/nwm-region-mgr
+./run_ngen_vpu.sh
+```
+##### 6) Check inputs, outputs and logs
+All input, output and log files from running MSWM and NGEN can be found in *[work_dir]/regionalization/[run_name]/[vpu]* 
 (as defined in **run_ngen_vpu.sh**)
 
-    - ##### 7) If ngen fails at t-route
-    Check if all NGEN cat-*.csv and nex-*.csv output files are generated; if yes,
+##### 7) If ngen fails at t-route
+Check if all NGEN cat-*.csv and nex-*.csv output files are generated; if yes,
     run t-route separately from the Output directory where ngen outputs are located, e.g.,
-        ```bash
-        python -m nwm_routing -f -V4 ../Input/vpu_09_troute_config_region.yaml
-        ```
+```bash
+python -m nwm_routing -f -V4 ../Input/vpu_09_troute_config_region.yaml
+```
 
 ### STEP 3: Evaluate NGEN simulation with nwm.verf
 
