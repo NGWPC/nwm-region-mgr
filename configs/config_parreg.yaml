@@ -24,30 +24,30 @@ donor:
 attr_datasets:
   ngen:
     attr_list: 
-    attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_ngen.csv'
-    attr_data_file: '{base_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet'
+    attr_select_file: '{base_dir}/inputs/region/attr_config/attr_selection_ngen.csv'
+    attr_data_file: '{base_dir}/inputs/region/attr_datasets/ngen/attr_ngen_{domain}.parquet'
     base_attr_list: ['elevation', 'slope', 'aspect']
   hlr:
     attr_list:
-    attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_hlr.csv'
-    attr_data_file: '{base_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet'
+    attr_select_file: '{base_dir}/inputs/region/attr_config/attr_selection_hlr.csv'
+    attr_data_file: '{base_dir}/inputs/region/attr_datasets/hlr/attr_hlr_{domain}.parquet'
     base_attr_list: ['PPT', 'SAND']
   streamcat:
     attr_list:
-    attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_streamcat.csv'
-    attr_data_file: '{base_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet'
+    attr_select_file: '{base_dir}/inputs/region/attr_config/attr_selection_streamcat.csv'
+    attr_data_file: '{base_dir}/inputs/region/attr_datasets/streamcat/attr_streamcat_{domain}.parquet'
     base_attr_list: ['Precip_Minus_EVT', 'Elev', 'BFI']
 
 snow_cover:
   consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins
-  snow_cover_file: '{base_dir}/inputs/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
+  snow_cover_file: '{base_dir}/inputs/region/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
   column: 'snow_pc_hydroatlas'  # column name for snow cover percent in the snow cover data file
   threshold: 20 # threshold for snow cover percent to determine snowiness category
 
 output:
     pairs:
       save: True
-      path: '{base_dir}/outputs/{run_name}/pairs'
+      path: '{base_dir}/outputs/region/{run_name}/pairs'
       stem: 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}'
       stem_suffix: '_mswm'  # suffix for the pairs file to be used by MSWM
       format: 'parquet'
@@ -57,12 +57,12 @@ output:
         columns_to_plot: ['distSpatial', 'distAttr']  # columns to plot    
     params:
       save: True
-      path: '{base_dir}/outputs/{run_name}/params'
+      path: '{base_dir}/outputs/region/{run_name}/params'
       stem: 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}'
       format: 'csv'
     attr_data_final:
       save: True
-      path: '{base_dir}/outputs/{run_name}/attr_data_final'
+      path: '{base_dir}/outputs/region/{run_name}/attr_data_final'
       stem: 'attr_{domain}_vpu{vpu_list}'
       format: 'parquet'
       plots:
@@ -71,11 +71,11 @@ output:
         columns_to_plot: ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT','hlr_PMPE', 'hlr_SAND','hlr_TAVE']  # attributes to plot
     config_final:
       save: True
-      path: '{base_dir}/outputs/{run_name}/config_parreg_final.yaml'
+      path: '{base_dir}/outputs/region/{run_name}/config_parreg_final.yaml'
       format: 
     spatial_distance:
       save: True
-      path: '{base_dir}/outputs/{run_name}/spatial_distance'
+      path: '{base_dir}/outputs/region/{run_name}/spatial_distance'
       format: 'parquet'
 
 ### algorithm parameters
