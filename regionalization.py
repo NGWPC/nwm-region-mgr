@@ -94,14 +94,15 @@ if __name__ == "__main__":
     """
     # Add the argument for the config directory
     parser.add_argument(
-        "--config_dir",
+        "config_dir",
         type=str,
         help=help_text,
     )
 
     # Add argument to specify run mode: formreg or region; default is region
     parser.add_argument(
-        "--mode",
+        "mode",
+        nargs="?",
         choices=["formreg", "region"],
         default="region",
         help=(
