@@ -49,14 +49,14 @@ Users may control regionalization behavior by adjusting several configuration fi
  - config_formreg.yaml: contains specific settings for the formulation regionalization process.
  - config_parreg.yaml: contains specific settings for the parameter regionalization process.
 
-Examples are available in `sample_files/configs` or they may be developed with the [Config Builder](config_builder/index.md) on this website.
+Examples are available in `configs` or they may be developed with the [Config Builder](config_builder/index.md) on this website.
 
 ## Executing nwm_region_mgr
 
 To run the regionalization script, you can use the following command.
 
 ```bash
-python regionalization.py sample_files/configs
+python regionalization.py configs
 ```
 
 
