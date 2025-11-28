@@ -1052,3 +1052,21 @@ class BaseConfigProcessor:
     def donor_gages(self):
         """Get the donor gage DataFrame."""
         return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
+
+    def get_output_file_name(
+        self,
+        output_section: str,
+        vpu: str = None,
+        algorithm: str = None,
+        use_stem_suffix: bool = False,
+    ):
+        """Get the output file name from the output configuration."""
+        output_config = self.config.output.get(output_section, None)
+        if output_config is None:
+            msg = f"Output section '{output_section}' not found in configuration for {self.__class__.__name__}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return output_config.get_file_path(
+            vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix
+        )
