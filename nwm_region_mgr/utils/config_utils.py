@@ -1061,7 +1061,7 @@ class BaseConfigProcessor:
         use_stem_suffix: bool = False,
     ):
         """Get the output file name from the output configuration."""
-        output_config = self.config.output.get(output_section, None)
+        output_config = getattr(self.config.output, output_section, None)
         if output_config is None:
             msg = f"Output section '{output_section}' not found in configuration for {self.__class__.__name__}."
             logger.error(msg)
