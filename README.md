@@ -78,7 +78,7 @@ Create a virtual environment to isolate the dependencies of this library from yo
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-pip pip install --upgrade pip
+pip install --upgrade pip
 ```
 
 #### 3. install nwm-region-mgr
