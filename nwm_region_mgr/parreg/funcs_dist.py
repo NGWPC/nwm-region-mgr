@@ -427,4 +427,3 @@ class ProximityPairer(Pairer):
             self.dist_spatial,
             None,
         )
-,

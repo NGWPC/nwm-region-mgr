@@ -17,15 +17,15 @@ eval set -- "$ARGS"
 # Accept -d (docker) and -p (parreg) flags
 while true; do
     case "$1" in
-        -d|--docker) docker=true 
+        -d|--docker) docker=true
             shift;;
-        -f|--formreg) formreg=true 
+        -f|--formreg) formreg=true
             shift;;
-        -p|--parreg) parreg=true 
+        -p|--parreg) parreg=true
             shift;;
-        -n|--ngen) ngen=true 
+        -n|--ngen) ngen=true
             shift;;
-        -e|--eval) eval=true 
+        -e|--eval) eval=true
             shift;;
         -h|--help) echo "Usage: $0 [-d|--docker] [-p|--parreg] [-f|--formreg] [-n|--ngen] [-e|--eval]" >&2; exit 1 ;;
         --) shift; break ;;
@@ -45,12 +45,16 @@ function docker_run_ngen {
         -v $(pwd)/data/:/data \
         -v $(pwd)/sample_files/:/sample_files \
         --rm ngen_rte -c " ulimit -n 60000 && python $*"
-        
+
 }
 
 ######### Docker Build #########
 if [ "$docker" = true ]; then
-    git clone git@github.com:NGWPC/nwm-rte.git 
+    # use HTTPS if SSH clone fails
+    if ! git clone git@github.com:NGWPC/nwm-rte.git; then
+        git clone https://github.com/NGWPC/nwm-rte.git
+    fi
+
     (cd nwm-rte && \
     git fetch && \
     git checkout region && \
@@ -89,5 +93,5 @@ fi
 
 if [ "$eval" = true ]; then
     docker_run -m nwm.verf \
-        "/sample_files/configs/config_eval.yaml" 
+        "/sample_files/configs/config_eval.yaml"
 fi
