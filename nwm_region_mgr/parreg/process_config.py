@@ -156,7 +156,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         for vpu1 in self.donor_vpus:
             # frp.config = self.expand_form_config_for_donor_vpu(vpu1, frp.config)
             # formulation_file = self.get_formulation_file_name(vpu1, frp.config)
-            formulation_file = frp.get_formulation_file_path(
+            formulation_file = frp.get_output_file_path(
                 "formulation",
                 vpu1,
                 use_stem_suffix=True,

@@ -1053,7 +1053,7 @@ class BaseConfigProcessor:
         """Get the donor gage DataFrame."""
         return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
 
-    def get_output_file_name(
+    def get_output_file_path(
         self,
         output_section: str,
         vpu: str = None,

@@ -56,7 +56,7 @@ def main(
         for vpu in frp.config.general.vpu_list:
             frp.run_formreg_for_vpu(
                 vpu,
-                frp.get_formulation_file_path(
+                frp.get_output_file_path(
                     "formulation",
                     vpu,
                     use_stem_suffix=True,
