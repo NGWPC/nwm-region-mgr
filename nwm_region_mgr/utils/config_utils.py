@@ -1053,6 +1053,33 @@ class BaseConfigProcessor:
         """Get the donor gage DataFrame."""
         return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
 
+    def expand_config_for_vpu(self, vpu: str):
+        """Expand the config to include VPUs (e.g., needed for all donors)."""
+        # config1 = config.copy()
+
+        def add_entry_if_missing(d: dict, vpu_key: str) -> dict:
+            if vpu_key not in d:
+                first_key = next(iter(d))
+                d[vpu_key] = d[first_key].replace(first_key, vpu_key)
+            return d
+
+        self.config.general.ngen_hydrofabric_file = add_entry_if_missing(
+            self.config.general.ngen_hydrofabric_file, vpu
+        )
+
+        co = getattr(self.config.output, "summary_score", None)
+        if co is not None:
+            co.stem = add_entry_if_missing(co.stem, vpu)
+        co = getattr(self.config.output, "formulation", None)
+        if co is not None:
+            co.stem = add_entry_if_missing(co.stem, vpu)
+
+        # save the expanded configuration
+        if hasattr(self.config.output, "config_final"):
+            getattr(self.config.output, "config_final").save_to_file(
+                self.config, data_str="Expanded final configuration"
+            )
+
     def get_output_file_path(
         self,
         output_section: str,

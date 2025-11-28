@@ -86,37 +86,6 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
         return co.get_file_path(vpu=vpu)
 
-    def expand_form_config_for_donor_vpu(self, vpu: str, config: Any) -> Any:
-        """Expand the formulation config for donor VPUs.
-
-        This function modifies formulation config to encompass all donor VPUs as needed.
-        """
-        config1 = config.copy()
-
-        def add_entry_if_missing(d: dict, vpu_key: str) -> dict:
-            if vpu_key not in d:
-                first_key = next(iter(d))
-                d[vpu_key] = d[first_key].replace(first_key, vpu_key)
-            return d
-
-        config1.general.ngen_hydrofabric_file = add_entry_if_missing(
-            config.general.ngen_hydrofabric_file, vpu
-        )
-        co = getattr(config.output, "summary_score", None)
-        if co is not None:
-            co.stem = add_entry_if_missing(co.stem, vpu)
-        co = getattr(config.output, "formulation", None)
-        if co is not None:
-            co.stem = add_entry_if_missing(co.stem, vpu)
-
-        # save the expanded configuration
-        if config1 != config:
-            config1.output["config_final"].save_to_file(
-                config1, data_str="Expanded final configuration"
-            )
-
-        return config1
-
     def run_parreg_for_vpu(self, vpu: str, frp: FRP) -> None:
         """Run the parameter regionalization process for a given VPU."""
         # set the VPU for processing
@@ -154,8 +123,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
         # run formulation regionalization for all donor VPUs
         for vpu1 in self.donor_vpus:
-            # frp.config = self.expand_form_config_for_donor_vpu(vpu1, frp.config)
-            # formulation_file = self.get_formulation_file_name(vpu1, frp.config)
+            frp.expand_config_for_vpu(vpu1)
             formulation_file = frp.get_output_file_path(
                 "formulation",
                 vpu1,
