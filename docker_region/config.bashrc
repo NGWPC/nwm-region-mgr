@@ -4,8 +4,8 @@ set -euo pipefail
 
 
 ### NO_CACHE: Passed to `docker build` call. Choose from: ["--no-cache", ""]. Has mild effect on RTE build speed when using pre-built base image.
-NO_CACHE="--no-cache"
-#NO_CACHE=""
+#NO_CACHE="--no-cache"
+NO_CACHE=""
 
 ### Freeform name tag for image that is built in this process
 # TARGET_IMAGE_NAME="ngen_rte:`date '+%Y%m%d%H%M%S'`-${NGEN_SOURCE_MODE}"
