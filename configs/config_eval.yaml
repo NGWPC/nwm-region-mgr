@@ -21,8 +21,8 @@ general:
 #### configurations for various file paths
 file_paths:
   #base_dir: data # when running from local
-  base_dir: /ngen-app/nwm-region-mgr/data/ # root directory to store data/outputs for verification
-  location_list_file: '{base_dir}/inputs/eval/regionalization/gage_list_conus_{location_set_name}.csv' # text file containing list of usgs gage IDs (one gage ID per line)
+  base_dir: /ngen-app/nwm-region-mgr/data/ # root directory to store inputs/outputs for verification
+  location_list_file: '{base_dir}/inputs/eval/gage_list_conus_{location_set_name}.csv' # text file containing list of usgs gage IDs (one gage ID per line)
   crosswalk_file: '{base_dir}/inputs/eval/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
   fcst_data_file: '{base_dir}/outputs/ngen/regionalization/{dataset_name}/{location_set_name}/Output/troute_output_{forecast_start_date}.nc' # forecast data directory (must be specified when nwm_forecast.data_source is set to ngenCERF)
   output_dir: '{base_dir}/outputs/eval/{location_set_name}' # output directory to store all output datasets, metrics and plots
