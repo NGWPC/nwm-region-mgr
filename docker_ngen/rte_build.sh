@@ -1,27 +1,14 @@
 #!/bin/bash
 # 
-# ngen_rte_build.sh
+# rte_build.sh
 # 
-# This script builds the ngen base image (or sources it from existing ghcr image),
-# then adds components such as mswm, fcst mgr, cal mgr, etc. to that image,
-# then uses docker run with host disk mounts to run an example workflow script.
+# This script builds the ngen_rte image for setting up the NGEN runtime environment. 
+# It includes, mswm, ngen, and ngen-forcing components, as well as 
+#    run_ngen_vpu_docker.py and configs/config_ngen.yaml from nwm-region-mgr.
 # 
 # See config.bashrc for configuration. Components can be installed from GitHub or from local source code.
 # 
-# Requirements:
-#   1. Various data files have been copied from s3.
-#       See config.bashrc comments for examples:
-#           Some to ~/s3/ngwpc-hydrofabric/
-#           Some to ~/s3/ngwpc-forcing/
-#           Some to ~/ngwpc/run_ngen/
-#   2. For BMI config templates:
-#       Repo ngwpc/ngen-forcing has been cloned to ~/ngwpc/ngen-forcing/
-#   3. For module_parameter_files:
-#       Repo ngwpc/nwm-msw-mgr has been cloned to ~/ngwpc/nwm-msw-mgr/
-# 
-# If installing components such as nwm-fcst-mgr, nwm-cal-mgr, and nwm-msw-mgr from local sources instead of from GitHub,
-# then this script assumes this is ran from a sibling directory of those (already cloned, checked out, pulled).
-#
+# Input data required (s3://ngwpc-dev/regionalization/data/inputs/) can be downloaded or mounted at runtime.
 
 set -euo pipefail
 set -x

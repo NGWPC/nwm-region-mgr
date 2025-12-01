@@ -28,13 +28,13 @@ RUN pip install --upgrade pip
 ### Regionalization python scripts and sample config files
 
 #From GitHub
-#RUN mkdir -p "/ngen-app/${REPO_NAME__REGION_MGR}/configs/"
-#RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/run_ngen_vpu_docker.py \
-#    -o /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
-#RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/configs/config_ngen.yaml \
-#    -o /ngen-app/${REPO_NAME__REGION_MGR}/configsgs/config_ngen.yaml
-
+RUN mkdir -p "/ngen-app/${REPO_NAME__REGION_MGR}/configs/"
+RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/run_ngen_vpu_docker.py \
+    -o /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
+RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/configs/config_ngen.yaml \
+    -o /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
+    
 # From local
-COPY run_ngen_vpu_docker.py /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
-COPY configs/config_ngen.yaml /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
+#COPY run_ngen_vpu_docker.py /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
+#COPY configs/config_ngen.yaml /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
 
