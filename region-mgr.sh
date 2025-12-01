@@ -4,105 +4,115 @@ set -euo pipefail
 
 OPTIND=1
 
+docker_region=false
+docker_ngen=false
+docker_eval=false
 docker=false
-parreg=false
+region=false
 formreg=false
 ngen=false
 eval=false
-ARGS=$(getopt -o dpfneh --long docker,parreg,formreg,ngen,eval,help -- "$@")
+ARGS=$(getopt -o drfneh --long docker_region,docker_ngen,docker_eval,docker,region,formreg,ngen,eval,help -- "$@")
 
 if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 eval set -- "$ARGS"
 
-# Accept -d (docker) and -p (parreg) flags
 while true; do
     case "$1" in
-        -d|--docker) docker=true 
+        --docker_region) docker_region=true # docker image for regionalization
+            shift;;
+        --docker_ngen) docker_ngen=true # docker image for ngen run
+            shift;;
+        --docker_eval) docker_eval=true # docker image for evaluation
+            shift;;
+
+        -d|--docker) docker=true # all three docker images
             shift;;
         -f|--formreg) formreg=true 
             shift;;
-        -p|--parreg) parreg=true 
+        -r|--region) region=true 
             shift;;
         -n|--ngen) ngen=true 
             shift;;
         -e|--eval) eval=true 
             shift;;
-        -h|--help) echo "Usage: $0 [-d|--docker] [-p|--parreg] [-f|--formreg] [-n|--ngen] [-e|--eval]" >&2; exit 1 ;;
+        -h|--help) 
+            echo "Usage: $0 [--docker_region] 
+                [--docker_ngen] [--docker_eval] [-d|--docker] [-r|--region] 
+                [-f|--formreg] [-n|--ngen] [-e|--eval]" >&2
+            exit 1 
+            ;;
         --) shift; break ;;
         *) echo "Internal error!" ; exit 1 ;;
     esac
 done
 
 function docker_run {
-    time sudo docker run --entrypoint python \
-        -v $(pwd)/data/:/ngen-app/nwm-region-mgr/data \
-        -v $(pwd)/sample_files/:/ngen-app/nwm-region-mgr/sample_files \
-        -v $(pwd)/ngencerf/:/ngencerf \
-        --rm ngen_rte "$@"
+    local mounts="-v $(pwd)/data/:/ngen-app/nwm-region-mgr/data"
+
+    if [[ "$RTE" == "ngen_rte" ]]; then
+        # Include ulimit before running ngen for a VPU
+        time docker run --entrypoint /bin/bash \
+            $mounts \
+            --rm $RTE -c "ulimit -n 60000 && python $*"
+    else
+        # Normal Python entrypoint for other images
+        time docker run --entrypoint python \
+            $mounts \
+            --rm $RTE "$@"
+    fi
 }
 
-function docker_run_ngen {
-    time docker run --entrypoint "/bin/bash" -it\
-        -u $(id -u):$(id -g) \
-        -v $(pwd)/data/:/ngen-app/nwm-region-mgr/data \
-        -v $(pwd)/sample_files/:/ngen-app/nwm-region-mgr/sample_files \
-        -v $(pwd)/ngencerf/:/ngencerf \
-        -v $(pwd)/ngen-app/data:/ngen-app/data/ \
-        --rm ngen_rte -c " ulimit -n 60000 && python $*"
-        
-}
-
-
-function docker_run_ngen_new {
-    time docker run --entrypoint "/bin/bash" -it\
-        -u $(id -u):$(id -g) \
-        -v /home/yuqiong.liu/:/home/yuqiong.liu/ \
-        -v $(pwd)/ngencerf/:/ngencerf \
-        --rm ngen_rte -c " ulimit -n 60000 && python $*"
-        
-}
 
 ######### Docker Build #########
+# build all three docker images
 if [ "$docker" = true ]; then
-    # git clone git@github.com:NGWPC/nwm-rte.git 
-    # (cd nwm-rte && \
-    # git fetch && \
-    # git checkout region && \
-    # git pull && \
-    # ./ngen_rte_build.sh)
-
-
-    ##### For development #####
-    (cd ../nwm-rte && \
-    ./ngen_rte_build.sh)
-
-    # # rm -rf nwm-rte
+    (cd docker_region && \
+    ./rte_build.sh)
+    (cd docker_ngen && \
+    ./rte_build.sh)
+    (cd docker_eval && \
+    ./rte_build.sh)    
 fi
 
-######### Regionalization #########
-if [ "$parreg" = true ]; then
 
+# build selected docker images
+if [ "$docker_region" = true ]; then
+    (cd docker_region && \
+    ./rte_build.sh)
+fi
+if [ "$docker_ngen" = true ]; then
+    (cd docker_ngen && \
+    ./rte_build.sh)
+fi
+if [ "$docker_eval" = true ]; then
+    (cd docker_eval && \
+    ./rte_build.sh)
+fi
+
+######### RUN Regionalization #########
+if [ "$region" = true ] || [ "$formreg" = "true" ]; then
+    export RTE="region_rte"
+    if [ "$region" = false ] || [ "$formreg" = "true" ]; then
+        mode="formreg"
+    else
+        mode="region"
+    fi
     docker_run "/ngen-app/nwm-region-mgr/regionalization.py" \
-        "/ngen-app/nwm-region-mgr/sample_files/configs"
+        "/ngen-app/nwm-region-mgr/configs" ${mode}
 fi
 
-if [ "$formreg" = true ]; then
 
-    docker_run "/ngen-app/nwm-region-mgr/run_formreg.py" \
-        "/sample_files/configs/config_general.yaml" \
-        "/sample_files/configs/config_formreg.yaml"
-fi
 ######### RUN NGEN #########
 if [ "$ngen" = true ]; then
-
-
-docker_run_ngen "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
-    --config_ngen "/ngen-app/nwm-region-mgr/sample_files/configs/config_ngen.yaml"
+    export RTE="ngen_rte"
+    docker_run "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
+        --config_ngen "/ngen-app/nwm-region-mgr/configs/config_ngen.yaml"
 fi
 
-######### Run EVAL #########
-
+######### RUN EVAL #########
 if [ "$eval" = true ]; then
+    export RTE="eval_rte"
     docker_run -m nwm.verf \
-        "/sample_files/configs/config_eval.yaml" 
+        "/ngen-app/nwm-region-mgr/configs/config_eval.yaml" 
 fi
