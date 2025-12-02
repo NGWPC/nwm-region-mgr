@@ -28,19 +28,31 @@ while true; do
 
         -d|--docker) docker=true # all three docker images
             shift;;
-        -f|--formreg) formreg=true 
+        -f|--formreg) formreg=true # run formulation regionalization only
             shift;;
-        -r|--region) region=true 
+        -r|--region) region=true # run full regionalization (formulation + parameter regionalization)
             shift;;
-        -n|--ngen) ngen=true 
+        -n|--ngen) ngen=true # run ngen simulation
             shift;;
-        -e|--eval) eval=true 
+        -e|--eval) eval=true # run evaluation
             shift;;
-        -h|--help) 
-            echo "Usage: $0 [--docker_region] 
-                [--docker_ngen] [--docker_eval] [-d|--docker] [-r|--region] 
-                [-f|--formreg] [-n|--ngen] [-e|--eval]" >&2
-            exit 1 
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]
+
+        Options:
+        --docker_region           Build Docker image for regionalization (region_rte)
+        --docker_ngen             Build Docker image for ngen execution (ngen_rte)
+        --docker_eval             Build Docker image for evaluation (eval_rte)
+        -d,  --docker             Build all Docker images (region_rte + ngen_rte + eval_rte)
+
+        -r,  --region             Run the regionalization workflow
+        -f,  --formreg            Run formulation regionalization only
+        -n,  --ngen               Run the NGEN model workflow
+        -e,  --eval               Run the evaluation workflow
+
+        -h,  --help               Show this help message and exit
+        " >&2
+            exit 0
             ;;
         --) shift; break ;;
         *) echo "Internal error!" ; exit 1 ;;
