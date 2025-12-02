@@ -16,54 +16,62 @@
 - **Formulation Regionalization** – Ranks NextGen model formulations for ungauged catchments based on similarity to gauged sites.
 - **Parameter Regionalization** – Estimates parameter values by intelligently transferring calibrations across catchments.
 - **Clustering Methods** – Groups catchments with shared hydrologic characteristics using multiple clustering approaches.
+- **Distance methods** – Identify donors using distance metrics that characterize catchment similarity/dissimilarity.
 - **Diagnostic Plots** – Generates clear plots and maps that explain formulation and parameter choices.
 - **Scalable Workflows** – Efficiently supports studies from individual watersheds to CONUS-wide applications.
 - **Customizable Configurations** – Full control of workflows via human-readable config files.
-## Docker Run Time Environment (RTE)
-### Step 0. Build Docker image and download data
-#### a) Sample input data can be downloaded from: **s3://ngwpc-dev/regionalization/data**
 
-#### b) Build Docker image
-`Note` This step is only necessary if a docker image doesn't already exists or if updates to the code base have been implemented. The short flag `-d` can also be used in place of `--docker`
+## Docker Run Time Environment (RTE)
+### Step 0. Build Docker images and download data
+#### a) Sample input data can be downloaded from: **s3://ngwpc-dev/regionalization/data/inputs**
+
+#### b) Build Docker images
+`Note` This step is only necessary if the required docker images don't already exist or if updates to the code base have been implemented. Options:
+-  --docker_region: Build Docker image for regionalization (region_rte)
+-  --docker_ngen: Build Docker image for ngen execution (ngen_rte)
+-  --docker_eval: Build Docker image for evaluation (eval_rte)
+-  -d or --docker: Build all Docker images (region_rte + ngen_rte + eval_rte)
 
 ```bash
+git clone https://github.com/NGWPC/nwm-region-mgr.git
 cd nwm-region-mgr
 ```
 ```bash
-./region-mgr.sh --docker
+#build all three docker images
+./region-mgr.sh --docker 
+# or build selected docker images
+./region-mgr.sh --docker_region
+./region-mgr.sh --docker_ngen
+./region-mgr.sh --docker_eval
 ```
 ### Step 1. Run regionalization
 
 #### a) Run formulation regionalization alone (no parreg):
-The short flag `-f` can also be used in place of `--formreg`.
+The short flag `-f` can also be used in place of `--formreg`. Prior to running, configure the settings in `configs/config_formreg.yaml`.
 ```bash
 ./region-mgr.sh --formreg
 ```
 #### b) Run parameter regionalization (formreg is also ran as a prerequisite):
-The short flag `-p` can also be used in place of `--parreg`.
+The short flag `-r` can also be used in place of `--region`. Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
 ```bash
-./region-mgr.sh --parreg
+./region-mgr.sh --region
 ```
 ### Step 2. Run NGEN
 Run a NGEN simulation:
 
-The short flag `-n` can also be used in place of `--ngen`.
+The short flag `-n` can also be used in place of `--ngen`. Prior to running, configure the settings in `configs/config_ngen.yaml`.
 ```bash
 ./region-mgr.sh --ngen
 ```
 ### Step 3. Run Evaluation
 Run an evaluation:
 
-The short flag `-e` can also be used in place of `--eval`.
+The short flag `-e` can also be used in place of `--eval`. Prior to running, configure the settings in `configs/config_eval.yaml`.
 ```bash
 ./region-mgr.sh --eval
 ```
-### Steps 0-4
-Alternatively the user can run steps 0-4 in all at once in series:
-```bash
-./region-mgr.sh -dpne
-```
-## Desktop/Workspace Run Time Environment (RTE)
+
+## Desktop/Workspace
 ### Clone & Build
 
 #### 1. clone ngen-region-mgr from Github
