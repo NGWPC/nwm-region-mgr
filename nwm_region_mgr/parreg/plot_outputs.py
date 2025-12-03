@@ -42,6 +42,81 @@ def plot_missing_attr_counts(
         cols = cols + [
             dataset + "_" + x for x in getattr(config.attr_datasets, dataset).attr_list
         ]
+
+    missing_cols = set(cols) - set(df_attrs_all.columns)
+    cols1 = [col for col in cols if col not in missing_cols]
+
+    if missing_cols:
+        logger.warning(
+            f"Missing columns in final attribute dataframe df_attrs_all: {missing_cols}."
+        )
+        logger.info("Please check the configuration.")
+
+    # Compute missing counts
+    missing_counts = df_attrs_all[cols1].isnull().sum()
+    total = len(df_attrs_all)
+
+    # Plot
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+
+    ax1.bar(
+        missing_counts.index, missing_counts.values, color="skyblue", edgecolor="black"
+    )
+    ax1.set_ylabel("Missing Count")
+    ax1.set_title(
+        f"Number (and %) of Catchments with Missing Values for Each Selected Attribute (VPU {vpu})"
+    )
+
+    # Rotate x-labels for readability
+    plt.xticks(rotation=90, ha="center")
+
+    # Add secondary axis for percentage
+    ax2 = ax1.twinx()
+    ax2.set_ylim(ax1.get_ylim()[0], ax1.get_ylim()[1])
+    ax2.set_ylabel("Missing (%)")
+
+    # Set percent ticks aligned with counts
+    yticks = ax1.get_yticks()
+    ax2.set_yticks(yticks)
+    ax2.set_yticklabels([f"{y / total * 100:.1f}%" for y in yticks])
+
+    # Save figure
+    out = getattr(config.output, "attr_data_final", None)
+    if out is None:
+        msg = "Output configuration for 'attr_data_final' is not defined. Skipping plot saving."
+        logger.warning(msg)
+        return
+
+    outfile = Path(
+        out.path,
+        f"plots/bar_attr_missing_count_{config.general.domain}_vpu{vpu}.png",
+    )
+    outfile.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(outfile, bbox_inches="tight")
+    logger.info(f"Missing attribute counts plot saved to {outfile}")
+
+    plt.close(fig)
+
+
+def plot_missing_attr_counts_old(
+    config: cs.Config, vpu: str, df_attrs_all: pd.DataFrame
+) -> None:
+    """Plot the number of catchments with missing values for each selected attribute.
+
+    Args:
+        config : cs.Config
+            Configuration object containing settings for the regionalization.
+        vpu : str
+            The VPU (Vector Processing Unit) identifier.
+        df_attrs_all : pd.DataFrame
+            DataFrame containing all attributes for the catchments.
+
+    """
+    cols = []
+    for dataset in config.general.attr_dataset_list:
+        cols = cols + [
+            dataset + "_" + x for x in getattr(config.attr_datasets, dataset).attr_list
+        ]
     missing_cols = set(cols) - set(df_attrs_all.columns)
     cols1 = [col for col in cols if col not in missing_cols]
     if missing_cols:
@@ -55,8 +130,14 @@ def plot_missing_attr_counts(
     )
     plt.title("Number of catchments with missing values for each selected attribute")
 
+    out = getattr(config.output, "attr_data_final", None)
+    if out is None:
+        msg = "Output configuration for 'attr_data_final' is not defined. Skipping plot saving."
+        logger.warning(msg)
+        return
+
     outfile = Path(
-        config.output["attr_data_final"].path,
+        out.path,
         f"plots/bar_attr_missing_count_{config.general.domain}_vpu{vpu}.png",
     )
     outfile.parent.mkdir(parents=True, exist_ok=True)
@@ -92,7 +173,7 @@ def plot_donor_spatial_map(
 
     """
     # read in lat/lon of all donors
-    gage_id_name = config.general.id_col.get("gage", "gage_id")
+    gage_id_name = getattr(config.general.id_col, "gage", "gage_id")
     donors_all = read_table(config.general.donor_gage_file, dtype={gage_id_name: str})
 
     # filter donors based on the donor_basins list (qualified donors)
@@ -192,8 +273,14 @@ def plot_donor_spatial_map(
     plt.tight_layout()
 
     # save the figure
+    out = getattr(config.output, "pairs", None)
+    if out is None:
+        msg = "Output configuration for 'pairs' is not defined. Skipping plot saving."
+        logger.warning(msg)
+        return
+
     outfile = Path(
-        config.output["pairs"].path,
+        out.path,
         f"plots/map_donors_{config.general.domain}_vpu{vpu}.png",
     )
     outfile.parent.mkdir(parents=True, exist_ok=True)

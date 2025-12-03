@@ -6,6 +6,9 @@ from pathlib import Path
 import fiona
 import geopandas as gpd
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def update_gpkg_layer(
@@ -56,9 +59,7 @@ def update_gpkg_layer(
 def main(vpu_str: str):
     """Extract VPU from conus.gpkg and save to new gpkg file."""
     # conus gpkg file
-    conus_in = Path(
-        "~/s3/hydrofabric-data/patch/7_30_25/nwm_patch_conus_nextgen.gpkg"
-    ).expanduser()
+    conus_in = "s3://hydrofabric-data/patch/7_30_25/nwm_patch_conus_nextgen.gpkg"
 
     # output gpkg file
     output_gpkg = (
