@@ -1,4 +1,4 @@
-"""Function to create donor-receiver paring using distance methods.
+"""Function to create donor-receiver pairs using distance methods.
 
 This function performs donor-receiver pairing using either Gower's distance (method = "gower") or
   the distance computed by unsupervised random forest classification (method = "urf")
