@@ -98,55 +98,6 @@ def plot_missing_attr_counts(
     plt.close(fig)
 
 
-def plot_missing_attr_counts_old(
-    config: cs.Config, vpu: str, df_attrs_all: pd.DataFrame
-) -> None:
-    """Plot the number of catchments with missing values for each selected attribute.
-
-    Args:
-        config : cs.Config
-            Configuration object containing settings for the regionalization.
-        vpu : str
-            The VPU (Vector Processing Unit) identifier.
-        df_attrs_all : pd.DataFrame
-            DataFrame containing all attributes for the catchments.
-
-    """
-    cols = []
-    for dataset in config.general.attr_dataset_list:
-        cols = cols + [
-            dataset + "_" + x for x in getattr(config.attr_datasets, dataset).attr_list
-        ]
-    missing_cols = set(cols) - set(df_attrs_all.columns)
-    cols1 = [col for col in cols if col not in missing_cols]
-    if missing_cols:
-        logger.warning(
-            f"Missing columns in final attribute dataframe df_attrs_all: {missing_cols}."
-        )
-        logger.info("Please check the configuration.")
-    plt.figure(figsize=(8, 4))
-    df_attrs_all[cols1].isnull().sum().plot(
-        kind="bar", color="skyblue", edgecolor="black"
-    )
-    plt.title("Number of catchments with missing values for each selected attribute")
-
-    out = getattr(config.output, "attr_data_final", None)
-    if out is None:
-        msg = "Output configuration for 'attr_data_final' is not defined. Skipping plot saving."
-        logger.warning(msg)
-        return
-
-    outfile = Path(
-        out.path,
-        f"plots/bar_attr_missing_count_{config.general.domain}_vpu{vpu}.png",
-    )
-    outfile.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(outfile, bbox_inches="tight")
-    logger.info(f"Missing attribute counts plot saved to {outfile}")
-
-    plt.close()
-
-
 def plot_donor_spatial_map(
     config: cs.Config,
     vpu: str,
