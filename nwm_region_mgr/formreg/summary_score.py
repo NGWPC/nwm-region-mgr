@@ -196,6 +196,15 @@ def _compute_summary_score_all_gages(
         "formulation",
         ss.metric_eval_period.col_name,
     ] + list(ss.metrics.keys())
+
+    # make sure all required columns exist (case insensitive)
+    for col in required_columns:
+        real_col = next((c for c in df_stats.columns if c.lower() == col.lower()), None)
+        if real_col is None:
+            raise KeyError(f"Column '{col}' not found (case-insensitive lookup).")
+        else:
+            df_stats = df_stats.rename(columns={real_col: col})
+
     df_stats = df_stats[required_columns]
 
     if not df_stats.empty:
@@ -274,8 +283,8 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
         msg = (
             f"No summary scores found for VPU {vpu}. Please check the statistics files."
         )
-        logger.error(msg)
-        raise ValueError(msg)
+        logger.warning(msg)
+        return df_score_all
 
     # drop vpu_id_col and divide_id_col
     df_score_vpu = df_score_vpu.drop(

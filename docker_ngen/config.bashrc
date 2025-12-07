@@ -9,19 +9,19 @@ NO_CACHE="--no-cache"
 
 
 ### NGEN_SOURCE_MODE: Choose from: ["ghcr", "existing_local_tag", "build_from_local", "build_from_remote"]
-# NGEN_SOURCE_MODE="ghcr" 
+NGEN_SOURCE_MODE="ghcr" 
 
 # Only used when ngen image source mode is "ghcr". Choose any ghcr tag, e.g. "latest" or a commit hash.
 # NGEN_BASE__REMOTE_GHCR_TAG="latest"
-# NGEN_BASE__REMOTE_GHCR_TAG="pr-82-build"
+NGEN_BASE__REMOTE_GHCR_TAG="pr-91-build"
 
-NGEN_SOURCE_MODE="existing_local_tag"
+#NGEN_SOURCE_MODE="existing_local_tag"
 # Only used when ngen image source mode is "existing_local_tag". Choose any existing local image tag.
 # To create the local iamge msmw:latest, follow these steps:
 # 1) download docker image from s3 (aws s3 cp s3://ngwpc-dev/jeff.wade/docker/mswm.tar.gz mswm.tar.gz)
 # 2) unpack (gunzip mswm.tar.gz)
 # 3) load the image (docker load -i mswm.tar)
-NGEN_BASE__EXISTING_LOCAL_TAG="mswm:latest"
+#NGEN_BASE__EXISTING_LOCAL_TAG="mswm:latest"
 
 # NGEN_SOURCE_MODE="build_from_remote"
 ## Only used when ngen source mode is "build_from_remote". Choose any GitHub tag (or branch name).
@@ -33,7 +33,7 @@ NGEN_BASE__EXISTING_LOCAL_TAG="mswm:latest"
 
 ### Freeform name tag for image that is built in this process
 # TARGET_IMAGE_NAME="ngen_rte:`date '+%Y%m%d%H%M%S'`-${NGEN_SOURCE_MODE}"
-TARGET_IMAGE_NAME="ngen_rte"
+TARGET_IMAGE_NAME="ngen_rte_new"
 
 
 ##### Region Manager
@@ -43,6 +43,10 @@ COMPONENT__REGION_MGR__SOURCE_MODE="remote"
 ### Only used when sourcing region manager from GitHub
 #COMPONENT__REGION_MGR__REMOTE_REPO_TAG="mdeshotel_NGWPC-7004"
 COMPONENT__REGION_MGR__REMOTE_REPO_TAG="yliu_test_old_image" 
+
+##### MSWM
+COMPONENT__MSW_MGR__SOURCE_MODE="remote"
+COMPONENT__MSW_MGR__REMOTE_REPO_TAG="idt-remove-ueb-start-advance"
 
 ### Logging functions
 BASENAME="$(basename "$(readlink -f "$0")")"

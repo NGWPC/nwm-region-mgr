@@ -59,6 +59,7 @@ info "Building image: ${TARGET_IMAGE_NAME}"
 sudo docker build -t ${TARGET_IMAGE_NAME} -f Dockerfile.rte ${NO_CACHE} \
     --build-arg NGEN_BASE_IMAGE=${NGEN_BASE_IMAGE} \
     --build-arg REPO_TAG__REGION_MGR="${COMPONENT__REGION_MGR__REMOTE_REPO_TAG}" \
+    --build-arg REPO_TAG__MSW_MGR="${COMPONENT__MSW_MGR__REMOTE_REPO_TAG}" \
     ".." \
     |& tee "docker_logs/build/${TARGET_IMAGE_NAME}-${TIMESTAMP}.log"
 

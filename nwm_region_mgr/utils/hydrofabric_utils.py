@@ -6,8 +6,8 @@ from typing import Optional
 
 import geopandas as gpd
 from shapely.geometry import GeometryCollection, Point
-from shapely.ops import unary_union
 
+# from shapely.ops import unary_union
 from nwm_region_mgr.utils.io_utils import read_table
 from nwm_region_mgr.utils.validation_utils import check_columns_dataframe
 
@@ -94,7 +94,8 @@ def find_gages_within_buffer(
         gdf1["geometry"] = gdf1.buffer(0)
 
     # dissolve all polygons into one before bufferring
-    combined_geom = unary_union(gdf1.geometry)
+    # combined_geom = unary_union(gdf1.geometry)
+    combined_geom = gdf1.geometry.union_all()
 
     # Create a buffer around the VPU polygon
     gdf_buffered = combined_geom.buffer(buffer * 1000)

@@ -8,12 +8,14 @@ FROM $NGEN_BASE_IMAGE
 
 ### Additional user args, these have to be after the FROM
 ARG REPO_TAG__REGION_MGR
+ARG REPO_TAG__MSW_MGR
 
 ### Static args
 ARG PYTHON_ENV="/ngen-app/ngen-python/bin"
 ARG GITHUB_ORG_URL="https://github.com/NGWPC"
 ARG GITHUBUSERCONTENT_ORG_URL="https://raw.githubusercontent.com/NGWPC"
 ARG REPO_NAME__REGION_MGR="nwm-region-mgr"
+ARG REPO_NAME__MSW_MGR="nwm-msw-mgr"
 
 ### For Python 3.10 base image (ngen ghcr ngen:latest as of 10/28/25)
 # ARG PYTHON_VERSION_STR="python3.10"
@@ -24,17 +26,20 @@ ARG PYTHON_VERSION_STR="python3.11"
 ENV PATH="${PYTHON_ENV}:${PATH}"
 RUN pip install --upgrade pip
 
+### MSW Manager installation
+# From GitHub
+RUN pip install "mswm @ git+${GITHUB_ORG_URL}/${REPO_NAME__MSW_MGR}@${REPO_TAG__MSW_MGR}"
 
 ### Regionalization python scripts and sample config files
 
 #From GitHub
-RUN mkdir -p "/ngen-app/${REPO_NAME__REGION_MGR}/configs/"
-RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/run_ngen_vpu_docker.py \
-    -o /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
-RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/configs/config_ngen.yaml \
-    -o /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
+# RUN mkdir -p "/ngen-app/${REPO_NAME__REGION_MGR}/configs/"
+# RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/run_ngen_vpu_docker.py \
+#     -o /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
+# RUN curl -L https://raw.githubusercontent.com/NGWPC/${REPO_NAME__REGION_MGR}/${REPO_TAG__REGION_MGR}/configs/config_ngen.yaml \
+#     -o /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
     
 # From local
-#COPY run_ngen_vpu_docker.py /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
-#COPY configs/config_ngen.yaml /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
+COPY run_ngen_vpu_docker.py /ngen-app/${REPO_NAME__REGION_MGR}/run_ngen_vpu_docker.py
+COPY configs/config_ngen.yaml /ngen-app/${REPO_NAME__REGION_MGR}/configs/config_ngen.yaml
 

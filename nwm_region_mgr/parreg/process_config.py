@@ -180,7 +180,8 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     def hydrofabric_gdf(self) -> gpd.GeoDataFrame:
         """Hydrofabric geodataframe with only valid geometries."""
         gdf = gpd.read_file(
-            self.config.general.ngen_hydrofabric_file[self.vpu], layer="divides"
+            self.config.general.ngen_hydrofabric_file[self.vpu],
+            layer=getattr(self.config.general.layer_name, "ngen", "divides"),
         )
         gdf["geometry"] = gdf.geometry.make_valid()
         return gdf
@@ -213,10 +214,11 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     @property
     def combined_geom(self):
         """Dissolve all polygons into one before buffering."""
-        try:
-            geom = self.hydrofabric_gdf_3857.union_all()
-        except AttributeError as e:
-            geom = self.hydrofabric_gdf_3857.unary_union
+        # try:
+        #     geom = self.hydrofabric_gdf_3857.union_all()
+        # except AttributeError as e:
+        #     geom = self.hydrofabric_gdf_3857.unary_union
+        geom = self.hydrofabric_gdf_3857.union_all()
         polygons = []
         if isinstance(geom, MultiPolygon):
             for polygon in geom.geoms:

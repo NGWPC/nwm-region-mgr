@@ -10,12 +10,13 @@ Functions:
 
 import logging
 from pathlib import Path
+from typing import Union
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
-from shapely.geometry import Point
+from shapely.geometry import MultiPolygon, Point, Polygon
 
 from nwm_region_mgr.parreg import config_schema as cs
 from nwm_region_mgr.utils import read_table
@@ -103,8 +104,8 @@ def plot_donor_spatial_map(
     vpu: str,
     donor_basins: list,
     final_donor_basins: list,
-    gdf_buffered: gpd.GeoDataFrame,
-    combined_geom: gpd.GeoDataFrame,
+    gdf_buffered: Union[Polygon, MultiPolygon],
+    combined_geom: Union[Polygon, MultiPolygon],
 ) -> None:
     """Plot the spatial distribution of donors within a VPU and its buffer zone.
 
@@ -141,9 +142,13 @@ def plot_donor_spatial_map(
     # visualize the donors selected
     fig, ax = plt.subplots(figsize=(8, 5))
 
-    # Plot base layer
+    # Plot base layer, use combined_geom if ring is empty (buffer is zero)
     ring = gdf_buffered.difference(combined_geom)
-    ring_gdf = gpd.GeoDataFrame(geometry=[ring], crs=donor_gdf.crs)
+    if ring.is_empty:
+        base_geom = combined_geom
+    else:
+        base_geom = ring
+    ring_gdf = gpd.GeoDataFrame(geometry=[base_geom], crs=donor_gdf.crs)
     ring_gdf.plot(
         ax=ax,
         color="lightgray",
@@ -155,63 +160,81 @@ def plot_donor_spatial_map(
     final_donor_gdf = donor_gdf[donor_gdf["gage_id"].isin(final_donor_basins)]
 
     # plot calibration basins in the buffered VPU
-    non_donor_gdf.plot(ax=ax, color="blue", markersize=10, marker="x")
-    final_donor_gdf.plot(ax=ax, color="blue", markersize=10)
+    non_donor_gdf.plot(ax=ax, color="red", markersize=20, marker="x")
+    final_donor_gdf.plot(
+        ax=ax, edgecolor="red", facecolor="none", markersize=20, marker="o"
+    )
 
     # donors and non-donors in the original VPU
     donors_vpu = final_donor_gdf[final_donor_gdf.geometry.within(combined_geom)]
     non_donors_vpu = non_donor_gdf[non_donor_gdf.geometry.within(combined_geom)]
-    donors_vpu.plot(ax=ax, color="red", markersize=10)
-    non_donors_vpu.plot(ax=ax, color="red", markersize=10, marker="x")
+    donors_vpu.plot(
+        ax=ax, edgecolor="blue", facecolor="none", markersize=20, marker="o"
+    )
+    non_donors_vpu.plot(ax=ax, color="blue", markersize=20, marker="x")
 
     # Create custom legend handles
-    legend_elements = [
-        Line2D(
-            [0],
-            [0],
-            marker="o",
-            color="w",
-            label=f"Donors within VPU ({len(donors_vpu)})",
-            markerfacecolor="red",
-            markersize=8,
-        ),
-        Line2D(
-            [0],
-            [0],
-            marker="o",
-            color="w",
-            label=f"Donors in buffer zone ({len(final_donor_gdf) - len(donors_vpu)})",
-            markerfacecolor="blue",
-            markersize=8,
-        ),
-        Line2D(
-            [0],
-            [0],
-            marker="x",
-            color="red",
-            label=f"non-donors within VPU ({len(non_donors_vpu)})",
-            # markerfacecolor="red",
-            markersize=8,
-        ),
-        Line2D(
-            [0],
-            [0],
-            marker="x",
-            color="blue",
-            label=f"non-donors in buffer zone ({len(non_donor_gdf) - len(non_donors_vpu)})",
-            # markerfacecolor="blue",
-            markersize=8,
-        ),
-        Line2D(
-            [0],
-            [0],
-            marker="s",
-            color="black",
-            label=f"Buffer zone ({round(config.donor.buffer_km)} km)",
-            markerfacecolor="lightgray",
-            markersize=10,
-        ),
-    ]
+    leg_donor_vpu = Line2D(
+        [0],
+        [0],
+        marker="o",
+        color="w",
+        label=f"Donors within VPU ({len(donors_vpu)})",
+        markeredgecolor="blue",
+        markerfacecolor="none",
+        markersize=6,
+    )
+    leg_donor_buffer = Line2D(
+        [0],
+        [0],
+        marker="o",
+        color="w",
+        label=f"Donors in buffer zone ({len(final_donor_gdf) - len(donors_vpu)})",
+        markeredgecolor="red",
+        markerfacecolor="none",
+        markersize=6,
+    )
+    leg_non_donor_vpu = Line2D(
+        [0],
+        [0],
+        marker="x",
+        color="blue",
+        label=f"non-donors within VPU ({len(non_donors_vpu)})",
+        markersize=6,
+        linestyle="None",
+    )
+    leg_non_donor_buffer = Line2D(
+        [0],
+        [0],
+        marker="x",
+        color="red",
+        label=f"non-donors in buffer zone ({len(non_donor_gdf) - len(non_donors_vpu)})",
+        markersize=6,
+        linestyle="None",
+    )
+    leg_buffer_zone = Line2D(
+        [0],
+        [0],
+        marker="s",
+        color="black",
+        label=f"Buffer zone ({round(config.donor.buffer_km)} km)",
+        markerfacecolor="lightgray",
+        markersize=6,
+        linestyle="None",
+    )
+    if ring.is_empty:
+        legend_elements = [
+            leg_donor_vpu,
+            leg_non_donor_vpu,
+        ]
+    else:
+        legend_elements = [
+            leg_donor_vpu,
+            leg_donor_buffer,
+            leg_non_donor_vpu,
+            leg_non_donor_buffer,
+            leg_buffer_zone,
+        ]
 
     # Add legend
     ax.legend(handles=legend_elements, loc="center left", bbox_to_anchor=(1, 0.5))

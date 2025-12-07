@@ -18,6 +18,7 @@ from typing import Dict, List, Literal, get_args
 import pandas as pd
 import pyarrow.parquet as pq
 from pydantic import BaseModel, Field, model_validator
+from pyparsing import col
 
 from nwm_region_mgr.utils import (
     BaseConfig,
@@ -199,13 +200,22 @@ class DonorConfig(BaseModel):
             )
 
         # filter based on metric thresholds
-        for col, threshold in self.metric_threshold.items():
+        for column, threshold in self.metric_threshold.items():
+            # find the actual column name, case-insensitive
+            real_col = next(
+                (c for c in df.columns if c.lower() == column.lower()), None
+            )
+            if real_col is None:
+                raise KeyError(
+                    f"Column '{column}' not found (case-insensitive lookup)."
+                )
+
             if threshold.absolute:
-                df[col] = df[col].abs()
+                df[real_col] = df[real_col].abs()
             if threshold.min is not None:
-                df = df[df[col] >= threshold.min]
+                df = df[df[real_col] >= threshold.min]
             if threshold.max is not None:
-                df = df[df[col] <= threshold.max]
+                df = df[df[real_col] <= threshold.max]
 
         donors = df[gage_id_name].unique().tolist()
         donor_cats = (

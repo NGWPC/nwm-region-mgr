@@ -21,7 +21,7 @@ import pandas as pd
 import seaborn as sns
 
 # from matplotlib.lines import Line2D
-from shapely.ops import unary_union
+# from shapely.ops import unary_union
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,8 @@ def _plot_columns_by_dtype(
     axes = np.array(axes).reshape(-1)  # Flatten in case of 2D grid
 
     # get the outer boundary of the GeoDataFrame
-    combined_polygon = unary_union(gdf.geometry)
+    # combined_polygon = unary_union(gdf.geometry)
+    combined_polygon = gdf.geometry.union_all()
     boundary = combined_polygon.boundary
 
     for i, column in enumerate(columns):
@@ -94,6 +95,7 @@ def _plot_columns_by_dtype(
         elif pd.api.types.is_categorical_dtype(dtype) or pd.api.types.is_object_dtype(
             dtype
         ):
+            print(f"Plotting categorical column: {column}")
             gdf_plot[column] = gdf_plot[column].astype("category")
             gdf_plot.plot(
                 ax=ax,

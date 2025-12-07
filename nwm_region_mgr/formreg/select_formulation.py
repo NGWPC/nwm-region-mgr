@@ -497,7 +497,7 @@ def _identify_best_formulation_per_gage(
         ].copy()
 
         # initialize cost column to None
-        best_per_gage["cost"] = None
+        # best_per_gage["cost"] = None
 
     return best_per_gage
 
@@ -548,7 +548,7 @@ def select_formulation_donors_only(
 
     # merge the crosswalk with the best formulations DataFrame
     df_selected = df_best_per_gage.merge(
-        cwt_divide_gage[[gage_id_col]].drop_duplicates(),
+        cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
         on=gage_id_col,
         how="left",
     )
@@ -732,12 +732,17 @@ def select_formulation_all(
 
         df_selected = pd.concat([df_selected, best_formulation], ignore_index=True)
 
+    print(f"Selected formulation columns: {df_selected.columns.tolist()}")
+    print(f"Selected formulations {df_selected.head()}.")
+
     # merge with cwt_divide_huc12 to get the divide_id
-    df_selected = df_selected.merge(
-        cwt_divide_huc12[["huc_id", divide_id_col]].drop_duplicates(),
-        on="huc_id",
-        how="left",
-    )
+    if not df_selected.empty:
+        df_selected = df_selected.merge(
+            cwt_divide_huc12[["huc_id", divide_id_col]].drop_duplicates(),
+            on="huc_id",
+            how="left",
+        )
+        print(f"Selected formulation columns: {df_selected.columns.tolist()}")
 
     # handle formulation selection for calibration gages
     if config.general.approach_calib_basins == "regionalization":
@@ -748,13 +753,19 @@ def select_formulation_all(
             config, df_score, cost_dict=cost_dict
         )
 
-        # replace the formulation for donors in df_selected with the one from df_selected_donors
-        form_map = df_selected_donors.drop_duplicates(divide_id_col).set_index(
-            divide_id_col
-        )["formulation"]
-        df_selected.loc[:, "formulation"] = (
-            df_selected[divide_id_col].map(form_map).fillna(df_selected["formulation"])
-        )
+        if df_selected.empty:
+            df_selected = df_selected_donors.copy()
+        else:
+            # replace the formulation for donors in df_selected with the one from df_selected_donors
+            print(f"Selected formulation columns: {df_selected.columns.tolist()}")
+            form_map = df_selected_donors.drop_duplicates(divide_id_col).set_index(
+                divide_id_col
+            )["formulation"]
+            df_selected.loc[:, "formulation"] = (
+                df_selected[divide_id_col]
+                .map(form_map)
+                .fillna(df_selected["formulation"])
+            )
     else:
         msg = (
             f"Unknown approach for assigning formulations to calibrated basins: "
@@ -915,7 +926,7 @@ def plot_formulation_results(
             df_selected = df_selected.merge(
                 gdf_vpu[[divide_id_col, "geometry"]].drop_duplicates(),
                 on=divide_id_col,
-                how="left",
+                how="right",
             )
 
             # convert df_selected to a real GeoDataFrame for plotting
@@ -929,12 +940,22 @@ def plot_formulation_results(
         columns_to_plot = cc.plots.get("columns_to_plot", None)
         if columns_to_plot is None:
             columns_to_plot = ["formulation", score_method, "summary_score", "cost"]
+            # make sure columns exist in the DataFrame
+            columns_to_plot = [
+                col for col in columns_to_plot if col in df_selected.columns
+            ]
+            # exclude columns with all NaN values
+            columns_to_plot = [
+                col for col in columns_to_plot if not df_selected[col].isna().all()
+            ]
         plot_dict = {
             "vpu": vpu,
             "var_str": "Formulation Selection",
             "columns": columns_to_plot,
             "ncols": 3,
         }
+        print(f"Plotting formulation selection results columns {columns_to_plot}... ")
+        print(df_selected.head())
         cc.plot_data(df_selected, plot_dict)
 
 

@@ -62,7 +62,7 @@ done
 function docker_run {
     local mounts="-v $(pwd)/data/:/ngen-app/nwm-region-mgr/data"
 
-    if [[ "$RTE" == "ngen_rte" ]]; then
+    if [[ "$RTE" == "ngen_rte_new" ]]; then
         # Include ulimit before running ngen for a VPU
         time docker run --entrypoint /bin/bash \
             $mounts \
@@ -117,7 +117,7 @@ fi
 
 ######### RUN NGEN #########
 if [ "$ngen" = true ]; then
-    export RTE="ngen_rte"
+    export RTE="ngen_rte_new"
     docker_run "/ngen-app/nwm-region-mgr/run_ngen_vpu_docker.py" \
         --config_ngen "/ngen-app/nwm-region-mgr/configs/config_ngen.yaml"
 fi
