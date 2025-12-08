@@ -288,12 +288,9 @@ def run_nwm_routing(args: dict):
         routing_logger.info("nwm_routing completed successfully.")
 
 
-def run_ngen_with_unified_logging(args: dict):
-    """Run NGEN as a subprocess and log output.
-
-    If NGEN fails and t-route output file is not found, run nwm_routing as a fallback.
-
-    """
+def run_ngen_with_nwm_routing_fallback() -> None:
+    """Execute ngen and poll its log file. If it returns a non-zero exit code or if certain messages
+    are found in its log file, then run nwm_routing separately as a fallback to produce t-route outputs."""
     ngen_logger = logging.getLogger("ngen")
     ngen_logger.propagate = False
     ngen_logger.setLevel(args["log_level"])
@@ -319,6 +316,7 @@ def run_ngen_with_unified_logging(args: dict):
         bufsize=1,
     )
 
+    aborted = False
     try:
         for line in iter(process.stdout.readline, ""):
             line = line.rstrip()
@@ -351,7 +349,21 @@ def run_ngen_with_unified_logging(args: dict):
         run_nwm_routing(args)
         return  # Exit after fallback
 
-    ngen_logger.info("NGEN simulation finished successfully.")
+
+def run_ngen_with_unified_logging(args: dict):
+    """Run NGEN as a subprocess and log output.
+
+    If args["use_nwm_routing_fallback"] is True, and
+    If NGEN fails and t-route output file is not found, run nwm_routing as a fallback.
+    """
+
+    if args["use_nwm_routing_fallback"]:
+        run_ngen_with_nwm_routing_fallback()
+    else:
+        cmd = ["bash", "-c", build_ngen_command(args)]
+        logger.info(f"Running command: {cmd}")
+        subprocess.run(cmd, check=True)
+        logger.info(f"Command finished: {cmd}")
 
 
 def main_workflow(
@@ -401,6 +413,7 @@ class NGENConfig(BaseModel):
     config_template: str
     log_file: str | Path = None
     log_level: str = "INFO"
+    use_nwm_routing_fallback: bool = False
 
     # validate timestamp fields
     _validate_start = field_validator("start_time")(validate_timestamp)

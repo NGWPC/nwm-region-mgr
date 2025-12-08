@@ -12,3 +12,4 @@ gpkg_file: '{base_dir}/inputs/region/hydrofabric/gpkg_vpu/vpu_{vpu}_patch.gpkg'
 config_template: '{base_dir}/inputs/ngen/mswm.config.template.docker'
 log_file: '{base_dir}/outputs/ngen/ngen_{algorithm}_vpu{vpu}.log'
 log_level: INFO
+use_nwm_routing_fallback: false
