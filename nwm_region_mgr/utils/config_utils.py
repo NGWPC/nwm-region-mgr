@@ -979,7 +979,11 @@ class BaseConfigProcessor:
 
     def set_vpu_gdf(self) -> gpd.GeoDataFrame:
         """Set the GeoDataFrame for the current vpu."""
-        gdf = gpd.read_file(Path(self.config.general.ngen_hydrofabric_file[self.vpu]))
+        layer_name = getattr(self.config.general.layer_name, "ngen", "divides")
+        gdf = gpd.read_file(
+            Path(self.config.general.ngen_hydrofabric_file[self.vpu]),
+            layer=layer_name,
+        )
         gdf = gdf[[self.divide_id_name.lower(), "geometry"]]
 
         self.vpu_gdf = gdf.copy()
