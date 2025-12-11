@@ -2,7 +2,7 @@
 general:
   n_procs: -1  # number of processes to use for parallel processing, -1 for all available cores
   attr_dataset_list: ['hlr','streamcat']
-  algorithm_list: ['kmeans', 'gower']  # list of algorithms to use for parameter regionalization
+  algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
   #algorithm_list: ['gower','urf','kmeans', 'kmedoids', 'hdbscan', 'birch']
 
 donor:

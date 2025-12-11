@@ -11,12 +11,12 @@ general:
   location_type: usgs_gage # location type
   variable_name: streamflow # currently only 'streamflow' is supported
   nwm_configuration: ngen_simulation    
-  dataset_name: [test_gower, test_kmeans] # user-specified name of datasets (e.g., formualtion or algorithm name)
-  nwm_version: [ngen, ngen] # list of NWM versions; must have the same length as 'dataset_name'
-  forecast_start_date: ['2022-10-01 00:00:00', '2022-10-01 00:00:00'] # list of start dates for simulation; must be same length as 'dataset_name'
-  forecast_end_date: ['2022-10-01 10:00:00', '2022-10-01 10:00:00'] # list of end dates for simulation; must be same length as 'dataset_name'
-  eval_start_date: ['2022-10-01 03:00:00', '2022-10-01 03:00:00'] # start date for evaluation period
-  eval_end_date: ['2022-10-01 10:00:00', '2022-10-01 10:00:00'] # end date for evaluation period
+  dataset_name: [test_kmeans] # user-specified name of datasets (e.g., formualtion or algorithm name)
+  nwm_version: [ngen] # list of NWM versions; must have the same length as 'dataset_name'
+  forecast_start_date: ['2022-10-01 00:00:00'] # list of start dates for simulation; must be same length as 'dataset_name'
+  forecast_end_date: ['2022-10-01 10:00:00'] # list of end dates for simulation; must be same length as 'dataset_name'
+  eval_start_date: ['2022-10-01 03:00:00'] # start date for evaluation period
+  eval_end_date: ['2022-10-01 10:00:00'] # end date for evaluation period
 
 #### configurations for various file paths
 file_paths:

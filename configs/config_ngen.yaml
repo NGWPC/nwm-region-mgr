@@ -1,7 +1,6 @@
 vpu: "03S"
 run_name: test
-algorithm: gower
-#base_dir: data
+algorithm: kmeans
 base_dir: /ngen-app/nwm-region-mgr/data
 start_time: '2022-10-01T00:00:00'
 end_time: '2022-10-01T10:00:00'
