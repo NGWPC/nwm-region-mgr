@@ -8,67 +8,56 @@
 <img src="docs/source/_images/overview.png" alt="overview" width="600"/>
 
 
-`nwm_region_mgr` is a Python package for identifying optimal model formulations and parameter values in ungauged catchments. It leverages calibration data from gauged catchments to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
+`nwm_region_mgr` is a Python package for identifying optimal model formulations and parameter values in ungauged catchments. It leverages calibration data from gauged catchments and catchment attributes to improve hydrologic modeling and forecasting skill across regions, playing a key role in the NextGen and NWM ecosystem.
 
 
 ## Key Features
 
-- **Formulation Regionalization** – Ranks NextGen model formulations for ungauged catchments based on similarity to gauged sites.
-- **Parameter Regionalization** – Estimates parameter values by intelligently transferring calibrations across catchments.
+- **Formulation Regionalization** – Ranks NextGen model formulations for ungauged catchments based on performance at gauged sites in a region.
+- **Parameter Regionalization** – Estimates parameter values by intelligently transferring calibrations across catchments based on similarity.
 - **Clustering Methods** – Groups catchments with shared hydrologic characteristics using multiple clustering approaches.
 - **Distance methods** – Identify donors using distance metrics that characterize catchment similarity/dissimilarity.
-- **Diagnostic Plots** – Generates clear plots and maps that explain formulation and parameter choices.
+- **Diagnostic Plots** – Generates diagnostic plots and maps that explain formulation and parameter choices.
 - **Scalable Workflows** – Efficiently supports studies from individual watersheds to CONUS-wide applications.
 - **Customizable Configurations** – Full control of workflows via human-readable config files.
 
 ## Docker Run Time Environment (RTE)
 ### Step 0. Build Docker images and download data
-#### a) Sample input data can be downloaded from: **s3://ngwpc-dev/regionalization/data/inputs**
+Follow NMW-RTE [README](https://github.com/NGWPC/nwm-rte/blob/development/README.md) to build Docker images and download sample data.
 
-#### b) Build Docker images
-`Note` This step is only necessary if the required docker images don't already exist or if updates to the code base have been implemented. Options:
--  --docker_region: Build Docker image for regionalization (region_rte)
--  --docker_ngen: Build Docker image for ngen execution (ngen_rte)
--  --docker_eval: Build Docker image for evaluation (eval_rte)
--  -d or --docker: Build all Docker images (region_rte + ngen_rte + eval_rte)
-
-```bash
-git clone https://github.com/NGWPC/nwm-region-mgr.git
-cd nwm-region-mgr
-```
-```bash
-#build all three docker images
-./region-mgr.sh --docker 
-# or build selected docker images
-./region-mgr.sh --docker_region
-./region-mgr.sh --docker_ngen
-./region-mgr.sh --docker_eval
-```
 ### Step 1. Run regionalization
 
 #### a) Run formulation regionalization alone (no parreg):
-The short flag `-f` can also be used in place of `--formreg`. Prior to running, configure the settings in `configs/config_formreg.yaml`.
+The short flag `-f` can also be used in place of `--formreg`. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_formreg.yaml`.
 ```bash
-./region-mgr.sh --formreg
+cd ngwpc/nwm-rte
+./ngen_rte_run_region.sh --formreg
 ```
+Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite.
+
 #### b) Run parameter regionalization (formreg is also ran as a prerequisite):
-The short flag `-r` can also be used in place of `--region`. Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
+The short flag `-p` can also be used in place of `--parreg`. Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
 ```bash
-./region-mgr.sh --region
+time ./ngen_rte_run_region.sh --parreg
 ```
 ### Step 2. Run NGEN
 Run a NGEN simulation:
 
 The short flag `-n` can also be used in place of `--ngen`. Prior to running, configure the settings in `configs/config_ngen.yaml`.
 ```bash
-./region-mgr.sh --ngen
+time ./ngen_rte_run_region.sh --ngen
 ```
 ### Step 3. Run Evaluation
 Run an evaluation:
 
 The short flag `-e` can also be used in place of `--eval`. Prior to running, configure the settings in `configs/config_eval.yaml`.
 ```bash
-./region-mgr.sh --eval
+time ./ngen_rte_run_region.sh --eval
+```
+
+### To run all steps in one command
+```bash
+time ./ngen_rte_run_region.sh --parreg --ngen --eval
 ```
 
 ## Desktop/Workspace
@@ -113,10 +102,10 @@ Three yaml config files are needed to run regionalization
 - **onfig_formreg.yaml**: specific settings for the formulation regionalization process.
 - **config_parreg.yaml**: specific settings for the parameter regionalization process.
 
-Follow the sample config files (nwm_region_mgr/sample_files/configs) to set up the configurations
+Follow the sample config files (nwm_region_mgr/configs) to set up the configurations
 for your regionalization application as needed.
 
-Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/**
+Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/inputs**
 
 
 #### 2) Run the regionalization script
@@ -129,40 +118,13 @@ Where:
 - [COFIG_DIR] refers to the directory containing the three config files as noted in 1), e.g.,
 
 ```bash
-python regionalization.py sample_files/configs
+python regionalization.py configs
 ```
 
 ### STEP 2: Run NGEN simulation with regionalized parameters
 
-#### Run natively in workspace
-##### 1) Install [ngen](https://github.com/NGWPC/ngen) and all submodules in its own venv
-You may want to follow the following Confluence pages:
-- [Clone ngen](https://confluence.nextgenwaterprediction.com/display/NGWPC/Clone+NGWPC+GitHub+Code)
-- [Build ngen](https://confluence.nextgenwaterprediction.com/display/NGWPC/Build+ngen+completely)
-  
-##### 2) Install [mswm](https://github.com/NGWPC/nwm-msw-mgr) in its own venv
-
-##### 3) Activate MSWM venv, e.g.
-```bash
-source ~/repos/nwm-msw-mgr/venv/bin/activate
-```
-##### 4) Set up MSWM configuration as shown in [run_ngen_vpu.sh](https://github.com/NGWPC/nwm-region-mgr/blob/development/run_ngen_vpu.sh)
-
-##### 5) Run MSWM and ngen simulation
-```bash
-cd ~/repos/nwm-region-mgr
-./run_ngen_vpu.sh
-```
-##### 6) Check inputs, outputs and logs
-All input, output and log files from running MSWM and NGEN can be found in *[work_dir]/regionalization/[run_name]/[vpu]* 
-(as defined in **run_ngen_vpu.sh**)
-
-##### 7) If ngen fails at t-route
-Check if all NGEN cat-*.csv and nex-*.csv output files are generated; if yes,
-    run t-route separately from the Output directory where ngen outputs are located, e.g.,
-```bash
-python -m nwm_routing -f -V4 ../Input/vpu_09_troute_config_region.yaml
-```
+To void complications from building ngen and its submodules locally, we recommend you always run NGEN simulation 
+with regionalized parameters and formulations from a Docker container. Follow instructions from the **Docker Run Time Environment (RTE)** section above. 
 
 ### STEP 3: Evaluate NGEN simulation with nwm.verf
 
@@ -174,7 +136,7 @@ Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-
 
 Check out what metrics are currently supported [here](https://confluence.nextgenwaterprediction.com/display/NGWPC/Forecast+Verification+%28ngen-verf%29%3A+Configuration)
 
-Sample input data can be downloaded from **s3://ngwpc-dev/Yuqiong.Liu/repos/nwm-verf** and are also available in [Github](https://github.com/NGWPC/nwm-verf/tree/development/data)
+Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/data/inputs/eval** 
 
 #### 3) Activate venv for nwm.verf
 ```bash
