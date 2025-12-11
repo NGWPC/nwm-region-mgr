@@ -1,4 +1,4 @@
-sample_file_path|inputs/gages_nwm4_calib_all.csv
+sample_file_path|inputs/region/gages_nwm4_calib_all.csv
 title|List of all calibration gages accross all NWM domains. Note list of potential donor gages can be a subset of this list, depending on gages included in the cal/val stats file.
 gage_id|Unique identifier for each gage.
 nws_id|National Weather Service (NWS) gage identifier.

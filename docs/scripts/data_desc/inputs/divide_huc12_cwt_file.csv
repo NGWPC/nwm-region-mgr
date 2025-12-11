@@ -1,4 +1,4 @@
-sample_file_path|inputs/cwt_divide_huc12/cwt_divide_huc12_conus.csv
+sample_file_path|inputs/region/cwt_divide_huc12/cwt_divide_huc12_conus.csv
 title|Catchment to HUC12 mapping file used in formulation regionalization. Each catchment may overlap with multiple HUC12 watersheds. It is desirable for the total overlap percentage for any given catchment to be as close to 100% as possible.
 divide_id|Unique identifier for each catchment.
 huc_12|12-digit Hydrologic Unit Code (HUC12) representing the watershed in which the catchment is located.
