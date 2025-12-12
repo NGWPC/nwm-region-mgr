@@ -10,7 +10,7 @@ import pandas as pd
 import yaml
 from dotenv import load_dotenv
 
-CONFIG_DIR = "sample_files/configs"
+CONFIG_DIR = "configs"
 
 DATA_DESC_DIR = "docs/scripts/data_desc"
 OUTPUT_DESC_DIR = DATA_DESC_DIR + "/outputs"

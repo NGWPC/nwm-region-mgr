@@ -6,9 +6,6 @@ from pathlib import Path
 import fiona
 import geopandas as gpd
 import pandas as pd
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 def update_gpkg_layer(
@@ -59,12 +56,19 @@ def update_gpkg_layer(
 def main(vpu_str: str):
     """Extract VPU from conus.gpkg and save to new gpkg file."""
     # conus gpkg file
-    conus_in = "s3://hydrofabric-data/patch/7_30_25/nwm_patch_conus_nextgen.gpkg"
+    conus_in = Path(
+        "~/s3/hydrofabric-data/patch/7_30_25/nwm_patch_conus_nextgen.gpkg"
+    ).expanduser()
 
     # output gpkg file
     output_gpkg = (
-        Path("~/data/hydrofabric/gpkg_vpu/") / f"vpu_{vpu_str}_patch.gpkg"
-    ).expanduser()
+        Path("../data/inputs/region/hydrofabric/gpkg_vpu/")
+        / f"vpu_{vpu_str}_patch.gpkg"
+    ).absolute()
+    if output_gpkg.exists():
+        print(f"Output gpkg {output_gpkg} already exists. Skipping extraction.")
+        return
+
     output_gpkg.parent.mkdir(parents=True, exist_ok=True)
 
     if output_gpkg.exists():

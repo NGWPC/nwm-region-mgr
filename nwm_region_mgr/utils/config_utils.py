@@ -979,7 +979,11 @@ class BaseConfigProcessor:
 
     def set_vpu_gdf(self) -> gpd.GeoDataFrame:
         """Set the GeoDataFrame for the current vpu."""
-        gdf = gpd.read_file(Path(self.config.general.ngen_hydrofabric_file[self.vpu]))
+        layer_name = getattr(self.config.general.layer_name, "ngen", "divides")
+        gdf = gpd.read_file(
+            Path(self.config.general.ngen_hydrofabric_file[self.vpu]),
+            layer=layer_name,
+        )
         gdf = gdf[[self.divide_id_name.lower(), "geometry"]]
 
         self.vpu_gdf = gdf.copy()
@@ -1052,3 +1056,64 @@ class BaseConfigProcessor:
     def donor_gages(self):
         """Get the donor gage DataFrame."""
         return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
+
+    def expand_config_for_vpu(self, vpu: str):
+        """Expand the config to include VPUs (e.g., needed for all donors).
+
+        Some donors may come from nearby VPUs, so we need to make sure that the
+        configuration includes all donor VPUs.
+
+        For example, if the current VPU '03S' uses donor gages from '03W','03N', and '06', then
+        this function will expand the config to include those VPUs as well for the ngen_hydrofabric_file
+        and output files.
+
+        --- Before expansion---
+        ngen_hydrofabric_file:
+            '03S': '/path/to/ngen_hydro_03S.gpkg'
+
+        --- After expansion---
+        ngen_hydrofabric_file:
+            '03S': '/path/to/ngen_hydro_03S.gpkg'
+            '03W': '/path/to/ngen_hydro_03W.gpkg'
+            '03N': '/path/to/ngen_hydro_03N.gpkg'
+            '06':  '/path/to/ngen_hydro_06.gpkg'
+
+        """
+
+        def add_entry_if_missing(d: dict, vpu_key: str) -> dict:
+            if vpu_key not in d:
+                first_key = next(iter(d))
+                d[vpu_key] = d[first_key].replace(first_key, vpu_key)
+
+        add_entry_if_missing(self.config.general.ngen_hydrofabric_file, vpu)
+
+        co = getattr(self.config.output, "summary_score", None)
+        if co is not None:
+            add_entry_if_missing(co.stem, vpu)
+        co = getattr(self.config.output, "formulation", None)
+        if co is not None:
+            add_entry_if_missing(co.stem, vpu)
+
+        # save the expanded configuration
+        if hasattr(self.config.output, "config_final"):
+            getattr(self.config.output, "config_final").save_to_file(
+                self.config, data_str="Expanded final configuration"
+            )
+
+    def get_output_file_path(
+        self,
+        output_section: str,
+        vpu: str = None,
+        algorithm: str = None,
+        use_stem_suffix: bool = False,
+    ):
+        """Get the output file name from the output configuration."""
+        output_config = getattr(self.config.output, output_section, None)
+        if output_config is None:
+            msg = f"Output section '{output_section}' not found in configuration for {self.__class__.__name__}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return output_config.get_file_path(
+            vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix
+        )
