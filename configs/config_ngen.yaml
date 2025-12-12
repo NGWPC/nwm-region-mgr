@@ -4,7 +4,7 @@ algorithm: kmeans
 base_dir: /ngen-app/nwm-region-mgr/data
 start_time: '2022-10-01T00:00:00'
 end_time: '2022-10-01T10:00:00'
-nprocs: 2
+nprocs: -1
 par_file: '{base_dir}/outputs/region/{run_name}/params/formulation_params_{algorithm}_conus_vpu{vpu}.csv'
 pair_file: '{base_dir}/outputs/region/{run_name}/pairs/pairs_{algorithm}_conus_vpu{vpu}_mswm.csv'
 gpkg_file: '{base_dir}/inputs/region/hydrofabric/gpkg_vpu/vpu_{vpu}_patch.gpkg'
