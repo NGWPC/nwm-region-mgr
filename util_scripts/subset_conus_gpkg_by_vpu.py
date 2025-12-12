@@ -35,7 +35,9 @@ def update_gpkg_layer(
         new_gdf = new_gdf.to_crs(existing_gdf.crs)
 
         # Combine existing and new rows
-        combined_gdf = gpd.GeoDataFrame(pd.concat([existing_gdf, new_gdf], ignore_index=True), crs=existing_gdf.crs)
+        combined_gdf = gpd.GeoDataFrame(
+            pd.concat([existing_gdf, new_gdf], ignore_index=True), crs=existing_gdf.crs
+        )
         if overwrite:
             # Replace the existing layer
             combined_gdf.to_file(gpkg_path, layer=layer_name, driver="GPKG")
@@ -54,10 +56,19 @@ def update_gpkg_layer(
 def main(vpu_str: str):
     """Extract VPU from conus.gpkg and save to new gpkg file."""
     # conus gpkg file
-    conus_in = Path("~/s3/hydrofabric-data/patch/7_30_25/nwm_patch_conus_nextgen.gpkg").expanduser()
+    conus_in = Path(
+        "~/s3/hydrofabric-data/patch/7_30_25/nwm_patch_conus_nextgen.gpkg"
+    ).expanduser()
 
     # output gpkg file
-    output_gpkg = (Path("~/data/hydrofabric/gpkg_vpu/") / f"vpu_{vpu_str}_patch.gpkg").expanduser()
+    output_gpkg = (
+        Path("../data/inputs/region/hydrofabric/gpkg_vpu/")
+        / f"vpu_{vpu_str}_patch.gpkg"
+    ).absolute()
+    if output_gpkg.exists():
+        print(f"Output gpkg {output_gpkg} already exists. Skipping extraction.")
+        return
+
     output_gpkg.parent.mkdir(parents=True, exist_ok=True)
 
     if output_gpkg.exists():
@@ -110,9 +121,9 @@ def main(vpu_str: str):
         )
         if n_divide_attrs < n_divides:
             # figure out which divides are missing in divide-attributes layer
-            missing_divides = set(gpd.read_file(output_gpkg, layer="divides")["divide_id"]) - set(
-                gpd.read_file(output_gpkg, layer="divide-attributes")["divide_id"]
-            )
+            missing_divides = set(
+                gpd.read_file(output_gpkg, layer="divides")["divide_id"]
+            ) - set(gpd.read_file(output_gpkg, layer="divide-attributes")["divide_id"])
             print(f"Missing divide_ids in divide-attributes layer: {missing_divides}")
 
             # for missing divides in divide-attributes layer, get their attributes from a random existing catchment
@@ -123,15 +134,21 @@ def main(vpu_str: str):
                 random_attrs["divide_id"] = divide_id
 
                 # append to new_attrs dataframe
-                new_attrs = pd.concat([new_attrs, pd.DataFrame([random_attrs])], ignore_index=True)
+                new_attrs = pd.concat(
+                    [new_attrs, pd.DataFrame([random_attrs])], ignore_index=True
+                )
             new_rows = gpd.GeoDataFrame(new_attrs, crs="EPSG:4326")
 
-            update_gpkg_layer(output_gpkg, "divide-attributes", new_rows, overwrite=True)
+            update_gpkg_layer(
+                output_gpkg, "divide-attributes", new_rows, overwrite=True
+            )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract VPU from conus.gpkg")
-    parser.add_argument("--vpu", required=True, help="VPU identifier (e.g., 09, 10L, 10U)")
+    parser.add_argument(
+        "--vpu", required=True, help="VPU identifier (e.g., 09, 10L, 10U)"
+    )
     args = parser.parse_args()
 
     print(f"Extracting VPU {args.vpu} from CONUS geopackage...")
