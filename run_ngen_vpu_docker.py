@@ -25,9 +25,6 @@ import yaml
 from mswm.build_inputs import RealizationBuilder
 from pydantic import BaseModel, field_validator
 
-# from nwm_region_mgr.utils.config_utils import NGENConfig
-# from nwm_region_mgr.utils.string_utils import recursive_substitute
-
 logger = logging.getLogger(__name__)
 
 TIMESTAMP_FMT = "%Y-%m-%dT%H:%M:%S"
@@ -441,7 +438,7 @@ class NGENConfigProcessor:
         """Convert the config to a dictionary."""
         return self.config.model_dump()
 
-    def substitute_placeholders(self, config) -> NGENConfig:
+    def substitute_placeholders(self, config: NGENConfig) -> NGENConfig:
         """Return a new NGENConfig where any string field containing {placeholders} is expanded."""
         mapping = config.model_dump()
 
