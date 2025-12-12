@@ -31,6 +31,7 @@ from pydantic import BaseModel, field_validator
 logger = logging.getLogger(__name__)
 
 TIMESTAMP_FMT = "%Y-%m-%dT%H:%M:%S"
+TIMESTAMP_FMT1 = "%Y-%m-%d %H:%M:%S"
 
 
 def setup_logging(log_file: str | Path, log_level: int = logging.INFO):
@@ -98,10 +99,10 @@ def create_mswm_config(args: dict):
         template_content = f.read()
 
     # format start and end times (as required by MSWM)
-    start_time = datetime.strptime(args["start_time"], "%Y-%m-%dT%H:%M:%S")
-    end_time = datetime.strptime(args["end_time"], "%Y-%m-%dT%H:%M:%S")
-    args["start_time"] = start_time.strftime("%Y-%m-%d %H:%M:%S")
-    args["end_time"] = end_time.strftime("%Y-%m-%d %H:%M:%S")
+    start_time = datetime.strptime(args["start_time"], TIMESTAMP_FMT)
+    end_time = datetime.strptime(args["end_time"], TIMESTAMP_FMT)
+    args["start_time"] = start_time.strftime(TIMESTAMP_FMT1)
+    args["end_time"] = end_time.strftime(TIMESTAMP_FMT1)
 
     # Replace placeholders in the template
     config_content = template_content.format(
@@ -228,7 +229,7 @@ def run_nwm_routing(args: dict):
 
     # Parse and format start time (expects args.start_time like '2022-10-01T00:00:00')
     try:
-        start_time = datetime.strptime(args["start_time"], "%Y-%m-%dT%H:%M:%S")
+        start_time = datetime.strptime(args["start_time"], TIMESTAMP_FMT)
         start_time_str = start_time.strftime("%Y%m%d%H%M")
     except Exception:  # prevents double logging
         # Fallback: use raw string if parsing fails
