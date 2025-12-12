@@ -1058,25 +1058,41 @@ class BaseConfigProcessor:
         return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
 
     def expand_config_for_vpu(self, vpu: str):
-        """Expand the config to include VPUs (e.g., needed for all donors)."""
-        # config1 = config.copy()
+        """Expand the config to include VPUs (e.g., needed for all donors).
+
+        Some donors may come from nearby VPUs, so we need to make sure that the
+        configuration includes all donor VPUs.
+
+        For example, if the current VPU '03S' uses donor gages from '03W','03N', and '06', then
+        this function will expand the config to include those VPUs as well for the ngen_hydrofabric_file
+        and output files.
+
+        --- Before expansion---
+        ngen_hydrofabric_file:
+            '03S': '/path/to/ngen_hydro_03S.gpkg'
+
+        --- After expansion---
+        ngen_hydrofabric_file:
+            '03S': '/path/to/ngen_hydro_03S.gpkg'
+            '03W': '/path/to/ngen_hydro_03W.gpkg'
+            '03N': '/path/to/ngen_hydro_03N.gpkg'
+            '06':  '/path/to/ngen_hydro_06.gpkg'
+
+        """
 
         def add_entry_if_missing(d: dict, vpu_key: str) -> dict:
             if vpu_key not in d:
                 first_key = next(iter(d))
                 d[vpu_key] = d[first_key].replace(first_key, vpu_key)
-            return d
 
-        self.config.general.ngen_hydrofabric_file = add_entry_if_missing(
-            self.config.general.ngen_hydrofabric_file, vpu
-        )
+        add_entry_if_missing(self.config.general.ngen_hydrofabric_file, vpu)
 
         co = getattr(self.config.output, "summary_score", None)
         if co is not None:
-            co.stem = add_entry_if_missing(co.stem, vpu)
+            add_entry_if_missing(co.stem, vpu)
         co = getattr(self.config.output, "formulation", None)
         if co is not None:
-            co.stem = add_entry_if_missing(co.stem, vpu)
+            add_entry_if_missing(co.stem, vpu)
 
         # save the expanded configuration
         if hasattr(self.config.output, "config_final"):
