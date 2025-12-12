@@ -26,6 +26,14 @@ def main(
     config_dir: str | Path, config_files: list[str], mode: Literal["formreg", "region"]
 ) -> None:
     """Execute regionalization."""
+    # Ensure mode is valid
+    if mode not in {"formreg", "region"}:
+        msg = (
+            f"Invalid mode for regionalization: {mode}. Must be 'formreg' or 'region'."
+        )
+        logger.error(msg)
+        raise ValueError(msg)
+
     # Build full paths to each config file
     config_paths = {file: config_dir / file for file in config_files}
 
