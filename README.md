@@ -25,13 +25,20 @@
 ### Step 0. Build Docker images and download data
 Follow NMW-RTE [README](https://github.com/NGWPC/nwm-rte/blob/development/README.md) to build Docker images and download sample data.
 
+> **Note:** A single ngen RTE Docker image needs to be built before continuing to the regionalization steps below. 
+> Make sure that RTE's build script runs successfully.  RTE's default run script (for forecasting) is not used by the regionalization workflow and should be skipped.
+
 ### Step 1. Run regionalization
+
+First, navigate to nwm-rte directory, e.g.,
+```bash
+cd ~/ngwpc/nwm-rte
+```
 
 #### a) Run formulation regionalization alone (no parreg):
 The short flag `-f` can also be used in place of `--formreg`. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_formreg.yaml`.
 ```bash
-cd ngwpc/nwm-rte
-./ngen_rte_run_region.sh --formreg
+time ./ngen_rte_run_region.sh --formreg
 ```
 Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite.
 
