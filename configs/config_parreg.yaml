@@ -60,6 +60,9 @@ output:
       path: '{base_dir}/outputs/region/{run_name}/params'
       stem: 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}'
       format: 'csv'
+      plots:
+        spatial_map: True
+        columns_to_plot: ['MP', 'MFSNO', 'uztwm', 'uzfwm', 'pxtemp', 'plwhc']  
     attr_data_final:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/attr_data_final'

@@ -1178,7 +1178,9 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         df_pairs = df_pairs.sort_values(by=[self.divide_id_name], ascending=True)
         return df_pairs
 
-    def save_pairing_results(self, df_pairs: pd.DataFrame, pairer_name: str) -> None:
+    def save_pairing_results(
+        self, df_pairs: pd.DataFrame, pairer_name: str
+    ) -> pd.DataFrame:
         """Save the pairing results to file."""
         # output config for pairs
         co = getattr(self.config.output, "pairs", None)
@@ -1233,6 +1235,8 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         )
         co.format = format0
 
+        return df_pairs_gage
+
     def get_donors_receivers_by_form(self, form_key: str, form_values: list) -> tuple:
         """Get the donors and receivers for a given formulation.
 
@@ -1271,7 +1275,9 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
         return donors_in_form, receivers_in_form
 
-    def create_formulation_parameter_file(self, form_config: Any, pairer: str) -> None:
+    def create_formulation_parameter_file(
+        self, form_config: Any, pairer: str
+    ) -> pd.DataFrame:
         """Create formulation parameter file.
 
         Create a formulation parameter file that lists the gage_id, formulation, and the calibrated parameters.
@@ -1349,6 +1355,56 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 data_str=f"Formulation Parameter Data (VPU {self.vpu}, algorithm = {pairer})",
                 use_stem_suffix=False,
             )
+
+        return df_param_all
+
+    def plot_parameter_outputs(
+        self, pairer_name: str, df_pairs_gage: pd.DataFrame, df_param_all: pd.DataFrame
+    ) -> None:
+        """Plot the formulation parameter outputs.
+
+        Args:
+            pairer_name: name of the pairing algorithm used
+            df_pairs_gage: DataFrame containing the gage-receiver pairs
+            df_param_all: DataFrame containing the formulation parameters
+
+        """
+        # output config for params
+        co = getattr(self.config.output, "params", None)
+        if co is None or not co.plots or co.plots.get("columns_to_plot", None) is None:
+            return
+
+        if df_param_all is None or df_param_all.empty:
+            msg = "No formulation parameter data found. Skipping params plot"
+            logger.error(msg)
+
+        if df_pairs_gage is None or df_pairs_gage.empty:
+            msg = "No gage-receiver pairing data found. Skipping params plot"
+            logger.error(msg)
+
+        # merge df_param_all with df_pairs_gage to get the formulation parameters for all receivers in the current VPU
+        df_params = df_pairs_gage.merge(
+            df_param_all,
+            on=self.gage_id_name,
+            how="left",
+        )
+
+        columns_to_plot = co.plots.get("columns_to_plot", [])
+        plot_dict = {
+            "vpu": self.vpu,
+            "var_str": "Regionalized Parameters",
+            "columns": columns_to_plot,
+            "ncols": min(3, len(columns_to_plot)),
+        }
+
+        # convert df_pairs to GeoDataFrame to plot spatial map
+        if co.plots and co.plots.get("spatial_map", False):
+            # merge df_pairs with the VPU geodataframe to get the geometry
+            gdf = self.get_vpu_gdf()
+            df_params = df_params.merge(gdf, on=self.divide_id_name, how="right")
+            df_params = gpd.GeoDataFrame(df_params, geometry="geometry", crs=gdf.crs)
+
+        co.plot_data(df_params, plot_dict)
 
     def generate_pairing(
         self, df_attr_all: pd.DataFrame, dist_spatial: pd.DataFrame, frp: FRP
@@ -1456,15 +1512,18 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 df_pairs_all = self.add_donors_to_pair_results(df_pairs_all)
 
                 # save the pairing results to file
-                self.save_pairing_results(df_pairs_all, pairer_name)
+                df_pairs_gage = self.save_pairing_results(df_pairs_all, pairer_name)
 
                 # plot the pairing results
                 self.plot_pairing_outputs(pairer_name, df_pairs_all)
 
                 # create formulation parameter file
-                self.create_formulation_parameter_file(
+                df_param_all = self.create_formulation_parameter_file(
                     getattr(frp.config.output, "formulation", None), pairer_name
                 )
+
+                # plot parameter outputs
+                self.plot_parameter_outputs(pairer_name, df_pairs_gage, df_param_all)
 
                 end_time = time.time()
                 logger.info(f"Execution time: {end_time - start_time:.4f} seconds")
