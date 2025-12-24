@@ -14,8 +14,6 @@ general:
   calval_stats_file: '{base_dir}/inputs/region/calval_stats/stat_calval_all_{domain}.parquet' #Path to folder where statistics from calibration and validation are stored
   calib_param_file: '{base_dir}/inputs/region/pseudo_calib_params/sampled_params_{domain}.csv' # Path to file containing calibration parameters for all gages in the domain
   #manual_pairings_file: '{base_dir}/inputs/region/manual_pairings/manual_pairings_{domain}_w_gage.csv'  # Path to manual pairings file
-  
-  #nested_gages: "inner" # How to handle nested gages in the calibration basin. Options: "inner" (use inner gage), "outer" (use outer gage)
   approach_calib_basins: summary_score  # Strategy for assigning formulations and parameters to calibrated basins: regionalization or summary_score
   
   id_col: # case-insensitive column names for different spatial units across all applicable files
