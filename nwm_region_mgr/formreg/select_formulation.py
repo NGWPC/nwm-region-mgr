@@ -547,8 +547,10 @@ def select_formulation_donors_only(
     cwt_divide_gage = read_table(config.general.gage_divide_cwt_file, dtype=col_dtype)
 
     # merge the crosswalk with the best formulations DataFrame
+    if divide_id_col in df_best_per_gage.columns:
+        df_best_per_gage = df_best_per_gage.drop(columns=[divide_id_col])
     df_selected = df_best_per_gage.merge(
-        cwt_divide_gage[[gage_id_col]].drop_duplicates(),
+        cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
         on=gage_id_col,
         how="left",
     )
@@ -915,7 +917,7 @@ def plot_formulation_results(
             df_selected = df_selected.merge(
                 gdf_vpu[[divide_id_col, "geometry"]].drop_duplicates(),
                 on=divide_id_col,
-                how="left",
+                how="right",
             )
 
             # convert df_selected to a real GeoDataFrame for plotting

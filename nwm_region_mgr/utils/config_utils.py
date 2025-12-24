@@ -631,6 +631,7 @@ class BaseConfigProcessor:
         self.config_schema = config_schema
         self.config = self.load_and_process_config
         self.sample_size = sample_size
+        self._expand_user_file_paths(self.config)
 
         self.set_logging()
         self.validate_files()
@@ -724,6 +725,31 @@ class BaseConfigProcessor:
         config = recursive_substitute(config, context)
 
         return config
+
+    def _expand_user_file_paths(self, obj: BaseModel) -> None:
+        """Recursively expand user home directory in file paths within a Pydantic model."""
+        for name, field in type(obj).model_fields.items():
+            val = getattr(obj, name)
+
+            # Always recurse
+            if isinstance(val, BaseModel):
+                self._expand_user_file_paths(val)
+                continue
+
+            if isinstance(val, dict):
+                for v in val.values():
+                    if isinstance(v, BaseModel):
+                        self._expand_user_file_paths(v)
+                continue
+
+            # Apply expansion only when explicitly needed
+            if (
+                ("file" in name or "path" in name or "dir" in name)
+                and isinstance(val, (str, Path))
+                and "~" in str(val)
+            ):
+                expanded = Path(val).expanduser()
+                setattr(obj, name, expanded)
 
     def _required_columns_calval_stats(self, config) -> set[str]:
         """Return a set of required columns for calibration/validation statistics."""
@@ -821,7 +847,9 @@ class BaseConfigProcessor:
                     paths[path1] = Path(val)
                 elif isinstance(val, dict):
                     paths[path1] = {
-                        k: Path(v) for k, v in val.items() if isinstance(v, (str, Path))
+                        k: Path(v).expanduser()
+                        for k, v in val.items()
+                        if isinstance(v, (str, Path))
                     }
                 else:
                     logger.warning(f"Unsupported type for {path1}: {type(val)}")
