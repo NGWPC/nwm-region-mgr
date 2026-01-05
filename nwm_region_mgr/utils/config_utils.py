@@ -336,32 +336,28 @@ class BaseOutputConfig(BaseModel):
     )
     path: Path | str = Field(
         description="Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.",
-        examples="{base_dir}/outputs/{run_name}/formulations",
-        default="{base_dir}/outputs/{run_name}/formulations",
+        examples=None,
+        default=None,
     )
     stem: Optional[str | Dict[str, str]] = Field(
         description="File stem for output files, used to create unique file names based on the path.",
-        default="form_{domain}_vpu{vpu_list}",
-        examples="form_{domain}_vpu{vpu_list}",
+        default=None,
+        examples=None,
     )
     stem_suffix: Optional[str] = Field(
         description="Suffix for the file stem, used to create unique file names based on the path for specific needs.",
-        default="_pars",
-        examples="_pars",
+        default=None,
+        examples=None,
     )
     format: Optional[str] = Field(
         description="File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.",
-        default="parquet",
-        examples="parquet",
+        default=None,
+        examples=None,
     )
     plots: Optional[Dict[str, Any]] = Field(
         description="Configuration for output plots, if applicable.",
         default=None,
-        examples={
-            "histogram": True,
-            "spatial_map": True,
-            "columns_to_plot": ["param1", "param2"],
-        },
+        examples=None,
     )
     plot_path: Optional[str] = Field(
         description=(
@@ -369,7 +365,7 @@ class BaseOutputConfig(BaseModel):
             "in a subfolder 'plots' in the defined output path."
         ),
         default=None,
-        examples="{base_dir}/outputs/{run_name}/formulations/plots",
+        examples=None,
     )
 
     @model_validator(mode="after")

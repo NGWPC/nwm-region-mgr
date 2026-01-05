@@ -706,6 +706,7 @@ class ParameterOutputConfig(BaseModel):
                 "histogram": True,
                 "columns_to_plot": ["distSpatial", "distAttr"],  # columns to plot
             },
+            "plot_path": "{base_dir}/outputs/{run_name}/pairs/plots",
         },
     )
 
@@ -717,6 +718,11 @@ class ParameterOutputConfig(BaseModel):
             "path": "{base_dir}/outputs/{run_name}/params",
             "stem": "formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}",
             "format": "csv",
+            "plots": {
+                "spatial_map": True,
+                "columns_to_plot": ["MP", "MFSNO", "uztwm", "uzfwm", "pxtemp", "plwhc"],
+            },
+            "plot_path": "{base_dir}/outputs/{run_name}/params/plots",
         },
     )
 
@@ -744,6 +750,7 @@ class ParameterOutputConfig(BaseModel):
                     "hlr_TAVE",
                 ],  # attributes to plot
             },
+            "plot_path": "{base_dir}/outputs/{run_name}/attr_data_final/plots",
         },
     )
 
@@ -753,7 +760,6 @@ class ParameterOutputConfig(BaseModel):
         examples={
             "save": True,
             "path": "{base_dir}/outputs/{run_name}/config_parreg_final.yaml",
-            "format": "yaml",
         },
     )
 
