@@ -121,6 +121,19 @@ is calculated.
    :align: center
 
 
+Regionalized Parameter Spatial Map
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Description: These maps display the spatial distribution of regionalized parameter values across all catchments 
+in the VPU. It helps in understanding the spatial patterns of parameters after the regionalization process. Only 
+parameters configured for plotting (in the output.params section of the configuration) are shown. Note there may 
+exist spatial gaps in the maps where the corresponding parameters are not applicable to certain catchments due to 
+the formulation chosen for those catchments. Plot is created using data from :ref:`params`.
+
+.. figure:: ../_images/output/map_formulation_params_kmeans_conus_vpu03S.png
+   :alt: Map of selected regionalized parameter values across all catchments from using the KMeans algorithm
+   :height: 450px
+   :align: center
+
 Attribute Spatial Maps
 ~~~~~~~~~~~~~~~~~~~~~~
 
