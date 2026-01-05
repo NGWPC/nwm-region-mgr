@@ -35,8 +35,14 @@ time ./ngen_rte_run_all.sh --parreg --ngen --eval
 
 ### Customize and run your own regionalization workflow
  - If necessary/applicable, prepare input data files (e.g., calibration/validation statistics, catchment 
-attributes, etc.). Refer to the [Input Data](tech_reference/input_data.rst) subsection  
-on the [Technical Reference](tech_reference/index.md) tab for details on required input files and formats.
+attributes, etc.). Refer to the [Input Data](tech_reference/input_data.rst) subsection for details. 
+   - Calibration/validation statistics can be collected from earlier calibration runs using the commands below, which will generate a csv file containing the statistics for all specified calibration job IDs, along with another csv file listing the corresponding calibrated parameter sets. These files can then be used in the regionalization configuration files.
+      ```bash
+        ngencerf regionalization 609 610 # where 609 and 610 are example calibration job IDs
+
+        # or specify a list of calibration job IDs in a text file
+        ngencerf regionalization --id-file job_ids.txt
+      ```
  - Adjust configuration files in `configs/` to set up your desired regionalization experiment. Refer to the 
 [Configuration](config_builder/index.md) tab for details on each config file and available options.
  - Follow Steps 0-3 above to execute the customized workflow.
@@ -68,8 +74,8 @@ cp -r configs/ sample_configs/
    - Alternatively, we can also specify selected attributes directly in the config file by editing the fields **attr_datasets.ngen.attr_list** and **attr_datasets.streamcat.attr_list**, respectively, for ngen and StreamCat. 
  - Set **donor.metric_eval_period.value** to 'valid' to use validation period statistics for donor selection
  - Set **snow_cover.threshold** to 10 to define catchment snowiness category based on 10% snow cover
- - Set **output.params.plots.columns_to_plot** to include a couple of CFE parameters to visualize spatial patterns (e.g., 'b' and 'slope')
- - Set **output.attr_data_final.plots.columns_to_plot** to include some selected attributes to visualize spatial patterns. Specifically, 
+ - Edit **output.params.plots.columns_to_plot** to include a couple of CFE parameters to visualize spatial patterns (e.g., 'b' and 'slope')
+ - Edit **output.attr_data_final.plots.columns_to_plot** to include some selected attributes to visualize spatial patterns. Specifically, 
    - remove the HLR attributes, since HLR is not chosen for this experiment
    - change *streamcat_Elev* to *streamcat_Perm*, since *Elev* is not selected in **attr_datasets.streamcat.attr_list** 
    - add a few ngen attributes: *ngen_slope*, *ngen_aspect*, *ngen_elevation*
@@ -100,9 +106,9 @@ After completion, check the output folder `outputs/region/test1/`, which contain
  - `summary_score/`: summary score for all donor candidates
  - `config_formreg_final.yaml` and `config_parreg_final.yaml`: the final (expanded) configuration files used in this run.
 
-See the **Output Directory Structure** subsection on the [Technical Reference](tech_reference/index.md#output-directory-structure) tab for details on output files and plots.
+See the **Output Directory Structure** subsection in the [Technical Reference](tech_reference/index.md#output-directory-structure) tab for details on output files and plots.
 
-See the [Output Tables](tech_reference/output_data.rst) and [Output Plots](tech_reference/output_plot.rst) subsections on the [Technical Reference](tech_reference/index.md) tab for details on output files and plots.
+See the [Output Tables](tech_reference/output_data.rst) and [Output Plots](tech_reference/output_plot.rst) subsections in the [Technical Reference](tech_reference/index.md) tab for details on output files and plots.
 
 #### 2. Run NGEN simulations
 
@@ -208,27 +214,63 @@ pip install -e .
 pip install .[parreg]
 ```
 
-### Configuration Files
+### STEP 1: Run regionalization to produce regionalized parameters and formulations
 
-Users may control regionalization behavior by adjusting several configuration files.
+#### 1) Set up configuration yaml files
 
- - config_general.yaml: contains general settings for the regionalization process.
- - config_formreg.yaml: contains specific settings for the formulation regionalization process.
- - config_parreg.yaml: contains specific settings for the parameter regionalization process.
+Three yaml config files are needed to run regionalization
+- **config_general.yaml**: general settings for the overall regionalization process.
+- **onfig_formreg.yaml**: specific settings for the formulation regionalization process.
+- **config_parreg.yaml**: specific settings for the parameter regionalization process.
 
-Examples are available in `configs`. See details of schema for each config file in the [Configuration](config_builder/index.md) tab.
+Follow the sample config files (nwm_region_mgr/configs) to set up the configurations
+for your regionalization application as needed.
 
-### Executing nwm_region_mgr
+Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/inputs**
 
-To run the regionalization script, you can use the following command.
+
+#### 2) Run the regionalization script
 
 ```bash
-# run formulation regionalization only
-python regionalization.py configs formreg
-
-# run parameter regionalization, which also runs formulation regionalization first (if not done already)
-python regionalization.py configs region
+python [NGEN_REG_ROOT]/nwm-region-mgr/regionalization.py [COFIG_DIR] [REG_TYPE]
 ```
+Where:
+- [NGEN_REG_ROOT] refers to the directory where nwm-region-mgr is installed
+- [COFIG_DIR] refers to the directory containing the three config files as noted in 1), e.g.,
+- [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'region' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'region'.
+
+```bash
+python regionalization.py configs formreg # to run formulation regionalization only
+python regionalization.py configs region # to run parameter regionalization (and formulation regionalization if not done already)
+```
+
+### STEP 2: Run NGEN simulation with regionalized parameters
+
+To void complications from building ngen and its submodules locally, we recommend you always run NGEN simulation 
+with regionalized parameters and formulations from a Docker container. Follow instructions from the **Docker Run Time Environment (RTE)** section above. 
+
+### STEP 3: Evaluate NGEN simulation with nwm.verf
+
+#### 1) Donwload and install [nwm.verf](https://github.com/NGWPC/nwm-verf)
+It is recommentded you install nwm.verf in its own venv. Note [nwm.eval](https://github.com/NGWPC/nwm-eval-mgr) needs to installed as a dependency
+
+#### 2) Set up configurations for evaluation
+Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/sample_files/configs/config_eval.yaml)
+
+Check out what metrics are currently supported [here](https://confluence.nextgenwaterprediction.com/display/NGWPC/Forecast+Verification+%28ngen-verf%29%3A+Configuration)
+
+Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/data/inputs/eval** 
+
+#### 3) Activate venv for nwm.verf
+```bash
+source ~/repos/nwm-verf/venv/bin/activate
+```
+#### 4) Run evaluation
+```bash
+python -m nwm.verf config_eval.yaml
+```
+#### 5) Check outputs
+Outputs from evaluation can be found in *[output_dir]* as specified in **config_eval.yaml**
 
 
 

@@ -114,18 +114,19 @@ for your regionalization application as needed.
 
 Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/inputs**
 
-
 #### 2) Run the regionalization script
 
 ```bash
-python [NGEN_REG_ROOT]/nwm-region-mgr/regionalization.py [COFIG_DIR]
+python [NGEN_REG_ROOT]/nwm-region-mgr/regionalization.py [COFIG_DIR] [REG_TYPE]
 ```
 Where:
 - [NGEN_REG_ROOT] refers to the directory where nwm-region-mgr is installed
 - [COFIG_DIR] refers to the directory containing the three config files as noted in 1), e.g.,
+- [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'region' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'region'.
 
 ```bash
-python regionalization.py configs
+python regionalization.py configs formreg # to run formulation regionalization only
+python regionalization.py configs region # to run parameter regionalization (and formulation regionalization if not done already)
 ```
 
 ### STEP 2: Run NGEN simulation with regionalized parameters
