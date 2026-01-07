@@ -204,8 +204,11 @@ class BaseGeneralConfig(BaseModel):
     )
 
     vpu_list: Union[List[str], str] = Field(
-        description="List of vector processing units (VPUs) within the domain or 'all' to process all.",
-        examples=["09"],
+        description=(
+            "List of vector processing units (VPUs) to be processed within the domain. "
+            "Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs)."
+        ),
+        examples=["03S"],
         default=["03S"],
     )
 
@@ -280,15 +283,6 @@ class BaseGeneralConfig(BaseModel):
             "drainage_area": "areasqkm",
         },
         default_factory=FieldCrosswalk,
-        # default_factory=lambda: FieldCrosswalk(
-        #     **{
-        #         "divide": "divide_id",
-        #         "gage": "gage_id",
-        #         "huc12": "huc_12",
-        #         "vpu": "vpuid",
-        #         "drainage_area": "areasqkm",
-        #     }
-        # ),
     )
 
     layer_name: LayerCrosswalk = Field(
@@ -323,6 +317,53 @@ class BaseGeneralConfig(BaseModel):
         if self.layer_name:
             # self.layer_name = {k.lower(): v.lower() for k, v in self.layer_name.items()}
             self.layer_name = self.layer_name.lower_case()
+        return self
+
+    @model_validator(mode="after")
+    def check_vpu_list(self) -> "BaseGeneralConfig":
+        """Ensure that the VPU list is valid."""
+        valid_vpus = {
+            "conus": [
+                "01",
+                "02",
+                "03N",
+                "03S",
+                "03W",
+                "04",
+                "05",
+                "06",
+                "07",
+                "08",
+                "09",
+                "10L",
+                "10U",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "18",
+            ],
+            "ak": ["ak"],
+            "hi": ["hi"],
+            "prvi": ["prvi"],
+        }
+
+        if isinstance(self.vpu_list, str) and self.vpu_list.lower() == "all":
+            self.vpu_list = valid_vpus[self.domain]
+        elif isinstance(self.vpu_list, list):
+            for vpu in self.vpu_list:
+                if vpu not in valid_vpus[self.domain]:
+                    msg = f"Invalid VPU '{vpu}' for domain '{self.domain}'. Valid options are: {valid_vpus[self.domain]}"
+                    logger.error(msg)
+                    raise ValueError(msg)
+        else:
+            msg = f"'vpu_list' must be a list of VPUs or 'all'. Got: {self.vpu_list}"
+            logger.error(msg)
+            raise ValueError(msg)
+
         return self
 
 
