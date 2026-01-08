@@ -39,7 +39,7 @@ attr_datasets:
     base_attr_list: ['Precip_Minus_EVT', 'Elev', 'BFI']
 
 snow_cover:
-  consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins
+  consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins (must be False for hi and prvi domains)
   snow_cover_file: '{base_dir}/inputs/region/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
   column: 'snow_pc_hydroatlas'  # column name for snow cover percent in the snow cover data file
   threshold: 20 # threshold for snow cover percent to determine snowiness category
