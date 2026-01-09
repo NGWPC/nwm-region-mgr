@@ -154,6 +154,9 @@ Update the `configs/config_eval.yaml` file as follows:
  - Set **file_paths.output_dir** to point to the directory where evaluation outputs should be saved. Here we add the **run_name** from regionalization `test1` (e.g., '{base_dir}/outputs/eval/test1/{location_set_name}'), to ensure evaluation outputs are also organized by regionalization runs.
  - Update fields in metics and plotting sections as desired. Here we will compute and plot a set of default evaluation metrics: KGE (Kling-Gupta Efficiency), NSE (Nash-Sutcliffe Efficiency), NNSE (Normalized NSE), and Correlation (CORR). Note the **lead_times** fields are not applicable here since we are evaluating simulations.
 
+Note: if you would like explore other configuration options for evaluation, refer to the [nwm.verf documentation](
+https://confluence.nextgenwaterprediction.com/spaces/NGWPC/pages/54132769/Forecast+Verification+nwm-verf+Configuration)
+
 Run the evaluation step as in Step 3 above.
 ```bash
 time ./ngen_rte_run_eval.sh --eval
