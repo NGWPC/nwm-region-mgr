@@ -45,9 +45,9 @@ class GeneralConfig(BaseGeneralConfig):
     )
 
     algorithm_list: List[
-        Literal["gower", "urf", "kmeans", "kmedoids", "hdbscan", "birch"]
+        Literal["gower", "urf", "kmeans", "kmedoids", "hdbscan", "birch", "proximity"]
     ] = Field(
-        description="Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch').",
+        description="Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity').",
         examples=["gower", "kmeans"],
         default=["gower"],
     )
@@ -810,6 +810,10 @@ class Config(BaseConfig):
         defined = set(self.algorithms.model_dump(exclude_unset=True).keys())
 
         missing = required - defined
+        missing = {
+            m for m in missing if m != "proximity"
+        }  # "proximity" appproch does not need algorithm parameters
+
         if missing:
             raise ValueError(
                 f"The following algorithms are listed in 'general.algorithm_list' "
