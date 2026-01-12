@@ -14,7 +14,7 @@ These are general settings for the formulation regionalization application.
       <form-field label="Run name"
                   name="run_name"
                   type="text"
-                  placeholder="test2"
+                  placeholder="test1"
                   tooltip="Name of the run, used to create output folders and files"
                   data-yaml="general.run_name">
       </form-field>
@@ -32,7 +32,7 @@ These are general settings for the formulation regionalization application.
       <form-field label="VPUs to process"
                   name="vpu_list"
                   type="select"
-                  options="01, 02, 03, 04, 05, 06, 07, 08, 09, 10"
+                  options="01, 02, 03N, 03S, 03W, 04, 05, 06, 07, 08, 09, 10L, 10U, 11, 12, 13, 14, 15, 16, 17, 18"
                   data-default="01"
                   tooltip="List of VPUs to process"
                   data-yaml="general.vpu_list"
@@ -42,7 +42,7 @@ These are general settings for the formulation regionalization application.
       <form-field label="Base directory"
                   name="base_dir"
                   type="text"
-                  placeholder="/home/user.name/data/ngen_reg/"
+                  placeholder="/ngen-app/nwm-region-mgr/data"
                   tooltip="Path to the directory with data and outputs"
                   data-yaml="general.base_dir">
       </form-field>
@@ -50,23 +50,23 @@ These are general settings for the formulation regionalization application.
       <form-field label="NextGen hydrofabric file"
                   name="ngen_hydrofabric_file"
                   type="text"
-                  placeholder="{base_dir}/inputs/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg"
-                  tooltip="Path to a hydrofabric geopackage"
+                  placeholder="{base_dir}/inputs/region/hydrofabric/vpu_divides/vpu_{vpu_list}.gpkg"
+                  tooltip="Path to hydrofabric geopackage file"
                   data-yaml="general.ngen_hydrofabric_file">
       </form-field>
 
       <form-field label="Gage divide cross-walk table file"
                   name="gage_divide_cwt_file"
                   type="text"
-                  placeholder="{base_dir}/inputs/cwt_divide_gage/calib_gage_divide_{domain}.parquet"
-                  tooltip="Path to a cross-walk table for divides"
+                  placeholder="{base_dir}/inputs/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet"
+                  tooltip="Path to a cross-walk table for divides and calibration gages"
                   data-yaml="general.gage_divide_cwt_file">
       </form-field>
 
       <form-field label="Donor gage file"
                   name="donor_gage_file"
                   type="text"
-                  placeholder="{base_dir}/inputs/gages_nwm4_calib_all.csv"
+                  placeholder="{base_dir}/inputs/region/gages_nwm4_calib_all.csv"
                   tooltip="Path to a list of donor basins"
                   data-yaml="general.donor_gage_file">
       </form-field>
@@ -74,18 +74,27 @@ These are general settings for the formulation regionalization application.
       <form-field label="Calibration & validation statistics file"
                   name="calval_stats_file"
                   type="text"
-                  placeholder="{base_dir}/inputs/calval_stats/stat_calval_all_{domain}.parquet"
-                  tooltip="Path to folder where statistics from calibration and validation are stored"
+                  placeholder="{base_dir}/inputs/region/calval_stats/stat_calval_all_{domain}.parquet"
+                  tooltip="Path to file where statistics from calibration and validation are stored"
                   data-yaml="general.calval_stats_file">
       </form-field>
 
-      <form-field label="Calibration approach"
+      <form-field label="Regionalization approach for calibrated basins"
                   name="approach_calib_basins"
                   type="select"
                   options="regionalization, summary_score"
                   data-default="regionalization"
                   tooltip="Strategy for assigning formulations and parameters to calibrated basins"
                   data-yaml="general.approach_calib_basins"
+                  required>
+      </form-field>
+
+      <form-field label="Manual pairing file to override algorithm-based regionalization"
+                  name="manual_pairings_file"
+                  type="text"
+                  placeholder="{base_dir}/inputs/region/manual_pairings/manual_pairings_{domain}.csv"
+                  tooltip="Strategy for assigning formulations and parameters to calibrated basins"
+                  data-yaml="general.manual_pairings_file"
                   required>
       </form-field>
 
@@ -121,6 +130,22 @@ These are general settings for the formulation regionalization application.
                   placeholder="vpuid"
                   tooltip="Name of column for VPU ID in all files"
                   data-yaml="general.id_col.vpu">
+      </form-field>
+
+      <form-field label="Donor"
+                  name="donor"
+                  type="text"
+                  placeholder="donor"
+                  tooltip="Name of column for donor basin ID in all files"
+                  data-yaml="general.id_col.donor">
+      </form-field>
+
+      <form-field label="Drainage area"
+                  name="drainage_area"
+                  type="text"
+                  placeholder="areasqkm"
+                  tooltip="Name of column for drainage area in all files"
+                  data-yaml="general.id_col.drainage_area">
       </form-field>
 
       <h4>Layer Names</h4>

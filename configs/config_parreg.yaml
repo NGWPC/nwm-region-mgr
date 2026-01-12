@@ -39,7 +39,7 @@ attr_datasets:
     base_attr_list: ['Precip_Minus_EVT', 'Elev', 'BFI']
 
 snow_cover:
-  consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins
+  consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins (must be False for hi and prvi domains)
   snow_cover_file: '{base_dir}/inputs/region/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
   column: 'snow_pc_hydroatlas'  # column name for snow cover percent in the snow cover data file
   threshold: 20 # threshold for snow cover percent to determine snowiness category
@@ -83,84 +83,43 @@ output:
 
 ### algorithm parameters
 algorithms:
-  ## general parameters common to all algorithms 
-  algo_general:
-    # snow fraction threshold to determine snowiness category 
-    min_snow_frac: 0.2
-    # maximum spatial distance (km) (donors with distance larger than this value are discarded, unless no donor smaller than this threshold is available)
-    max_spa_dist: 1500
-    # maximum differences in some key attributes between donors and receivers as additional constraints
-    max_attr_diff:
-      elev_mean: 1200 
-      snow_frac: 0.3 
-      forest_frac: 0.5 
-      urban_frac: 0.5 
-      cropland_frac: 0.5 
-    # maximum number of donors to keep that satisfy the attribute distance requirement
-    n_donor_max: 3
-    # minimum fraction of total variance explained by PCA components
-    min_var_pca: 0.8
+  algo_general:          # general parameters common to all algorithms 
+    max_spa_dist: 1500   # maximum spatial distance (km) (donors with distance larger than this value are discarded, unless no donor smaller than this threshold is available)
+    n_donor_max: 3       # maximum number of donors to keep that satisfy the spatial distance requirement
+    min_var_pca: 0.8     # minimum fraction of total variance explained by PCA components
     
-  ## parameters specific to gower 
-  gower:
-    # minimum attr distance (if one or more donors with distance smaller than this threshold, stop searching)
-    min_attr_dist: 0.1
-    # maximum attr distance (donors with distance larger than this value are discarded, unless no donor smaller than this threshold is available)
-    max_attr_dist: 0.25
-    # starting distance (neighbourhood) for searching donors (km)
-    min_spa_dist: 200
-    # maximum number of donors to keep that satisfy the attribute distance requirement
-    n_donor_max: 3
-    # distance (in km) threshold where receiver adopts a donor directly (i.e., donor/receiver overlapping each other)
-    zero_spa_dist: 1
-  urf: #unsupervised random forest
-    # whether to perform PCA prior to applying urf (preliminary testing indicates limited difference in results)
-    pca: FALSE
-    # number of trees in the forest
-    n_trees: 500
-    # the maximum depth of each tree
-    max_depth: 3
-    # minimum attr distance (if one or more donors with distance smaller than this threshold, stop searching)
-    min_attr_dist: 0.1
-    # maximum attr distance (donors with distance larger than this value are discarded, unless no donor smaller than this threshold is available)
-    max_attr_dist: 0.25
-    # starting distance (neighbourhood) for searching donors (km)
-    min_spa_dist: 200
-    # maximum number of donors to keep that satisfy the attribute distance requirement
-    n_donor_max: 3
-    # distance (in km) threshold where receiver adopts a donor directly (i.e., donor/receiver overlapping each other)
-    zero_spa_dist: 1    
-  ## parameters specific to the K-means approach
-  kmeans:
-    # number of donor basins in a cluster when no further clustering is needed
-    n_donor_max: 3
-    # number of maximum iterations
-    n_iter_max: 100
-    # initialization method, choose from 'k-means++', 'random'
-    init: k-means++
-    # number of times the k-means algorithm is run with different centroid seeds.
-    n_init: 3
-  ## parameters specific to the K-mediods approach
-  kmedoids:
-    # number of donor basins in a cluster when no further clustering is needed
-    n_donor_max: 3
-    # maximum number of iterations
-    n_iter_max: 100
-    # initialization method, choose from 'random', 'heuristic', 'k-medoids++', 'build'
-    init: heuristic
-  hdbscan:
-    # number of donor basins in a cluster when no further clustering is needed
-    n_donor_max: 20
-    # minimum cluster size (to avoid being considered noise)
-    min_cluster_size: 3
-  birch:
-    # number of donor basins in a cluster when no further clustering is needed
-    n_donor_max: 3
-    # branching factor
-    branching_factor: 50
-    # min and max threshold parameters - the algorithm will iterate through threshold between these to identify a suitable threshold
-    min_thresh: 1.5
+  gower:                   # parameters specific to gower 
+    min_attr_dist: 0.1     # minimum attr distance (if one or more donors with distance smaller than this threshold, stop searching)
+    max_attr_dist: 0.25    # maximum attr distance (donors with distance larger than this value are discarded, unless no donor smaller than this threshold is available)
+    min_spa_dist: 200      # starting distance (neighbourhood) for searching donors (km)
+    zero_spa_dist: 1       # distance (in km) threshold where receiver adopts a donor directly (i.e., donor/receiver overlapping each other)
+
+  urf:                     # unsupervised random forest
+    pca: FALSE             # whether to perform PCA prior to applying urf (preliminary testing indicates limited difference in results)
+    n_trees: 500           # number of trees in the forest
+    max_depth: 3           # maximum depth of each tree
+    min_attr_dist: 0.1     # minimum attr distance (if one or more donors with distance smaller than this threshold, stop searching)
+    max_attr_dist: 0.25    # maximum attr distance (donors with distance larger than this value are discarded, unless no donor smaller than this threshold is available)
+    min_spa_dist: 200      # starting distance (neighbourhood) for searching donors (km)
+    zero_spa_dist: 1       # distance (in km) threshold where receiver adopts a donor directly (i.e., donor/receiver overlapping each other)
+  
+  kmeans:                # parameters specific to k-means approach
+    n_iter_max: 100      # number of maximum iterations
+    init: k-means++      # initialization method, choose from 'random', 'k-means++', 'forgy', 'random_partition'
+    n_init: 3            # number of times the k-means algorithm will be run with different centroid seeds
+
+  kmedoids:              # parameters specific to the K-mediods approach
+    n_iter_max: 100      # maximum number of iterations
+    init: heuristic      # initialization method, choose from 'random', 'heuristic'
+
+  hdbscan:                 # parameters specific to HDBSCAN
+    n_donor_max: 20         # number of donor basins in a cluster when no further clustering is needed
+    min_cluster_size: 3     # minimum cluster size (to avoid being considered noise)
+
+  birch:                  # parameters specific to BIRCH
+    branching_factor: 50  # branching factor
+    min_thresh: 1.5       # min and max threshold parameters - the algorithm will iterate through threshold between these to identify a suitable threshold
     max_thresh: 4.0
-    # maximum number of times to resample the data (since order of objects impacts the clustering results)   
-    max_resample: 20 
+    max_resample: 20      # maximum number of times to resample the data (since order of objects impacts the clustering results)   
+
     

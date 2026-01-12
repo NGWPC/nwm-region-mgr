@@ -45,9 +45,9 @@ class GeneralConfig(BaseGeneralConfig):
     )
 
     algorithm_list: List[
-        Literal["gower", "urf", "kmeans", "kmedoids", "hdbscan", "birch"]
+        Literal["gower", "urf", "kmeans", "kmedoids", "hdbscan", "birch", "proximity"]
     ] = Field(
-        description="Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch').",
+        description="Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity').",
         examples=["gower", "kmeans"],
         default=["gower"],
     )
@@ -706,6 +706,7 @@ class ParameterOutputConfig(BaseModel):
                 "histogram": True,
                 "columns_to_plot": ["distSpatial", "distAttr"],  # columns to plot
             },
+            "plot_path": "{base_dir}/outputs/{run_name}/pairs/plots",
         },
     )
 
@@ -717,6 +718,11 @@ class ParameterOutputConfig(BaseModel):
             "path": "{base_dir}/outputs/{run_name}/params",
             "stem": "formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}",
             "format": "csv",
+            "plots": {
+                "spatial_map": True,
+                "columns_to_plot": ["MP", "MFSNO", "uztwm", "uzfwm", "pxtemp", "plwhc"],
+            },
+            "plot_path": "{base_dir}/outputs/{run_name}/params/plots",
         },
     )
 
@@ -744,6 +750,7 @@ class ParameterOutputConfig(BaseModel):
                     "hlr_TAVE",
                 ],  # attributes to plot
             },
+            "plot_path": "{base_dir}/outputs/{run_name}/attr_data_final/plots",
         },
     )
 
@@ -753,7 +760,6 @@ class ParameterOutputConfig(BaseModel):
         examples={
             "save": True,
             "path": "{base_dir}/outputs/{run_name}/config_parreg_final.yaml",
-            "format": "yaml",
         },
     )
 
@@ -804,6 +810,10 @@ class Config(BaseConfig):
         defined = set(self.algorithms.model_dump(exclude_unset=True).keys())
 
         missing = required - defined
+        missing = {
+            m for m in missing if m != "proximity"
+        }  # "proximity" appproch does not need algorithm parameters
+
         if missing:
             raise ValueError(
                 f"The following algorithms are listed in 'general.algorithm_list' "

@@ -204,8 +204,11 @@ class BaseGeneralConfig(BaseModel):
     )
 
     vpu_list: Union[List[str], str] = Field(
-        description="List of vector processing units (VPUs) within the domain or 'all' to process all.",
-        examples=["09"],
+        description=(
+            "List of vector processing units (VPUs) to be processed within the domain. "
+            "Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs)."
+        ),
+        examples=["03S"],
         default=["03S"],
     )
 
@@ -280,15 +283,6 @@ class BaseGeneralConfig(BaseModel):
             "drainage_area": "areasqkm",
         },
         default_factory=FieldCrosswalk,
-        # default_factory=lambda: FieldCrosswalk(
-        #     **{
-        #         "divide": "divide_id",
-        #         "gage": "gage_id",
-        #         "huc12": "huc_12",
-        #         "vpu": "vpuid",
-        #         "drainage_area": "areasqkm",
-        #     }
-        # ),
     )
 
     layer_name: LayerCrosswalk = Field(
@@ -325,6 +319,53 @@ class BaseGeneralConfig(BaseModel):
             self.layer_name = self.layer_name.lower_case()
         return self
 
+    @model_validator(mode="after")
+    def check_vpu_list(self) -> "BaseGeneralConfig":
+        """Ensure that the VPU list is valid."""
+        valid_vpus = {
+            "conus": [
+                "01",
+                "02",
+                "03N",
+                "03S",
+                "03W",
+                "04",
+                "05",
+                "06",
+                "07",
+                "08",
+                "09",
+                "10L",
+                "10U",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "18",
+            ],
+            "ak": ["ak"],
+            "hi": ["hi"],
+            "prvi": ["prvi"],
+        }
+
+        if isinstance(self.vpu_list, str) and self.vpu_list.lower() == "all":
+            self.vpu_list = valid_vpus[self.domain]
+        elif isinstance(self.vpu_list, list):
+            for vpu in self.vpu_list:
+                if vpu not in valid_vpus[self.domain]:
+                    msg = f"Invalid VPU '{vpu}' for domain '{self.domain}'. Valid options are: {valid_vpus[self.domain]}"
+                    logger.error(msg)
+                    raise ValueError(msg)
+        else:
+            msg = f"'vpu_list' must be a list of VPUs or 'all'. Got: {self.vpu_list}"
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return self
+
 
 class BaseOutputConfig(BaseModel):
     """Base Output Manager."""
@@ -336,32 +377,28 @@ class BaseOutputConfig(BaseModel):
     )
     path: Path | str = Field(
         description="Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.",
-        examples="{base_dir}/outputs/{run_name}/formulations",
-        default="{base_dir}/outputs/{run_name}/formulations",
+        examples=None,
+        default=None,
     )
     stem: Optional[str | Dict[str, str]] = Field(
         description="File stem for output files, used to create unique file names based on the path.",
-        default="form_{domain}_vpu{vpu_list}",
-        examples="form_{domain}_vpu{vpu_list}",
+        default=None,
+        examples=None,
     )
     stem_suffix: Optional[str] = Field(
         description="Suffix for the file stem, used to create unique file names based on the path for specific needs.",
-        default="_pars",
-        examples="_pars",
+        default=None,
+        examples=None,
     )
     format: Optional[str] = Field(
         description="File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.",
-        default="parquet",
-        examples="parquet",
+        default=None,
+        examples=None,
     )
     plots: Optional[Dict[str, Any]] = Field(
         description="Configuration for output plots, if applicable.",
         default=None,
-        examples={
-            "histogram": True,
-            "spatial_map": True,
-            "columns_to_plot": ["param1", "param2"],
-        },
+        examples=None,
     )
     plot_path: Optional[str] = Field(
         description=(
@@ -369,7 +406,7 @@ class BaseOutputConfig(BaseModel):
             "in a subfolder 'plots' in the defined output path."
         ),
         default=None,
-        examples="{base_dir}/outputs/{run_name}/formulations/plots",
+        examples=None,
     )
 
     @model_validator(mode="after")

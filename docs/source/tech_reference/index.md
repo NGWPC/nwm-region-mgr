@@ -14,7 +14,7 @@ Output Tables<output_data>
 Output Plots<output_plot>
 :::
 
-### Output Structure
+### Output Directory Structure
 
 ```bash
 .
