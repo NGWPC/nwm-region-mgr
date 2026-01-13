@@ -1,36 +1,43 @@
 # User Guide
 
-## Run regionalization with Singularity on INT/EA/UAT Clusters
+## Run regionalization with NWM-RTE on INT/EA/UAT Clusters
 
 On the INT/EA/UAT clusters, all software dependencies for regionalization are installed and managed through 
-Singularity containers. Follow the steps below to run the regionalization workflow, which includes three steps:
+NWM-RTE (Run Time Environment). Follow the steps below to run the regionalization workflow, which includes three steps:
  - formulation & parameter regionalization (via nwm-region-mgr)
  - regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
  - evaluation of regionalized simulations (via nwm-verf and nwm-eval-mgr)
 
 ### Test the sample regionalization workflow
-#### Step 0: Load Singularity module and pull container
+
+First, make sure you cd to the root directory of nwm-rte, e.g.,
+
+```bash
+cd /ngen-app/nwm-rte
+```
+
 #### Step 1: Run regionalization
 ```bash
 # run parameter regionalization (this also runs formulation regionalization first, if not done already)
 time ./ngen_rte_run_region.sh --parreg
+
 # if only formulation regionalization is desired, use the following command instead
 time ./ngen_rte_run_region.sh --formreg
 ```
 
 #### Step 2: Run NGEN simulation
 ```bash
-time ./ngen_rte_run_mswm.sh --ngen
+time ./ngen_rte_run_region.sh --ngen
 ```
 
 #### Step 3: Run evaluation
 ```bash
-time ./ngen_rte_run_eval.sh --eval
+time ./ngen_rte_run_region.sh --eval
 ```
 
 #### Alternatively: Run all steps in one command
 ```bash
-time ./ngen_rte_run_all.sh --parreg --ngen --eval
+time ./ngen_rte_run_region.sh --parreg --ngen --eval
 ``` 
 
 ### Customize and run your own regionalization workflow
@@ -73,7 +80,7 @@ cp -r configs/ sample_configs/
    - For **streamcat**: use the file defined by the field **attr_datasets.streamcat.attr_select_file** (e.g., `inputs/region/attr_config/attr_selection_streamcat.csv`). Set the **select** column to 1 for desired attributes and to 0 for others. Here we select the following attributes: BFI, DamDens, Perm, RckDep, WtDep, PctCarbResid, PctEolCrs, PctWater, Precip, Tmax, Tmean, Tmin, RdDens, Runoff, Clay, Sand, Precip_Minus_EVT.
    - Alternatively, we can also specify selected attributes directly in the config file by editing the fields **attr_datasets.ngen.attr_list** and **attr_datasets.streamcat.attr_list**, respectively, for ngen and StreamCat. 
  - Set **donor.metric_eval_period.value** to 'valid' to use validation period statistics for donor selection
- - Set **snow_cover.threshold** to 10 to define catchment snowiness category based on 10% snow cover
+ - Set **snow_cover.threshold** to 10 to define catchment snowiness category based on 10% (mean annual) snowfall
  - Edit **output.params.plots.columns_to_plot** to include a couple of CFE parameters to visualize spatial patterns (e.g., 'b' and 'slope')
  - Edit **output.attr_data_final.plots.columns_to_plot** to include some selected attributes to visualize spatial patterns. Specifically, 
    - remove the HLR attributes, since HLR is not chosen for this experiment
@@ -124,7 +131,7 @@ First, update the `configs/config_ngen.yaml` file as follows:
 Run the NGEN simulation step as in Step 2 above.
 
 ```bash
-time ./ngen_rte_run_mswm.sh --ngen
+time ./ngen_rte_run_region.sh --ngen
 ```
 
 After completion, the simulation outputs will be saved in the folder
@@ -133,7 +140,7 @@ After completion, the simulation outputs will be saved in the folder
 Next, update the `configs/config_ngen.yaml` file again to set **algorithm** to 'kmeans' for the second run, while keeping other fields unchanged. Reun the NGEN simulation step again.
 
 ```bash
-time ./ngen_rte_run_mswm.sh --ngen
+time ./ngen_rte_run_region.sh --ngen
 ```
 
 After completion, the simulation outputs will be saved in the folder
@@ -159,7 +166,7 @@ https://confluence.nextgenwaterprediction.com/spaces/NGWPC/pages/54132769/Foreca
 
 Run the evaluation step as in Step 3 above.
 ```bash
-time ./ngen_rte_run_eval.sh --eval
+time ./ngen_rte_run_region.sh --eval
 ```
 After completion, evaluation results will be saved in the folder `data/outputs/eval/regionalization/test1/vpu_09/`, including
  - `joined/`: combined observed and simulated streamflow data for all locations in parquet format; each file corresponds to one dataset (i.e., algorithm)
