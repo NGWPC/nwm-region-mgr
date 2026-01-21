@@ -1,4 +1,4 @@
-sample_file_path|outputs/attr_data_final/attr_conus_vpu03S.parquet
+sample_file_path|outputs/region/attr_data_final/attr_conus_vpu03S.parquet
 title|Final attribute data used for regionalization, based on attribute selection in the configuration. Each attribute is prefixed by its corresponding dataset name.
 divide_id|Unique identifier for each catchment.
 is_donor|Indicates whether the catchment is a donor (true) or receiver (false).

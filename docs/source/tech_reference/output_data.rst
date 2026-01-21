@@ -8,7 +8,7 @@ attr_data_final
 
 Final attribute data used for regionalization, based on attribute selection in the configuration. Each attribute is prefixed by its corresponding dataset name.
 
-Sample file path: ``outputs/attr_data_final/attr_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/attr_data_final/attr_conus_vpu03S.parquet``
 
 **Example rows:**
 
@@ -226,7 +226,7 @@ formulations
 
 Formulations selected for each catchment from formulation regionalization.
 
-Sample file path: ``outputs/formulations/form_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/formulations/form_conus_vpu03S.parquet``
 
 **Example rows:**
 
@@ -292,7 +292,7 @@ formulations_pars
 
 Formulations selected for each catchment from formulation regionalization.
 
-Sample file path: ``outputs/formulations/form_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/formulations/form_conus_vpu03S.parquet``
 
 **Example rows:**
 
@@ -602,7 +602,7 @@ pairs_distance_algorithms
 
 Receiver-donor pairs generated from parameter regionalization using distance-based algorithms (currently Gower and URF). 
 
-Sample file path: ``outputs/pairs/pairs_gower_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/pairs/pairs_gower_conus_vpu03S.parquet``
 
 **Example rows:**
 
@@ -664,7 +664,7 @@ pairs_cluster_algorithms
 
 Receiver-donor pairs generated from parameter regionalization using clustering-based algorithms (currently KMeans, KMedoids, HDBSCAN, and BIRCH). Attribute distances are not calculated for these algorithms.
 
-Sample file path: ``outputs/pairs/pairs_kmeans_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/pairs/pairs_kmeans_conus_vpu03S.parquet``
 
 **Example rows:**
 
@@ -718,7 +718,7 @@ pairs_mswm
 
 Receiver-donor pairs generated from parameter regionalization to be used by MSWM.
 
-Sample file path: ``outputs/pairs/pairs_kmeans_conus_vpu03S_mswm.csv ``
+Sample file path: ``outputs/region/pairs/pairs_kmeans_conus_vpu03S_mswm.csv ``
 
 **Example rows:**
 
@@ -756,7 +756,7 @@ params
 
 Formulation and calibrated parameters for each donor basin.
 
-Sample file path: ``outputs/params/formulation_params_gower_conus_vpu03S.csv``
+Sample file path: ``outputs/region/params/formulation_params_gower_conus_vpu03S.csv``
 
 **Example rows:**
 
@@ -1066,7 +1066,7 @@ spatial_distance
 
 Spatial distances between donor and receiver catchments within the VPU. Columns represent donor catchments, and rows represent receiver catchments.
 
-Sample file path: ``outputs/spatial_distance/donor_receiver_dist_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/spatial_distance/donor_receiver_dist_conus_vpu03S.parquet``
 
 .. warning:: Schema table omitted for spatial_distance files due to large number of columns.
 
@@ -1079,7 +1079,7 @@ summary_score
 
 Summary scores for each calibrated formulation and basin.
 
-Sample file path: ``outputs/summary_score/score_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/summary_score/score_conus_vpu03S.parquet``
 
 **Example rows:**
 

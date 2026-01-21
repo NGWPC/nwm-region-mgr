@@ -1,4 +1,4 @@
-sample_file_path|outputs/params/formulation_params_gower_conus_vpu03S.csv
+sample_file_path|outputs/region/params/formulation_params_gower_conus_vpu03S.csv
 title|Formulation and calibrated parameters for each donor basin.
 formulation|Formulation assigned to the calibration basin. Modules within the formulation are separated by commas.
 MFSNO|NOM parameter: Melt factor for snow depletion curve

@@ -359,6 +359,7 @@ class FormulationOutputConfig(BaseModel):
                 "spatial_map": True,  # whether to create spatial map of selected formulations & scores
                 "histogram": True,  # whether to create histogram of scores
             },
+            "plot_path": "{base_dir}/outputs/{run_name}/formulations/plots",
         },
     )
 
@@ -381,6 +382,7 @@ class FormulationOutputConfig(BaseModel):
             "stem_suffix": "_all_gages",  # suffix for the summary score file containing all gages in the domain
             "format": "parquet",
             "plots": {"histogram": True, "spatial_map": True},
+            "plot_path": "{base_dir}/outputs/{run_name}/summary_score/plots",
         },
     )
 

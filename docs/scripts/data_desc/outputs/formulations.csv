@@ -1,3 +1,4 @@
+sample_file_path|outputs/region/formulations/form_conus_vpu03S.parquet
 title|Formulations selected for each catchment from formulation regionalization.
 vpu|Hydrologic VPU the catchment belongs to.
 divide_id|Unique identifier for each catchment.
@@ -8,4 +9,3 @@ summary_score|Highest summary score for the assigned formulation calibrated basi
 cost|Computational cost associated with the assigned formulation in the HUC region.
 num_gages|Number of calibrated basins using the assigned formulation in the HUC region.
 upscale_huc|HUC level used for upscaling in order to find sufficient number of calibrated basins in the HUC region. If same as the HUC level defined in the configuration, then no upscaling was performed.
-sample_file_path|outputs/formulations/form_conus_vpu03S.parquet

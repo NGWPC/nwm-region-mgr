@@ -204,8 +204,11 @@ class BaseGeneralConfig(BaseModel):
     )
 
     vpu_list: Union[List[str], str] = Field(
-        description="List of vector processing units (VPUs) within the domain or 'all' to process all.",
-        examples=["09"],
+        description=(
+            "List of vector processing units (VPUs) to be processed within the domain. "
+            "Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs)."
+        ),
+        examples=["03S"],
         default=["03S"],
     )
 
@@ -280,15 +283,6 @@ class BaseGeneralConfig(BaseModel):
             "drainage_area": "areasqkm",
         },
         default_factory=FieldCrosswalk,
-        # default_factory=lambda: FieldCrosswalk(
-        #     **{
-        #         "divide": "divide_id",
-        #         "gage": "gage_id",
-        #         "huc12": "huc_12",
-        #         "vpu": "vpuid",
-        #         "drainage_area": "areasqkm",
-        #     }
-        # ),
     )
 
     layer_name: LayerCrosswalk = Field(
@@ -325,6 +319,53 @@ class BaseGeneralConfig(BaseModel):
             self.layer_name = self.layer_name.lower_case()
         return self
 
+    @model_validator(mode="after")
+    def check_vpu_list(self) -> "BaseGeneralConfig":
+        """Ensure that the VPU list is valid."""
+        valid_vpus = {
+            "conus": [
+                "01",
+                "02",
+                "03N",
+                "03S",
+                "03W",
+                "04",
+                "05",
+                "06",
+                "07",
+                "08",
+                "09",
+                "10L",
+                "10U",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "18",
+            ],
+            "ak": ["ak"],
+            "hi": ["hi"],
+            "prvi": ["prvi"],
+        }
+
+        if isinstance(self.vpu_list, str) and self.vpu_list.lower() == "all":
+            self.vpu_list = valid_vpus[self.domain]
+        elif isinstance(self.vpu_list, list):
+            for vpu in self.vpu_list:
+                if vpu not in valid_vpus[self.domain]:
+                    msg = f"Invalid VPU '{vpu}' for domain '{self.domain}'. Valid options are: {valid_vpus[self.domain]}"
+                    logger.error(msg)
+                    raise ValueError(msg)
+        else:
+            msg = f"'vpu_list' must be a list of VPUs or 'all'. Got: {self.vpu_list}"
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return self
+
 
 class BaseOutputConfig(BaseModel):
     """Base Output Manager."""
@@ -336,32 +377,28 @@ class BaseOutputConfig(BaseModel):
     )
     path: Path | str = Field(
         description="Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.",
-        examples="{base_dir}/outputs/{run_name}/formulations",
-        default="{base_dir}/outputs/{run_name}/formulations",
+        examples=None,
+        default=None,
     )
     stem: Optional[str | Dict[str, str]] = Field(
         description="File stem for output files, used to create unique file names based on the path.",
-        default="form_{domain}_vpu{vpu_list}",
-        examples="form_{domain}_vpu{vpu_list}",
+        default=None,
+        examples=None,
     )
     stem_suffix: Optional[str] = Field(
         description="Suffix for the file stem, used to create unique file names based on the path for specific needs.",
-        default="_pars",
-        examples="_pars",
+        default=None,
+        examples=None,
     )
     format: Optional[str] = Field(
         description="File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.",
-        default="parquet",
-        examples="parquet",
+        default=None,
+        examples=None,
     )
     plots: Optional[Dict[str, Any]] = Field(
         description="Configuration for output plots, if applicable.",
         default=None,
-        examples={
-            "histogram": True,
-            "spatial_map": True,
-            "columns_to_plot": ["param1", "param2"],
-        },
+        examples=None,
     )
     plot_path: Optional[str] = Field(
         description=(
@@ -369,7 +406,7 @@ class BaseOutputConfig(BaseModel):
             "in a subfolder 'plots' in the defined output path."
         ),
         default=None,
-        examples="{base_dir}/outputs/{run_name}/formulations/plots",
+        examples=None,
     )
 
     @model_validator(mode="after")
@@ -631,6 +668,7 @@ class BaseConfigProcessor:
         self.config_schema = config_schema
         self.config = self.load_and_process_config
         self.sample_size = sample_size
+        self._expand_user_file_paths(self.config)
 
         self.set_logging()
         self.validate_files()
@@ -724,6 +762,31 @@ class BaseConfigProcessor:
         config = recursive_substitute(config, context)
 
         return config
+
+    def _expand_user_file_paths(self, obj: BaseModel) -> None:
+        """Recursively expand user home directory in file paths within a Pydantic model."""
+        for name, field in type(obj).model_fields.items():
+            val = getattr(obj, name)
+
+            # Always recurse
+            if isinstance(val, BaseModel):
+                self._expand_user_file_paths(val)
+                continue
+
+            if isinstance(val, dict):
+                for v in val.values():
+                    if isinstance(v, BaseModel):
+                        self._expand_user_file_paths(v)
+                continue
+
+            # Apply expansion only when explicitly needed
+            if (
+                ("file" in name or "path" in name or "dir" in name)
+                and isinstance(val, (str, Path))
+                and "~" in str(val)
+            ):
+                expanded = Path(val).expanduser()
+                setattr(obj, name, expanded)
 
     def _required_columns_calval_stats(self, config) -> set[str]:
         """Return a set of required columns for calibration/validation statistics."""
@@ -821,7 +884,9 @@ class BaseConfigProcessor:
                     paths[path1] = Path(val)
                 elif isinstance(val, dict):
                     paths[path1] = {
-                        k: Path(v) for k, v in val.items() if isinstance(v, (str, Path))
+                        k: Path(v).expanduser()
+                        for k, v in val.items()
+                        if isinstance(v, (str, Path))
                     }
                 else:
                     logger.warning(f"Unsupported type for {path1}: {type(val)}")
@@ -979,7 +1044,11 @@ class BaseConfigProcessor:
 
     def set_vpu_gdf(self) -> gpd.GeoDataFrame:
         """Set the GeoDataFrame for the current vpu."""
-        gdf = gpd.read_file(Path(self.config.general.ngen_hydrofabric_file[self.vpu]))
+        layer_name = getattr(self.config.general.layer_name, "ngen", "divides")
+        gdf = gpd.read_file(
+            Path(self.config.general.ngen_hydrofabric_file[self.vpu]),
+            layer=layer_name,
+        )
         gdf = gdf[[self.divide_id_name.lower(), "geometry"]]
 
         self.vpu_gdf = gdf.copy()
@@ -1052,3 +1121,64 @@ class BaseConfigProcessor:
     def donor_gages(self):
         """Get the donor gage DataFrame."""
         return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
+
+    def expand_config_for_vpu(self, vpu: str):
+        """Expand the config to include VPUs (e.g., needed for all donors).
+
+        Some donors may come from nearby VPUs, so we need to make sure that the
+        configuration includes all donor VPUs.
+
+        For example, if the current VPU '03S' uses donor gages from '03W','03N', and '06', then
+        this function will expand the config to include those VPUs as well for the ngen_hydrofabric_file
+        and output files.
+
+        --- Before expansion---
+        ngen_hydrofabric_file:
+            '03S': '/path/to/ngen_hydro_03S.gpkg'
+
+        --- After expansion---
+        ngen_hydrofabric_file:
+            '03S': '/path/to/ngen_hydro_03S.gpkg'
+            '03W': '/path/to/ngen_hydro_03W.gpkg'
+            '03N': '/path/to/ngen_hydro_03N.gpkg'
+            '06':  '/path/to/ngen_hydro_06.gpkg'
+
+        """
+
+        def add_entry_if_missing(d: dict, vpu_key: str) -> dict:
+            if vpu_key not in d:
+                first_key = next(iter(d))
+                d[vpu_key] = d[first_key].replace(first_key, vpu_key)
+
+        add_entry_if_missing(self.config.general.ngen_hydrofabric_file, vpu)
+
+        co = getattr(self.config.output, "summary_score", None)
+        if co is not None:
+            add_entry_if_missing(co.stem, vpu)
+        co = getattr(self.config.output, "formulation", None)
+        if co is not None:
+            add_entry_if_missing(co.stem, vpu)
+
+        # save the expanded configuration
+        if hasattr(self.config.output, "config_final"):
+            getattr(self.config.output, "config_final").save_to_file(
+                self.config, data_str="Expanded final configuration"
+            )
+
+    def get_output_file_path(
+        self,
+        output_section: str,
+        vpu: str = None,
+        algorithm: str = None,
+        use_stem_suffix: bool = False,
+    ):
+        """Get the output file name from the output configuration."""
+        output_config = getattr(self.config.output, output_section, None)
+        if output_config is None:
+            msg = f"Output section '{output_section}' not found in configuration for {self.__class__.__name__}."
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return output_config.get_file_path(
+            vpu, algorithm=algorithm, use_stem_suffix=use_stem_suffix
+        )

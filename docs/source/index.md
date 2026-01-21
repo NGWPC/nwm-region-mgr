@@ -154,7 +154,7 @@ Efficiently allocates computational resources to handle workflows from small wat
 
 User Guide<user_guide.rst>
 FAQ<faq.rst>
-Config Builder<config_builder/index.rst>
+Configuration<config_builder/index.rst>
 Technical Reference <tech_reference/index.md>
 API </API/index.rst>
 :::

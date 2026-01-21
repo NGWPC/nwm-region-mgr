@@ -1,10 +1,12 @@
-# Configuration File Builder
+# Regionalization Configuration
 
 ### Introduction
 
-Welcome to the Configuration File Builder! The tabs on the left (currently under development) will take you to the builder for each of the specific config files. Once in the builder, you will be prompted to enter setup information for your regionalization run, or you can scroll to the bottom to fill in default values. Once done, hit 'download' to save the generated configuration YAML file to your local system.
+This section provides detailed documentation for the configuration files used in the NWM Regionalization Manager (nwm-region-mgr) tool. The configuration files define the parameters and settings for both formulation and parameter regionalization processes.
 
 Example files and schemas for all configuration fields and subfields are included below. You can navigate to each config file or schema section using the tabs on the right or the table of contents below.
+
+The tabs on the left will take you to the builder for each of the specific config files. Currently, only the general configuration builder is available. The builders for formulation and parameter regionalizations are still under development. In the builder, you will be prompted to enter setup information for your regionalization run, or you can scroll to the bottom to fill in default values. Once done, hit 'download' to save the generated configuration YAML file to your local system.
 ### Schema Reference and Sample YAML Config Files
 
   - [General configurations (shared by formulation & parameter regionalizations)](#general-configurations-shared-by-formulation-parameter-regionalizations)
@@ -167,14 +169,6 @@ output: #-----------------------------------------------------------------------
   config_final: #----------------------------------------------------------------------------------------Output configuration for the final configuration file after processing, with placeholders resolved.
     save: True #-----------------------------------------------------------------------------------------Whether to save output files
     path: '{base_dir}/outputs/{run_name}/config_formreg_final.yaml' #------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
-    stem: 'form_{domain}_vpu{vpu_list}' #----------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-    stem_suffix: '_pars' #-------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
-    format: 'parquet' #----------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
-    plots: #---------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
-      histogram: True
-      spatial_map: True
-      columns_to_plot: ['param1', 'param2']
-    plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #--------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
   summary_score: #---------------------------------------------------------------------------------------Output configurations for the summary score.
     save: True #-----------------------------------------------------------------------------------------Whether to save output files
     path: '{base_dir}/outputs/{run_name}/summary_score' #------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
@@ -184,7 +178,7 @@ output: #-----------------------------------------------------------------------
     plots: #---------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
       histogram: True
       spatial_map: True
-    plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #--------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
+    plot_path: '{base_dir}/outputs/{run_name}/summary_score/plots' #-------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
 ```
 
 #### formreg Schema (general)
@@ -250,21 +244,21 @@ output: #-----------------------------------------------------------------------
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| formulation | BaseOutputConfig | Output configurations for the selected formulations. | save=True path='{base_dir}/outputs/{run_name}/formulations' stem='form_{domain}_vpu{vpu_list}' stem_suffix='_pars' format='parquet' plots=None plot_path='{base_dir}/outputs/{run_name}/formulations/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/formulations', 'stem': 'form_{domain}_vpu{vpu_list}', 'stem_suffix': '_pars', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True}} |
+| formulation | BaseOutputConfig | Output configurations for the selected formulations. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/formulations', 'stem': 'form_{domain}_vpu{vpu_list}', 'stem_suffix': '_pars', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True}, 'plot_path': '{base_dir}/outputs/{run_name}/formulations/plots'} |
 | config_final | BaseOutputConfig | Output configuration for the final configuration file after processing, with placeholders resolved. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_formreg_final.yaml'} |
-| summary_score | BaseOutputConfig | Output configurations for the summary score. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/summary_score', 'stem': 'score_{domain}_vpu{vpu_list}', 'stem_suffix': '_all_gages', 'format': 'parquet', 'plots': {'histogram': True, 'spatial_map': True}} |
+| summary_score | BaseOutputConfig | Output configurations for the summary score. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/summary_score', 'stem': 'score_{domain}_vpu{vpu_list}', 'stem_suffix': '_all_gages', 'format': 'parquet', 'plots': {'histogram': True, 'spatial_map': True}, 'plot_path': '{base_dir}/outputs/{run_name}/summary_score/plots'} |
 
 #### formreg Schema (BaseOutputConfig)
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
 | save | bool | Whether to save output files | True | True |
-| path | Path \| str | Path to save output file or files. If a directory, the 'stem' and 'format' must be specified. | {base_dir}/outputs/{run_name}/formulations | {base_dir}/outputs/{run_name}/formulations |
-| stem | str \| Dict[str, str] \| NoneType | File stem for output files, used to create unique file names based on the path. | form_{domain}_vpu{vpu_list} | form_{domain}_vpu{vpu_list} |
-| stem_suffix | str \| NoneType | Suffix for the file stem, used to create unique file names based on the path for specific needs. | _pars | _pars |
-| format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | parquet | parquet |
-| plots | Dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | {'histogram': True, 'spatial_map': True, 'columns_to_plot': ['param1', 'param2']} |
-| plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | {base_dir}/outputs/{run_name}/formulations/plots |
+| path | Path \| str | Path to save output file or files. If a directory, the 'stem' and 'format' must be specified. | None | None |
+| stem | str \| Dict[str, str] \| NoneType | File stem for output files, used to create unique file names based on the path. | None | None |
+| stem_suffix | str \| NoneType | Suffix for the file stem, used to create unique file names based on the path for specific needs. | None | None |
+| format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | None | None |
+| plots | Dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | None |
+| plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | None |
 ### Specific configurations for parameter regionalization (parreg)
 
 #### Example File
@@ -318,51 +312,33 @@ general:
         spatial_map: True
         histogram: True
         columns_to_plot: ['distSpatial', 'distAttr']
-      plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #----------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
+      plot_path: '{base_dir}/outputs/{run_name}/pairs/plots' #-----------------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
     params: #------------------------------------------------------------------------------------------------------------------------Configuration for saving regionalized parameters.
       save: True #-------------------------------------------------------------------------------------------------------------------Whether to save output files
       path: '{base_dir}/outputs/{run_name}/params' #---------------------------------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
       stem: 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}' #-----------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-      stem_suffix: '_pars' #---------------------------------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
       format: 'csv' #----------------------------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
       plots: #-----------------------------------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
-        histogram: True
         spatial_map: True
-        columns_to_plot: ['param1', 'param2']
-      plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #----------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
+        columns_to_plot: ['MP', 'MFSNO', 'uztwm', 'uzfwm', 'pxtemp', 'plwhc']
+      plot_path: '{base_dir}/outputs/{run_name}/params/plots' #----------------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
     attr_data_final: #---------------------------------------------------------------------------------------------------------------("Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",)
       save: True #-------------------------------------------------------------------------------------------------------------------Whether to save output files
       path: '{base_dir}/outputs/{run_name}/attr_data_final' #------------------------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
       stem: 'attr_{domain}_vpu{vpu_list}' #------------------------------------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-      stem_suffix: '_pars' #---------------------------------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
       format: 'parquet' #------------------------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
       plots: #-----------------------------------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
         spatial_map: True
         histogram: True
         columns_to_plot: ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT', 'hlr_PMPE', 'hlr_SAND', 'hlr_TAVE']
-      plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #----------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
+      plot_path: '{base_dir}/outputs/{run_name}/attr_data_final/plots' #-------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
     config_final: #------------------------------------------------------------------------------------------------------------------Configuration for saving final configuration file used in regionalization.
       save: True #-------------------------------------------------------------------------------------------------------------------Whether to save output files
       path: '{base_dir}/outputs/{run_name}/config_parreg_final.yaml' #---------------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
-      stem: 'form_{domain}_vpu{vpu_list}' #------------------------------------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-      stem_suffix: '_pars' #---------------------------------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
-      format: 'yaml' #---------------------------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
-      plots: #-----------------------------------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
-        histogram: True
-        spatial_map: True
-        columns_to_plot: ['param1', 'param2']
-      plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #----------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
     spatial_distance: #--------------------------------------------------------------------------------------------------------------Configuration for saving spatial distance data.
       save: True #-------------------------------------------------------------------------------------------------------------------Whether to save output files
       path: '{base_dir}/outputs/{run_name}/spatial_distance' #-----------------------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
-      stem: 'form_{domain}_vpu{vpu_list}' #------------------------------------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-      stem_suffix: '_pars' #---------------------------------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
       format: 'parquet' #------------------------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
-      plots: #-----------------------------------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
-        histogram: True
-        spatial_map: True
-        columns_to_plot: ['param1', 'param2']
-      plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #----------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
   algorithms: #----------------------------------------------------------------------------------------------------------------------Algorithm configuration class.  See specific algorithms for additional arguments.
     algo_general: #------------------------------------------------------------------------------------------------------------------General configurations shared by all regionalization algorithms.
       max_spa_dist: 1500.0 #---------------------------------------------------------------------------------------------------------Maximum spatial distance (km) to consider a donor suitable
@@ -551,23 +527,23 @@ general:
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| pairs | BaseOutputConfig | Configuration for saving donor-receiver pairs. | save=True path='{base_dir}/outputs/{run_name}/formulations' stem='form_{domain}_vpu{vpu_list}' stem_suffix='_pars' format='parquet' plots=None plot_path='{base_dir}/outputs/{run_name}/formulations/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/pairs', 'stem': 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}', 'stem_suffix': '_mswm', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['distSpatial', 'distAttr']}} |
-| params | BaseOutputConfig | Configuration for saving regionalized parameters. | save=True path='{base_dir}/outputs/{run_name}/formulations' stem='form_{domain}_vpu{vpu_list}' stem_suffix='_pars' format='parquet' plots=None plot_path='{base_dir}/outputs/{run_name}/formulations/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/params', 'stem': 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}', 'format': 'csv'} |
-| attr_data_final | BaseOutputConfig | ("Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",) | save=True path='{base_dir}/outputs/{run_name}/formulations' stem='form_{domain}_vpu{vpu_list}' stem_suffix='_pars' format='parquet' plots=None plot_path='{base_dir}/outputs/{run_name}/formulations/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/attr_data_final', 'stem': 'attr_{domain}_vpu{vpu_list}', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT', 'hlr_PMPE', 'hlr_SAND', 'hlr_TAVE']}} |
-| config_final | BaseOutputConfig | Configuration for saving final configuration file used in regionalization. | save=True path='{base_dir}/outputs/{run_name}/formulations' stem='form_{domain}_vpu{vpu_list}' stem_suffix='_pars' format='parquet' plots=None plot_path='{base_dir}/outputs/{run_name}/formulations/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_parreg_final.yaml', 'format': 'yaml'} |
-| spatial_distance | BaseOutputConfig | Configuration for saving spatial distance data. | save=True path='{base_dir}/outputs/{run_name}/formulations' stem='form_{domain}_vpu{vpu_list}' stem_suffix='_pars' format='parquet' plots=None plot_path='{base_dir}/outputs/{run_name}/formulations/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/spatial_distance', 'format': 'parquet'} |
+| pairs | BaseOutputConfig | Configuration for saving donor-receiver pairs. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/pairs', 'stem': 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}', 'stem_suffix': '_mswm', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['distSpatial', 'distAttr']}, 'plot_path': '{base_dir}/outputs/{run_name}/pairs/plots'} |
+| params | BaseOutputConfig | Configuration for saving regionalized parameters. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/params', 'stem': 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}', 'format': 'csv', 'plots': {'spatial_map': True, 'columns_to_plot': ['MP', 'MFSNO', 'uztwm', 'uzfwm', 'pxtemp', 'plwhc']}, 'plot_path': '{base_dir}/outputs/{run_name}/params/plots'} |
+| attr_data_final | BaseOutputConfig | ("Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",) | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/attr_data_final', 'stem': 'attr_{domain}_vpu{vpu_list}', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT', 'hlr_PMPE', 'hlr_SAND', 'hlr_TAVE']}, 'plot_path': '{base_dir}/outputs/{run_name}/attr_data_final/plots'} |
+| config_final | BaseOutputConfig | Configuration for saving final configuration file used in regionalization. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_parreg_final.yaml'} |
+| spatial_distance | BaseOutputConfig | Configuration for saving spatial distance data. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/spatial_distance', 'format': 'parquet'} |
 
 #### parreg Schema (BaseOutputConfig)
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
 | save | bool | Whether to save output files | True | True |
-| path | Path \| str | Path to save output file or files. If a directory, the 'stem' and 'format' must be specified. | {base_dir}/outputs/{run_name}/formulations | {base_dir}/outputs/{run_name}/formulations |
-| stem | str \| Dict[str, str] \| NoneType | File stem for output files, used to create unique file names based on the path. | form_{domain}_vpu{vpu_list} | form_{domain}_vpu{vpu_list} |
-| stem_suffix | str \| NoneType | Suffix for the file stem, used to create unique file names based on the path for specific needs. | _pars | _pars |
-| format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | parquet | parquet |
-| plots | Dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | {'histogram': True, 'spatial_map': True, 'columns_to_plot': ['param1', 'param2']} |
-| plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | {base_dir}/outputs/{run_name}/formulations/plots |
+| path | Path \| str | Path to save output file or files. If a directory, the 'stem' and 'format' must be specified. | None | None |
+| stem | str \| Dict[str, str] \| NoneType | File stem for output files, used to create unique file names based on the path. | None | None |
+| stem_suffix | str \| NoneType | Suffix for the file stem, used to create unique file names based on the path for specific needs. | None | None |
+| format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | None | None |
+| plots | Dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | None |
+| plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | None |
 
 :::{toctree}
 :maxdepth: 2

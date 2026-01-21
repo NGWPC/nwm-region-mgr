@@ -547,8 +547,10 @@ def select_formulation_donors_only(
     cwt_divide_gage = read_table(config.general.gage_divide_cwt_file, dtype=col_dtype)
 
     # merge the crosswalk with the best formulations DataFrame
+    if divide_id_col in df_best_per_gage.columns:
+        df_best_per_gage = df_best_per_gage.drop(columns=[divide_id_col])
     df_selected = df_best_per_gage.merge(
-        cwt_divide_gage[[gage_id_col]].drop_duplicates(),
+        cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
         on=gage_id_col,
         how="left",
     )
@@ -587,6 +589,7 @@ def select_formulation_all(
     gage_id_col = getattr(id_cols, "gage", "gage_id")
     divide_id_col = getattr(id_cols, "divide", "divide_id")
     huc12_id_col = getattr(id_cols, "huc12", "huc_12")
+    huc12_layer = getattr(config.general.layer_name, "huc12", "WBDSnapshot_National")
 
     # score computing method, type, and tolerance
     score_method = config.spatial_unit.best_formulation.method.lower()
@@ -653,13 +656,23 @@ def select_formulation_all(
     # Open with Fiona to read features in huc_ids
     features = []
     huc_digit = len(huc_ids[0])  # assuming all huc_ids have the same length
-    with fiona.open(huc12_hydro_file, "r", open_options=["METHOD=ONLY_CCW"]) as src:
+    with fiona.open(
+        huc12_hydro_file, "r", layer=huc12_layer, open_options=["METHOD=ONLY_CCW"]
+    ) as src:
         for feat in src:
             huc_key = next(
                 (k for k in feat["properties"] if k.lower() == huc12_id_col), None
             )
             if huc_key and feat["properties"][huc_key][:huc_digit] in huc_ids:
                 features.append(feat)
+
+        if not features:
+            msg = (
+                f"No matching HUC12 geometries found in {huc12_hydro_file} "
+                f"for the specified HUC IDs at {huc_level} level."
+            )
+            logger.error(msg)
+            raise ValueError(msg)
 
         # Convert to GeoDataFrame
         huc12_gdf = gpd.GeoDataFrame.from_features(features, crs=src.crs)
@@ -915,7 +928,7 @@ def plot_formulation_results(
             df_selected = df_selected.merge(
                 gdf_vpu[[divide_id_col, "geometry"]].drop_duplicates(),
                 on=divide_id_col,
-                how="left",
+                how="right",
             )
 
             # convert df_selected to a real GeoDataFrame for plotting

@@ -327,7 +327,7 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             )
             # read the geometry file
             geo_file = Path(config.general.ngen_hydrofabric_file[vpu])
-            gdf = gpd.read_file(geo_file)
+            gdf = gpd.read_file(geo_file, layer=config.general.layer_name.ngen)
 
             # merge geometry with summary score DataFrame
             df_score_wide = df_score_wide.merge(
