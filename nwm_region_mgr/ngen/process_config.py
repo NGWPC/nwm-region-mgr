@@ -13,9 +13,9 @@ Functions:
 
 """
 
-import datetime
 import logging
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 from mswm.build_inputs import RealizationBuilder
@@ -49,9 +49,9 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             f"GeoPackage file:  {self.config.general.ngen_hydrofabric_file.get(f'{vpu}', None)}"
         )
         logger.info(f"MSWM template file:  {self.config.general.config_template}")
-        logger.info(f"NGEN input dir:      {self.ngen_data_dir(vpu, algo) / 'Input'}")
-        logger.info(f"NGEN output dir:     {self.ngen_data_dir(vpu, algo) / 'Output'}")
-        logger.info(f"Number of procs:     {self.config.general.nprocs}")
+        logger.info(f"NGEN input dir:      {self.ngen_data_dir(vpu, algo)}/Input")
+        logger.info(f"NGEN output dir:     {self.ngen_data_dir(vpu, algo)}/Output")
+        logger.info(f"Number of procs:     {self.config.general.n_procs}")
         logger.info("================================================")
 
     def create_mswm_config(self, vpu: str, algo: str) -> Path:
@@ -190,9 +190,8 @@ class NgenSimulationProcessor(BaseConfigProcessor):
     @property
     def ngen_work_dir(self) -> Path:
         """Get NGEN work directory (work_dir field in MSWM config file)."""
-        return Path(self.config.output.ngen.path())
+        return Path(self.config.output.ngen.path)
 
-    @property
     def ngen_data_dir(self, vpu: str, algo: str) -> Path:
         """Get directory for NGEN inputs and outputs for a given VPU and algorithm."""
         return (

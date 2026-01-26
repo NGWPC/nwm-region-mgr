@@ -7,10 +7,10 @@ Classes:
 
 """
 
-import datetime
 import logging
+from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -49,6 +49,14 @@ class NgenGeneralSettings(BaseGeneralConfig):
         description="End time for the NGEN simulation in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).",
         examples="2022-10-01T10:00:00",
         default="2022-10-02T00:00:00",
+    )
+
+    algorithm_list: List[
+        Literal["gower", "urf", "kmeans", "kmedoids", "hdbscan", "birch", "proximity"]
+    ] = Field(
+        description="Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity').",
+        examples=["gower", "kmeans"],
+        default=["gower"],
     )
 
     par_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
