@@ -99,7 +99,10 @@ class NgenSimulationProcessor(BaseConfigProcessor):
         """Verify that necessary input files for NGEN run exist."""
         input_dir = self.ngen_data_dir(vpu, algo) / "Input"
         ngen_exe = input_dir / "ngen"
-        real_file = self.ngen_data_dir / f"vpu_{vpu}_realization_config_bmi_region.json"
+        real_file = (
+            self.ngen_data_dir(vpu, algo)
+            / f"vpu_{vpu}_realization_config_bmi_region.json"
+        )
         real_file = real_file.resolve()
         partition_file = input_dir / f"vpu_{vpu}_partition_config.json"
         hydrofab_file = input_dir / self.config.general.ngen_hydrofabric_file.get(
