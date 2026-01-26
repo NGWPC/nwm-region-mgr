@@ -430,15 +430,15 @@ class BaseOutputConfig(BaseModel):
 
         return values
 
-    @model_validator(mode="after")
-    def check_format_if_dir(cls, values):
-        """Check if path is a directory. If so require a 'format'."""
-        if not Path(values.path).suffix and not values.format:
-            msg = f"If 'path' is a directory, 'format' must be specified: {values.path}"
-            logger.error(msg)
-            raise ValueError(msg)
+    # @model_validator(mode="after")
+    # def check_format_if_dir(cls, values):
+    #     """Check if path is a directory. If so require a 'format'."""
+    #     if not Path(values.path).suffix and not values.format:
+    #         msg = f"If 'path' is a directory, 'format' must be specified: {values.path}"
+    #         logger.error(msg)
+    #         raise ValueError(msg)
 
-        return values
+    #     return values
 
     @model_validator(mode="after")
     def check_plot_config(cls, values):
@@ -917,9 +917,8 @@ class BaseConfigProcessor:
         # create a dictionary to hold the paths
         paths = {}
         for path1 in path_fields:
-            # check in snow_cover config if not found in general config
             val = getattr(config.general, path1, None) or getattr(
-                config.snow_cover, path1, None
+                getattr(config, "snow_cover", None), path1, None
             )
             if val is not None:
                 if isinstance(val, (str, Path)):
