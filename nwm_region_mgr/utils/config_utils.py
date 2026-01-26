@@ -23,6 +23,7 @@ Classes/Functions:
 """
 
 import logging
+import os
 import re
 from contextlib import contextmanager
 from functools import lru_cache, reduce
@@ -93,35 +94,35 @@ class LoggingConfig(BaseModel):
         return self
 
 
-class NGENConfig(BaseModel):
-    """NextGen configuration."""
+# class NGENConfig(BaseModel):
+#     """NextGen configuration."""
 
-    vpu: str
-    """VPU identifier."""
-    run_name: str
-    """Name of the run, used to create output folders and files."""
-    algorithm: str
-    """Name of the algorithm to use for regionalization."""
-    start_time: str
-    """Start time for the simulation."""
-    end_time: str
-    """End time for the simulation."""
-    base_dir: str
-    """Path to base directory for input/output files."""
-    par_file: str
-    """Path to the parameter file."""
-    pair_file: str
-    """Path to the pair file."""
-    gpkg_file: str
-    """Path to the geopackage file."""
-    config_template: str
-    """Path to the configuration template file."""
-    log_file: str
-    """Path to the log file."""
-    log_level: str
-    """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'SEVERE', 'FATAL'."""
-    nprocs: int
-    """Number of processors to use."""
+#     vpu: str
+#     """VPU identifier."""
+#     run_name: str
+#     """Name of the run, used to create output folders and files."""
+#     algorithm: str
+#     """Name of the algorithm to use for regionalization."""
+#     start_time: str
+#     """Start time for the simulation."""
+#     end_time: str
+#     """End time for the simulation."""
+#     base_dir: str
+#     """Path to base directory for input/output files."""
+#     par_file: str
+#     """Path to the parameter file."""
+#     pair_file: str
+#     """Path to the pair file."""
+#     gpkg_file: str
+#     """Path to the geopackage file."""
+#     config_template: str
+#     """Path to the configuration template file."""
+#     log_file: str
+#     """Path to the log file."""
+#     log_level: str
+#     """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'SEVERE', 'FATAL'."""
+#     nprocs: int
+#     """Number of processors to use."""
 
 
 class PydanticDictLike(BaseModel):
@@ -211,11 +212,22 @@ class BaseGeneralConfig(BaseModel):
         examples=["03S"],
         default=["03S"],
     )
+    n_procs: int = Field(
+        description="Number of processors to use for parallel processing. Set to -1 to use all available processors.",
+        examples=2,
+        default=-1,
+    )
 
     base_dir: str = Field(
         description="Path to base directory for input/output files.",
         examples="/root/nwm-region-mgr/data/",
         default="./data/",
+    )
+
+    static_data_dir: str = Field(
+        description="Path to static data directory containing hydrofabric and other static input files.",
+        examples="/ngencerf-app/nwm-region-mgr/inputs/static_data/",
+        default="/ngencerf-app/nwm-region-mgr/inputs/static_data/",
     )
 
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
@@ -726,6 +738,14 @@ class BaseConfigProcessor:
             logger.exception(f"Error loading YAML file: {e}")
             raise
 
+    def _recursive_substitute_until_fixed(self, config, context, max_iter=5):
+        for _ in range(max_iter):
+            new_config = recursive_substitute(config, context)
+            if new_config == config:
+                break
+            config = new_config
+        return config
+
     def _substitute_placeholders(self, config: BaseModel) -> BaseModel:
         """Substitute placeholders in the config with actual values.
 
@@ -744,6 +764,9 @@ class BaseConfigProcessor:
             "run_name": config.general.run_name
             if hasattr(config.general, "run_name")
             else None,
+            "static_data_dir": config.general.static_data_dir
+            if hasattr(config.general, "static_data_dir")
+            else None,
             "base_dir": config.general.base_dir
             if hasattr(config.general, "base_dir")
             else None,
@@ -759,34 +782,53 @@ class BaseConfigProcessor:
         context = {k: v for k, v in context.items() if v is not None}
 
         # substitute placeholders in the config
-        config = recursive_substitute(config, context)
+        config = self._recursive_substitute_until_fixed(config, context)
 
         return config
 
-    def _expand_user_file_paths(self, obj: BaseModel) -> None:
-        """Recursively expand user home directory in file paths within a Pydantic model."""
-        for name, field in type(obj).model_fields.items():
-            val = getattr(obj, name)
+    def _expand_user(self, val: str | Path) -> Path:
+        """Expand user home directory and environment variables in a file path."""
+        s = str(val)
 
-            # Always recurse
-            if isinstance(val, BaseModel):
-                self._expand_user_file_paths(val)
-                continue
+        user = os.environ.get("LOGNAME") or os.environ.get("USER")
+        if user:
+            user = user.split("@", 1)[0]
+            s = re.sub(r"\$USER\b", user, s)
 
-            if isinstance(val, dict):
-                for v in val.values():
-                    if isinstance(v, BaseModel):
-                        self._expand_user_file_paths(v)
-                continue
+        s = os.path.expandvars(s)
+        s = os.path.expanduser(s)
 
-            # Apply expansion only when explicitly needed
-            if (
-                ("file" in name or "path" in name or "dir" in name)
-                and isinstance(val, (str, Path))
-                and "~" in str(val)
-            ):
-                expanded = Path(val).expanduser()
-                setattr(obj, name, expanded)
+        return str(s)
+
+    def _expand_user_file_paths(self, obj) -> None:
+        if isinstance(obj, BaseModel):
+            for name in obj.__class__.model_fields:
+                val = getattr(obj, name)
+                new_val = self._expand_user_file_paths(val)
+                if new_val is not val:
+                    setattr(obj, name, new_val)
+
+        elif isinstance(obj, dict):
+            for k, v in obj.items():
+                new_v = self._expand_user_file_paths(v)
+                if new_v is not v:
+                    obj[k] = new_v
+
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                new_v = self._expand_user_file_paths(v)
+                if new_v is not v:
+                    obj[i] = new_v
+
+        elif isinstance(obj, tuple):
+            return tuple(self._expand_user_file_paths(v) for v in obj)
+
+        elif isinstance(obj, (str, Path)):
+            s = str(obj)
+            if any(x in s for x in ("~", "$")):
+                return self._expand_user(s)
+
+        return obj
 
     def _required_columns_calval_stats(self, config) -> set[str]:
         """Return a set of required columns for calibration/validation statistics."""

@@ -32,12 +32,6 @@ logger = logging.getLogger(__name__)
 class GeneralConfig(BaseGeneralConfig):
     """General configuration settings specific to parameter regionalization."""
 
-    n_procs: int = Field(
-        description="Number of processors to use for parallel processing. Set to -1 to use all available processors.",
-        default=-1,
-        examples=-1,
-    )
-
     attr_dataset_list: List[Literal["ngen", "hlr", "streamcat"]] = Field(
         description="List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'.",
         examples=["ngen", "streamcat"],
