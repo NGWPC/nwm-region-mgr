@@ -14,6 +14,7 @@ Functions:
 """
 
 import logging
+import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -54,6 +55,12 @@ class NgenSimulationProcessor(BaseConfigProcessor):
         logger.info(f"Number of procs:     {self.config.general.n_procs}")
         logger.info("================================================")
 
+    def resolve_num_processes(n):
+        """Resolve number of processes to use for NGEN run."""
+        if n == -1:
+            return os.cpu_count() or 1
+        return max(1, n)
+
     def create_mswm_config(self, vpu: str, algo: str) -> Path:
         """Create MSWM config file based on template."""
         with open(self.config.general.config_template, "r") as f:
@@ -75,7 +82,7 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             pair_file=self.config.general.pair_file.get(f"{vpu}_{algo}", None),
             gpkg_file=self.config.general.ngen_hydrofabric_file.get(f"{vpu}", None),
             work_dir=self.ngen_work_dir,
-            nprocs=self.config.general.n_procs,
+            nprocs=self.resolve_num_processes(self.config.general.n_procs),
             static_data_dir=self.config.general.static_data_dir,
         )
 
