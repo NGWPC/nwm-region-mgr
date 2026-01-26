@@ -76,6 +76,7 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             gpkg_file=self.config.general.ngen_hydrofabric_file.get(f"{vpu}", None),
             work_dir=self.ngen_work_dir,
             nprocs=self.config.general.n_procs,
+            static_data_dir=self.config.general.static_data_dir,
         )
 
         # Write the new config file
