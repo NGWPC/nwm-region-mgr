@@ -23,17 +23,17 @@ donor:
 attr_datasets:
   ngen:
     attr_list: 
-    attr_select_file: '{base_dir}/attr_config/attr_selection_ngen.csv'
+    attr_select_file: '{static_data_dir}/region/attr_config/attr_selection_ngen.csv'
     attr_data_file: '{static_data_dir}/region/attr_datasets/ngen/attr_ngen_{domain}.parquet'
     base_attr_list: ['elevation', 'slope', 'aspect']
   hlr:
     attr_list:
-    attr_select_file: '{base_dir}/attr_config/attr_selection_hlr.csv'
+    attr_select_file: '{static_data_dir}/region/attr_config/attr_selection_hlr.csv'
     attr_data_file: '{static_data_dir}/region/attr_datasets/hlr/attr_hlr_{domain}.parquet'
     base_attr_list: ['PPT', 'SAND']
   streamcat:
     attr_list:
-    attr_select_file: '{base_dir}/attr_config/attr_selection_streamcat.csv'
+    attr_select_file: '{static_data_dir}/region/attr_config/attr_selection_streamcat.csv'
     attr_data_file: '{static_data_dir}/region/attr_datasets/streamcat/attr_streamcat_{domain}.parquet'
     base_attr_list: ['Precip_Minus_EVT', 'Elev', 'BFI']
 
