@@ -30,41 +30,67 @@ Follow NMW-RTE [README](https://github.com/NGWPC/nwm-rte/blob/development/README
 
 ### Step 1. Run regionalization
 
-First, navigate to nwm-rte directory, e.g.,
-```bash
-cd ~/ngwpc/nwm-rte
-```
+First, navigate to your preferred working directory (e.g., `/ngen-oe/$USER/run_region`, `/ngen-dev/$USER/run_region`, 
+or `~/run_region`) where you have the regionalization config files set up and where you want to save the outputs from 
+regionalization. You can copy sample config files from `nwm-region-mgr/configs/` to your working directory and 
+modify them as needed. Note {RTE_REPO_ROOT} in the steps below refers to the root directory of your **nwm-rte** 
+repo, e.g., `~/ngpwc/nwm-rte` (on local AWS workspace), or `/ngencerf-app/nwm-rte` (on INT/EA/UAT).
 
 #### a) Run formulation regionalization alone (no parreg):
 The short flag `-f` can also be used in place of `--formreg`. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_formreg.yaml`.
 ```bash
-time ./ngen_rte_run_region.sh --formreg
+# run slurm job to submit to compute nodes on INT/EA/UAT
+[RTE_REPO_ROOT]/sbatch_run_region.sh configs formreg
+
+# or run directly in controller node or local AWS workpsace
+time [RTE_REPO_ROOT]/run_region.sh -c configs --formreg
 ```
 Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite.
 
 #### b) Run parameter regionalization (formreg is also ran as a prerequisite):
 The short flag `-p` can also be used in place of `--parreg`. Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
 ```bash
-time ./ngen_rte_run_region.sh --parreg
+# run slurm job to submit to compute nodes on INT/EA/UAT
+[RTE_REPO_ROOT]/sbatch_run_region.sh configs parreg
+
+# or run directly in controller node or local AWS workpsace
+time [RTE_REPO_ROOT]/run_region.sh -c configs --parreg
 ```
 ### Step 2. Run NGEN
-Run a NGEN simulation:
+Run a NGEN simulation.
 
-The short flag `-n` can also be used in place of `--ngen`. Prior to running, configure the settings in `configs/config_ngen.yaml`.
+The short flag `-n` can also be used in place of `--ngen`. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_ngen.yaml`.
 ```bash
-time ./ngen_rte_run_region.sh --ngen
+# run slurm job to submit to compute nodes on INT/EA/UAT
+[RTE_REPO_ROOT]/sbatch_run_region.sh configs ngen
+
+# or run directly in controller node or local AWS workpsace
+time [RTE_REPO_ROOT]/run_region.sh -c configs --ngen
 ```
+
 ### Step 3. Run Evaluation
 Run an evaluation:
 
 The short flag `-e` can also be used in place of `--eval`. Prior to running, configure the settings in `configs/config_eval.yaml`.
 ```bash
-time ./ngen_rte_run_region.sh --eval
-```
+# run slurm job to submit to compute nodes on INT/EA/UAT
+[RTE_REPO_ROOT]/sbatch_run_region.sh configs eval
+
+# or run directly in controller node or local AWS workpsace
+time [RTE_REPO_ROOT]/run_region.sh -c configs --eval
+``` 
 
 ### To run all steps in one command
+Typically, we do not recommend running all three steps in one command, since users may want to inspect the outputs 
+from each step before proceeding to the next step. However, it is possible to run all three steps in one command 
+as shown below:
+
 ```bash
-time ./ngen_rte_run_region.sh --parreg --ngen --eval
+# run slurm job to submit to compute nodes on INT/EA/UAT
+[RTE_REPO_ROOT]/sbatch_run_region.sh configs parreg ngen eval
+
+# or run directly in controller node or local AWS workpsace
+time [RTE_REPO_ROOT]/run_region.sh -c configs --parreg --ngen --eval
 ```
 
 ## Desktop/Workspace
@@ -117,7 +143,7 @@ Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/inputs
 #### 2) Run the regionalization script
 
 ```bash
-python [NGEN_REG_ROOT]/nwm-region-mgr/regionalization.py [COFIG_DIR] [REG_TYPE]
+python -m nwm_region_mgr [COFIG_DIR] [REG_TYPE]
 ```
 Where:
 - [NGEN_REG_ROOT] refers to the directory where nwm-region-mgr is installed
@@ -125,8 +151,8 @@ Where:
 - [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'region' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'region'.
 
 ```bash
-python regionalization.py configs formreg # to run formulation regionalization only
-python regionalization.py configs region # to run parameter regionalization (and formulation regionalization if not done already)
+python -m nwm_region_mgr configs formreg # to run formulation regionalization only
+python -m nwm_region_mgr configs region # to run parameter regionalization (and formulation regionalization if not done already)
 ```
 
 ### STEP 2: Run NGEN simulation with regionalized parameters
