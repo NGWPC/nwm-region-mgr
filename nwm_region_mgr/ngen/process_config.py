@@ -55,7 +55,7 @@ class NgenSimulationProcessor(BaseConfigProcessor):
         logger.info(f"Number of procs:     {self.config.general.n_procs}")
         logger.info("================================================")
 
-    def resolve_num_processes(n):
+    def resolve_num_processes(self, n: int):
         """Resolve number of processes to use for NGEN run."""
         if n == -1:
             return os.cpu_count() or 1
@@ -164,24 +164,41 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             self.verify_ngen_run_inputs(vpu, algo)
         )
 
-        if self.config.general.n_procs < 1:
-            self.config.general.n_procs = 1
-            logger.warning("Number of processors set to 1.")
+        n_procs = self.resolve_num_processes(self.config.general.n_procs)
 
-        if self.config.general.n_procs == 1:
+        # Precompute the output directory path safely
+        output_dir = self.ngen_data_dir(vpu, algo) / "Output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Base command string
+        if n_procs == 1:
             logger.info("Running NGEN in serial mode.")
-            cmd_str = f"""
-            cd {self.ngen_data_dir(vpu, algo) / "Output"}
-            {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file}
-            """
-        else:
-            logger.info(
-                f"Running NGEN in parallel mode with {self.config.general.n_procs} processors."
+            cmd_str = (
+                f'cd "{output_dir}"\n'
+                f"{ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file}"
             )
-            cmd_str = f"""
-            cd {self.ngen_data_dir(vpu, algo) / "Output"}
-            mpirun --allow-run-as-root -n {self.config.general.n_procs} {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}
-            """
+        else:
+            logger.info(f"Running NGEN in parallel mode with {n_procs} processors.")
+            cmd_str = (
+                f'cd "{output_dir}"\n'
+                f"mpirun --allow-run-as-root -n {n_procs} {ngen_exe} "
+                f"{hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}"
+            )
+
+        # if n_procs == 1:
+        #     logger.info("Running NGEN in serial mode.")
+        #     cmd_str = f"""
+        #     cd "{self.ngen_data_dir(vpu, algo) / "Output"}"
+        #     {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file}
+        #     """
+        # else:
+        #     logger.info(
+        #         f"Running NGEN in parallel mode with {self.config.general.n_procs} processors."
+        #     )
+        #     cmd_str = f"""
+        #     cd "{self.ngen_data_dir(vpu, algo) / "Output"}"
+        #     mpirun --allow-run-as-root -n {n_procs} {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}
+        #     """
 
         return cmd_str
 
