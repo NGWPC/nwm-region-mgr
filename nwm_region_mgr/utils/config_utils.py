@@ -94,37 +94,6 @@ class LoggingConfig(BaseModel):
         return self
 
 
-# class NGENConfig(BaseModel):
-#     """NextGen configuration."""
-
-#     vpu: str
-#     """VPU identifier."""
-#     run_name: str
-#     """Name of the run, used to create output folders and files."""
-#     algorithm: str
-#     """Name of the algorithm to use for regionalization."""
-#     start_time: str
-#     """Start time for the simulation."""
-#     end_time: str
-#     """End time for the simulation."""
-#     base_dir: str
-#     """Path to base directory for input/output files."""
-#     par_file: str
-#     """Path to the parameter file."""
-#     pair_file: str
-#     """Path to the pair file."""
-#     gpkg_file: str
-#     """Path to the geopackage file."""
-#     config_template: str
-#     """Path to the configuration template file."""
-#     log_file: str
-#     """Path to the log file."""
-#     log_level: str
-#     """Logging level, e.g., 'DEBUG', 'INFO', 'WARNING', 'SEVERE', 'FATAL'."""
-#     nprocs: int
-#     """Number of processors to use."""
-
-
 class PydanticDictLike(BaseModel):
     """Stand-in for dictionary-like behavior when you want specificity of a pydantic model."""
 
@@ -323,11 +292,9 @@ class BaseGeneralConfig(BaseModel):
     def lower_case_ids(self) -> "BaseGeneralConfig":
         """Ensure that all ID columns are in lower case."""
         if self.id_col:
-            # self.id_col = {k.lower(): v.lower() for k, v in self.id_col.items()}
             self.id_col = self.id_col.lower_case()
 
         if self.layer_name:
-            # self.layer_name = {k.lower(): v.lower() for k, v in self.layer_name.items()}
             self.layer_name = self.layer_name.lower_case()
         return self
 
@@ -429,16 +396,6 @@ class BaseOutputConfig(BaseModel):
             logger.debug(f"Plot path not specified, using default: {values.plot_path}")
 
         return values
-
-    # @model_validator(mode="after")
-    # def check_format_if_dir(cls, values):
-    #     """Check if path is a directory. If so require a 'format'."""
-    #     if not Path(values.path).suffix and not values.format:
-    #         msg = f"If 'path' is a directory, 'format' must be specified: {values.path}"
-    #         logger.error(msg)
-    #         raise ValueError(msg)
-
-    #     return values
 
     @model_validator(mode="after")
     def check_plot_config(cls, values):

@@ -1,16 +1,17 @@
 """Process configuration to conduct NGEN simulation with regionalized formulations and parameters.
 
+Classes:
+    - NgenSimulationProcessor: Processor to run NGEN simulation for regionalization.
 Functions:
-- log_run_info: Log the run information.
-- create_mswm_config: Create MSWM config file based on template.
-- verify_ngen_run_inputs: Verify that necessary input files for NGEN run exist.
-- run_mswm: Run MSWM RealizationBuilder to build realization and BMI config files.
-- build_ngen_command: Build the NGEN command string.
-- run_ngen: Run NGEN as a subprocess and log output.
-- ngen_work_dir: Get NGEN work directory (work_dir field in MSWM config file).
-- ngen_data_dir: Get directory for NGEN inputs and outputs for a given VPU and algorithm.
-- ngen_vpu_workflow: Run the main workflow to execute MSWM and NGEN simulations.
-
+    - log_run_info: Log the run information.
+    - create_mswm_config: Create MSWM config file based on template.
+    - verify_ngen_run_inputs: Verify that necessary input files for NGEN run exist.
+    - run_mswm: Run MSWM RealizationBuilder to build realization and BMI config files.
+    - build_ngen_command: Build the NGEN command string.
+    - run_ngen: Run NGEN as a subprocess and log output.
+    - ngen_work_dir: Get NGEN work directory (work_dir field in MSWM config file).
+    - ngen_data_dir: Get directory for NGEN inputs and outputs for a given VPU and algorithm.
+    - ngen_vpu_workflow: Run the main workflow to execute MSWM and NGEN simulations.
 """
 
 import logging
@@ -184,21 +185,6 @@ class NgenSimulationProcessor(BaseConfigProcessor):
                 f"mpirun --allow-run-as-root -n {n_procs} {ngen_exe} "
                 f"{hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}"
             )
-
-        # if n_procs == 1:
-        #     logger.info("Running NGEN in serial mode.")
-        #     cmd_str = f"""
-        #     cd "{self.ngen_data_dir(vpu, algo) / "Output"}"
-        #     {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file}
-        #     """
-        # else:
-        #     logger.info(
-        #         f"Running NGEN in parallel mode with {self.config.general.n_procs} processors."
-        #     )
-        #     cmd_str = f"""
-        #     cd "{self.ngen_data_dir(vpu, algo) / "Output"}"
-        #     mpirun --allow-run-as-root -n {n_procs} {ngen_exe} {hydrofab_file} all {hydrofab_file} all {real_file} {partition_file}
-        #     """
 
         return cmd_str
 
