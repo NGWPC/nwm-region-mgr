@@ -8,7 +8,7 @@ general:
   n_procs: 36  # Number of processors to use; set to -1 to use all available processors 
 
   base_dir: '${WORKSPACE_ROOT}/run_region' # Path to the base directory, with WORKSPACE_ROOT set via docker run (/ngen-dev/$USER on INT, /ngen-oe/$USER on OE, ~ on local AWS workspace)
-  static_data_dir: '/ngen-app/nwm-region-mgr/data/inputs'  # Path to the static data directory (where all sample inputs for regionalization are stored)
+  static_data_dir: '/ngencerf-app/nwm-region-mgr/data/inputs'  # Path to the static data directory (where all sample inputs for regionalization are stored)
   ngen_hydrofabric_file: '{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_{vpu_list}.gpkg'  
   gage_divide_cwt_file: '{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet'
   donor_gage_file: '{static_data_dir}/region/gages_nwm4_calib_all.csv'

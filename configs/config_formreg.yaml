@@ -64,7 +64,7 @@ summary_score:
 formulation_cost:
 
   #score_tolerance: 0.05 # Tolerance in percentage for summary score. 
-  file:  '{base_dir}/formulation_costs_secs_per_catchment.csv' # Path to the file containing the computational cost of each formulation
+  file:  '{base_dir}/inputs/region/formulation_costs_secs_per_catchment.csv' # Path to the file containing the computational cost of each formulation
   costs: # List of formulations and their corresponding computational costs
     "noah-owp-modular ueb cfe-x t-route": 10
     # "noah-owp-modular sac-sma t-route": 20

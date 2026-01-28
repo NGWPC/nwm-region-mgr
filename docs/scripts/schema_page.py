@@ -56,6 +56,7 @@ def get_sample_input_files(yaml_files: list[str]) -> dict[str, str]:
         v = v.replace("{domain}", all_config["general"]["domain"])
         v = v.replace("{run_name}", all_config["general"]["run_name"])
         v = v.replace("{base_dir}", all_config["general"]["base_dir"])
+        v = v.replace("{static_data_dir}", all_config["general"]["static_data_dir"])
         v = v.replace("{vpu_list}", all_config["general"]["vpu_list"][0])
 
         if not os.path.exists(v) or not os.path.isfile(v):
