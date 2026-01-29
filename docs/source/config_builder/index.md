@@ -52,8 +52,10 @@ The tabs on the left will take you to the builder for each of the specific confi
 general:
   run_name: 'test' #----------------------------------------------------------------------------Name of the run, used to create output folders and files.
   domain: 'conus' #-----------------------------------------------------------------------------Which National Water Model Domain this run uses.
-  vpu_list: ['09'] #----------------------------------------------------------------------------List of vector processing units (VPUs) within the domain or 'all' to process all.
+  vpu_list: ['03S'] #---------------------------------------------------------------------------List of vector processing units (VPUs) to be processed within the domain. Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs).
+  n_procs: 2 #----------------------------------------------------------------------------------Number of processors to use for parallel processing. Set to -1 to use all available processors.
   base_dir: '/root/nwm-region-mgr/data/' #------------------------------------------------------Path to base directory for input/output files.
+  static_data_dir: '/ngencerf-app/nwm-region-mgr/inputs/static_data/' #-------------------------Path to static data directory containing hydrofabric and other static input files.
   ngen_hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_09.gpkg' #--------------------------Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}.If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns 'divide_id', 'vpuid' and 'geometry'.
   gage_divide_cwt_file: '{base_dir}/inputs/calib_gage_divide_{domain}.parquet' #----------------Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'.
   donor_gage_file: '{base_dir}/inputs/gages_nwm4_calib_all.csv' #-------------------------------Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.
@@ -81,8 +83,10 @@ general:
 | --- | --- | --- | --- | --- |
 | run_name | str | Name of the run, used to create output folders and files. | test | test |
 | domain | str = conus \| ak \| hi \| prvi | Which National Water Model Domain this run uses. | conus | conus |
-| vpu_list | List[str] \| str | List of vector processing units (VPUs) within the domain or 'all' to process all. | ['03S'] | ['09'] |
+| vpu_list | List[str] \| str | List of vector processing units (VPUs) to be processed within the domain. Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs). | ['03S'] | ['03S'] |
+| n_procs | int | Number of processors to use for parallel processing. Set to -1 to use all available processors. | -1 | 2 |
 | base_dir | str | Path to base directory for input/output files. | ./data/ | /root/nwm-region-mgr/data/ |
+| static_data_dir | str | Path to static data directory containing hydrofabric and other static input files. | /ngencerf-app/nwm-region-mgr/inputs/static_data/ | /ngencerf-app/nwm-region-mgr/inputs/static_data/ |
 | ngen_hydrofabric_file | Path \| str \| Dict[str, Path] \| Dict[str, str] | Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}.If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns 'divide_id', 'vpuid' and 'geometry'. | vpu_03S.gpkg | {base_dir}/inputs/hydrofabric/vpu_09.gpkg |
 | gage_divide_cwt_file | Path \| str | Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'. | calib_gage_divide_{domain}.parquet | {base_dir}/inputs/calib_gage_divide_{domain}.parquet |
 | donor_gage_file | Path \| str | Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'. | gages_nwm4_calib_all.csv | {base_dir}/inputs/gages_nwm4_calib_all.csv |
@@ -244,7 +248,7 @@ output: #-----------------------------------------------------------------------
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| formulation | BaseOutputConfig | Output configurations for the selected formulations. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/formulations', 'stem': 'form_{domain}_vpu{vpu_list}', 'stem_suffix': '_pars', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True}, 'plot_path': '{base_dir}/outputs/{run_name}/formulations/plots'} |
+| formulation | BaseOutputConfig | Output configurations for the selected formulations. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/formulations', 'stem': 'form_{domain}_vpu{vpu_list}', 'stem_suffix': '_pars', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True}, 'plot_path': '{base_dir}/outputs/{run_name}/formulations/plots'} |
 | config_final | BaseOutputConfig | Output configuration for the final configuration file after processing, with placeholders resolved. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_formreg_final.yaml'} |
 | summary_score | BaseOutputConfig | Output configurations for the summary score. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/summary_score', 'stem': 'score_{domain}_vpu{vpu_list}', 'stem_suffix': '_all_gages', 'format': 'parquet', 'plots': {'histogram': True, 'spatial_map': True}, 'plot_path': '{base_dir}/outputs/{run_name}/summary_score/plots'} |
 
@@ -265,9 +269,8 @@ output: #-----------------------------------------------------------------------
 ```yaml
 general:
   general: #-------------------------------------------------------------------------------------------------------------------------General configuration settings specific to parameter regionalization.
-    n_procs: -1 #--------------------------------------------------------------------------------------------------------------------Number of processors to use for parallel processing. Set to -1 to use all available processors.
     attr_dataset_list: ['ngen', 'streamcat'] #---------------------------------------------------------------------------------------List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'.
-    algorithm_list: ['gower', 'kmeans'] #--------------------------------------------------------------------------------------------Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch').
+    algorithm_list: ['gower', 'kmeans'] #--------------------------------------------------------------------------------------------Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity').
     manual_pairings_file: 'pairs_kmeans_conus_vpu09.parquet' #-----------------------------------------------------------------------Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections.
   donor: #---------------------------------------------------------------------------------------------------------------------------Configuration for donor selection.
     buffer_km: 100.0 #---------------------------------------------------------------------------------------------------------------Size of buffer (in km) around current VPU to identify qualified donors.
@@ -335,10 +338,12 @@ general:
     config_final: #------------------------------------------------------------------------------------------------------------------Configuration for saving final configuration file used in regionalization.
       save: True #-------------------------------------------------------------------------------------------------------------------Whether to save output files
       path: '{base_dir}/outputs/{run_name}/config_parreg_final.yaml' #---------------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
+      plot_path: 'None/plots' #------------------------------------------------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
     spatial_distance: #--------------------------------------------------------------------------------------------------------------Configuration for saving spatial distance data.
       save: True #-------------------------------------------------------------------------------------------------------------------Whether to save output files
       path: '{base_dir}/outputs/{run_name}/spatial_distance' #-----------------------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
       format: 'parquet' #------------------------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
+      plot_path: 'None/plots' #------------------------------------------------------------------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
   algorithms: #----------------------------------------------------------------------------------------------------------------------Algorithm configuration class.  See specific algorithms for additional arguments.
     algo_general: #------------------------------------------------------------------------------------------------------------------General configurations shared by all regionalization algorithms.
       max_spa_dist: 1500.0 #---------------------------------------------------------------------------------------------------------Maximum spatial distance (km) to consider a donor suitable
@@ -395,9 +400,8 @@ general:
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| n_procs | int | Number of processors to use for parallel processing. Set to -1 to use all available processors. | -1 | -1 |
 | attr_dataset_list | List[str = ngen \| hlr \| streamcat] | List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'. | ['ngen'] | ['ngen', 'streamcat'] |
-| algorithm_list | List[str = gower \| urf \| kmeans \| kmedoids \| hdbscan \| birch] | Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch'). | ['gower'] | ['gower', 'kmeans'] |
+| algorithm_list | List[str = gower \| urf \| kmeans \| kmedoids \| hdbscan \| birch \| proximity] | Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'). | ['gower'] | ['gower', 'kmeans'] |
 | manual_pairings_file | Path \| str \| NoneType | Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections. | None | pairs_kmeans_conus_vpu09.parquet |
 
 #### parreg Schema (donor)
@@ -527,11 +531,11 @@ general:
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| pairs | BaseOutputConfig | Configuration for saving donor-receiver pairs. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/pairs', 'stem': 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}', 'stem_suffix': '_mswm', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['distSpatial', 'distAttr']}, 'plot_path': '{base_dir}/outputs/{run_name}/pairs/plots'} |
-| params | BaseOutputConfig | Configuration for saving regionalized parameters. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/params', 'stem': 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}', 'format': 'csv', 'plots': {'spatial_map': True, 'columns_to_plot': ['MP', 'MFSNO', 'uztwm', 'uzfwm', 'pxtemp', 'plwhc']}, 'plot_path': '{base_dir}/outputs/{run_name}/params/plots'} |
-| attr_data_final | BaseOutputConfig | ("Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",) | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/attr_data_final', 'stem': 'attr_{domain}_vpu{vpu_list}', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT', 'hlr_PMPE', 'hlr_SAND', 'hlr_TAVE']}, 'plot_path': '{base_dir}/outputs/{run_name}/attr_data_final/plots'} |
-| config_final | BaseOutputConfig | Configuration for saving final configuration file used in regionalization. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_parreg_final.yaml'} |
-| spatial_distance | BaseOutputConfig | Configuration for saving spatial distance data. | <factory> | {'save': True, 'path': '{base_dir}/outputs/{run_name}/spatial_distance', 'format': 'parquet'} |
+| pairs | BaseOutputConfig | Configuration for saving donor-receiver pairs. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/pairs', 'stem': 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}', 'stem_suffix': '_mswm', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['distSpatial', 'distAttr']}, 'plot_path': '{base_dir}/outputs/{run_name}/pairs/plots'} |
+| params | BaseOutputConfig | Configuration for saving regionalized parameters. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/params', 'stem': 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}', 'format': 'csv', 'plots': {'spatial_map': True, 'columns_to_plot': ['MP', 'MFSNO', 'uztwm', 'uzfwm', 'pxtemp', 'plwhc']}, 'plot_path': '{base_dir}/outputs/{run_name}/params/plots'} |
+| attr_data_final | BaseOutputConfig | ("Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",) | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/attr_data_final', 'stem': 'attr_{domain}_vpu{vpu_list}', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT', 'hlr_PMPE', 'hlr_SAND', 'hlr_TAVE']}, 'plot_path': '{base_dir}/outputs/{run_name}/attr_data_final/plots'} |
+| config_final | BaseOutputConfig | Configuration for saving final configuration file used in regionalization. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_parreg_final.yaml'} |
+| spatial_distance | BaseOutputConfig | Configuration for saving spatial distance data. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/spatial_distance', 'format': 'parquet'} |
 
 #### parreg Schema (BaseOutputConfig)
 

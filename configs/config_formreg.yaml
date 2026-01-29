@@ -2,9 +2,9 @@
  
 # General settings for the formulation regionalization application
 general:
-  huc12_hydrofabric_file: '{base_dir}/inputs/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb' #non-AK domains
-  #huc12_hydrofabric_file: '{base_dir}/inputs/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'  # AK domain
-  divide_huc12_cwt_file: '{base_dir}/inputs/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv' # Path to crosswalk file for HUC12 and NextGen catchments.
+  huc12_hydrofabric_file: '{static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb' #non-AK domains
+  #huc12_hydrofabric_file: '{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'  # AK domain
+  divide_huc12_cwt_file: '{static_data_dir}/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv' # Path to crosswalk file for HUC12 and NextGen catchments.
 
   calib_basins_only: False  # whether to run formulation selection only for calibrated basins (based on summary score)
   formulation_to_include: # List of competing formulations required to be considered in the selection process

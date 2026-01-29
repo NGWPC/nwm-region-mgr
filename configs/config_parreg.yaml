@@ -1,6 +1,5 @@
 ### general 
 general:
-  n_procs: -1  # number of processes to use for parallel processing, -1 for all available cores
   attr_dataset_list: ['hlr','streamcat']
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
   #algorithm_list: ['gower','urf','kmeans', 'kmedoids', 'hdbscan', 'birch']
@@ -24,23 +23,23 @@ donor:
 attr_datasets:
   ngen:
     attr_list: 
-    attr_select_file: '{base_dir}/inputs/region/attr_config/attr_selection_ngen.csv'
-    attr_data_file: '{base_dir}/inputs/region/attr_datasets/ngen/attr_ngen_{domain}.parquet'
+    attr_select_file: '{static_data_dir}/region/attr_config/attr_selection_ngen.csv'
+    attr_data_file: '{static_data_dir}/region/attr_datasets/ngen/attr_ngen_{domain}.parquet'
     base_attr_list: ['elevation', 'slope', 'aspect']
   hlr:
     attr_list:
-    attr_select_file: '{base_dir}/inputs/region/attr_config/attr_selection_hlr.csv'
-    attr_data_file: '{base_dir}/inputs/region/attr_datasets/hlr/attr_hlr_{domain}.parquet'
+    attr_select_file: '{static_data_dir}/region/attr_config/attr_selection_hlr.csv'
+    attr_data_file: '{static_data_dir}/region/attr_datasets/hlr/attr_hlr_{domain}.parquet'
     base_attr_list: ['PPT', 'SAND']
   streamcat:
     attr_list:
-    attr_select_file: '{base_dir}/inputs/region/attr_config/attr_selection_streamcat.csv'
-    attr_data_file: '{base_dir}/inputs/region/attr_datasets/streamcat/attr_streamcat_{domain}.parquet'
+    attr_select_file: '{static_data_dir}/region/attr_config/attr_selection_streamcat.csv'
+    attr_data_file: '{static_data_dir}/region/attr_datasets/streamcat/attr_streamcat_{domain}.parquet'
     base_attr_list: ['Precip_Minus_EVT', 'Elev', 'BFI']
 
 snow_cover:
   consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins (must be False for hi and prvi domains)
-  snow_cover_file: '{base_dir}/inputs/region/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
+  snow_cover_file: '{static_data_dir}/region/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
   column: 'snow_pc_hydroatlas'  # column name for snow cover percent in the snow cover data file
   threshold: 20 # threshold for snow cover percent to determine snowiness category
 

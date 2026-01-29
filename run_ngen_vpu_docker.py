@@ -1,13 +1,9 @@
 """Standalone program for running ngen simulations with regionalized parameters.
 
 This script calls MSWM to set up an NGEN simulation and runs the NGEN simulation
-  for a specified VPU using regionalized parameters. It takes various command-line arguments
+  for a specified VPU using regionalized parameters. It takes a yaml file (e.g., configs/config_ngen.yaml)
   to specify the run configuration and paths to necessary files.
 
-Sometimes the NGEN simulation may fail due to issues in the routing module. In such cases,
-this script will attempt to run `nwm_routing` as a fallback to generate the routing output.
-
-See run_ngen_vpu.sh for an example of how to run this script.
 """
 
 from __future__ import annotations
@@ -144,8 +140,6 @@ def verify_ngen_run_inputs(args: dict):
     if not hydrofab_file.is_file():
         raise FileNotFoundError(f"Hydrofabric file not found: {hydrofab_file}")
     logger.info("All NGEN command-line arguments verified.")
-
-    # TODO: verify the module BMI config file also exists
 
     return ngen_exe, real_file, partition_file, hydrofab_file
 
@@ -353,8 +347,8 @@ def run_ngen_with_unified_logging(args: dict):
 
     If args["use_nwm_routing_fallback"] is True, and
     If NGEN fails and t-route output file is not found, run nwm_routing as a fallback.
-    """
 
+    """
     if args["use_nwm_routing_fallback"]:
         run_ngen_with_nwm_routing_fallback()
     else:
@@ -404,11 +398,13 @@ class NGENConfig(BaseModel):
 
     nprocs: int
     base_dir: str
+    static_data_dir: str
 
     par_file: str
     pair_file: str
     gpkg_file: str
     config_template: str
+    out_dir: str = None
     log_file: str | Path = None
     log_level: str = "INFO"
     use_nwm_routing_fallback: bool = False
