@@ -1,5 +1,3 @@
-# User configuration for formulation regionalization
- 
 # General settings for the formulation regionalization application
 general:
   huc12_hydrofabric_file: '{static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb' #non-AK domains
@@ -10,7 +8,6 @@ general:
   formulation_to_include: # List of competing formulations required to be considered in the selection process
   formulation_to_exclude: # List of formulation to exclude from the selection process
   consider_cost: True  # whether to consider computational cost
-  #approach_calib_basins: regionalization # Strategy for assigning formulations to calibrated basins: regionalization or summary_score
 
 # Define configurations for the spatial discretization for formulation regionalization
 # For each spatial unit, a single formulation will be identified and applied to all catchments within the unit
@@ -64,7 +61,7 @@ summary_score:
 formulation_cost:
 
   #score_tolerance: 0.05 # Tolerance in percentage for summary score. 
-  file:  '{base_dir}/inputs/region/formulation_costs_secs_per_catchment.csv' # Path to the file containing the computational cost of each formulation
+  file:  '{static_data_dir}/region/formulation_costs_secs_per_catchment.csv' # Path to the file containing the computational cost of each formulation
   costs: # List of formulations and their corresponding computational costs
     "noah-owp-modular ueb cfe-x t-route": 10
     # "noah-owp-modular sac-sma t-route": 20
