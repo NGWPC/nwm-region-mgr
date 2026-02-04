@@ -21,10 +21,10 @@ general:
 
 #### configurations for various file paths
 file_paths:
-  base_dir: '${WORKSPACE_ROOT}/run_region'  # root directory to store inputs/outputs for verification
-  location_list_file: '/ngencerf-app/nwm-region-mgr/data/inputs/eval/gage_list_conus_{location_set_name}.csv' # text file containing list of usgs gage IDs (one gage ID per line)
-  crosswalk_file: '/ngencerf-app/nwm-region-mgr/data/inputs/eval/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
-  calib_param_file: '/ngencerf-app/nwm-region-mgr/data/inputs/region/pseudo_calib_params/sampled_params_{domain}.csv' # calibration parameters file (used when separate_calibrated is True); must have column 'gage_id'
+  base_dir: '${WORK_DIR}'  # root directory to store inputs/outputs for verification
+  location_list_file: '${REPOS_COMMON_ROOT__HOST}/nwm-verf/data/inputs/regionalization/gage_list_conus_{location_set_name}.csv' # text file containing list of usgs gage IDs (one gage ID per line)
+  crosswalk_file: '${REPOS_COMMON_ROOT__HOST}/nwm-verf/data/inputs/regionalization/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
+  calib_param_file: '${REPOS_COMMON_ROOT__HOST}/nwm-region-mgr/data/inputs/region/pseudo_calib_params/sampled_params_{domain}.csv' # calibration parameters file (used when separate_calibrated is True); must have column 'gage_id'
   fcst_data_file: '{base_dir}/outputs/ngen/regionalization/{dataset_name}/{location_set_name}/Output/troute_output_{forecast_start_date}.nc' # forecast data directory (must be specified when nwm_forecast.data_source is set to ngenCERF)
   output_dir: '{base_dir}/outputs/eval/{location_set_name}' # output directory to store all output datasets, metrics and plots
 
