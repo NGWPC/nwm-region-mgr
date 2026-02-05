@@ -140,6 +140,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         """Donors."""
         gage_file = self.donor_gage_file
         donors = self.donor_gages
+
         if donors.empty:
             raise ValueError(f"No donors found in the donor gage file: {gage_file}")
         if "longitude" not in donors.columns or "latitude" not in donors.columns:
@@ -150,6 +151,17 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             raise ValueError(
                 f"Donor gage file must contain 'gage_id' column: {gage_file}"
             )
+
+        valid_mask = donors["longitude"].between(-180, 180) & donors[
+            "latitude"
+        ].between(-90, 90)
+
+        if not valid_mask.all():
+            invalid_rows = donors[~valid_mask]
+            raise ValueError(
+                f"invalid coordinates found in donor gage file: {gage_file}\n{invalid_rows}"
+            )
+
         return donors
 
     @property
