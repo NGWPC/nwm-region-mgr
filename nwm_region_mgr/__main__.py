@@ -137,11 +137,14 @@ def _build_formreg_processor(file_general, file_formreg):
 def main(
     config_dir: Path,
     option: OPTIONS,
+    sample_size: int | None = None,
 ) -> None:
     """Execute regionalization or NGEN simulation."""
     logger.info("Starting nwm_region_mgr")
     logger.info("Config directory: %s", config_dir)
     logger.info("Run option: %s", option)
+    if sample_size is not None:
+        logger.info("Sample size: %d", sample_size)
 
     config_paths = _resolve_config_files(config_dir, option)
 
@@ -163,7 +166,7 @@ def main(
                 config_paths[CONFIG.parreg],
             ],
             config_schema=pcs.Config,
-            sample_size=None,
+            sample_size=sample_size,
         )
         _run_parreg(frp, rp)
 
@@ -206,5 +209,12 @@ if __name__ == "__main__":
         ),
     )
 
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=500,
+        help="Sample size for parameter regionalization",
+    )
+
     args = parser.parse_args()
-    main(args.config_dir, args.option)
+    main(args.config_dir, args.option, sample_size=args.sample_size)
