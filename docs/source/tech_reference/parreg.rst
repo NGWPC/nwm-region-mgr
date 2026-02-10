@@ -197,10 +197,6 @@ Notes
 - Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
 
-- The algorithm generated donor-receiver pairs can be updated to incorporate specific manual pairs, if provided via
-  `manual_pairings_file` in config_general.yaml(see the corresponding section in :doc:`Input Data <input_data>` page for details).
-
-
 .. toctree::
    :maxdepth: 2
 
