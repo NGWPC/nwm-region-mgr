@@ -151,18 +151,22 @@ def test_urf_process_shape(minimal_attr_df, minimal_config):
     assert list(out.columns) == donors
 
 
-# -------------------------Functional / slow tests — end-to-end pairing--------------------------
-@pytest.mark.slow
+# -------------------------Functional tests — end-to-end pairing--------------------------
+@pytest.mark.functional
 def test_proximity_pairer_end_to_end(
     minimal_attr_df, minimal_spatial_dist, minimal_config, monkeypatch
 ):
     """End-to-end proximity pairing with assign_donors mocked."""
     from nwm_region_mgr.parreg import utils_algo
 
-    def fake_assign(run, donors, receivers, config, *_args, **_kwargs):
+    def fake_assign(
+        run, donors, receivers, config, dist_attr, dist_spatial, *_args, **_kwargs
+    ):
         rows = []
+        # for each receiver, assign the nearest donor based on dist_spatial
         for r in receivers:
-            rows.append({"divide_id": r, "donor_id": donors[0]})
+            nearest_donor = dist_spatial.loc[r].idxmin()
+            rows.append({"divide_id": r, "donor_id": nearest_donor})
         return pd.DataFrame(rows)
 
     monkeypatch.setattr(utils_algo, "assign_donors", fake_assign)
@@ -176,3 +180,5 @@ def test_proximity_pairer_end_to_end(
     out = p.pair()
     assert set(out["divide_id"]) == {"r1", "r2"}
     assert "donor_id" in out.columns
+    assert out.loc[out["divide_id"] == "r1", "donor_id"].iloc[0] == "d1"
+    assert out.loc[out["divide_id"] == "r2", "donor_id"].iloc[0] == "d2"

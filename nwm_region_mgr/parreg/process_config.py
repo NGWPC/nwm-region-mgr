@@ -152,12 +152,15 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 f"Donor gage file must contain 'gage_id' column: {gage_file}"
             )
 
-        valid_mask = donors["longitude"].between(-180, 180) & donors[
+        # validate coordinates (skip NaNs)
+        has_coords = donors["longitude"].notna() & donors["latitude"].notna()
+        valid_coords = donors["longitude"].between(-180, 180) & donors[
             "latitude"
         ].between(-90, 90)
+        invalid_mask = has_coords & ~valid_coords
 
-        if not valid_mask.all():
-            invalid_rows = donors[~valid_mask]
+        if invalid_mask.any():
+            invalid_rows = donors[invalid_mask]
             raise ValueError(
                 f"invalid coordinates found in donor gage file: {gage_file}\n{invalid_rows}"
             )
@@ -516,7 +519,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     def gdf_donors(self) -> gpd.GeoDataFrame:
         """Geodataframe of donors."""
         _, gdf_donors, _ = self.donor_receiver_gdfs()
-        # if self.sample_size is not None:  #sample_size should not be applied to donors
+        # if self.sample_size is not None:
         #     gdf_donors = gdf_donors.sample(
         #         n=self.sample_size, replace=False, random_state=50
         #     )  # randomly sample a small number of receivers for testing
@@ -1116,7 +1119,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             return processed_receivers_df
 
         # determine the receivers to be processed
-        if processed_receivers_df is not None:
+        if processed_receivers_df is not None and not processed_receivers_df.empty:
             receivers_processed = processed_receivers_df[self.divide_id_name].tolist()
             receivers_tobe_processed = list(
                 set(receivers_tobe_processed) - set(receivers_processed)
