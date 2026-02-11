@@ -1,4 +1,4 @@
-sample_file_path|inputs/cwt_divide_gage/calib_gage_divide_conus.parquet
+sample_file_path|inputs/region/cwt_divide_gage/calib_gage_divide_conus.parquet
 title|Crosswalk table linking gages to catchments (i.e., divides).
 gage_id|Unique identifier for each gage.
 divide_id|Unique identifier for each catchment.

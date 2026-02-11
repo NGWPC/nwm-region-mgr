@@ -1,4 +1,4 @@
-sample_file_path|inputs/calval_stats/stat_calval_all_conus.parquet
+sample_file_path|inputs/region/calval_stats/stat_calval_all_conus.parquet
 title|Calibration and validation statistics for all gages in an NWM domain (e.g., CONUS).
 formulation|NextGen formualtion calibrated for a given gage
 gage_id|Unique identifier for each gage

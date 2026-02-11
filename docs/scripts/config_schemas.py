@@ -412,20 +412,28 @@ def generate_toc_from_markdown(md_text: str) -> str:
 def main(docs_to_create: dict) -> None:
     """Create markdown file documentation for the specified pydantic models."""
     # Static intro paragraph
-    intro_block = ["# Configuration File Builder\n"]
+    intro_block = ["# Regionalization Configuration\n"]
     intro_block.append("### Introduction\n")
     intro_block.append(
-        "Welcome to the Configuration File Builder! The tabs on the left (currently under development) "
-        "will take you to the builder for each of the specific config files. Once in the builder, "
-        "you will be prompted to enter setup information for your regionalization run, or you "
-        "can scroll to the bottom to fill in default values. Once done, hit 'download' to save "
-        "the generated configuration YAML file to your local system.\n"
+        "This section provides detailed documentation for the configuration files used "
+        "in the NWM Regionalization Manager (nwm-region-mgr) tool. The configuration "
+        "files define the parameters and settings for both formulation and parameter "
+        "regionalization processes.\n"
     )
     intro_block.append(
         "Example files and schemas for all configuration fields and subfields are included below. "
         "You can navigate to each config file or schema section using the tabs on the right or the "
         "table of contents below.\n"
     )
+    intro_block.append(
+        "The tabs on the left will take you to the builder for each of the specific config files. "
+        "Currently, only the general configuration builder is available. The builders "
+        "for formulation and parameter regionalizations are still under development. In the builder, "
+        "you will be prompted to enter setup information for your regionalization run, or you "
+        "can scroll to the bottom to fill in default values. Once done, hit 'download' to save "
+        "the generated configuration YAML file to your local system.\n"
+    )
+
     intro_block = "\n".join(intro_block)
 
     # Describe each config file

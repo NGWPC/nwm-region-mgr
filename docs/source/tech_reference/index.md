@@ -14,7 +14,7 @@ Output Tables<output_data>
 Output Plots<output_plot>
 :::
 
-### Output Structure
+### Output Directory Structure
 
 ```bash
 .
@@ -64,6 +64,11 @@ Output Plots<output_plot>
 │   ├── donor_receiver_dist_conus_vpu01.parquet  # Centroid-to-centroid distances (VPU 01)
 │   └── donor_receiver_dist_conus_vpu02.parquet  # Centroid-to-centroid distances (VPU 02)
 ├── params                                            # Formulation parameters to be used by MSWM
+│   ├── plots                                              # spatial visualizations of selected regionalized parameters
+    │   ├── map_formulation_params_kmeans_conus_vpu01.png  # spatial map of regionalized parameters (kmeans,VPU 01)
+    │   ├── map_formulation_params_kmeans_conus_vpu02.png  # spatial map of regionalized parameters (kmeans,VPU 02)
+    │   ├── map_formulation_params_gower_conus_vpu01.png   # spatial map of regionalized parameters (gower, VPU 01)
+    │   └── map_formulation_params_gower_conus_vpu02.png   # spatial map of regionalized parameters (gower, VPU 02)
 │   ├── formulation_params_gower_conus_vpu01.csv  # Formulation parameter file (gower, VPU 01)
 │   ├── formulation_params_gower_conus_vpu02.csv  # Formulation parameter file (gower, VPU 02)
 │   ├── formulation_params_kmeans_conus_vpu01.csv  # Formulation parameter file (kmeans, VPU 01)
