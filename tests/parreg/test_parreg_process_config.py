@@ -2,10 +2,8 @@
 
 from types import SimpleNamespace
 
-import geopandas as gpd
 import pandas as pd
 import pytest
-from shapely.geometry import Point
 
 from nwm_region_mgr.parreg.process_config import (
     ParameterRegionalizationProcessor as PRP,

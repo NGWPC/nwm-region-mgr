@@ -1,7 +1,5 @@
 """Unit and integration tests for nwm_region_mgr.formreg.process_config.FormulationRegionalizationProcessor."""
 
-from pathlib import Path
-
 import pytest
 
 

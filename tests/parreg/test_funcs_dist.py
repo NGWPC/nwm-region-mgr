@@ -1,8 +1,5 @@
-""" "Unit and integration tests for distance-based pairing functions (funcs_dist.py)."""
+"""Unit and integration tests for distance-based pairing functions (funcs_dist.py)."""
 
-from types import SimpleNamespace
-
-import numpy as np
 import pandas as pd
 import pytest
 
