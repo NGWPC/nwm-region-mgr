@@ -1,6 +1,5 @@
 """Tests for nwm-region-mgr formreg CLI."""
 
-import shutil
 import subprocess
 from pathlib import Path
 

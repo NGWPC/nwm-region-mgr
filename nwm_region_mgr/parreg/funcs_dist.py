@@ -315,13 +315,11 @@ class GowerPairer(DistancePairer):
 
         range_of_reduced_attr = df_attr_reduced.max() - df_attr_reduced.min()
         range_array = np.repeat(
-            # np.matrix(range_of_reduced_attr), number_of_receivers, axis=0
             np.array(range_of_reduced_attr)[None, :],
             number_of_receivers,
             axis=0,
         )
 
-        # weights_array = np.repeat(np.matrix(weights), number_of_receivers, axis=0)
         weights_array = np.repeat(
             np.array(weights)[None, :], number_of_receivers, axis=0
         )
@@ -357,7 +355,6 @@ class GowerPairer(DistancePairer):
     ):
         """Calculate Gower's distance between donors and receivers (to be used in parallel computing)."""
         scores_donor = np.repeat(
-            # np.matrix(df_attr_reduced.iloc[i]), number_of_receivers, axis=0
             np.array(df_attr_reduced.iloc[i])[None, :],
             number_of_receivers,
             axis=0,

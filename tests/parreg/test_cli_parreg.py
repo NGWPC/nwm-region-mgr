@@ -1,6 +1,5 @@
 """Tests for nwm-region-mgr CLI parreg command."""
 
-import shutil
 import subprocess
 from pathlib import Path
 

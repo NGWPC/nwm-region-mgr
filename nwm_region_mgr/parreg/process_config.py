@@ -519,10 +519,6 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     def gdf_donors(self) -> gpd.GeoDataFrame:
         """Geodataframe of donors."""
         _, gdf_donors, _ = self.donor_receiver_gdfs()
-        # if self.sample_size is not None:
-        #     gdf_donors = gdf_donors.sample(
-        #         n=self.sample_size, replace=False, random_state=50
-        #     )  # randomly sample a small number of receivers for testing
         return gdf_donors
 
     @property
