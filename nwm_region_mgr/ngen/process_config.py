@@ -79,11 +79,13 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             "ak": "Alaska",
             "hi": "Hawaii",
             "prvi": "Puerto_Rico",
+            "gl": "gl",
         }
 
         domain = self.config.general.domain.lower()
 
         try:
+            general_domain = domain_map[domain].lower()
             forcing_domain = domain_map[domain]
         except KeyError:
             raise ValueError(
@@ -105,6 +107,7 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             work_dir=self.ngen_work_dir,
             nprocs=self.resolve_num_processes(self.config.general.n_procs),
             static_data_dir=self.config.general.static_data_dir,
+            domain=general_domain,
             global_domain=forcing_domain,
             forcing_configuration=forcing_source,
         )
