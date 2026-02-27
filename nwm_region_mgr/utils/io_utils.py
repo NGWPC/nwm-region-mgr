@@ -3,8 +3,8 @@
 io_utils.py
 
 Functions:
-- save_data: Save data to disk in an appropriate format based on its type and file extension
-- read_table: Read a table from a file, supporting CSV and Parquet formats.
+    - save_data: Save data to disk in an appropriate format based on its type and file extension
+    - read_table: Read a table from a file, supporting CSV and Parquet formats.
 
 """
 

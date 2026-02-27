@@ -78,24 +78,5 @@ Note in Figure 2, NextGen divides are labeled as "HUC12"
    **Figure 5.** Optional re-designation of formulations at streamgauges.
 
 
-Notes
------
-- Configuration for formulation regionalization is specified in `config_formreg.yaml`.
-
-- The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
-
-- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
-  parameter regionalization requires formulation regionalization to be completed first.
-
-- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
-  formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
-  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
-  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
-  share the same formulation as the uncalibrated catchment.
-
-- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
-  additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
-
-
 .. toctree::
    :maxdepth: 2

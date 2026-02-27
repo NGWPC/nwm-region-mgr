@@ -4,18 +4,18 @@ This module provides functions to select formulations based on summary scores of
 as well as formulation costs if provided in the configuration.
 
 Functions:
-- _get_gages_with_shared_formulations: Identify the formulations shared by a number of gages.
-- _find_gages_nearest_neighbor: Find gages for a given HUC ID using the nearest neighbor method.
-- _find_gages_upscaling: Find gages for a given HUC ID using the upscaling method.
-- _find_calibration_gages: Find gages for a given HUC ID in the summary scores DataFrame.
-- _get_formulation_costs: Retrieve formulation costs from the configuration.
-- _select_formulation_given_score: Select a formulation for each spatial unit based on the method specified.
-- _identify_best_formulation_per_gage: Identify the best formulation for each gage based on summary scores and costs.
-- select_formulation_donors_only: Select formulations for donor basins only.
-- select_formulation_all: Select formulations for all basins.
-- save_formulation_results: Save the formulation selection results to file.
-- plot_formulation_results: Plot the formulation selection results.
-- select_formulation: Head function to select formulations for each spatial unit in the VPU.
+    - _get_gages_with_shared_formulations: Identify the formulations shared by a number of gages.
+    - _find_gages_nearest_neighbor: Find gages for a given HUC ID using the nearest neighbor method.
+    - _find_gages_upscaling: Find gages for a given HUC ID using the upscaling method.
+    - _find_calibration_gages: Find gages for a given HUC ID in the summary scores DataFrame.
+    - _get_formulation_costs: Retrieve formulation costs from the configuration.
+    - _select_formulation_given_score: Select a formulation for each spatial unit based on the method specified.
+    - _identify_best_formulation_per_gage: Identify the best formulation for each gage based on summary scores and costs.
+    - select_formulation_donors_only: Select formulations for donor basins only.
+    - select_formulation_all: Select formulations for all basins.
+    - save_formulation_results: Save the formulation selection results to file.
+    - plot_formulation_results: Plot the formulation selection results.
+    - select_formulation: Head function to select formulations for each spatial unit in the VPU.
 
 """
 
