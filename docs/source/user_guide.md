@@ -89,7 +89,7 @@ Note: When using `run_region.sh`, the short flags `-f`, `-p`, `-n`, and `-e` can
 time /ngencerf-app/nwm-rte/run_region.sh -c configs -f -p -n -e
 ``` 
 #### Run regionalization with a specific RTE image tag
-By default, the nwm-rte image with tage `latest` will be used to run the regionalization workflow. To use a specific 
+By default, the nwm-rte image with tag `latest` will be used to run the regionalization workflow. To use a specific 
 image tag (e.g., for testing with a new image), set the variable `image_tag` in the script as shown below:
 ```bash
 # run all steps with sample configle and a specific image tag

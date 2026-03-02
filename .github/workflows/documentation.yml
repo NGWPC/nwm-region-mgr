@@ -2,7 +2,7 @@ name: documentation
 
 on:
   push:
-    branches: [ "documentation" ]
+    branches: [ "yliu_NGWPC-9419_oconus_region_runs" ]
 
 permissions:
   contents: write
