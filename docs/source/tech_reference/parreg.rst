@@ -182,6 +182,30 @@ for any unpaired receivers after the main pairing method is applied:
 * **HDBSCAN vs BIRCH**: Both hierarchical, but HDBSCAN is density-based and detects irregular clusters, while
   BIRCH is tree-based and designed for large datasets with roughly spherical clusters.
 
+Notes
+-----
+
+- Configuration for parameter regionalization is specified in `config_parreg.yaml`.
+
+- The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
+
+- Currently, three attribute datasets are supported:
+
+  * `NextGen attributes <https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>`_.
+  * `Hydrologic Landscape Regions (HLR) attributes <https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>`_.
+  * `StreamCat attributes <https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>`_.
+
+- Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
+  algorithm inefficiency.
+
+- Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
+  regionalization run, the workflow will first check if the required outputs from formulation regionalization for
+  the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
+  proceeding with parameter regionalization.
+
+- Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
+  depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
+
 .. toctree::
    :maxdepth: 2
 

@@ -93,6 +93,8 @@ as shown below:
 time [RTE_REPO_ROOT]/run_region.sh -c configs --parreg --ngen --eval
 ```
 
+See `[RTE_REPO_ROOT]/run_region.sh --help` for more details on the command line arguments and options.
+
 ## Desktop/Workspace
 ### Clone & Build
 
@@ -190,3 +192,9 @@ Outputs from evaluation can be found in *[output_dir]* as specified in **config_
 - Create new pseduo calibration/validation stats for different formulations, using this [script](https://github.com/NGWPC/nwm-region-mgr/blob/yliu_NGPWC-6984/util_scripts/run_create_pseudo_calval_stats.sh)
 - Create geopackages for a new VPU using this [script](https://github.com/NGWPC/nwm-region-mgr/blob/yliu_NGPWC-6984/util_scripts/subset_conus_gpkg_by_vpu.py)
 - Create gage list files and NGEN divide-gage crosswalk file for a new domain using this [script](https://github.com/NGWPC/nwm-verf/blob/yliu_NGWPC-6986/utils/create_ngen_crosswalk_regionalization.py)
+
+## Testing
+
+Unit tests are located under `tests/` and use pytest.
+
+See `tests/README.md` for details.
