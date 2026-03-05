@@ -1,12 +1,12 @@
 """Functions to create donor-receiver pairs using clustering methods.
 
-This function performs donor-receiver pairing based on clustering using
-  k-means clustering (method = "kmeans")
-  k-medoids clustering (method = "kmedoids")
-  HDBSCAN (method = "hdbscan") - Hierarchical Density-Based Spatial Clustering of Applications with Noise.
-     Finds core samples of high density and expands clusters from them.
-  BIRCH (method = "birch") - Balanced Iterative Reducing & Clustering with Hierarchy. Scalable for large datasets.
-     Order of points in the dataset influences the outcome. Hence interactive resampling is implemented here.
+This function performs donor-receiver pairing based on clustering using:
+    - k-means clustering (method = "kmeans")
+    - k-medoids clustering (method = "kmedoids")
+    - HDBSCAN (method = "hdbscan") - Hierarchical Density-Based Spatial Clustering of Applications with Noise.
+    Finds core samples of high density and expands clusters from them.
+    - BIRCH (method = "birch") - Balanced Iterative Reducing & Clustering with Hierarchy. Scalable for large datasets.
+    Order of points in the dataset influences the outcome. Hence interactive resampling is implemented here.
 
 Notes:
   1) the clustering is done in multiple rounds to handle data gaps in attributes

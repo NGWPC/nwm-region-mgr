@@ -73,6 +73,28 @@ class NgenSimulationProcessor(BaseConfigProcessor):
         self.config.general.start_time = start_time.strftime(TIMESTAMP_FMT1)
         self.config.general.end_time = end_time.strftime(TIMESTAMP_FMT1)
 
+        # global_domain for ngen-forcing
+        domain_map = {
+            "conus": "CONUS",
+            "ak": "Alaska",
+            "hi": "Hawaii",
+            "prvi": "Puerto_Rico",
+            "gl": "gl",
+        }
+
+        domain = self.config.general.domain.lower()
+
+        try:
+            general_domain = domain_map[domain].lower()
+            forcing_domain = domain_map[domain]
+        except KeyError:
+            raise ValueError(
+                f"Unsupported domain: {domain}. "
+                f"Supported options: {', '.join(domain_map.keys())}."
+            )
+
+        forcing_source = "aorc" if domain == "conus" else "nwm"
+
         # Replace placeholders in the template
         config_content = template_content.format(
             vpu="vpu_" + vpu,
@@ -85,6 +107,9 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             work_dir=self.ngen_work_dir,
             nprocs=self.resolve_num_processes(self.config.general.n_procs),
             static_data_dir=self.config.general.static_data_dir,
+            domain=general_domain,
+            global_domain=forcing_domain,
+            forcing_configuration=forcing_source,
         )
 
         # Write the new config file

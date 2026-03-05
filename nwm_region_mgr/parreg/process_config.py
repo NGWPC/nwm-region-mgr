@@ -3,38 +3,38 @@
 process_config.py
 
 Functions:
-- run_parreg_for_vpu: Run the parameter regionalization process for a given VPU.
-- set_vpu: Set the VPU for processing.
-- get_donors_receivers: Get the donors and receivers for a given VPU from the config.
-- get_initial_donor_df: Get initial donor gage/catchment df (before screening with stats) for a specific VPU.
-- donor_receiver_gdfs: Get the donor and receiver GeoDataFrames for a given VPU.
-- update_spatial_distance_donors: Update existing dataframe for pairwise spatial distance to include new donors.
-- update_spatial_distance_receivers: Update existing dataframe for pairwise spatial distance to include new receivers.
-- compute_donor_receiver_spatial_distance: Compute spatial distance between donors and receivers.
-- write_spatial_file: Save the spatial distance data.
-- generate_pairing: Generate pairings based on the spatial distance and attributes.
-- process_attr_data: Process attribute data for donors and receivers.
-- set_snow_flag: Set the snow flag in the attribute data.
-- build_hydrofabric_path: Build hydrofabric path for a given VPU.
-- donors_df: Get the donors DataFrame.
-- donors_gdf: Get the donors GeoDataFrame.
-- hydrofabric_gdf: Get the hydrofabric GeoDataFrame.
-- hydrofabric_gdf_3857: Get the hydrofabric GeoDataFrame projected to EPSG:3857.
-- donor_gdf_3857: Get the donors GeoDataFrame projected to EPSG:3857.
-- combined_geom: Get the combined geometry of the hydrofabric.
-- hydrofabric_buffered_polygon: Get the buffered hydrofabric polygon.
-- donor_basins: Get the donor basins for a given VPU.
-- donor_basins_all: Get all donor basins from the calibration parameter file.
-- donors: Get the list of donor IDs.
-- receivers: Get the list of receiver IDs.
-- number_of_donors: Get the number of donors.
-- number_of_receiver: Get the number of receivers.
-- dist_file: Build the path for the spatial distance file.
-- dist_spatial: Get the spatial distance DataFrame.
-- set_formulation_dict: Set the {formulation: catchments} dictionary.
-- get_base_attr_list_all: Get the base attribute list from all datasets.
-- df_attrs_all: Get the DataFrame containing all attributes.
-- datasets: Get the list of datasets from the config.
+    - run_parreg_for_vpu: Run the parameter regionalization process for a given VPU.
+    - set_vpu: Set the VPU for processing.
+    - get_donors_receivers: Get the donors and receivers for a given VPU from the config.
+    - get_initial_donor_df: Get initial donor gage/catchment df (before screening with stats) for a specific VPU.
+    - donor_receiver_gdfs: Get the donor and receiver GeoDataFrames for a given VPU.
+    - update_spatial_distance_donors: Update existing dataframe for pairwise spatial distance to include new donors.
+    - update_spatial_distance_receivers: Update existing dataframe for pairwise spatial distance to include new receivers.
+    - compute_donor_receiver_spatial_distance: Compute spatial distance between donors and receivers.
+    - write_spatial_file: Save the spatial distance data.
+    - generate_pairing: Generate pairings based on the spatial distance and attributes.
+    - process_attr_data: Process attribute data for donors and receivers.
+    - set_snow_flag: Set the snow flag in the attribute data.
+    - build_hydrofabric_path: Build hydrofabric path for a given VPU.
+    - donors_df: Get the donors DataFrame.
+    - donors_gdf: Get the donors GeoDataFrame.
+    - hydrofabric_gdf: Get the hydrofabric GeoDataFrame.
+    - hydrofabric_gdf_3857: Get the hydrofabric GeoDataFrame projected to EPSG:3857.
+    - donor_gdf_3857: Get the donors GeoDataFrame projected to EPSG:3857.
+    - combined_geom: Get the combined geometry of the hydrofabric.
+    - hydrofabric_buffered_polygon: Get the buffered hydrofabric polygon.
+    - donor_basins: Get the donor basins for a given VPU.
+    - donor_basins_all: Get all donor basins from the calibration parameter file.
+    - donors: Get the list of donor IDs.
+    - receivers: Get the list of receiver IDs.
+    - number_of_donors: Get the number of donors.
+    - number_of_receiver: Get the number of receivers.
+    - dist_file: Build the path for the spatial distance file.
+    - dist_spatial: Get the spatial distance DataFrame.
+    - set_formulation_dict: Set the {formulation: catchments} dictionary.
+    - get_base_attr_list_all: Get the base attribute list from all datasets.
+    - df_attrs_all: Get the DataFrame containing all attributes.
+    - datasets: Get the list of datasets from the config.
 
 """
 

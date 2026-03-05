@@ -80,6 +80,15 @@ Process
 Pairing Methods
 ----------------
 
+Currentlly a total of six main pairing methods are supported, in addition to the proximity method used as a fallback
+for any unpaired receivers after the main pairing method is applied:
+
+* **Gower** (distance-based)
+* **URF** (unsupervised random forest, distance-based)
+* **KMeans** (clustering-based)
+* **KMedoids** (clustering-based)
+* **HDBSCAN** (clustering-based)
+* **BIRCH** (clustering-based)
 
 **Distance-based methods**
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,18 +1,26 @@
 # User Guide
 
+## Overview of regionalization workflow
+
+The regionalization workflow includes the following steps:
+ - **STEP 0**: run calibration and collect formulation prameters and calibration/validation statistics
+ - **STEP 1**: formulation & parameter regionalization (via nwm-region-mgr)
+ - **STEP 2**: regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
+ - **STEP 3**: evaluation of regionalized simulations (via nwm-verf and nwm-eval-mgr)
+
+![Regionalization Workflow](_images/regionalization_workflow.jpeg)
+
 ## Run regionalization with NWM-RTE on INT/EA/UAT Clusters
 
 On the INT/EA/UAT clusters, all software dependencies for regionalization are installed and managed through 
-NWM-RTE (Run Time Environment). Follow the steps below to run the regionalization workflow, which includes three steps:
- - formulation & parameter regionalization (via nwm-region-mgr)
- - regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
- - evaluation of regionalized simulations (via nwm-verf and nwm-eval-mgr)
+NWM-RTE (Run Time Environment, `/ngencerf-app/nwm-rte`). Regionalization workflows are executed via docker containers using an 
+[nwm-rte image](https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte).
 
 ### Test the sample regionalization workflow
 
 - Navigate to your preferred working directory (e.g., `/ngen-oe/$USER/run_region`, `/ngen-dev/$USER/run_region`, 
 or `~/run_region`). 
-- Copy sample config files from `nwm-region-mgr/configs/` to your working directory., e.g.,
+- Copy sample config files from `/ngencerf-app/nwm-region-mgr/configs/` to your working directory., e.g.,
 ```bash
 cd /ngen-oe/$USER/run_region  # or your preferred working directory
 cp -r /ngencerf-app/nwm-region-mgr/configs .
@@ -21,71 +29,77 @@ cp -r /ngencerf-app/nwm-region-mgr/configs .
   - `sbatch_run_region.sh`, for submitting jobs to compute nodes on INT/EA/UAT via SBATCH (recommended)
   - `run_region.sh`, for running directly on the controller node or local AWS workspace (only for small regions or testing purposes)
 
-On INT/EA/UAT, the root directory of **nwm-rte** is `/ngencerf-app/nwm-rte`. 
+#### Step 1. Run regionalization
 
-### Step 1. Run regionalization
-
-#### a) Run formulation regionalization alone (no parreg):
-The short flag `-f` can also be used in place of `--formreg`. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_formreg.yaml`. Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite.
+a) Run formulation regionalization alone (no parreg):
+Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_formreg.yaml`. 
 
 ```bash
 # submit to compute nodes on INT/EA/UAT
 /ngencerf-app/nwm-rte/sbatch_run_region.sh configs formreg
 
-# or run directly in controller node or local AWS workpsace
+# or run directly in controller node or local AWS workspace
 time /ngencerf-app/nwm-rte/run_region.sh -c configs --formreg
 ```
 
-#### b) Run parameter regionalization (formreg is also ran as a prerequisite):
-The short flag `-p` can also be used in place of `--parreg`. Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
+b) Run parameter regionalization (formreg is also run as a prerequisite):
+Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
 ```bash
 # submit to compute nodes on INT/EA/UAT
 /ngencerf-app/nwm-rte/sbatch_run_region.sh configs parreg
 
-# or run directly in controller node or local AWS workpsace
+# or run directly in controller node or local AWS workspace
 time /ngencerf-app/nwm-rte/run_region.sh -c configs --parreg
 ```
-### Step 2. Run NGEN
-Run a NGEN simulation.
-
-The short flag `-n` can also be used in place of `--ngen`. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_ngen.yaml`.
+#### Step 2. Run NGEN
+Run NGEN simulations. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_ngen.yaml`.
 ```bash
 # submit to compute nodes on INT/EA/UAT
 /ngencerf-app/nwm-rte/sbatch_run_region.sh configs ngen
 
-# or run directly in controller node or local AWS workpsace
+# or run directly in controller node or local AWS workspace
 time /ngencerf-app/nwm-rte/run_region.sh -c configs --ngen
 ```
 
-### Step 3. Run Evaluation
-Run an evaluation.
-
-The short flag `-e` can also be used in place of `--eval`. Prior to running, configure the settings in `configs/config_eval.yaml`.
+#### Step 3. Run Evaluation
+Run an evaluation. Prior to running, configure the settings in `configs/config_eval.yaml`.
 ```bash
 # submit to compute nodes on INT/EA/UAT
 /ngencerf-app/nwm-rte/sbatch_run_region.sh configs eval
 
-# or run directly in controller node or local AWS workpsace
+# or run directly in controller node or local AWS workspace
 time /ngencerf-app/nwm-rte/run_region.sh -c configs --eval
 ``` 
 
-### To run all steps in one command
-Typically, we do not recommend running all three steps in one command, since users may want to inspect the outputs 
-from each step before proceeding to the next step. However, it is possible to run all three steps in one command 
-as shown below:
+#### Run all steps in one command
+Users may prefer running the above steps sequencially so they can inspect the outputs from each step before 
+proceeding to the next step. However, it is possible to run all three steps in one command as shown below:
 
 ```bash
 # submit to compute nodes on INT/EA/UAT
 /ngencerf-app/nwm-rte/sbatch_run_region.sh configs parreg ngen eval
 
-# or run directly in controller node or local AWS workpsace
+# or run directly in controller node or local AWS workspace
 time /ngencerf-app/nwm-rte/run_region.sh -c configs --parreg --ngen --eval
 ```
+Note: When using `run_region.sh`, the short flags `-f`, `-p`, `-n`, and `-e` can also be used in place of `--formreg`,
+`--parreg`, `--ngen`, and `--eval`, respectively. The short flags are not supported when using `sbatch_run_region.sh`.
+```bash
+# run all steps with short flags (only for run_region.sh)
+time /ngencerf-app/nwm-rte/run_region.sh -c configs -f -p -n -e
+``` 
+#### Run regionalization with a specific RTE image tag
+By default, the nwm-rte image with tag `latest` will be used to run the regionalization workflow. To use a specific 
+image tag (e.g., for testing with a new image), set the variable `image_tag` in the script as shown below:
+```bash
+# run all steps with sample configle and a specific image tag
+/ngencerf-app/nwm-rte/sbatch_run_region.sh /ngencerf-app/nwm-region-mgr/configs parreg ngen eval --image-tag pr-22-build
+```
+
 
 ### Customize and run your own regionalization workflow
- - If necessary/applicable, prepare input data files (e.g., calibration/validation statistics, catchment 
-attributes, etc.). Refer to the [Input Data](tech_reference/input_data.rst) subsection for details. 
-   - Calibration/validation statistics can be collected from earlier calibration runs using the commands below, which will generate a csv file containing the statistics for all specified calibration job IDs, along with another csv file listing the corresponding calibrated parameter sets. These files can then be used in the regionalization configuration files.
+ - Prepare input data files. Refer to the [Input Data](tech_reference/input_data.rst) subsection for details. 
+   - Calibration/validation statistics can be collected from earlier ngenCERF calibration runs using the commands below, which will generate a csv file (in your current run directory) containing the statistics for all specified calibration job IDs, along with another csv file listing the corresponding calibrated parameter sets. These files can then be used in the regionalization configuration files.
       ```bash
         ngencerf regionalization 609 610 # where 609 and 610 are example calibration job IDs
 
@@ -94,7 +108,7 @@ attributes, etc.). Refer to the [Input Data](tech_reference/input_data.rst) subs
       ```
  - Adjust configuration files in `configs/` to set up your desired regionalization experiment. Refer to the 
 [Configuration](config_builder/index.md) tab for details on each config file and available options.
- - Follow Steps 0-3 above to execute the customized workflow.
+ - Follow Steps 1-3 above to execute the regionalization workflow.
 
 ### Example application: comparing different regionalization methods
 In this section, we will walk through an example application where we compare gower vs. kmeans clustering for 
@@ -116,7 +130,7 @@ cp -r configs/ test1_configs/
 #### 0.2 Update `test1_configs/config_parreg.yaml`
  - Set **general.attr_dataset_list** to *['ngen','streamcat']* as the attribute datasets for computing catchment similarity
  - Set **general.algorithm_list** to *['gower', 'kmeans']*. This will run parameter regionalization using both algorithms sequentially.
- - Set **donor.buffer_km** to 100 (instead of 200) to use a smaller donor pool for this experiment
+ - Set **donor.buffer_km** to 100 (instead of 200) to use a smaller donor search neighbourhood (around the VPU) for this experiment
  - Select specific attributes from each dataset using the attribution selection file
    - copy sample attribute selection files from `/ngencerf-app/nwm-region-mgr/data/inputs/region/attr_config/` to working directory
    ```bash
@@ -139,7 +153,7 @@ cp -r configs/ test1_configs/
 
 #### 1. Run regionalization
 
-Run the regionalization step as in Step 1 above, using the updated configuration files in `configs/`.
+Run the regionalization step as in Step 1 above, using the updated configuration files in `test1_configs/`.
 
 
 ```bash
@@ -159,7 +173,7 @@ After completion, check the output folder `outputs/region/test1/`, which contain
  - `summary_score/`: summary score for all donor candidates
  - `config_formreg_final.yaml` and `config_parreg_final.yaml`: the final (expanded) configuration files used in this run.
 
-See the **Output Directory Structure** subsection in the [Technical Reference](tech_reference/index.md#output-directory-structure) tab for details on output files and plots.
+See the **Output Directory Structure** subsection in the [Technical Reference](tech_reference/index.md#output-directory-structure) tab for details on the output directory structure.
 
 See the [Output Tables](tech_reference/output_data.rst) and [Output Plots](tech_reference/output_plot.rst) subsections in the [Technical Reference](tech_reference/index.md) tab for details on output files and plots.
 
@@ -168,12 +182,11 @@ See the [Output Tables](tech_reference/output_data.rst) and [Output Plots](tech_
 In this experiment, we will run NGEN simulations using the parameter sets derived from both gower and kmeans methods, respectively. 
 
 First, update the `test1_configs/config_ngen.yaml` file as follows:
- - Set **algorithm_list** to ['gower'] for the first run
+ - Set **algorithm_list** to `['gower']` for the first run
  - Set **start_time** and **end_time** to define the simulation period (e.g., '2022-10-01T00:00:00' to '2022-10-10T00:00:00'). Here for demonstration purposes we use a 10-day period in October 2022.
  - The other fields can remain unchanged.
 
 Run the NGEN simulation step as in Step 2 above.
-ng
 ```bash
 /ngencerf-app/nwm-rte/sbatch_run_region.sh test1_configs ngen
 ```
@@ -181,14 +194,14 @@ ng
 After completion, the simulation outputs will be saved in the folder
 `outputs/ngen/regionalization/test1_gower/vpu09/Output/`, where the streamflow outputs can be found in the file `troute_output_202210010000.nc`. Note that the sub-folder name `test1_gower` includes the run_name (here *test1*) and the algorithm used (here *gower*).
 
-Next, update the `test1_configs/config_ngen.yaml` file again to set **algorithm_list** to ['kmeans'] for the second run, while keeping other fields unchanged. Reun the NGEN simulation step again.
+Next, update the `test1_configs/config_ngen.yaml` file again to set **algorithm_list** to `['kmeans']` for the second run, while keeping other fields unchanged. Run the NGEN simulation step again.
 
 After completion, the simulation outputs will be saved in the folder
 `outputs/ngen/regionalization/test1_kmeans/vpu09/Output/`, where the streamflow outputs can be found in the file `troute_output_202210010000.nc`.
 
-Depending on available computational resources, each NGEN simulation may take an hour or more to complete.
+Depending on available computational resources, each NGEN simulation may take up to an hour or more to complete.
 
-Alternatively, you can also run NGEN simulation for both gower and kmeans methods in a single run by setting **algorithm_list** to ['gower', 'kmeans'] and running the NGEN step once.
+Alternatively, you can also run NGEN simulation for both gower and kmeans methods in a single run by setting **algorithm_list** to `['gower', 'kmeans']`.
 
 #### 3. Run evaluation
 
@@ -198,19 +211,23 @@ Update the `configs/config_eval.yaml` file as follows:
  - Set **general.location_set_name** to *vpu_09*
  - Set **general.dataset_name** to *[test1_kmeans, test1_gower]*. This defines the names of the two datasets to be evaluated and intercompared, corresponding to the two algorithms used in parameter regionalization.
  - Set **general.nwm_version** to *[ngen, ngen]*. Both simulations use the ngen configuration.
- - Set **general.fcst_start_date** and **general.fcst_end_date** to define the simulation period (e.g., '2022-10-01T00:00:00' to '2022-10-10T00:00:00'), consistent with the simulation period used above. Both fields should be lists with the same length as **dataset_name**.
- - Set **general.eval_start_date** and **general.eval_end_date** to define the evaluation period (e.g., '2022-10-03T00:00:00' to '2022-10-10T00:00:00'). Here we use an 8-day evaluation period starting from October 3, 2022, to allow a 2-day spin-up period. Both fields should be lists with the same length as **dataset_name**.
- - Set **file_paths.output_dir** to point to the directory where evaluation outputs should be saved. Here we add the **run_name** from regionalization `test1` (e.g., '{base_dir}/outputs/eval/test1/{location_set_name}'), to ensure evaluation outputs are also organized by regionalization runs.
+ - Set **general.fcst_start_date** and **general.fcst_end_date** to define the simulation period (e.g., `'2022-10-01T00:00:00'` to `'2022-10-10T00:00:00'`), consistent with the simulation period used above. Both fields should be lists with the same length as **dataset_name**, e.g.,
+      ```bash
+      forecast_start_date: ['2012-10-01 00:00:00', '2012-10-01 00:00:00'] 
+      forecast_end_date: ['2012-10-10 00:00:00', '2012-10-10 00:00:00']
+      ```
+ - Set **general.eval_start_date** and **general.eval_end_date** to define the evaluation period (e.g., `'2022-10-03T00:00:00'` to `'2022-10-10T00:00:00'`). Here we use an 8-day evaluation period starting from October 3, 2022, to allow a 2-day spin-up period. Both fields should be lists with the same length as **dataset_name**.
+ - Set **file_paths.output_dir** to point to the directory where evaluation outputs should be saved. Here we add the **run_name** from regionalization `test1` (e.g., `'{base_dir}/outputs/eval/test1/{location_set_name}'`), to ensure evaluation outputs are also organized by regionalization runs.
  - Update fields in metics and plotting sections as desired. Here we will compute and plot a set of default evaluation metrics: KGE (Kling-Gupta Efficiency), NSE (Nash-Sutcliffe Efficiency), NNSE (Normalized NSE), and Correlation (CORR). Note the **lead_times** fields are not applicable here since we are evaluating simulations.
 
-Note: if you would like explore other configuration options for evaluation, refer to the [nwm.verf documentation](
+Note: if you would like to explore other configuration options for evaluation, refer to the [nwm.verf documentation](
 https://confluence.nextgenwaterprediction.com/spaces/NGWPC/pages/54132769/Forecast+Verification+nwm-verf+Configuration)
 
 Run the evaluation step as in Step 3 above.
 ```bash
 /ngencerf-app/nwm-rte/sbatch_run_region.sh test1_configs eval
 ```
-After completion, evaluation results will be saved in the folder `data/outputs/eval/regionalization/test1/vpu_09/`, including
+After completion, evaluation results will be saved in the folder `data/outputs/eval/test1/vpu_09/`, including
  - `joined/`: combined observed and simulated streamflow data for all locations in parquet format; each file corresponds to one dataset (i.e., algorithm)
  - `metrics/`: evaluation metrics tables for all locations in parquet format; each file corresponds to one dataset (i.e., algorithm)
  - `plots/ngen_simulation/`: evaluation plots for all locations, comparing the two algorithms
@@ -284,16 +301,15 @@ Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/inputs
 #### 2) Run the regionalization script
 
 ```bash
-python [NGEN_REG_ROOT]/nwm-region-mgr/regionalization.py [COFIG_DIR] [REG_TYPE]
+python -m nwm_region_mgr [COFIG_DIR] [REG_TYPE]
 ```
 Where:
-- [NGEN_REG_ROOT] refers to the directory where nwm-region-mgr is installed
-- [COFIG_DIR] refers to the directory containing the three config files as noted in 1), e.g.,
-- [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'region' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'region'.
+- [COFIG_DIR] refers to the directory containing the config files as noted in 1)
+- [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'parreg' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'parreg'.
 
 ```bash
 python -m nwm_region_mgr configs formreg # to run formulation regionalization only
-python -m nwm_region_mgr configs region # to run parameter regionalization (and formulation regionalization if not done already)
+python -m nwm_region_mgr configs parreg # to run parameter regionalization (and formulation regionalization if not done already)
 ```
 
 ### STEP 2: Run NGEN simulation with regionalized parameters
@@ -323,6 +339,136 @@ python -m nwm.verf config_eval.yaml
 ```
 #### 5) Check outputs
 Outputs from evaluation can be found in *[output_dir]* as specified in **config_eval.yaml**
+
+
+## Helpful tips and notes
+
+### Running regionalization on INT/EA/UAT clusters
+
+#### Job submission
+Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
+customize the job submission (see the header of the script for usage details). You can adpat the following bash script
+for your needs:
+
+```bash
+#!/bin/bash
+
+# required argument
+CONFIG_DIR="./configs_test"
+
+# Optional arguments to override the defaults
+image_tag="pr-22-build" # default: latest. Check available image tags at: https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte
+pull_image=false #default: false
+workflow_options=(parreg ngen eval) #default: parreg. Valid options: formreg, parreg, ngen, eval
+dry_run=false #default: false
+
+# ==== Typically no need to modify lines below ====
+SCRIPT_TO_RUN="/ngencerf-app/nwm-rte/sbatch_run_region.sh"
+
+# Build optional arguments
+extra_args=()
+
+if [ "$pull_image" = true ]; then
+    extra_args+=(--pull-image)
+fi
+
+if [ "$dry_run" = true ]; then
+    extra_args+=(--dry-run)
+fi
+
+"$SCRIPT_TO_RUN" \
+    "$CONFIG_DIR" \
+    "${workflow_options[@]}" \
+    --image-tag "$image_tag" \
+    "${extra_args[@]}" \
+    "$@"
+```
+
+#### Monitoring job status
+After a SLURM job is submitted, you can monitor the job status using:
+```bash
+squeue -u $USER
+```
+The job will typically remain in 'CF' (configuring) state for a few minutes. Once the job status changes to "R" 
+(running), you can monitor the progress by reviewing the log file `logs/region-${JOB_SUFFIX}-%j.log`,
+where, 
+- `${JOB_SUFFIX}` is a string formed by joining the workflows being run with "-"
+- `%j` is the SLURM job ID.
+
+```bash
+tail -f logs/region-parreg-ngen-eval-1124.log
+```
+#### Viewing regionalization outputs
+By default, regionalization outputs are saved in parquet format to increase storage and runtime efficiencies, 
+which can be conviently viewed using an extension (e.g., Parquet Explorer) in VS Code. However, on INT/EA/UAT 
+clusters, these tools are not readily available. 
+
+There are a couple of options for users to view the outputs:
+- Option 1: specify csv format for outputs in the config files `config_formreg.yaml` and `config_parreg.yaml` 
+  (e.g., `output.pairs.format: 'csv'`), which will allow you to save the outputs directly in csv format, e.g., 
+```bash
+output.pairs.format: 'csv'
+output.params.format: 'csv'
+``` 
+- Option 2: use the utility script `view_parquet.sh` in nwm-region-mgr to view parquet files. You can copy 
+this script to your working directory, e.g.,:
+```bash
+cp /ngencerf-app/nwm-region-mgr/util_scripts/view_parquet.sh .
+```
+The script allows you to:
+- preview the parquet file
+- query the file with SQL commands
+- convert the parquet file to csv format etc. 
+
+Check the header of the script for usage instructions.
+
+
+### Formulation regionalization
+
+- Configuration for formulation regionalization is specified in `config_general.yaml` and `config_formreg.yaml`.
+
+- The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
+
+- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
+  parameter regionalization requires formulation regionalization to be completed first.
+
+- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
+  formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
+  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
+  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
+  share the same formulation as the uncalibrated catchment.
+
+- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
+  additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
+
+### Parameter regionalization
+
+- Configuration for parameter regionalization is specified in `config_general.yaml` and `config_parreg.yaml`.
+
+- The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
+
+- Currently, three attribute datasets are supported:
+
+  * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
+  * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
+  * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
+
+- Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
+  algorithm inefficiency.
+
+- Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
+  regionalization run, the workflow will first check if the required outputs from formulation regionalization for
+  the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
+  proceeding with parameter regionalization.
+
+- Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
+  depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
+
+### Other notes 
+- Configuration for the AK domain is slightly different in a few fields:
+  * `config_general.yaml`: `id_col.huc12` should be set to `huc12` (vs. `huc_12` for other domains) 
+  * `config_general.yaml`: `layer_name.huc12` should be set to `WBDHU12` (vs `WBDSnapshot_National` for other domains)
+  * `config_formreg.ymal.huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
 
 
 
