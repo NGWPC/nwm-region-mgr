@@ -3,10 +3,10 @@
 plot_utils.py
 
 Functions:
-- _plot_columns_by_dtype: Plot multiple columns of a GeoDataFrame based on their data types.
-- plot_spatial_map: Generate a spatial map plot for the given data.
-- plot_histogram: Generate histogram plot for the spatial or attribute distance between donors and receivers.
-- plot_point_map: Plot the spatial distribution of locations as points on a base layer map.
+    - _plot_columns_by_dtype: Plot multiple columns of a GeoDataFrame based on their data types.
+    - plot_spatial_map: Generate a spatial map plot for the given data.
+    - plot_histogram: Generate histogram plot for the spatial or attribute distance between donors and receivers.
+    - plot_point_map: Plot the spatial distribution of locations as points on a base layer map.
 
 """
 

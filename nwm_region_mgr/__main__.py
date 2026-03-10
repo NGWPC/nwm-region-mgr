@@ -105,7 +105,7 @@ def _run_parreg(
     mp = ManualPairer(rp.config)
     for vpu in rp.config.general.vpu_list:
         logger.info("Running manual pairings for VPU %s", vpu)
-        mp.run_manual_pairing(vpu)
+        mp.run_manual_pairing(vpu, rp, frp)
 
 
 def _run_ngen(

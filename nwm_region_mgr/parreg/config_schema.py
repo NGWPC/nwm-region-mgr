@@ -46,13 +46,13 @@ class GeneralConfig(BaseGeneralConfig):
         default=["gower"],
     )
 
-    manual_pairings_file: Path | str | None = Field(
+    manual_pairings_file: Path | str | Dict[str, Path] | Dict[str, str] | None = Field(
         description=(
             "Path to the manual pairings file. If provided, this file will be used to specify "
             "manual donor-receiver pairings, overriding the algorithmic selections."
         ),
-        examples="pairs_kmeans_conus_vpu09.parquet",
-        default=None,
+        examples="{static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv",
+        default="{static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv",
     )
 
 

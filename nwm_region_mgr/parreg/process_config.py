@@ -1225,7 +1225,11 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
         # save the gage-donor pairs to a separate file (MSWM requires csv format)
         format0 = co.format
-        co.format = "csv"
+        if co.format != "csv":
+            logger.info(
+                "Output format for MSWM pairs is reset to 'csv' (as required by MSWM)."
+            )
+            co.format = "csv"
         co.save_to_file(
             df_pairs_gage,
             vpu=self.vpu,
@@ -1300,7 +1304,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
                 logger.error(msg)
                 raise FileNotFoundError(msg)
             else:
-                logger.info(
+                logger.debug(
                     f"Loading formulation parameter data from file: {param_file}"
                 )
                 df_param = read_table(param_file, dtype={self.gage_id_name: str})
