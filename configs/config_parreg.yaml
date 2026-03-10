@@ -1,8 +1,8 @@
 ### general 
 general:
-  attr_dataset_list: ['hlr','streamcat']
-  algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
-  #algorithm_list: ['gower','urf','kmeans', 'kmedoids', 'hdbscan', 'birch']
+  attr_dataset_list: ['ngen','streamcat'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat'.
+  algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization. Supported options: 'gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'. 
+  manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu_list}.csv'  # path to the manual pairings file 
 
 donor:
   buffer_km: 200
