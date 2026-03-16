@@ -52,7 +52,7 @@ class GeneralConfig(BaseGeneralConfig):
             "manual donor-receiver pairings, overriding the algorithmic selections."
         ),
         examples="{static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv",
-        default="{static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv",
+        default=None,
     )
 
 

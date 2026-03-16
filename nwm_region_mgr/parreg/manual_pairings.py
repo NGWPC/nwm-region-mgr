@@ -27,7 +27,11 @@ class ManualPairer:
     @property
     def manual_pairings_file(self) -> Path:
         """Path to the manual pairings file."""
-        return self.config.general.manual_pairings_file[self.vpu]
+        files = getattr(self.config.general, "manual_pairings_file", None)
+        if files is None:
+            return None
+
+        return files[self.vpu]
 
     @property
     def divide_col(self):
@@ -289,6 +293,16 @@ class ManualPairer:
         )
 
         dist_spatial = pd.read_parquet(dist_file, columns=list(donor_divides))
+
+        print(f"Dimensions of spatial distance matrix: {dist_spatial.shape}")
+
+        # check if 'cat-417543' is in dist_spatial row index
+        if "cat-417543" in dist_spatial.index:
+            logger.warning("Receiver 'cat-417543' found in spatial distance matrix.")
+        else:
+            logger.warning(
+                "Receiver 'cat-417543' not found in spatial distance matrix. "
+            )
 
         # initialize empty dataframes with correct columns
         df1 = df2 = df3 = df4 = pd.DataFrame(columns=[self.divide_col, "donor"])
