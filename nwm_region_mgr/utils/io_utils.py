@@ -200,13 +200,13 @@ def read_table_safely(
 
 
 def read_table(
-    file_path: Path | str, dtype: dict[str, str] | None = None, refresh: bool = False
+    file_path: Path | str, dtype: dict | None = None, refresh: bool = False
 ) -> pd.DataFrame:
     """Read a table from CSV, TSV, or Parquet with caching and optional automatic refresh.
 
     Args:
         file_path (Path | str): Path to the file to read. Supported formats are CSV, TSV, and Parquet.
-        dtype (dict[str, str] | None): Optional dictionary specifying the data types for specific columns.
+        dtype (dict | None): Optional dictionary specifying the data types for specific columns.
         refresh (bool): If True, forces re-reading the file even if it is cached. Default is False.
 
     Returns:

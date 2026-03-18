@@ -105,7 +105,7 @@ def _run_parreg(
     mp = ManualPairer(rp.config)
     for vpu in rp.config.general.vpu_list:
         logger.info("Running manual pairings for VPU %s", vpu)
-        mp.run_manual_pairing(vpu)
+        mp.run_manual_pairing(vpu, rp, frp)
 
 
 def _run_ngen(
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--sample-size",
         type=int,
-        default=500,
+        default=None,
         help="Sample size for parameter regionalization",
     )
 

@@ -595,6 +595,60 @@ Sample file path: ``outputs/region/formulations/form_conus_vpu03S.parquet``
 
 
 
+.. _pairs_cluster_algorithms:
+
+pairs_cluster_algorithms
+------------------------
+
+Receiver-donor pairs generated from parameter regionalization using clustering-based algorithms (currently KMeans, KMedoids, HDBSCAN, and BIRCH). Attribute distances are not calculated for these algorithms.
+
+Sample file path: ``outputs/region/pairs/pairs_kmeans_conus_vpu03S.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "divide_id", "tag", "donor", "distSpatial", "donors", "distSpatials"
+   "cat-410687", "main", "cat-412161", "18", "cat-412161,cat-412160,cat-412159", "18,28,28"
+   "cat-410688", "main", "cat-412161", "18", "cat-412161,cat-412159,cat-412160", "18,27,28"
+   "cat-410689", "main", "cat-412319", "48", "cat-412319,cat-412276,cat-412275", "48,52,54"
+
+**Schema:**
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Description
+     - Type
+   * - divide_id
+     - Unique identifier for each receiver catchment.  
+     - object
+
+   * - tag
+     - Identifier indicating whether the donor is found using all selected attributes during the "main" run or using basic attributes during the "basic" run.
+     - object
+
+   * - donor
+     - Unique identifier for each donor catchment.
+     - object
+
+   * - distSpatial
+     - Spatial distance between the receiver and donor catchments (in kilometers).
+     - int64
+
+   * - donors
+     - The final set of donors considered for the receiver catchment. The number of final donors is determined by the "n_donor_max" parameter specified in the configuration.
+     - object
+
+   * - distSpatials
+     - Spatial distances corresponding to the final set of donors (in kilometers).
+     - object
+
+
+
+
 .. _pairs_distance_algorithms:
 
 pairs_distance_algorithms
@@ -657,68 +711,14 @@ Sample file path: ``outputs/region/pairs/pairs_gower_conus_vpu03S.parquet``
 
 
 
-.. _pairs_cluster_algorithms:
-
-pairs_cluster_algorithms
-------------------------
-
-Receiver-donor pairs generated from parameter regionalization using clustering-based algorithms (currently KMeans, KMedoids, HDBSCAN, and BIRCH). Attribute distances are not calculated for these algorithms.
-
-Sample file path: ``outputs/region/pairs/pairs_kmeans_conus_vpu03S.parquet``
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "divide_id", "tag", "donor", "distSpatial", "donors", "distSpatials"
-   "cat-410687", "main", "cat-412161", "18", "cat-412161,cat-412160,cat-412159", "18,28,28"
-   "cat-410688", "main", "cat-412161", "18", "cat-412161,cat-412159,cat-412160", "18,27,28"
-   "cat-410689", "main", "cat-412319", "48", "cat-412319,cat-412276,cat-412275", "48,52,54"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - divide_id
-     - Unique identifier for each receiver catchment.  
-     - object
-
-   * - tag
-     - Identifier indicating whether the donor is found using all selected attributes during the "main" run or using basic attributes during the "basic" run.
-     - object
-
-   * - donor
-     - Unique identifier for each donor catchment.
-     - object
-
-   * - distSpatial
-     - Spatial distance between the receiver and donor catchments (in kilometers).
-     - int64
-
-   * - donors
-     - The final set of donors considered for the receiver catchment. The number of final donors is determined by the "n_donor_max" parameter specified in the configuration.
-     - object
-
-   * - distSpatials
-     - Spatial distances corresponding to the final set of donors (in kilometers).
-     - object
-
-
-
-
 .. _pairs_mswm:
 
 pairs_mswm
 ----------
 
-Receiver-donor pairs generated from parameter regionalization to be used by MSWM.
+Receiver donor pairs generated from parameter regionalization to be used by MSWM.
 
-Sample file path: ``outputs/region/pairs/pairs_kmeans_conus_vpu03S_mswm.csv ``
+Sample file path: ``outputs/region/pairs/pairs_kmeans_conus_vpu03S_mswm.csv``
 
 **Example rows:**
 

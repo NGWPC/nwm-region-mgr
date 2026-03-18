@@ -271,7 +271,7 @@ general:
   general: #-------------------------------------------------------------------------------------------------------------------------General configuration settings specific to parameter regionalization.
     attr_dataset_list: ['ngen', 'streamcat'] #---------------------------------------------------------------------------------------List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'.
     algorithm_list: ['gower', 'kmeans'] #--------------------------------------------------------------------------------------------Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity').
-    manual_pairings_file: 'pairs_kmeans_conus_vpu09.parquet' #-----------------------------------------------------------------------Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections.
+    manual_pairings_file: '{static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv' #-----------------------------------Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections.
   donor: #---------------------------------------------------------------------------------------------------------------------------Configuration for donor selection.
     buffer_km: 100.0 #---------------------------------------------------------------------------------------------------------------Size of buffer (in km) around current VPU to identify qualified donors.
     metric_eval_period: #------------------------------------------------------------------------------------------------------------Evaluation period of metrics to be used for screening donors.
@@ -402,7 +402,7 @@ general:
 | --- | --- | --- | --- | --- |
 | attr_dataset_list | List[str = ngen \| hlr \| streamcat] | List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'. | ['ngen'] | ['ngen', 'streamcat'] |
 | algorithm_list | List[str = gower \| urf \| kmeans \| kmedoids \| hdbscan \| birch \| proximity] | Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'). | ['gower'] | ['gower', 'kmeans'] |
-| manual_pairings_file | Path \| str \| NoneType | Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections. | None | pairs_kmeans_conus_vpu09.parquet |
+| manual_pairings_file | Path \| str \| Dict[str, Path] \| Dict[str, str] \| NoneType | Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections. | {static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv | {static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv |
 
 #### parreg Schema (donor)
 

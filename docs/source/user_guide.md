@@ -345,9 +345,28 @@ Outputs from evaluation can be found in *[output_dir]* as specified in **config_
 
 ### Running regionalization on INT/EA/UAT clusters
 
+#### Compute resources
+
+Currently, each regionalization job can only run on a single compute node on the INT/EA/UAT clusters. Two partitions 
+are available on these clusters: `c5n-9xlarge` and `r8a-12xlarge`. Each partition contains 50 compute nodes, with 18
+CPUs per node for `c5n-9xlarge` and 48 CPUs per node for `r8a-12xlarge`. 
+
+Regionalization jobs are submitted to a partition based on the number of parallel processes (n_procs) specified in 
+the config file `config_general.yaml`, as follows:
+- If n_procs <= 18, the job is submitted to the `c5n-9xlarge` partition
+- If 18 < n_procs <= 48, the job is submitted to the `r8a-12xlarge` partition
+- If n_procs > 48, the job is not submitted and an error message is raised, since a single compute node supports 
+  a maximum of 48 CPUs.
+
+To fully utilize available computational resources, it is recommended to set n_procs to match the number of CPUs per node:
+- Use n_procs = 18 for the c5n-9xlarge partition.
+- Use n_procs = 48 for the r8a-12xlarge partition.
+
+Note the partition configuration on these clusters may change in the future (use `sinfo` to check the current configuration).
+
 #### Job submission
 Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
-customize the job submission (see the header of the script for usage details). You can adpat the following bash script
+customize the job submission (see the header of the script for usage details). You can adapt the following bash script
 for your needs:
 
 ```bash
@@ -361,6 +380,7 @@ image_tag="pr-22-build" # default: latest. Check available image tags at: https:
 pull_image=false #default: false
 workflow_options=(parreg ngen eval) #default: parreg. Valid options: formreg, parreg, ngen, eval
 dry_run=false #default: false
+delete_runtime_dir=false #default: false
 
 # ==== Typically no need to modify lines below ====
 SCRIPT_TO_RUN="/ngencerf-app/nwm-rte/sbatch_run_region.sh"
@@ -374,6 +394,10 @@ fi
 
 if [ "$dry_run" = true ]; then
     extra_args+=(--dry-run)
+fi
+
+if [ "$delete_runtime_dir" = true ]; then
+    extra_args+=(--delete-runtime-dir)
 fi
 
 "$SCRIPT_TO_RUN" \
@@ -465,10 +489,73 @@ Check the header of the script for usage instructions.
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
 
 ### Other notes 
-- Configuration for the AK domain is slightly different in a few fields:
+#### AK domain regionalization
+
+  Configuration for the AK domain is slightly different in a few fields:
   * `config_general.yaml`: `id_col.huc12` should be set to `huc12` (vs. `huc_12` for other domains) 
   * `config_general.yaml`: `layer_name.huc12` should be set to `WBDHU12` (vs `WBDSnapshot_National` for other domains)
   * `config_formreg.ymal.huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
+  
+#### Output cleanup
+
+  Each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv,
+  nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. Make sure to update the path in the `cd` command to point to the correct output folder for each algorithm.
+  ```bash
+  # update with your VPU, run name, and algorithm
+  VPU=03S 
+  RUN_NAME=test1 
+  ALGORITHM=gower 
+
+  cd outputs/ngen/regionalization/${RUN_NAME}_${ALGORITHM}/vpu_${VPU}
+  mv -f output output_backup 
+  mkdir output
+  mv -f output_backup/t-route* output/
+  rm -rf output_backup
+  ```
+
+#### Manual pairings
+
+  Manual pairings can be specified in the config file `config_parreg.yaml` to override the algorithm-based donor 
+  selection process for certain receiver catchments. This can be useful when users want to enforce specific 
+  donor-receiver pairs based on their expert knowledge or other considerations. To specify manual pairings, 
+  set the field `manual_pairs_file` to point to a comma-delimited csv file containing the manual pairings, with 
+  one of the following columns pairs: 
+  
+  * receiver_divide_id, donor_divide_id
+  * receiver_divide_id, donor_gage_id
+  * receiver_gage_id, donor_gage_id
+  * receiver_gage_id, donor_divide_id
+  
+  Each row in the file should be populated with exactly one valid receiver column and one valid donor column. 
+  See sample files in `nwm_region_mgr/data/inputs/region/manual_pairs/` for examples of formatting the manual pairings
+  file. The following examples are all valid formats for the manual pairings file:
+  ```bash
+  receiver_divide_id,receiver_gage_id,donor_divide_id,donor_gage_id
+  cat-410687,,cat-423550,
+  cat-410688,,cat-423550,
+  cat-423248,,,023177483
+  ,02207385,,02314500
+  ,02217475,cat-412526,
+  ```
+  ```bash
+  receiver_divide_id,donor_divide_id
+  cat-410687,cat-423550
+  cat-410688,cat-423550
+  ```
+  ```bash
+  receiver_gage_id,donor_gage_id
+  02207385,02314500
+  ```
+  Note that the specified manual pairings will be used to update the final donor-receiver pair files, for each allgorithm 
+  specified in `general.algorithm_list` in `config_parreg.yaml`. A `distSptatial` column will be added to indicate the 
+  spatial distance between the donor and receiver catchments for each manual pair, and a `tag` column will be added to 
+  indicate that these pairs are manually specified. The original pair and parameter files will be saved to backup files 
+  with `_original` added to the filename. Specifically, the following files will be updated with manual pairings:
+  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU].parquet`: the `receiver catchment/divide` vs `donor catchment/divide` pair file
+  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU]_mswm.csv`: the `donor gage` vs `receiver catchment/divide` pair file required
+    by MSWM in the ngen simulation step.
+  - `params/formulation_params_[ALGORITHM]_[DOMAIN]_[VPU].csv`: the donor gage formulation and parameter file required 
+    by MSWM in the ngen simulation step. 
 
 
 

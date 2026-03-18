@@ -1,7 +1,26 @@
+"""Generate RST files with schema tables for input and output data files.
+
+Based on sample files on S3 and description CSVs in the docs folder. This script reads sample file paths
+ from the description CSVs, loads the sample files (csv, parquet, gpkg/gdb) from S3, extracts the schema and
+ a preview of the data, and writes it to RST files for documentation.
+
+The generated RST files are saved in the `docs/source/tech_reference` directory:
+    i.e., `input_data.rst` and `output_data.rst`.
+
+To add a new file schema to the documentation:
+1. Upload a sample file to S3 and get the path.
+2. Add a description CSV in `docs/scripts/data_desc/inputs` or `docs/scripts/data_desc/outputs`
+with a `sample_file_path` entry pointing to the sample file on S3.
+3. Run this script to regenerate the RST files with the new schema included. Prior to running, ensure your AWS
+credentials are up to date in the `.env` file or environment variables for S3 access.
+"""
+
 import os
 import re
+import tempfile
 from io import BytesIO
 from pathlib import Path
+from pprint import pprint
 
 import boto3
 import fiona
@@ -10,15 +29,17 @@ import pandas as pd
 import yaml
 from dotenv import load_dotenv
 
-CONFIG_DIR = "configs"
+S3_DATA_DIR = "regionalization/data"
+INPUT_DATA_DIR = S3_DATA_DIR + "/inputs/region"
+OUTPUT_DATA_DIR = S3_DATA_DIR + "/sample_outputs/test"
 
 DATA_DESC_DIR = "docs/scripts/data_desc"
 OUTPUT_DESC_DIR = DATA_DESC_DIR + "/outputs"
 INPUT_DESC_DIR = DATA_DESC_DIR + "/inputs"
 
 OUT_PATH = "docs/source/tech_reference"
-OUT_PATH_INPUT_DATA = OUT_PATH + "/input_data.rst"
-OUT_PATH_OUTPUT_DATA = OUT_PATH + "/output_data.rst"
+INPUT_DATA_FILE = OUT_PATH + "/input_data.rst"
+OUTPUT_DATA_FILE = OUT_PATH + "/output_data.rst"
 
 
 def initialize_s3_client():
@@ -43,57 +64,24 @@ def initialize_s3_client():
     return s3
 
 
-def get_sample_input_files(yaml_files: list[str]) -> dict[str, str]:
-    all_config = {}
-    for yaml_path in yaml_files:
-        with open(yaml_path, "r") as f:
-            config = yaml.safe_load(f)
-        all_config = deep_merge_keep_both(all_config, config)
+def get_sample_data_files(base_dir: Path, desc_dir: Path) -> dict[str, str]:
+    """Return a dictionary of sample input and output file paths on S3."""
+    # get list of all files in the data description directory
+    desc_files = list(Path(desc_dir).glob("*.csv"))
 
-    path_dict = unpack_dict(all_config)
+    # create a mapping of file stem to sample file path from the description files
     file_dict = {}
-    for k, v in path_dict.items():
-        v = v.replace("{domain}", all_config["general"]["domain"])
-        v = v.replace("{run_name}", all_config["general"]["run_name"])
-        v = v.replace("{base_dir}", all_config["general"]["base_dir"])
-        v = v.replace("{static_data_dir}", all_config["general"]["static_data_dir"])
-        v = v.replace("{vpu_list}", all_config["general"]["vpu_list"][0])
+    for f in desc_files:
+        df = pd.read_csv(f, delimiter="|", index_col=False, header=None)
+        if "sample_file_path" in df[0].values:
+            sample_path = df[df[0] == "sample_file_path"][1].values[0]
+            sample_path = sample_path.replace("inputs/region/", "")
+            sample_path = sample_path.replace("outputs/region/", "")
+            file_dict[Path(f).stem] = base_dir / sample_path
+        else:
+            print(f"Warning: no sample_file_path found in description file {f}")
 
-        if not os.path.exists(v) or not os.path.isfile(v):
-            continue
-        if "output" in k.lower():
-            continue
-        file_dict[k] = v
     return file_dict
-
-
-def get_sample_output_files() -> dict[str, str]:
-    """Return a dictionary of sample output file paths on S3 for different output types."""
-    base_dir = Path("regionalization/data/sample_outputs/test")
-    vpu = "03S"
-    outputs = {
-        "attr_data_final": base_dir
-        / "attr_data_final"
-        / f"attr_conus_vpu{vpu}.parquet",
-        "formulations": base_dir / "formulations" / f"form_conus_vpu{vpu}.parquet",
-        "formulations_pars": base_dir
-        / "formulations"
-        / f"form_conus_vpu{vpu}_pars.parquet",
-        "pairs_distance_algorithms": base_dir
-        / "pairs"
-        / f"pairs_gower_conus_vpu{vpu}.parquet",
-        "pairs_cluster_algorithms": base_dir
-        / "pairs"
-        / f"pairs_kmeans_conus_vpu{vpu}.parquet",
-        "pairs_mswm": base_dir / "pairs" / f"pairs_kmeans_conus_vpu{vpu}_mswm.csv",
-        "params": base_dir / "params" / f"formulation_params_gower_conus_vpu{vpu}.csv",
-        "spatial_distance": base_dir
-        / "spatial_distance"
-        / f"donor_receiver_dist_conus_vpu{vpu}.parquet",
-        "summary_score": base_dir / "summary_score" / f"score_conus_vpu{vpu}.parquet",
-    }
-
-    return outputs
 
 
 def make_anchor(title: str) -> str:
@@ -109,9 +97,6 @@ def schema_to_rst(df: pd.DataFrame, title: str, preview_rows: int = 3) -> str:
     lines = []
     description = ""
     desc_df = None
-
-    # determine whether it is an input or output data file
-    is_output = title in get_sample_output_files().keys()
 
     # read table and column descriptions if the description file is available in either input or output desc dir
     files = list(Path(INPUT_DESC_DIR).glob("*.csv")) + list(
@@ -138,7 +123,7 @@ def schema_to_rst(df: pd.DataFrame, title: str, preview_rows: int = 3) -> str:
     if desc_df is not None and "title" in desc_df[0].values:
         description = desc_df[desc_df[0] == "title"][1].values[0]
     if desc_df is not None and "sample_file_path" in desc_df[0].values:
-        sample_path = desc_df[desc_df[0] == "sample_file_path"][1].values[0]
+        sample_path = desc_df[desc_df[0] == "sample_file_path"][1].values[0].strip()
         description += f"\n\nSample file path: ``{sample_path}``"
     if description:
         lines.append(description)
@@ -189,24 +174,12 @@ def schema_to_rst(df: pd.DataFrame, title: str, preview_rows: int = 3) -> str:
     lines.append("   * - Column")
     lines.append("     - Description")
     lines.append("     - Type")
-    # if not is_output:
-    #     lines.append("     - Nullable")
-
-    # nullables = (
-    #     df.isnull().any().to_dict()
-    #     if len(df) > 0
-    #     else {c: "unknown" for c in df.columns}
-    # )
 
     for col, dtype in df.dtypes.items():
         if desc_df is not None and col in desc_df[0].values:
             col_desc = desc_df[desc_df[0] == col][1].values[0]
         else:
             col_desc = col
-
-        # not using nullable info for now
-        # lines.append(
-        #    f"   * - {col}\n     - {col_desc}\n     - {dtype}\n     - {nullables[col]}\n"
 
         lines.append(f"   * - {col}\n     - {col_desc}\n     - {dtype}\n")
 
@@ -226,7 +199,7 @@ def process_file(
         df = pd.DataFrame()
         return schema_to_rst(df, title)
 
-    ext = os.path.splitext(path)[1].lower()
+    ext = os.path.splitext(path)[1].lower().strip()
     try:
         if s3_client is None:
             if ext == ".csv":
@@ -245,14 +218,33 @@ def process_file(
             else:
                 return
         else:
-            response = s3_client.get_object(Bucket=bucket, Key=str(path))
+            response = s3_client.get_object(Bucket=bucket, Key=str(path).strip())
             if ext == ".csv":
                 df = pd.read_csv(BytesIO(response["Body"].read()), nrows=1000)
             elif ext == ".parquet":
                 df = pd.read_parquet(BytesIO(response["Body"].read()), engine="pyarrow")
+            elif ext in [".gpkg", ".gdb"]:
+                if gpd is None:
+                    raise RuntimeError("geopandas required for GPKG/GDB")
+                # Write S3 content to temporary file
+                with tempfile.NamedTemporaryFile(suffix=ext) as tmp_file:
+                    tmp_file.write(response["Body"].read())
+                    tmp_file.flush()  # ensure data is written
+                    layers = fiona.listlayers(tmp_file.name)
+                    rst_blocks = []
+                    for layer in layers:
+                        gdf = gpd.read_file(tmp_file.name, layer=layer, rows=1000)
+                        rst_blocks.append(
+                            schema_to_rst(gdf, f"{title} (layer: {layer})")
+                        )
+                    return "\n\n".join(rst_blocks)
             else:
+                print(
+                    f"ERROR: Unsupported file type for schema extraction: {ext} in file {path}"
+                )
                 return
     except Exception as e:
+        print(f"ERROR reading {path}: {e}")
         return f".. warning:: Failed to read {path} ({e})"
 
     return schema_to_rst(df, title)
@@ -289,7 +281,7 @@ def deep_merge_keep_both(d1, d2):
     return merged
 
 
-def main(
+def process_schema(
     file_dict: dict[str, str],
     output_rst,
     s3_client=None,
@@ -308,25 +300,20 @@ def main(
 
 if __name__ == "__main__":
     # process input data schemas
-    yaml_files = list(Path(CONFIG_DIR).glob("*.yaml"))
-    yaml_files = [
-        f
-        for f in yaml_files
-        if f.name
-        in [
-            "config_formreg.yaml",
-            "config_parreg.yaml",
-            "config_general.yaml",
-        ]
-    ]  # only process "general", "formreg", "parreg" configs
-
-    main(get_sample_input_files(yaml_files), OUT_PATH_INPUT_DATA, s3_client=None)
+    s3_client = initialize_s3_client()
+    input_files = get_sample_data_files(Path(INPUT_DATA_DIR), Path(INPUT_DESC_DIR))
+    print("============ Creating schemas for input files ============")
+    pprint(input_files)
+    process_schema(
+        dict(sorted(input_files.items())), INPUT_DATA_FILE, s3_client=s3_client
+    )
 
     # process output data schemas
-    s3_client = initialize_s3_client()
-    output_files = get_sample_output_files()
-    main(
-        output_files,
-        OUT_PATH_OUTPUT_DATA,
+    output_files = get_sample_data_files(Path(OUTPUT_DATA_DIR), Path(OUTPUT_DESC_DIR))
+    print("\n============ Creating schemas for output files ============")
+    pprint(output_files)
+    process_schema(
+        dict(sorted(output_files.items())),
+        OUTPUT_DATA_FILE,
         s3_client=s3_client,
     )

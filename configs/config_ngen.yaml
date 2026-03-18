@@ -10,8 +10,8 @@ general:
   # ngen_hydrofabric_file: '{static_data_dir}/hydrofabric/gpkg_vpu/vpu_{vpu_list}.gpkg'  
 
   # ----- fields unique to NGEN simulation (i.e., not in config_general.yaml) ----
-  start_time: '2022-10-01T00:00:00'
-  end_time: '2022-10-01T10:00:00'
+  start_time: '2012-10-01T00:00:00'
+  end_time: '2012-10-01T10:00:00'
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
   par_file: '{base_dir}/outputs/region/{run_name}/params/formulation_params_{algorithm_list}_conus_vpu{vpu_list}.csv'
   pair_file: '{base_dir}/outputs/region/{run_name}/pairs/pairs_{algorithm_list}_conus_vpu{vpu_list}_mswm.csv'

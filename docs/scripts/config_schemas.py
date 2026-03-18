@@ -1,4 +1,11 @@
-"""Generate documentation for configuration schemas and sample configs used in nwm-region-mgr."""
+"""Generate documentation for configuration schemas and sample configs used in nwm-region-mgr.
+
+This script generates markdown documentation for the configuration schemas used in the NWM Regionalization Manager
+    (nwm-region-mgr) tool. It creates example YAML configuration files and detailed markdown tables describing each
+    field in the configuration schemas, including their types, descriptions, default values, and examples.
+
+The generated markdown file is saved to `docs/source/config_builder/index.md`.
+"""
 
 import re
 from pathlib import Path
