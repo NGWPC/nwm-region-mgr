@@ -345,9 +345,28 @@ Outputs from evaluation can be found in *[output_dir]* as specified in **config_
 
 ### Running regionalization on INT/EA/UAT clusters
 
+#### Compute resources
+
+Currently, each regionalization job can only run on a single compute node on the INT/EA/UAT clusters. Two partitions 
+are available on these clusters: `c5n-9xlarge` and `r8a-12xlarge`. Each partition contains 50 compute nodes, with 18
+CPUs per node for `c5n-9xlarge` and 48 CPUs per node for `r8a-12xlarge`. 
+
+Regionalization jobs are submitted to a partition based on the number of parallel processes (n_procs) specified in 
+the config file `config_general.yaml`, as follows:
+- If n_procs <= 18, the job is submitted to the `c5n-9xlarge` partition
+- If 18 < n_procs <= 48, the job is submitted to the `r8a-12xlarge` partition
+- If n_procs > 48, the job is not submitted and an error message is raised, since a single compute node supports 
+  a maximum of 48 CPUs.
+
+To fully utilize available computational resources, it is recommended to set n_procs to match the number of CPUs per node:
+- Use n_procs = 18 for the c5n-9xlarge partition.
+- Use n_procs = 48 for the r8a-12xlarge partition.
+
+Note the partition configuration on these clusters may change in the future (use `sinfo` to check the current configuration).
+
 #### Job submission
 Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
-customize the job submission (see the header of the script for usage details). You can adpat the following bash script
+customize the job submission (see the header of the script for usage details). You can adapt the following bash script
 for your needs:
 
 ```bash
@@ -361,6 +380,7 @@ image_tag="pr-22-build" # default: latest. Check available image tags at: https:
 pull_image=false #default: false
 workflow_options=(parreg ngen eval) #default: parreg. Valid options: formreg, parreg, ngen, eval
 dry_run=false #default: false
+delete_runtime_dir=false #default: false
 
 # ==== Typically no need to modify lines below ====
 SCRIPT_TO_RUN="/ngencerf-app/nwm-rte/sbatch_run_region.sh"
@@ -374,6 +394,10 @@ fi
 
 if [ "$dry_run" = true ]; then
     extra_args+=(--dry-run)
+fi
+
+if [ "$delete_runtime_dir" = true ]; then
+    extra_args+=(--delete-runtime-dir)
 fi
 
 "$SCRIPT_TO_RUN" \
