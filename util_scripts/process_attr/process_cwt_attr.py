@@ -9,8 +9,8 @@ the crosswalk table.
 The configuration is specified in a YAML file (attr_config.yaml), which includes paths to input/output files,
 attribute dataset information, and processing options.
 
-The script also requires a list of attributes to process for the specified attribute dataset,
-which is provided in a separate CSV file via the `attr_list_file` parameter in the configuration.
+The script also requires a list of attributes to process for the specified attribute dataset, 
+which is provided in a separate CSV file via the `attr_list_file` parameter in the configuration. 
 
 Example usage:
     python process_cwt_attr.py attr_config.yaml
@@ -656,6 +656,7 @@ class ProcessAttrDataset(BaseModel):
     def filter_attrs_by_list(self, df_attrs: pd.DataFrame) -> pd.DataFrame:
         """Filter attributes based on the specified attribute list in the configuration."""
         if self.attr_list_file:
+            # attr_list = pd.read_csv(self.attr_list_file)["attr_name"].tolist()
             attr_list = (
                 pd.read_csv(
                     self.attr_list_file,
@@ -761,11 +762,6 @@ class ProcessAttrDataset(BaseModel):
         else:
             # for NGEN attributes, just keep all attributes (no weighting needed since it's already at catchment level)
             df_attrs_weighted = df_attrs.copy()
-
-        # make sure div_col column is string type
-        df_attrs_weighted[self.div_col] = df_attrs_weighted[self.div_col].astype(
-            "string"
-        )
 
         # save attr data to parquet file
         Path(self.attr_file).parent.mkdir(parents=True, exist_ok=True)
