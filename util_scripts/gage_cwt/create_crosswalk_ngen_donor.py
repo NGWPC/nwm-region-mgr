@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Create crosswalk files between calibration gages and divides for NWM regionalization."""
+"""Create crosswalk files between calibration gages and divides for NWM regionalization.
+
+The script supports both NHF v1 and v2.2 GPKG files.
+
+See run_create_crosswalk_ngen_donor.sh for example usage.
+
+"""
 
 import argparse
 import glob
@@ -9,14 +15,14 @@ import geopandas as gpd
 import pandas as pd
 
 
-def resolve_nested_gages(df: pd.DataFrame, nested_gages: str) -> pd.DataFrame:
+def resolve_nested_gages(
+    df: pd.DataFrame, nested_gages: str, id_col: str, area_col: str = "area_sqkm"
+) -> pd.DataFrame:
     """Resolve nested gages by keeping only one gage per divide.
 
     For divides associated with multiple gages, keep the gage with
     the smallest or largest total drainage area.
     """
-    id_col = "divide_id"
-
     # Find divides with multiple gages
     duplicates = df[df[id_col].duplicated(keep=False)]
 
@@ -25,9 +31,9 @@ def resolve_nested_gages(df: pd.DataFrame, nested_gages: str) -> pd.DataFrame:
 
     # Compute drainage area for each gage
     gage_area = (
-        df.groupby("gage_id", as_index=False)["areasqkm"]
+        df.groupby("gage_id", as_index=False)[area_col]
         .sum()
-        .rename(columns={"areasqkm": "drainage_area"})
+        .rename(columns={area_col: "drainage_area"})
     )
 
     # Join back to duplicates
@@ -52,8 +58,16 @@ def resolve_nested_gages(df: pd.DataFrame, nested_gages: str) -> pd.DataFrame:
 
 
 def build_crosswalks(
-    input_dir: Path, outdir: Path, gages_file: Path, nested_gages: str = "inner"
+    input_dir: Path,
+    outdir: Path,
+    gages_file: Path,
+    nested_gages: str = "inner",
+    hf_version: str = "nhf",
 ):
+    id_col = "divide_id" if hf_version == "v2.2" else "div_id"
+    area_col = "areasqkm" if hf_version == "v2.2" else "area_sqkm"
+    vpu_col = "vpuid" if hf_version == "v2.2" else "vpu_id"
+
     """Build crosswalk parquet files for all calibration domains."""
     domains = {
         "conus": "CONUS",
@@ -66,6 +80,13 @@ def build_crosswalks(
     ngage = ncats = 0
 
     for domain1, domain in domains.items():
+        # nhf for oconus domains is not available yet
+        if hf_version == "nhf" and domain1 != "conus":
+            print(
+                f"NHF GPKG files are not available for {domain}, skipping crosswalk creation."
+            )
+            continue
+
         outfile = Path(outdir, f"calib_gage_divide_{domain1}.parquet")
         if outfile.exists():
             print(f"Crosswalk file already exists for {domain}: {outfile}. Skip")
@@ -77,7 +98,7 @@ def build_crosswalks(
         df_cats = pd.DataFrame()
         for f1 in files:
             cats = gpd.read_file(f1, layer="divides")
-            cols = ["divide_id", "toid", "areasqkm", "vpuid", "type"]
+            cols = [id_col, area_col, vpu_col, "type"]
             cats = cats.reindex(columns=cols, fill_value=float("nan"))
 
             cats["gage_id"] = (
@@ -91,7 +112,9 @@ def build_crosswalks(
             df_cats = pd.concat([df_cats, cats], ignore_index=True, axis=0)
 
         # resolve nested gages
-        df_cats = resolve_nested_gages(df_cats, nested_gages=nested_gages)
+        df_cats = resolve_nested_gages(
+            df_cats, nested_gages=nested_gages, id_col=id_col, area_col=area_col
+        )
 
         # save crosswalk to file for use in regionalization later
         df_cats.to_parquet(outfile, index=False)
@@ -108,10 +131,15 @@ def build_crosswalks(
 
     for domain1, domain in domains.items():
         outfile = Path(outdir, f"calib_gage_divide_{domain1}.parquet")
+        if not outfile.exists():
+            print(
+                f"Crosswalk file not found for {domain} at expected location: {outfile}"
+            )
+            continue
         df1 = pd.read_parquet(outfile)
 
         # check to make sure no duplicate divides
-        dup_divides = df1[df1["divide_id"].duplicated(keep=False)]
+        dup_divides = df1[df1[id_col].duplicated(keep=False)]
         if not dup_divides.empty:
             raise ValueError(
                 f"Duplicate divides still found in {domain} crosswalk after resolving nested gages: {dup_divides}"
@@ -127,7 +155,13 @@ def build_crosswalks(
             print(f"Extra basins found in crosswalk for {domain}: {gages_extra}")
         if gages_missed:
             print(
-                f"Missing calibration basins in crosswalk for {domain}: {gages_missed}"
+                f"Number of missing calibration basins in crosswalk for {domain}: {len(gages_missed)}"
+            )
+            gages_missed = (
+                gages_missed if len(gages_missed) <= 10 else gages_missed[:10]
+            )
+            print(
+                f"First {len(gages_missed)} missing calibration basins in crosswalk for {domain}: {gages_missed}"
             )
 
 
@@ -159,9 +193,17 @@ def main():
         default="inner",
         help="How to resolve nested gages (default: inner).",
     )
+    parser.add_argument(
+        "--hf-version",
+        choices=["nhf", "v2.2"],
+        default="nhf",
+        help="Version of the hydrofabric GPKG files (default: nhf).",
+    )
 
     args = parser.parse_args()
-    build_crosswalks(args.input_dir, args.outdir, args.gages_file, args.nested_gages)
+    build_crosswalks(
+        args.input_dir, args.outdir, args.gages_file, args.nested_gages, args.hf_version
+    )
 
 
 if __name__ == "__main__":
