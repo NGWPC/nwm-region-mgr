@@ -1,4 +1,10 @@
-"""python script to create crosswalk table between NextGen catchments and HUC12s."""
+"""python script to create crosswalk table between NextGen catchments and HUC12s.
+
+The script reads HUC12 and NextGen catchment shapefiles, identifies the best matching HUC12 for each catchment
+based on maximum area overlap, and outputs a crosswalk table with the matched pairs and overlap information.
+
+The script supports both NHF v1 and v2.2 GPKG files.
+"""
 
 from functools import lru_cache
 from pathlib import Path
@@ -6,13 +12,21 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
+hf_version = "nhf"  #  "nhf" or "v2.2"
+
+id_col = "divide_id" if hf_version == "v2.2" else "div_id"
+area_col = "areasqkm" if hf_version == "v2.2" else "area_sqkm"
+vpu_col = "vpuid" if hf_version == "v2.2" else "vpu_id"
+
 
 def create_cwt(
     vpu: str, shp1: gpd.GeoDataFrame, shp2: gpd.GeoDataFrame, huc_col: str
 ) -> pd.DataFrame:
     """Create crosswalk table between NextGen catchments and HUC12s for a given VPU."""
     # Convert to a projected CRS for accurate area calculations
-    projected_crs = "EPSG:3857"
+    # projected_crs = "EPSG:3857" # Web Mercator; preserves shapes but distorts area, especially at high latitudes
+    projected_crs = "EPSG:6933"  # Equal-area cylindrical projection; preserves area globally; alternative: "EPSG:5070" (Albers Equal Area) for CONUS only
+
     shp1 = shp1.to_crs(projected_crs)
     shp2 = shp2.to_crs(projected_crs)
 
@@ -26,9 +40,9 @@ def create_cwt(
     overlap["overlap_area"] = overlap.geometry.area / 1_000_000
 
     # merge with shp2
-    overlap = overlap[["divide_id", huc_col, "overlap_area"]]
-    shp2_tmp = shp2[["divide_id", "areasqkm", "original_area"]]
-    overlap = overlap.merge(shp2_tmp, on="divide_id", how="left")
+    overlap = overlap[[id_col, huc_col, "overlap_area"]]
+    shp2_tmp = shp2[[id_col, area_col, "original_area"]]
+    overlap = overlap.merge(shp2_tmp, on=id_col, how="left")
 
     # Calculate percentage of each shp2 polygon that is covered by intersecting polygons in shp1
     overlap["overlap_percentage"] = (
@@ -36,24 +50,22 @@ def create_cwt(
     ) * 100
 
     # Find the maximum overlapping shp1 polygon for each polygon in shp2
-    max_overlap = overlap.loc[
-        overlap.groupby("divide_id")["overlap_percentage"].idxmax()
-    ]
+    max_overlap = overlap.loc[overlap.groupby(id_col)["overlap_percentage"].idxmax()]
 
     # identify shp2 polygons not paired with a shp1 polygon
-    polys = shp2["divide_id"].unique()
-    polys_matched = max_overlap["divide_id"].unique()
+    polys = shp2[id_col].unique()
+    polys_matched = max_overlap[id_col].unique()
     polys_unmatched = [x for x in polys if x not in polys_matched]
 
     # Find the nearest shp1 polygon for each unmatched shp2 polygon
     nearest_matches = gpd.sjoin_nearest(
-        shp2[shp2["divide_id"].isin(polys_unmatched)],
+        shp2[shp2[id_col].isin(polys_unmatched)],
         shp1,
         how="left",
         distance_col="nearest_distance",
     )
     nearest_matches.rename(columns={"nearest_distance": "nearest_dist_m"}, inplace=True)
-    nearest_matches = nearest_matches[["divide_id", huc_col, "nearest_dist_m"]]
+    nearest_matches = nearest_matches[[id_col, huc_col, "nearest_dist_m"]]
 
     # create the final huc12/divide_id crosswalk table
     cwt = pd.concat([max_overlap, nearest_matches], axis=0, ignore_index=True)
@@ -65,6 +77,28 @@ def create_cwt(
 def read_huc_layer(path: str, layer: str) -> gpd.GeoDataFrame:
     """Read and cache a GeoDataFrame by path and layer."""
     return gpd.read_file(Path(path).expanduser(), layer=layer)
+
+
+def get_vpu_list(domain: str) -> list:
+    """Get list of VPUs for the specified domain."""
+    match domain.lower():
+        case "conus":
+            # fmt: off
+            vpu_list = [
+                "01", "02", "03N", "03S", "03W", "04", "05", "06", "07", "08",
+                "09", "10L", "10U", "11", "12", "13", "14", "15", "16", "17", "18",
+            ]
+            # fmt: on
+        case "ak":
+            vpu_list = ["ak"]
+        case "hi":
+            vpu_list = ["hi"]
+        case "prvi":
+            vpu_list = ["prvi"]
+        case _:
+            raise Exception(f"Unsupported domain: {domain}")
+
+    return vpu_list
 
 
 def process_domain(domain: list | str):
@@ -81,43 +115,54 @@ def process_domain(domain: list | str):
     for domain in domains:
         print(f"Processing domain: {domain}")
 
+        # skip oconus domains for now since nhf hydrofabric is not available yet
+        if hf_version == "nhf" and domain != "conus":
+            print(
+                f"Skipping domain {domain} for NHF since hydrofabric is not available yet."
+            )
+            continue
+
         # Read HUC12 shapefiles
         if domain != "ak":
             shp_huc = read_huc_layer(
-                "~/work/data/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb",
+                "~/data/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb",
                 "WBDSnapshot_National",
             )
             shp_huc["VPUID"] = shp_huc["VPUID"].astype(str)
             huc_col = "HUC_12"
         else:
             shp_huc = read_huc_layer(
-                "~/work/data/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg", "WBDHU12"
+                "~/data/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg", "WBDHU12"
             ).copy()
             shp_huc["VPUID"] = "19"
             huc_col = "huc12"
             # shp_huc.rename(columns={"huc12": "HUC_12"}, inplace=True)
 
         # Read NextGen hydrofabric shapefiles
-        f2 = Path("~/work/data/gpkg_v2.2/", domain + "_nextgen.gpkg").expanduser()
-        shp_ngen = gpd.read_file(f2, layer="divides")
-        if domain == "ak":
-            shp_ngen["vpuid"] = "19"
-        elif domain == "hi":
-            shp_ngen["vpuid"] = "20"
-        elif domain == "prvi":
-            shp_ngen["vpuid"] = "21"
+        # f2 = Path("~/work/data/gpkg_v2.2/", domain + "_nextgen.gpkg").expanduser()
+        # shp_ngen = gpd.read_file(f2, layer="divides")
+        # if domain == "ak":
+        #     shp_ngen["vpuid"] = "19"
+        # elif domain == "hi":
+        #     shp_ngen["vpuid"] = "20"
+        # elif domain == "prvi":
+        #     shp_ngen["vpuid"] = "21"
 
         # Create ngen catchment - huc12 crosswalk; process by vpus to reduce memory usage
-        vpus = shp_ngen["vpuid"].unique()
+        vpus = get_vpu_list(domain)
         df_cwt = pd.DataFrame()
         for vpu in vpus:
             print(f"Processing VPU {vpu}")
             shp1 = shp_huc[shp_huc["VPUID"] == vpu]
-            shp2 = shp_ngen[shp_ngen["vpuid"] == vpu]
+            # shp2 = shp_ngen[shp_ngen["vpuid"] == vpu]
+            shp2 = gpd.read_file(
+                Path(
+                    f"~/data/hydrofabric/gpkg_{hf_version}/vpu_{vpu}.gpkg"
+                ).expanduser(),
+                layer="divides",
+            )
             df = create_cwt(vpu, shp1, shp2, huc_col)
-            df.rename(
-                columns={huc_col: huc_col.lower()}, inplace=True
-            )  # rename huc_col to lowercase
+            df.rename(columns={huc_col: huc_col.lower()}, inplace=True)
             df_cwt = pd.concat([df_cwt, df])
 
         # Round all numeric columns to 2 decimal places
@@ -126,9 +171,7 @@ def process_domain(domain: list | str):
         )
 
         # save crosswalk to file for use in formulation regionalization later
-        outdir = Path(
-            "~/repos/nwm-region-mgr/inputs/region/cwt_ngen_huc12"
-        ).expanduser()
+        outdir = Path(f"~/data/region_input/{hf_version}/cwt_ngen_huc12").expanduser()
         outdir.mkdir(exist_ok=True, parents=True)
         outfile = Path(outdir, "cwt_huc12_divide_" + domain + ".csv")
         df_cwt.to_csv(outfile, index=False)
