@@ -17,12 +17,12 @@ general:
   approach_calib_basins: summary_score  # Strategy for assigning formulations and parameters to calibrated basins: regionalization or summary_score
   
   id_col: # case-insensitive column names for different spatial units across all applicable files
-    divide: divide_id  # Name of column for catchment ID in all files
+    divide: div_id  # Name of column for catchment ID in all files
     gage: gage_id  # Name of column for calibration basin ID in all files
     huc12: huc_12  # Name of column for HUC12 ID in all files ("huc_12"for non-AK domains, "huc12" for AK)
-    vpu: vpuid  # Name of column for VPU ID in all files
+    vpu: vpu_id  # Name of column for VPU ID in all files
     donor: donor  # Name of column for donor basin ID in all files
-    drainage_area: areasqkm  # Name of column for catchment drainage area in all files
+    drainage_area: area_sqkm  # Name of column for catchment drainage area in all files
 
   layer_name: # Define the layer to be used in the corresponding hydrofabric file
     ngen: divides
