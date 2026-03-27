@@ -44,7 +44,7 @@ class FormulationGeneralSettings(BaseGeneralConfig):
     divide_huc12_cwt_file: str | None = Field(
         description=(
             "Path to crosswalk file between HUC12 basins and NextGen catchments, "
-            "with columns 'divide_id' and 'huc_12'."
+            "with columns 'div_id' and 'huc_12'."
         ),
         examples="cwt_divide_huc12_{domain}.csv",
         default=None,
