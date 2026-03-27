@@ -38,7 +38,6 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 
 from nwm_region_mgr.utils.dict_utils import flatten_dict
 from nwm_region_mgr.utils.io_utils import read_table, save_data
-from nwm_region_mgr.utils.logging_utils import setup_logging
 from nwm_region_mgr.utils.plot_utils import plot_histogram, plot_spatial_map
 from nwm_region_mgr.utils.string_utils import recursive_substitute
 from nwm_region_mgr.utils.validation_utils import (
@@ -1040,29 +1039,6 @@ class BaseConfigProcessor:
         config = self._substitute_placeholders(config)
 
         return config
-
-    def set_logging(self):
-        """Set up logging based on the configuration."""
-        log_level = self.config.general.logging.level.upper()
-        log_file = Path(self.config.general.logging.file)
-        setup_logging(
-            level=log_level,
-            log_file=log_file,
-            file_level=log_level,
-        )
-
-        from nwm_region_mgr.formreg import config_schema as fcs  # avoid circular import
-
-        config_str = (
-            "Formulation Regionalization"
-            if isinstance(self.config, fcs.Config)
-            else "Parameter Regionalization"
-        )
-        logger.info(
-            "%s - Config files: %s", config_str, [str(f) for f in self.config_file]
-        )
-        logger.info("Set up logging with level: %s", log_level)
-        logger.info("Log files: %s", log_file)
 
     def validate_files(self):
         """Validate that all file paths exist and required columns are present in the files."""
