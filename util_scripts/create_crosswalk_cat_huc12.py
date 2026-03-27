@@ -136,17 +136,6 @@ def process_domain(domain: list | str):
             ).copy()
             shp_huc["VPUID"] = "19"
             huc_col = "huc12"
-            # shp_huc.rename(columns={"huc12": "HUC_12"}, inplace=True)
-
-        # Read NextGen hydrofabric shapefiles
-        # f2 = Path("~/work/data/gpkg_v2.2/", domain + "_nextgen.gpkg").expanduser()
-        # shp_ngen = gpd.read_file(f2, layer="divides")
-        # if domain == "ak":
-        #     shp_ngen["vpuid"] = "19"
-        # elif domain == "hi":
-        #     shp_ngen["vpuid"] = "20"
-        # elif domain == "prvi":
-        #     shp_ngen["vpuid"] = "21"
 
         # Create ngen catchment - huc12 crosswalk; process by vpus to reduce memory usage
         vpus = get_vpu_list(domain)
