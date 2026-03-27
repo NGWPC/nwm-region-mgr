@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 class GeneralConfig(BaseGeneralConfig):
     """General configuration settings specific to parameter regionalization."""
 
-    attr_dataset_list: List[Literal["ngen", "hlr", "streamcat"]] = Field(
-        description="List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'.",
+    attr_dataset_list: List[Literal["ngen", "hlr", "streamcat", "hydroatlas"]] = Field(
+        description="List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat', 'hydroatlas'.",
         examples=["ngen", "streamcat"],
         default=["ngen"],
     )
@@ -351,6 +351,19 @@ class AvailableAttrsConfig(BaseModel):
             "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_streamcat.csv",
             "attr_data_file": "{base_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet",
             "base_attr_list": ["Precip_Minus_EVT", "Elev", "BFI"],
+        },
+    )
+
+    hydroatlas: AttrDatasetConfig = Field(
+        description=(
+            "Configuration for HydroATLAS attribute dataset "
+            "(https://www.hydrosheds.org/hydroatlas)."
+        ),
+        examples={
+            "attr_list": None,
+            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_hydroatlas.csv",
+            "attr_data_file": "{base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet",
+            "base_attr_list": ["ele_mt_sav", "dis_m3_pyr", "run_mm_syr", "pre_mm_syr"],
         },
     )
 

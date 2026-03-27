@@ -1212,7 +1212,7 @@ class BaseConfigProcessor:
         # save the expanded configuration
         if hasattr(self.config.output, "config_final"):
             getattr(self.config.output, "config_final").save_to_file(
-                self.config, data_str="Expanded final configuration"
+                self.config, data_str="final configuration"
             )
 
     def get_output_file_path(
