@@ -141,32 +141,30 @@ class DonorConfig(BaseModel):
         init_donor_df: pd.DataFrame = None,
     ) -> list:
         """Screen donors based on the metric thresholds and evaluation period."""
-        divide_id_name = getattr(config.general.id_col, "divide", "divide_id")
-        gage_id_name = getattr(config.general.id_col, "gage", "gage_id")
+        div_col = getattr(config.general.id_col, "divide", "div_id")
+        gage_col = getattr(config.general.id_col, "gage", "gage_id")
 
         # initial donors
-        donors = [
-            d for d in init_donor_df[gage_id_name].unique().tolist() if d in donors0
-        ]
+        donors = [d for d in init_donor_df[gage_col].unique().tolist() if d in donors0]
         donor_cats = (
-            init_donor_df.loc[init_donor_df[gage_id_name].isin(donors), divide_id_name]
+            init_donor_df.loc[init_donor_df[gage_col].isin(donors), div_col]
             .unique()
             .tolist()
         )
 
         # read the donor stats file
         stats_file = config.general.calval_stats_file
-        df = read_table(stats_file, dtype={gage_id_name: str})
+        df = read_table(stats_file, dtype={gage_col: str})
 
         # filter based on initial donors
-        df = df[df[gage_id_name].isin(donors)]
+        df = df[df[gage_col].isin(donors)]
         if df.empty:
             logger.warning(
                 f"No matching gages found in {stats_file} for the initial donors. Returning the initial list."
             )
-            return {gage_id_name: donors, divide_id_name: donor_cats}
+            return {gage_col: donors, div_col: donor_cats}
         else:
-            gages_stat = df[gage_id_name].unique().tolist()
+            gages_stat = df[gage_col].unique().tolist()
             gages_missing = [g for g in donors if g not in gages_stat]
             if gages_missing:
                 logger.warning(
@@ -201,9 +199,9 @@ class DonorConfig(BaseModel):
             if threshold.max is not None:
                 df = df[df[col] <= threshold.max]
 
-        donors = df[gage_id_name].unique().tolist()
+        donors = df[gage_col].unique().tolist()
         donor_cats = (
-            init_donor_df[init_donor_df[gage_id_name].isin(donors)][divide_id_name]
+            init_donor_df[init_donor_df[gage_col].isin(donors)][div_col]
             .unique()
             .tolist()
         )
@@ -218,7 +216,7 @@ class DonorConfig(BaseModel):
                 "No donors left after filtering. Check the metric thresholds and evaluation period."
             )
 
-        return {gage_id_name: donors, divide_id_name: donor_cats}
+        return {gage_col: donors, div_col: donor_cats}
 
 
 class AttrDatasetConfig(BaseModel):
@@ -284,7 +282,7 @@ class AttrDatasetConfig(BaseModel):
                     f"Select file not found: {self.attr_select_file}"
                 )
 
-            df_attrs = pd.read_csv(attr_select_path)
+            df_attrs = read_table(attr_select_path)
 
             if "select" not in df_attrs.columns or "attr_name" not in df_attrs.columns:
                 raise ValueError(
@@ -293,7 +291,7 @@ class AttrDatasetConfig(BaseModel):
 
             self.attr_list = df_attrs[df_attrs["select"] == 1]["attr_name"].to_list()
 
-    def get_attr_data(self, id_name: str = "divide_id") -> pd.DataFrame:
+    def get_attr_data(self, id_name: str = "div_id") -> pd.DataFrame:
         """Load attribute data filtered by selected attributes."""
         self._get_selected_attrs()
 
@@ -305,14 +303,7 @@ class AttrDatasetConfig(BaseModel):
             raise FileNotFoundError(
                 f"Attribute data file not found: {self.attr_data_file}"
             )
-
-        suffix = attr_data_path.suffix.lower()
-        if suffix == ".csv":
-            df_data = pd.read_csv(attr_data_path)
-        elif suffix == ".parquet":
-            df_data = pd.read_parquet(attr_data_path)
-        else:
-            raise ValueError(f"Unsupported file format: {suffix}")
+        df_data = read_table(attr_data_path)
 
         missing_cols = set(self.attr_list) - set(df_data.columns)
         if missing_cols:
