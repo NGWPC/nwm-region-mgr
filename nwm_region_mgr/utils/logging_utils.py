@@ -8,7 +8,7 @@ from typing import Optional, Union
 class CustomLoggingFormatter(logging.Formatter):
     """Custom logging formatter to change 'ERROR' to 'SEVERE', and 'CRITICAL' to 'FATAL'.
 
-    This is to be consistent with logging levels in ngen and ngen-cal.
+    This is to be consistent with logging levels in EWTS.
 
     """
 
@@ -80,23 +80,12 @@ def setup_logging(
     # Apply handlers to  package
     logger = logging.getLogger("nwm_region_mgr")
     logger.setLevel(min(level, file_level or level))  # Allow lower thresholds
-    # Apply handlers to package
-    logger = logging.getLogger("nwm_region_mgr")
-    logger.setLevel(min(level, file_level or level))  # Allow lower thresholds
 
     # Remove existing handlers for the logger to avoid duplication
     # (e.g., when both formulation and parameter regionalizations are run)
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
-    # Remove existing handlers for the logger to avoid duplication
-    # (e.g., when both formulation and parameter regionalizations are run)
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
 
-    logger.addHandler(console_handler)
-    if file_handler:
-        logger.addHandler(file_handler)
-    logger.propagate = False  # Prevent duplication through root logger
     logger.addHandler(console_handler)
     if file_handler:
         logger.addHandler(file_handler)

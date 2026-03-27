@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Literal, get_args
 
 import matplotlib
+import yaml
 
 from nwm_region_mgr.formreg import config_schema as fcs
 from nwm_region_mgr.formreg.process_config import (
@@ -23,6 +24,7 @@ from nwm_region_mgr.formreg.process_config import (
 from nwm_region_mgr.parreg import config_schema as pcs
 from nwm_region_mgr.parreg.manual_pairings import ManualPairer
 from nwm_region_mgr.parreg.process_config import ParameterRegionalizationProcessor
+from nwm_region_mgr.utils.logging_utils import setup_logging
 
 logger = logging.getLogger(__name__)
 matplotlib.use("Agg")
@@ -140,13 +142,22 @@ def main(
     sample_size: int | None = None,
 ) -> None:
     """Execute regionalization or NGEN simulation."""
+    # Load logging config from YAML
+    config_paths = _resolve_config_files(config_dir, option)
+    config_path = config_paths[CONFIG.general]
+    with open(config_path) as f:
+        cfg = yaml.safe_load(f)
+
+    log_file = cfg.get("log_file", None)
+    log_level = cfg.get("log_level", "INFO")
+
+    setup_logging(level=log_level, log_file=log_file)
+
     logger.info("Starting nwm_region_mgr")
     logger.info("Config directory: %s", config_dir)
     logger.info("Run option: %s", option)
     if sample_size is not None:
         logger.info("Sample size: %d", sample_size)
-
-    config_paths = _resolve_config_files(config_dir, option)
 
     # create formreg processor for formreg / parreg cases
     if option in {"formreg", "parreg"}:

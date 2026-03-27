@@ -131,17 +131,17 @@ class FieldCrosswalk(PydanticDictLike):
     """Mapping of column names for unique identifiers in all require files for regionalization."""
 
     divide: str = Field(
-        description="Column name for divide (catchment) ID.", default="divide_id"
+        description="Column name for divide (catchment) ID.", default="div_id"
     )
 
     gage: str = Field(description="Column name for gage (basin) ID.", default="gage_id")
 
     huc12: str = Field(description="Column name for HUC12 ID.", default="huc_12")
 
-    vpu: str = Field(description="Column name for VPU ID.", default="vpuid")
+    vpu: str = Field(description="Column name for VPU ID.", default="vpu_id")
 
     drainage_area: str = Field(
-        description="Column name for drainage area.", default="areasqkm"
+        description="Column name for drainage area.", default="area_sqkm"
     )
 
 
@@ -205,14 +205,14 @@ class BaseGeneralConfig(BaseModel):
             "or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}."
             "If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and "
             "expanded to a dictionary mapping each VPU to its corresponding file."
-            " This file must include columns 'divide_id', 'vpuid' and 'geometry'."
+            " This file must include columns 'div_id', 'vpu_id' and 'geometry'."
         ),
         examples="{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
         default="vpu_03S.gpkg",
     )
 
     gage_divide_cwt_file: Path | str = Field(
-        description="Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'.",
+        description="Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'.",
         examples="{base_dir}/inputs/calib_gage_divide_{domain}.parquet",
         default="calib_gage_divide_{domain}.parquet",
     )
@@ -257,11 +257,11 @@ class BaseGeneralConfig(BaseModel):
     id_col: FieldCrosswalk = Field(
         description="Dictionary mapping column names for unique identifiers in all applicable files.",
         examples={
-            "divide": "divide_id",
+            "divide": "div_id",
             "gage": "gage_id",
             "huc12": "huc_12",
-            "vpu": "vpuid",
-            "drainage_area": "areasqkm",
+            "vpu": "vpu_id",
+            "drainage_area": "area_sqkm",
         },
         default_factory=FieldCrosswalk,
     )
@@ -689,7 +689,7 @@ class BaseConfigProcessor:
         self.sample_size = sample_size
         self._expand_user_file_paths(self.config)
 
-        self.set_logging()
+        # self.set_logging()
         self.validate_files()
 
     def _deep_merge_configs(self, a: dict, b: dict) -> dict:
@@ -839,7 +839,7 @@ class BaseConfigProcessor:
 
     def _required_columns_calval_stats(self, config) -> set[str]:
         """Return a set of required columns for calibration/validation statistics."""
-        required_fields = {self.gage_id_name, "formulation"}
+        required_fields = {self.gage_col, "formulation"}
 
         # required fields for summary score configuration (for formulation regionalization)
         sc = getattr(config, "summary_score", None)
@@ -870,18 +870,18 @@ class BaseConfigProcessor:
     def _file_required_column_map(self, config) -> Dict[str, str]:
         """Return a dictionary mapping files to required columns."""
         file_dict = {
-            "gage_divide_cwt_file": {self.divide_id_name, self.gage_id_name},
-            "donor_gage_file": {self.gage_id_name, "longitude", "latitude"},
+            "gage_divide_cwt_file": {self.div_col, self.gage_col},
+            "donor_gage_file": {self.gage_col, "longitude", "latitude"},
             "calval_stats_file": self._required_columns_calval_stats(config),
-            "calib_param_file": {self.gage_id_name, "formulation"},
+            "calib_param_file": {self.gage_col, "formulation"},
             "ngen_hydrofabric_file": {
-                self.divide_id_name,
-                self.vpu_id_name,
+                self.div_col,
+                self.vpu_col,
                 "geometry",
             },
-            "huc12_hydrofabric_file": {self.huc12_id_name, "geometry"},
-            "divide_huc12_cwt_file": {self.divide_id_name, self.huc12_id_name},
-            "formulation_file": {self.divide_id_name, "formulation"},
+            "huc12_hydrofabric_file": {self.huc12_col, "geometry"},
+            "divide_huc12_cwt_file": {self.div_col, self.huc12_col},
+            "formulation_file": {self.div_col, "formulation"},
         }
 
         # add snow cover file if it exists in the config
@@ -892,7 +892,7 @@ class BaseConfigProcessor:
                 snow_cover_file = getattr(config.snow_cover, "snow_cover_file", None)
                 snow_frac_col = getattr(config.snow_cover, "column", None)
                 if snow_cover_file and snow_frac_col:
-                    file_dict["snow_cover_file"] = {self.divide_id_name, snow_frac_col}
+                    file_dict["snow_cover_file"] = {self.div_col, snow_frac_col}
 
         return file_dict
 
@@ -1097,7 +1097,10 @@ class BaseConfigProcessor:
             Path(self.config.general.ngen_hydrofabric_file[self.vpu]),
             layer=layer_name,
         )
-        gdf = gdf[[self.divide_id_name.lower(), "geometry"]]
+        gdf = gdf[[self.div_col.lower(), "geometry"]]
+
+        # ensure div_col is always string
+        gdf[self.div_col] = gdf[self.div_col].astype("string")
 
         self.vpu_gdf = gdf.copy()
 
@@ -1121,32 +1124,32 @@ class BaseConfigProcessor:
         logger.info(f"  Execution time for {step_str}: {end - start} seconds")
 
     @property
-    def divide_id_name(self):
+    def div_col(self):
         """Id_name for divide from the config."""
-        return getattr(self.config.general.id_col, "divide", "divide_id")
+        return getattr(self.config.general.id_col, "divide", "div_id")
 
     @property
-    def gage_id_name(self):
+    def gage_col(self):
         """Id_name for gage from the config."""
         return getattr(self.config.general.id_col, "gage", "gage_id")
 
     @property
     def drainage_area_name(self):
         """Id_name for drainage_area from the config."""
-        return getattr(self.config.general.id_col, "drainage_area", "areasqkm")
+        return getattr(self.config.general.id_col, "drainage_area", "area_sqkm")
 
     @property
-    def huc12_id_name(self):
+    def huc12_col(self):
         """Id_name for huc12 from the config."""
         return getattr(self.config.general.id_col, "huc12", "huc_12")
 
     @property
-    def vpu_id_name(self):
+    def vpu_col(self):
         """Id_name for vpu from the config."""
-        return getattr(self.config.general.id_col, "vpu", "vpuid")
+        return getattr(self.config.general.id_col, "vpu", "vpu_id")
 
     @property
-    def donor_id_name(self):
+    def donor_col(self):
         """Id_name for donor gage from the config."""
         return getattr(self.config.general.id_col, "donor", "donor")
 
@@ -1158,7 +1161,7 @@ class BaseConfigProcessor:
     @property
     def gage_crosswalk(self):
         """Get the gage crosswalk DataFrame."""
-        return read_table(self.gage_crosswalk_file, dtype={self.gage_id_name: str})
+        return read_table(self.gage_crosswalk_file, dtype={self.gage_col: str})
 
     @property
     def donor_gage_file(self):
@@ -1168,7 +1171,7 @@ class BaseConfigProcessor:
     @property
     def donor_gages(self):
         """Get the donor gage DataFrame."""
-        return read_table(self.donor_gage_file, dtype={self.gage_id_name: str})
+        return read_table(self.donor_gage_file, dtype={self.gage_col: str})
 
     def expand_config_for_vpu(self, vpu: str):
         """Expand the config to include VPUs (e.g., needed for all donors).
