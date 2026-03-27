@@ -689,7 +689,6 @@ class BaseConfigProcessor:
         self.sample_size = sample_size
         self._expand_user_file_paths(self.config)
 
-        # self.set_logging()
         self.validate_files()
 
     def _deep_merge_configs(self, a: dict, b: dict) -> dict:

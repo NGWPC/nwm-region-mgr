@@ -34,6 +34,7 @@ def setup_logging(
         file_level: Logging level for file output (default: same as console level).
 
     """
+    # Map user-friendly log level names to logging module levels
     user_log_levels = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
@@ -50,9 +51,9 @@ def setup_logging(
         user_log_levels.get(file_level.strip().lower(), level) if file_level else level
     )
 
-    # Set root logger to WARNING to suppress noisy external logs
+    # Set root logger
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.WARNING)
+    root_logger.setLevel(min(level, file_level or level))
 
     # Remove existing handlers to avoid duplication
     for handler in root_logger.handlers[:]:
@@ -77,16 +78,9 @@ def setup_logging(
         file_handler.setFormatter(formatter)
         file_handler.setLevel(file_level or level)
 
-    # Apply handlers to  package
-    logger = logging.getLogger("nwm_region_mgr")
-    logger.setLevel(min(level, file_level or level))  # Allow lower thresholds
+    root_logger = logging.getLogger()
+    root_logger.setLevel(min(level, file_level or level))
 
-    # Remove existing handlers for the logger to avoid duplication
-    # (e.g., when both formulation and parameter regionalizations are run)
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-
-    logger.addHandler(console_handler)
+    root_logger.addHandler(console_handler)
     if file_handler:
-        logger.addHandler(file_handler)
-    logger.propagate = False  # Prevent duplication through root logger
+        root_logger.addHandler(file_handler)
