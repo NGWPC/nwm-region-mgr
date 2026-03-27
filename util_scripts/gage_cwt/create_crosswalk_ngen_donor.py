@@ -117,6 +117,7 @@ def build_crosswalks(
         )
 
         # save crosswalk to file for use in regionalization later
+        df_cats[id_col] = df_cats[id_col].astype("string")
         df_cats.to_parquet(outfile, index=False)
         print(
             f"There are {len(files)} calibration gages and {len(df_cats)} catchments in the {domain} domain"
