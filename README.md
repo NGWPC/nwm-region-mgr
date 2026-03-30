@@ -198,3 +198,24 @@ Outputs from evaluation can be found in *[output_dir]* as specified in **config_
 Unit tests are located under `tests/` and use pytest.
 
 See `tests/README.md` for details.
+
+## Documentation
+Documentation is built using Sphinx and can be found in the `docs/` directory. To build the documentation locally, 
+first install the documentation dependencies
+
+```bash
+pip install -e .[docs,dev]
+```
+Then build or rebuild the documentation with the following commands:
+
+```bash
+# if needed, run docs/scripts/config_schema.py to update docs/sources/config_builder/index.md
+python docs/scripts/config_schema.py
+
+# if needed, run docs/scripts/data_schema.py to update input_data.rst and output_data.rst in docs/sources/tech_reference.
+# note you may want to update data description files in docs/scripts/data_desc before running the script
+python docs/scripts/data_schema.py
+
+# to build the docs
+make -C docs html
+```
