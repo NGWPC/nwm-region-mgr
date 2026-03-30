@@ -102,8 +102,8 @@ def schema_to_rst(df: pd.DataFrame, title: str, preview_rows: int = 3) -> str:
     files = list(Path(INPUT_DESC_DIR).glob("*.csv")) + list(
         Path(OUTPUT_DESC_DIR).glob("*.csv")
     )
-    file_stem = title.lower().replace(" ", "_").split(".")[-1]
-    files = [f for f in files if f.stem.lower() in file_stem]
+    files = [f for f in files if f.stem.lower() in title.lower()]
+
     if len(files) > 0:
         desc_file = files[0]
         with open(desc_file, "r") as f:
@@ -194,9 +194,10 @@ def process_file(
     bucket: str = "ngwpc-dev",
 ) -> str:
     """Load a file (csv, parquet, gpkg, gdb) and return an RST schema string."""
+    df = pd.DataFrame()
+
     # skip spatial_distance output files (too large)
     if "spatial_distance" in title:
-        df = pd.DataFrame()
         return schema_to_rst(df, title)
 
     ext = os.path.splitext(path)[1].lower().strip()
@@ -220,7 +221,15 @@ def process_file(
         else:
             response = s3_client.get_object(Bucket=bucket, Key=str(path).strip())
             if ext == ".csv":
-                df = pd.read_csv(BytesIO(response["Body"].read()), nrows=1000)
+                df = pd.read_csv(
+                    BytesIO(response["Body"].read()),
+                    nrows=1000,
+                    dtype={
+                        "gage_id": str,
+                        "donor_gage_id": str,
+                        "receiver_gage_id": str,
+                    },
+                )
             elif ext == ".parquet":
                 df = pd.read_parquet(BytesIO(response["Body"].read()), engine="pyarrow")
             elif ext in [".gpkg", ".gdb"]:
@@ -245,7 +254,6 @@ def process_file(
                 return
     except Exception as e:
         print(f"ERROR reading {path}: {e}")
-        return f".. warning:: Failed to read {path} ({e})"
 
     return schema_to_rst(df, title)
 
