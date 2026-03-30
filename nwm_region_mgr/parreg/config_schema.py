@@ -383,14 +383,14 @@ class SnowCoverConfig(BaseModel):
 
     snow_cover_file: Path | str | dict[str, Path | str] | None = Field(
         description="Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values.",
-        examples="vpu{vpu_list}_snow_frac.parquet",
+        examples="{base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet",
         default=None,
     )
 
     column: str | None = Field(
         description="Column name in the snow cover data file that contains the snow cover percentage.",
-        examples="snow_pc_hydroatlas",
-        default="snow_pc_hydroatlas",
+        examples="snw_pc_syr",
+        default="snw_pc_syr",
     )
 
     threshold: float | None = Field(

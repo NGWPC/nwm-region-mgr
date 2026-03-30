@@ -215,7 +215,7 @@ def plot_spatial_map(gdf: gpd.GeoDataFrame, d1: dict) -> None:
     # save the figure
     if d1.get("outfile") is not None:
         plt.savefig(d1["outfile"], bbox_inches="tight")
-        plt.close()
+        plt.close(fig)
         logger.info(
             f"Spatial map of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}"
         )
@@ -278,7 +278,7 @@ def plot_histogram(data: pd.DataFrame, d1: dict) -> None:
     # save the figure
     if d1.get("outfile") is not None:
         plt.savefig(d1["outfile"], bbox_inches="tight")
-        plt.close()
+        plt.close(fig)
         logger.info(
             f"Histogram of {d1['var_str']} for VPU {d1['vpu']} saved to {d1['outfile']}"
         )
