@@ -77,12 +77,12 @@ Frequently Asked Questions
 
 .. dropdown:: Does the donor/receiver pairing distinguish between snowy and non-snowy regions?
     
-    Currrently, the snowiness of catchments is determined using the mean annual snowfall fraction derived based on 
+    Currrently, the snowiness of catchments is determined using the mean annual snowcover fraction derived based on 
     the `HydroATLAS dataset <https://www.hydrosheds.org/pages/hydroatlas>`_, based on "snow_cover.threshold" defined 
     in the configuration file. If the "snow_cover.consider_snowness" option is set to True, parameter regionalization 
     will be performed separately for snowy and non-snowy basins. 
     
-    Note HydroATLAS-based mean annual snowfall fraction data is not available for PRVI.
+    Note HydroATLAS-based mean annual snowcover fraction data is not available for PRVI.
 
     
 .. dropdown:: How do I start using this tool?
