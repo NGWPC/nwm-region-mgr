@@ -106,6 +106,9 @@ class ClusterPairer(Pairer):
                 df_attr.drop(self.config["non_attr_cols"], axis=1)
             )
 
+            # convert to float32 to save memory for clustering algorithms
+            df_attr_reduced = df_attr_reduced.astype(np.float32)
+
             # process snowy and non-snowy catchments separately
             processed_receivers_df = self.process_snow_groups(
                 df_attr, df_attr_reduced, processed_receivers_df, snowy=True
