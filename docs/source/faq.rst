@@ -63,7 +63,7 @@ Frequently Asked Questions
     (e.g., 
     `ngen: NextGen divide attributes <https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>`_, 
     `hlr: Hydrologic Landscape Region attributes <https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>`_, and 
-    `streamcat: StreamCat attributes <https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>`_). 
+    `streamcat: StreamCat attributes <https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>`_, 
     `hydroatlas: HydroATLAS attributes <https://www.hydrosheds.org/hydroatlas>`_). 
 
 .. dropdown:: Which attribute datasets are supported for each domain?

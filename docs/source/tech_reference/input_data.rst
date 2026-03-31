@@ -19,9 +19,6 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
    "01010000", "noah-owp-modular cfe-s t-route", "2.5681848800643285", "0.3286171733536613", "98.26779571658672", "12.345915915145532", "34.57680991125569", "4.064091503042371", "0.9712745199335464", "3.7414847994010367", "0.0009141315202519", "0.2682757844834037", "0.7532535832349109", "0.4130823012978584", "0.2589183149092599", "0.1352373803701926", "0.0004228761310245", "1.1540687515916113", "0.3326644885346328", "0.8494590266511353", "3.7047342427645367", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
    "01010000", "noah-owp-modular snow-17 lasam t-route", "1.7202166366984653", "0.2830454483663369", "55.7216447075499", "7.395125941680879", "64.91094869284314", "4.532964185028021", "0.839432321093368", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.2549536985740628", "0.1149808945005032", "3395.942668181262", "0.0402573508525195", "1.3993208237988155", "0.1860697866529445", "0.4344457454145048", "2.8034892811290693", "0.1682210213074931", "0.0212834071116516", "0.1391684172778563", "0.7052654753641924", "0.1892796609353877", "1.8393994158286835", "0.8245934418227354", "2.6163411478418066", "85.65653278592669", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
    "01010000", "noah-owp-modular ueb cfe-x t-route", "1.6984225027876014", "0.1138073585146865", "44.18211099270653", "10.7458769168222", "41.55877300879165", "2.6584257451986466", "0.9894877010479544", "6.451208746356487", "0.0009931305806678", "0.4331962074757012", "0.2281443013468404", "0.2915759136119435", "0.1545028069618073", "0.1101811687158985", "0.00173408132033", "4.603211031471964", "0.9632723151253538", "0.1889839116526389", "0.1175267001634975", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "1.451971818772199", "0.2253714587504531", "2.6267503130197287", "1.0381689683179314", "0.2723324489894099", "0.9878101435547773", "2.104278810378881", "0.0096068438949711", "346.4354100199481", "1291.644609708449", "6.939487504771504", "0.3945507373583731", "0.8990968927991766", "83059.92094090296", "-0.4349516338584633", "2.974069284705172", "4.643406523991181", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
-   "01010000", "noah-owp-modular cfe-s t-route", "2.5681848800643285", "0.3286171733536613", "98.26779571658672", "12.345915915145532", "34.57680991125569", "4.064091503042371", "0.9712745199335464", "3.7414847994010367", "0.0009141315202519", "0.2682757844834037", "0.7532535832349109", "0.4130823012978584", "0.2589183149092599", "0.1352373803701926", "0.0004228761310245", "1.1540687515916113", "0.3326644885346328", "0.8494590266511353", "3.7047342427645367", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
-   "01010000", "noah-owp-modular snow-17 lasam t-route", "1.7202166366984653", "0.2830454483663369", "55.7216447075499", "7.395125941680879", "64.91094869284314", "4.532964185028021", "0.839432321093368", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.2549536985740628", "0.1149808945005032", "3395.942668181262", "0.0402573508525195", "1.3993208237988155", "0.1860697866529445", "0.4344457454145048", "2.8034892811290693", "0.1682210213074931", "0.0212834071116516", "0.1391684172778563", "0.7052654753641924", "0.1892796609353877", "1.8393994158286835", "0.8245934418227354", "2.6163411478418066", "85.65653278592669", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
-   "01010000", "noah-owp-modular ueb cfe-x t-route", "1.6984225027876014", "0.1138073585146865", "44.18211099270653", "10.7458769168222", "41.55877300879165", "2.6584257451986466", "0.9894877010479544", "6.451208746356487", "0.0009931305806678", "0.4331962074757012", "0.2281443013468404", "0.2915759136119435", "0.1545028069618073", "0.1101811687158985", "0.00173408132033", "4.603211031471964", "0.9632723151253538", "0.1889839116526389", "0.1175267001634975", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "1.451971818772199", "0.2253714587504531", "2.6267503130197287", "1.0381689683179314", "0.2723324489894099", "0.9878101435547773", "2.104278810378881", "0.0096068438949711", "346.4354100199481", "1291.644609708449", "6.939487504771504", "0.3945507373583731", "0.8990968927991766", "83059.92094090296", "-0.4349516338584633", "2.974069284705172", "4.643406523991181", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
 
 **Schema:**
 
@@ -688,7 +685,7 @@ Sample file path: ``inputs/region/attr_datasets/hlr/attr_hlr_conus.parquet``
      - Description
      - Type
    * - divide_id
-     - Unique identifier for each catchment.
+     - divide_id
      - object
 
    * - AQPERMNEW
@@ -778,7 +775,1199 @@ Sample file path: ``inputs/region/attr_config/attr_selection_hlr.csv``
      - object
 
    * - description
-     - description
+     - Description of the HLR attribute.
+     - object
+
+
+
+
+.. _hydroatlas-attr_data_file:
+
+hydroatlas.attr_data_file
+-------------------------
+
+File containing HydroATLAS attribute data for all catchments in a NWM domain (e.g., CONUS).
+
+Sample file path: ``inputs/region/attr_datasets/hydroatlas/attr_hydroatlas_conus.parquet``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "div_id", "dis_m3_pyr", "dis_m3_pmn", "dis_m3_pmx", "run_mm_syr", "inu_pc_smn", "inu_pc_umn", "inu_pc_smx", "inu_pc_umx", "inu_pc_slt", "inu_pc_ult", "lka_pc_sse", "lka_pc_use", "lkv_mc_usu", "rev_mc_usu", "dor_pc_pva", "ria_ha_ssu", "ria_ha_usu", "riv_tc_ssu", "riv_tc_usu", "gwt_cm_sav", "ele_mt_sav", "ele_mt_uav", "ele_mt_smn", "ele_mt_smx", "slp_dg_sav", "slp_dg_uav", "sgr_dk_sav", "clz_cl_smj", "cls_cl_smj", "tmp_dc_syr", "tmp_dc_uyr", "tmp_dc_smn", "tmp_dc_smx", "tmp_dc_s01", "tmp_dc_s02", "tmp_dc_s03", "tmp_dc_s04", "tmp_dc_s05", "tmp_dc_s06", "tmp_dc_s07", "tmp_dc_s08", "tmp_dc_s09", "tmp_dc_s10", "tmp_dc_s11", "tmp_dc_s12", "pre_mm_syr", "pre_mm_uyr", "pre_mm_s01", "pre_mm_s02", "pre_mm_s03", "pre_mm_s04", "pre_mm_s05", "pre_mm_s06", "pre_mm_s07", "pre_mm_s08", "pre_mm_s09", "pre_mm_s10", "pre_mm_s11", "pre_mm_s12", "pet_mm_syr", "pet_mm_uyr", "pet_mm_s01", "pet_mm_s02", "pet_mm_s03", "pet_mm_s04", "pet_mm_s05", "pet_mm_s06", "pet_mm_s07", "pet_mm_s08", "pet_mm_s09", "pet_mm_s10", "pet_mm_s11", "pet_mm_s12", "aet_mm_syr", "aet_mm_uyr", "aet_mm_s01", "aet_mm_s02", "aet_mm_s03", "aet_mm_s04", "aet_mm_s05", "aet_mm_s06", "aet_mm_s07", "aet_mm_s08", "aet_mm_s09", "aet_mm_s10", "aet_mm_s11", "aet_mm_s12", "ari_ix_sav", "ari_ix_uav", "cmi_ix_syr", "cmi_ix_uyr", "cmi_ix_s01", "cmi_ix_s02", "cmi_ix_s03", "cmi_ix_s04", "cmi_ix_s05", "cmi_ix_s06", "cmi_ix_s07", "cmi_ix_s08", "cmi_ix_s09", "cmi_ix_s10", "cmi_ix_s11", "cmi_ix_s12", "snw_pc_syr", "snw_pc_uyr", "snw_pc_smx", "snw_pc_s01", "snw_pc_s02", "snw_pc_s03", "snw_pc_s04", "snw_pc_s05", "snw_pc_s06", "snw_pc_s07", "snw_pc_s08", "snw_pc_s09", "snw_pc_s10", "snw_pc_s11", "snw_pc_s12", "glc_cl_smj", "glc_pc_s01", "glc_pc_s02", "glc_pc_s03", "glc_pc_s04", "glc_pc_s05", "glc_pc_s06", "glc_pc_s07", "glc_pc_s08", "glc_pc_s09", "glc_pc_s10", "glc_pc_s11", "glc_pc_s12", "glc_pc_s13", "glc_pc_s14", "glc_pc_s15", "glc_pc_s16", "glc_pc_s17", "glc_pc_s18", "glc_pc_s19", "glc_pc_s20", "glc_pc_s21", "glc_pc_s22", "glc_pc_u01", "glc_pc_u02", "glc_pc_u03", "glc_pc_u04", "glc_pc_u05", "glc_pc_u06", "glc_pc_u07", "glc_pc_u08", "glc_pc_u09", "glc_pc_u10", "glc_pc_u11", "glc_pc_u12", "glc_pc_u13", "glc_pc_u14", "glc_pc_u15", "glc_pc_u16", "glc_pc_u17", "glc_pc_u18", "glc_pc_u19", "glc_pc_u20", "glc_pc_u21", "glc_pc_u22", "pnv_cl_smj", "pnv_pc_s01", "pnv_pc_s02", "pnv_pc_s03", "pnv_pc_s04", "pnv_pc_s05", "pnv_pc_s06", "pnv_pc_s07", "pnv_pc_s08", "pnv_pc_s09", "pnv_pc_s10", "pnv_pc_s11", "pnv_pc_s12", "pnv_pc_s13", "pnv_pc_s14", "pnv_pc_s15", "pnv_pc_u01", "pnv_pc_u02", "pnv_pc_u03", "pnv_pc_u04", "pnv_pc_u05", "pnv_pc_u06", "pnv_pc_u07", "pnv_pc_u08", "pnv_pc_u09", "pnv_pc_u10", "pnv_pc_u11", "pnv_pc_u12", "pnv_pc_u13", "pnv_pc_u14", "pnv_pc_u15", "wet_cl_smj", "wet_pc_sg1", "wet_pc_ug1", "wet_pc_sg2", "wet_pc_ug2", "wet_pc_s01", "wet_pc_s02", "wet_pc_s03", "wet_pc_s04", "wet_pc_s05", "wet_pc_s06", "wet_pc_s07", "wet_pc_s08", "wet_pc_s09", "wet_pc_u01", "wet_pc_u02", "wet_pc_u03", "wet_pc_u04", "wet_pc_u05", "wet_pc_u06", "wet_pc_u07", "wet_pc_u08", "wet_pc_u09", "for_pc_sse", "for_pc_use", "crp_pc_sse", "crp_pc_use", "pst_pc_sse", "pst_pc_use", "ire_pc_sse", "ire_pc_use", "gla_pc_sse", "gla_pc_use", "prm_pc_sse", "prm_pc_use", "pac_pc_sse", "pac_pc_use", "tbi_cl_smj", "tec_cl_smj", "fmh_cl_smj", "fec_cl_smj", "cly_pc_sav", "cly_pc_uav", "slt_pc_sav", "slt_pc_uav", "snd_pc_sav", "snd_pc_uav", "soc_th_sav", "soc_th_uav", "swc_pc_syr", "swc_pc_uyr", "swc_pc_s01", "swc_pc_s02", "swc_pc_s03", "swc_pc_s04", "swc_pc_s07", "swc_pc_s08", "swc_pc_s09", "swc_pc_s10", "swc_pc_s11", "swc_pc_s12", "lit_cl_smj", "kar_pc_sse", "kar_pc_use", "ero_kh_sav", "ero_kh_uav", "pop_ct_ssu", "pop_ct_usu", "ppd_pk_sav", "ppd_pk_uav", "urb_pc_sse", "urb_pc_use", "nli_ix_sav", "nli_ix_uav", "rdd_mk_sav", "rdd_mk_uav", "hft_ix_s93", "hft_ix_u93", "hft_ix_s09", "hft_ix_u09", "gad_id_smj", "gdp_ud_sav", "gdp_ud_ssu", "gdp_ud_usu", "hdi_ix_sav"
+   "1", "0.043", "0.005", "0.139", "2.0", "0.0", "0.0", "0.0", "1.0", "0.0", "2.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1.952", "4.809", "2.73", "5.018", "848.0", "223.0", "281.0", "82.0", "917.0", "31.0", "44.0", "72.0", "15.0", "103.0", "223.0", "222.00000000000003", "115.00000000000001", "339.0", "115.00000000000001", "142.0", "169.0", "210.00000000000003", "255.0", "306.0", "339.0", "332.0", "295.0", "232.0", "159.0", "116.0", "95.0", "99.0", "13.0", "10.0", "10.0", "4.0", "1.0", "1.0", "8.0", "17.0", "11.0", "6.0", "6.0", "10.0", "1740.0000000000002", "1712.9999999999998", "60.0", "77.0", "119.00000000000001", "159.0", "206.0", "236.0", "240.0", "216.0", "172.0", "124.0", "74.0", "56.0", "78.0", "82.0", "4.0", "7.0", "10.0", "11.0", "9.0", "6.0", "5.0", "8.0", "7.0", "5.0", "3.0", "3.0", "6.0", "6.0", "-94.0", "-94.0", "-78.0", "-87.0", "-92.0", "-98.0", "-100.0", "-100.0", "-97.0", "-92.0", "-94.0", "-95.0", "-92.0", "-82.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "14.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "17.0", "34.0", "0.0", "49.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "10.0", "71.0", "0.0", "19.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "12.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "-999.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "4.0", "1.0", "58.0", "53.0", "5.0", "1.0", "0.0", "0.0", "0.0", "0.0", "9.0", "10.0", "13.0", "435.00000000000006", "4.0", "130.0", "18.0", "18.0", "31.0", "30.0", "51.0", "51.0", "5.0", "4.0", "5.0", "5.0", "8.0", "9.0", "9.0", "7.0", "2.0", "3.0", "4.0", "4.0", "4.0", "5.0", "1.0", "0.0", "1.0", "2710.0", "3269.0000000000005", "0.034", "0.036", "0.324", "0.092", "0.0", "0.0", "172.0", "0.0", "174.0", "68.0", "43.0", "35.0", "55.0", "45.0", "240.0", "55767.99999999999", "708852.0", "815795.0", "951.0"
+   "2", "0.105", "0.011", "0.333", "2.0", "5.0", "2.0", "20.0", "7.0", "28.0", "10.0", "0.0", "0.0", "0.0", "0.0", "0.0", "4.669", "11.064", "8.674", "14.927", "380.0", "133.0", "221.0", "71.0", "824.0", "11.000000000000002", "32.0", "29.0", "15.0", "103.0", "225.0", "222.99999999999997", "116.0", "341.0", "117.0", "144.0", "173.0", "213.0", "258.0", "307.0", "341.0", "334.0", "298.0", "234.0", "161.0", "117.0", "84.0", "94.0", "12.0", "9.0", "9.0", "3.0", "0.0", "0.0", "6.0", "16.0", "10.0", "5.0", "5.0", "9.0", "1777.0", "1740.0", "62.0", "79.00000000000001", "123.0", "163.0", "210.99999999999997", "240.0", "244.0", "219.0", "176.00000000000003", "127.0", "76.00000000000001", "58.0", "68.0", "77.0", "4.0", "6.0", "9.0", "10.0", "8.0", "5.0", "4.0", "7.0", "6.0", "4.0", "3.0", "2.0", "5.0", "5.0", "-95.0", "-95.0", "-81.0", "-89.0", "-93.0", "-98.0", "-100.0", "-100.0", "-97.0", "-93.0", "-94.0", "-96.0", "-93.0", "-85.00000000000001", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "12.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "2.0", "33.0", "7.0", "26.0", "0.0", "30.0", "0.0", "0.0", "0.0", "0.0", "0.0", "2.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "8.0", "57.0", "3.0", "21.0", "0.0", "11.000000000000002", "0.0", "0.0", "0.0", "0.0", "0.0", "1.0", "12.0", "0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "99.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "-999.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "41.00000000000001", "16.0", "42.0", "54.0", "31.0", "14.0", "0.0", "0.0", "0.0", "0.0", "2.0", "9.0", "13.0", "435.0", "4.0", "130.0", "19.000000000000004", "18.0", "33.0", "30.0", "48.0", "49.0", "5.0", "5.0", "4.0", "5.0", "7.0", "8.0", "7.0", "6.0", "1.0", "2.0", "3.0", "3.0", "4.0", "4.0", "1.0", "0.0", "1.0", "1272.0", "2506.0", "3.283", "3.518", "14.116", "4.776", "1.0", "0.0", "956.0", "400.0", "451.0", "220.0", "99.0", "62.0", "108.0", "72.0", "240.0", "55768.0", "125292296.0", "138469984.0", "951.0"
+   "3", "0.043", "0.005", "0.139", "2.0", "0.0", "0.0", "0.0", "1.0", "0.0", "2.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1.952", "4.809", "2.73", "5.018", "848.0", "223.00000000000003", "281.0", "82.0", "917.0", "31.0", "44.0", "72.0", "15.000000000000002", "103.00000000000001", "223.00000000000003", "222.0", "115.0", "339.0", "115.0", "142.0", "169.0", "210.0", "254.99999999999997", "306.0", "339.0", "332.0", "295.0", "232.0", "159.0", "116.0", "95.0", "99.0", "13.0", "10.0", "10.0", "4.0", "1.0", "1.0", "8.0", "17.0", "11.0", "6.0", "6.0", "10.0", "1740.0", "1713.0000000000002", "60.00000000000001", "77.0", "118.99999999999999", "159.0", "206.00000000000003", "236.0", "240.00000000000003", "215.99999999999997", "172.0", "124.0", "74.0", "56.0", "78.0", "82.0", "4.0", "7.0", "10.0", "11.0", "9.0", "6.0", "5.0", "8.0", "7.0", "5.0", "3.0", "3.0", "6.0", "6.0", "-94.0", "-94.0", "-78.0", "-87.0", "-92.00000000000001", "-98.00000000000001", "-100.0", "-100.0", "-96.99999999999999", "-92.00000000000001", "-94.0", "-95.0", "-92.00000000000001", "-82.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "14.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "17.0", "34.0", "0.0", "49.00000000000001", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "10.0", "71.0", "0.0", "19.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "12.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "100.0", "0.0", "0.0", "0.0", "-999.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "4.0", "1.0", "58.0", "53.0", "5.0", "1.0", "0.0", "0.0", "0.0", "0.0", "9.0", "10.0", "13.0", "435.0", "4.0", "130.0", "18.0", "18.0", "31.0", "30.000000000000004", "51.0", "51.0", "5.0", "4.0", "5.0", "5.0", "8.0", "9.0", "9.0", "7.0", "2.0", "3.0", "4.0", "4.0", "4.0", "5.0", "1.0", "0.0", "1.0", "2710.0", "3269.0", "0.034", "0.036", "0.324", "0.092", "0.0", "0.0", "172.0", "0.0", "174.0", "68.0", "43.0", "35.0", "55.0", "45.0", "240.00000000000003", "55768.0", "708852.0", "815794.9999999999", "951.0"
+
+**Schema:**
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Description
+     - Type
+   * - div_id
+     - Unique identifier for each catchment.
+     - string
+
+   * - dis_m3_pyr
+     - annual average natural discharge (m3/year)
+     - float64
+
+   * - dis_m3_pmn
+     - annual minimum naturaldischarge (m3/month)
+     - float64
+
+   * - dis_m3_pmx
+     - annual maximum natural discharge (m3/month)
+     - float64
+
+   * - run_mm_syr
+     - sub-basin annual average land surface runoff (mm/year)
+     - float64
+
+   * - inu_pc_smn
+     - sub-basin annual minimum inundation extent (percent)
+     - float64
+
+   * - inu_pc_umn
+     - total watershed annual minimum inundation extent (percent)
+     - float64
+
+   * - inu_pc_smx
+     - sub-basin annual maximum inundation extent (percent)
+     - float64
+
+   * - inu_pc_umx
+     - total watershed annual maximum inundation extent (percent)
+     - float64
+
+   * - inu_pc_slt
+     - sub-basin long-term maximum inundation extent (percent)
+     - float64
+
+   * - inu_pc_ult
+     - total watershed long-term maximum inundation extent (percent)
+     - float64
+
+   * - lka_pc_sse
+     - sub-basin lake area (percent)
+     - float64
+
+   * - lka_pc_use
+     - total watershed lake area (percent)
+     - float64
+
+   * - lkv_mc_usu
+     - total watershed lake volume (million m3)
+     - float64
+
+   * - rev_mc_usu
+     - total watershed reservoir volume (million m3)
+     - float64
+
+   * - dor_pc_pva
+     - sub-basin degree of regulation (percent)
+     - float64
+
+   * - ria_ha_ssu
+     - sub-basin river area (hectares)
+     - float64
+
+   * - ria_ha_usu
+     - total watershed river area (hectares)
+     - float64
+
+   * - riv_tc_ssu
+     - sub-basin river volume (thousand m3)
+     - float64
+
+   * - riv_tc_usu
+     - total watershed river volume (thousand m3)
+     - float64
+
+   * - gwt_cm_sav
+     - sub-basin average groundwater table depth (cm)
+     - float64
+
+   * - ele_mt_sav
+     - sub-basin average elevation (meters above sea level)
+     - float64
+
+   * - ele_mt_uav
+     - total watershed average elevation (meters above sea level)
+     - float64
+
+   * - ele_mt_smn
+     - sub-basin minimum elevation (meters above sea level)
+     - float64
+
+   * - ele_mt_smx
+     - sub-basin maximum elevation (meters above sea level)
+     - float64
+
+   * - slp_dg_sav
+     - sub-basin average slope (degrees)
+     - float64
+
+   * - slp_dg_uav
+     - total watershed average slope (degrees)
+     - float64
+
+   * - sgr_dk_sav
+     - sub-basin stream gradient (decimeters per kilometer)
+     - float64
+
+   * - clz_cl_smj
+     - sub-basin spatial majority climate zone (classes 18)
+     - float64
+
+   * - cls_cl_smj
+     - sub-basin spatial majority climate strata (classes 125)
+     - float64
+
+   * - tmp_dc_syr
+     - sub-basin annual average temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_uyr
+     - total watershed annual average temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_smn
+     - sub-basin annual minimum temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_smx
+     - sub-basin annual maximum temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s01
+     - sub-basin average January temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s02
+     - sub-basin average February temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s03
+     - sub-basin average March temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s04
+     - sub-basin average April temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s05
+     - sub-basin average May temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s06
+     - sub-basin average June temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s07
+     - sub-basin average July temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s08
+     - sub-basin average August temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s09
+     - sub-basin average September temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s10
+     - sub-basin average October temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s11
+     - sub-basin average November temperature (degrees C x10)
+     - float64
+
+   * - tmp_dc_s12
+     - sub-basin average December temperature (degrees C x10)
+     - float64
+
+   * - pre_mm_syr
+     - sub-basin annual average precipitation (mm/year)
+     - float64
+
+   * - pre_mm_uyr
+     - total watershed annual average precipitation (mm/year)
+     - float64
+
+   * - pre_mm_s01
+     - sub-basin average January precipitation (mm)
+     - float64
+
+   * - pre_mm_s02
+     - sub-basin average February precipitation (mm)
+     - float64
+
+   * - pre_mm_s03
+     - sub-basin average March precipitation (mm)
+     - float64
+
+   * - pre_mm_s04
+     - sub-basin average April precipitation (mm)
+     - float64
+
+   * - pre_mm_s05
+     - sub-basin average May precipitation (mm)
+     - float64
+
+   * - pre_mm_s06
+     - sub-basin average June precipitation (mm)
+     - float64
+
+   * - pre_mm_s07
+     - sub-basin average July precipitation (mm)
+     - float64
+
+   * - pre_mm_s08
+     - sub-basin average August precipitation (mm)
+     - float64
+
+   * - pre_mm_s09
+     - sub-basin average September precipitation (mm)
+     - float64
+
+   * - pre_mm_s10
+     - sub-basin average October precipitation (mm)
+     - float64
+
+   * - pre_mm_s11
+     - sub-basin average November precipitation (mm)
+     - float64
+
+   * - pre_mm_s12
+     - sub-basin average December precipitation (mm)
+     - float64
+
+   * - pet_mm_syr
+     - sub-basin annual average potential evapotranspiration (mm/year)
+     - float64
+
+   * - pet_mm_uyr
+     - total watershed annual average potential evapotranspiration (mm/year)
+     - float64
+
+   * - pet_mm_s01
+     - sub-basin average January potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s02
+     - sub-basin average February potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s03
+     - sub-basin average March potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s04
+     - sub-basin average April potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s05
+     - sub-basin average May potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s06
+     - sub-basin average June potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s07
+     - sub-basin average July potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s08
+     - sub-basin average August potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s09
+     - sub-basin average September potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s10
+     - sub-basin average October potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s11
+     - sub-basin average November potential evapotranspiration (mm)
+     - float64
+
+   * - pet_mm_s12
+     - sub-basin average December potential evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_syr
+     - sub-basin annual average actual evapotranspiration (mm/year)
+     - float64
+
+   * - aet_mm_uyr
+     - total watershed annual average actual evapotranspiration (mm/year)
+     - float64
+
+   * - aet_mm_s01
+     - sub-basin average January actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s02
+     - sub-basin average February actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s03
+     - sub-basin average March actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s04
+     - sub-basin average April actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s05
+     - sub-basin average May actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s06
+     - sub-basin average June actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s07
+     - sub-basin average July actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s08
+     - sub-basin average August actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s09
+     - sub-basin average September actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s10
+     - sub-basin average October actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s11
+     - sub-basin average November actual evapotranspiration (mm)
+     - float64
+
+   * - aet_mm_s12
+     - sub-basin average December actual evapotranspiration (mm)
+     - float64
+
+   * - ari_ix_sav
+     - sub-basin average global arid index (index value)
+     - float64
+
+   * - ari_ix_uav
+     - total watershed average global arid index (index value)
+     - float64
+
+   * - cmi_ix_syr
+     - sub-basin annual average climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_uyr
+     - total watershed annual average climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s01
+     - sub-basin average January climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s02
+     - sub-basin average February climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s03
+     - sub-basin average March climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s04
+     - sub-basin average April climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s05
+     - sub-basin average May climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s06
+     - sub-basin average June climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s07
+     - sub-basin average July climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s08
+     - sub-basin average August climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s09
+     - sub-basin average September climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s10
+     - sub-basin average October climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s11
+     - sub-basin average November climate moisture index (index value)
+     - float64
+
+   * - cmi_ix_s12
+     - sub-basin average December climate moisture index (index value)
+     - float64
+
+   * - snw_pc_syr
+     - sub-basin annual average snow cover extent (percent)
+     - float64
+
+   * - snw_pc_uyr
+     - total watershed annual average snow cover extent (percent)
+     - float64
+
+   * - snw_pc_smx
+     - sub-basin annual maximum snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s01
+     - sub-basin average January snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s02
+     - sub-basin average February snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s03
+     - sub-basin average March snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s04
+     - sub-basin average April snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s05
+     - sub-basin average May snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s06
+     - sub-basin average June snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s07
+     - sub-basin average July snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s08
+     - sub-basin average August snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s09
+     - sub-basin average September snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s10
+     - sub-basin average October snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s11
+     - sub-basin average November snow cover extent (percent)
+     - float64
+
+   * - snw_pc_s12
+     - sub-basin average December snow cover extent (percent)
+     - float64
+
+   * - glc_cl_smj
+     - sub-basin spatial majority land cover classes (classes 22)
+     - float64
+
+   * - glc_pc_s01
+     - sub-basin percentage of forest land cover class 1 (broadleaf evergreen forest)
+     - float64
+
+   * - glc_pc_s02
+     - sub-basin percentage of forest land cover class 2 (needleleaf evergreen forest)
+     - float64
+
+   * - glc_pc_s03
+     - sub-basin percentage of forest land cover class 3 (broadleaf deciduous forest)
+     - float64
+
+   * - glc_pc_s04
+     - sub-basin percentage of forest land cover class 4 (needleleaf deciduous forest)
+     - float64
+
+   * - glc_pc_s05
+     - sub-basin percentage of forest land cover class 5 (mixed forest)
+     - float64
+
+   * - glc_pc_s06
+     - sub-basin percentage of forest land cover class 6 (shrubland)
+     - float64
+
+   * - glc_pc_s07
+     - sub-basin percentage of forest land cover class 7 (grassland)
+     - float64
+
+   * - glc_pc_s08
+     - sub-basin percentage of forest land cover class 8 (wetland)
+     - float64
+
+   * - glc_pc_s09
+     - sub-basin percentage of forest land cover class 9 (tundra)
+     - float64
+
+   * - glc_pc_s10
+     - sub-basin percentage of forest land cover class 10 (desert)
+     - float64
+
+   * - glc_pc_s11
+     - sub-basin percentage of forest land cover class 11 (urban)
+     - float64
+
+   * - glc_pc_s12
+     - sub-basin percentage of forest land cover class 12 (water)
+     - float64
+
+   * - glc_pc_s13
+     - sub-basin percentage of forest land cover class 13 (ice)
+     - float64
+
+   * - glc_pc_s14
+     - sub-basin percentage of forest land cover class 14 (bare soil)
+     - float64
+
+   * - glc_pc_s15
+     - sub-basin percentage of forest land cover class 15 (agricultural)
+     - float64
+
+   * - glc_pc_s16
+     - sub-basin percentage of forest land cover class 16 (plantation)
+     - float64
+
+   * - glc_pc_s17
+     - sub-basin percentage of forest land cover class 17 (mangrove)
+     - float64
+
+   * - glc_pc_s18
+     - sub-basin percentage of forest land cover class 18 (bamboo)
+     - float64
+
+   * - glc_pc_s19
+     - sub-basin percentage of forest land cover class 19 (savanna)
+     - float64
+
+   * - glc_pc_s20
+     - sub-basin percentage of forest land cover class 20 (tropical rainforest)
+     - float64
+
+   * - glc_pc_s21
+     - sub-basin percentage of forest land cover class 21 (temperate rainforest)
+     - float64
+
+   * - glc_pc_s22
+     - sub-basin percentage of forest land cover class 22 (unknown)
+     - float64
+
+   * - glc_pc_u01
+     - total watershed percentage of forest land cover class 1 (broadleaf evergreen forest)
+     - float64
+
+   * - glc_pc_u02
+     - total watershed percentage of forest land cover class 2 (needleleaf evergreen forest)
+     - float64
+
+   * - glc_pc_u03
+     - total watershed percentage of forest land cover class 3 (broadleaf deciduous forest)
+     - float64
+
+   * - glc_pc_u04
+     - total watershed percentage of forest land cover class 4 (needleleaf deciduous forest)
+     - float64
+
+   * - glc_pc_u05
+     - total watershed percentage of forest land cover class 5 (mixed forest)
+     - float64
+
+   * - glc_pc_u06
+     - total watershed percentage of forest land cover class 6 (shrubland)
+     - float64
+
+   * - glc_pc_u07
+     - total watershed percentage of forest land cover class 7 (grassland)
+     - float64
+
+   * - glc_pc_u08
+     - total watershed percentage of forest land cover class 8 (wetland)
+     - float64
+
+   * - glc_pc_u09
+     - total watershed percentage of forest land cover class 9 (tundra)
+     - float64
+
+   * - glc_pc_u10
+     - total watershed percentage of forest land cover class 10 (desert)
+     - float64
+
+   * - glc_pc_u11
+     - total watershed percentage of forest land cover class 11 (urban)
+     - float64
+
+   * - glc_pc_u12
+     - total watershed percentage of forest land cover class 12 (water)
+     - float64
+
+   * - glc_pc_u13
+     - total watershed percentage of forest land cover class 13 (ice)
+     - float64
+
+   * - glc_pc_u14
+     - total watershed percentage of forest land cover class 14 (bare soil)
+     - float64
+
+   * - glc_pc_u15
+     - total watershed percentage of forest land cover class 15 (agricultural)
+     - float64
+
+   * - glc_pc_u16
+     - total watershed percentage of forest land cover class 16 (plantation)
+     - float64
+
+   * - glc_pc_u17
+     - total watershed percentage of forest land cover class 17 (mangrove)
+     - float64
+
+   * - glc_pc_u18
+     - total watershed percentage of forest land cover class 18 (bamboo)
+     - float64
+
+   * - glc_pc_u19
+     - total watershed percentage of forest land cover class 19 (savanna)
+     - float64
+
+   * - glc_pc_u20
+     - total watershed percentage of forest land cover class 20 (tropical rainforest)
+     - float64
+
+   * - glc_pc_u21
+     - total watershed percentage of forest land cover class 21 (temperate rainforest)
+     - float64
+
+   * - glc_pc_u22
+     - total watershed percentage of forest land cover class 22 (unknown)
+     - float64
+
+   * - pnv_cl_smj
+     - sub-basin potential natural vegetation spatial majority classes (classes 15)
+     - float64
+
+   * - pnv_pc_s01
+     - sub-basin percentage of potential natural vegetation class 1 (broadleaf evergreen forest)
+     - float64
+
+   * - pnv_pc_s02
+     - sub-basin percentage of potential natural vegetation class 2 (needleleaf evergreen forest)
+     - float64
+
+   * - pnv_pc_s03
+     - sub-basin percentage of potential natural vegetation class 3 (broadleaf deciduous forest)
+     - float64
+
+   * - pnv_pc_s04
+     - sub-basin percentage of potential natural vegetation class 4 (needleleaf deciduous forest)
+     - float64
+
+   * - pnv_pc_s05
+     - sub-basin percentage of potential natural vegetation class 5 (mixed forest)
+     - float64
+
+   * - pnv_pc_s06
+     - sub-basin percentage of potential natural vegetation class 6 (shrubland)
+     - float64
+
+   * - pnv_pc_s07
+     - sub-basin percentage of potential natural vegetation class 7 (grassland)
+     - float64
+
+   * - pnv_pc_s08
+     - sub-basin percentage of potential natural vegetation class 8 (wetland)
+     - float64
+
+   * - pnv_pc_s09
+     - sub-basin percentage of potential natural vegetation class 9 (tundra)
+     - float64
+
+   * - pnv_pc_s10
+     - sub-basin percentage of potential natural vegetation class 10 (desert)
+     - float64
+
+   * - pnv_pc_s11
+     - sub-basin percentage of potential natural vegetation class 11 (urban)
+     - float64
+
+   * - pnv_pc_s12
+     - sub-basin percentage of potential natural vegetation class 12 (water)
+     - float64
+
+   * - pnv_pc_s13
+     - sub-basin percentage of potential natural vegetation class 13 (ice)
+     - float64
+
+   * - pnv_pc_s14
+     - sub-basin percentage of potential natural vegetation class 14 (bare soil)
+     - float64
+
+   * - pnv_pc_s15
+     - sub-basin percentage of potential natural vegetation class 15 (agricultural)
+     - float64
+
+   * - pnv_pc_u01
+     - total watershed percentage of potential natural vegetation class 1 (broadleaf evergreen forest)
+     - float64
+
+   * - pnv_pc_u02
+     - total watershed percentage of potential natural vegetation class 2 (needleleaf evergreen forest)
+     - float64
+
+   * - pnv_pc_u03
+     - total watershed percentage of potential natural vegetation class 3 (broadleaf deciduous forest)
+     - float64
+
+   * - pnv_pc_u04
+     - total watershed percentage of potential natural vegetation class 4 (needleleaf deciduous forest)
+     - float64
+
+   * - pnv_pc_u05
+     - total watershed percentage of potential natural vegetation class 5 (mixed forest)
+     - float64
+
+   * - pnv_pc_u06
+     - total watershed percentage of potential natural vegetation class 6 (shrubland)
+     - float64
+
+   * - pnv_pc_u07
+     - total watershed percentage of potential natural vegetation class 7 (grassland)
+     - float64
+
+   * - pnv_pc_u08
+     - total watershed percentage of potential natural vegetation class 8 (wetland)
+     - float64
+
+   * - pnv_pc_u09
+     - total watershed percentage of potential natural vegetation class 9 (tundra)
+     - float64
+
+   * - pnv_pc_u10
+     - total watershed percentage of potential natural vegetation class 10 (desert)
+     - float64
+
+   * - pnv_pc_u11
+     - total watershed percentage of potential natural vegetation class 11 (urban)
+     - float64
+
+   * - pnv_pc_u12
+     - total watershed percentage of potential natural vegetation class 12 (water)
+     - float64
+
+   * - pnv_pc_u13
+     - total watershed percentage of potential natural vegetation class 13 (ice)
+     - float64
+
+   * - pnv_pc_u14
+     - total watershed percentage of potential natural vegetation class 14 (bare soil)
+     - float64
+
+   * - pnv_pc_u15
+     - total watershed percentage of potential natural vegetation class 15 (agricultural)
+     - float64
+
+   * - wet_cl_smj
+     - sub-basin spatial majority wetland classes (classes 12)
+     - float64
+
+   * - wet_pc_sg1
+     - sub-basin percentage of wetland cover for class group 1
+     - float64
+
+   * - wet_pc_ug1
+     - total watershed percentage of wetland cover for class group 1
+     - float64
+
+   * - wet_pc_sg2
+     - sub-basin percentage of wetland cover for class group 2
+     - float64
+
+   * - wet_pc_ug2
+     - total watershed percentage of wetland cover for class group 2
+     - float64
+
+   * - wet_pc_s01
+     - sub-basin percentage of wetland cover for class group 1
+     - float64
+
+   * - wet_pc_s02
+     - sub-basin percentage of wetland cover for class group 2
+     - float64
+
+   * - wet_pc_s03
+     - sub-basin percentage of wetland cover for class group 3
+     - float64
+
+   * - wet_pc_s04
+     - sub-basin percentage of wetland cover for class group 4
+     - float64
+
+   * - wet_pc_s05
+     - sub-basin percentage of wetland cover for class group 5
+     - float64
+
+   * - wet_pc_s06
+     - sub-basin percentage of wetland cover for class group 6
+     - float64
+
+   * - wet_pc_s07
+     - sub-basin percentage of wetland cover for class group 7
+     - float64
+
+   * - wet_pc_s08
+     - sub-basin percentage of wetland cover for class group 8
+     - float64
+
+   * - wet_pc_s09
+     - sub-basin percentage of wetland cover for class group 9
+     - float64
+
+   * - wet_pc_u01
+     - total watershed percentage of wetland cover for class group 1
+     - float64
+
+   * - wet_pc_u02
+     - total watershed percentage of wetland cover for class group 2
+     - float64
+
+   * - wet_pc_u03
+     - total watershed percentage of wetland cover for class group 3
+     - float64
+
+   * - wet_pc_u04
+     - total watershed percentage of wetland cover for class group 4
+     - float64
+
+   * - wet_pc_u05
+     - total watershed percentage of wetland cover for class group 5
+     - float64
+
+   * - wet_pc_u06
+     - total watershed percentage of wetland cover for class group 6
+     - float64
+
+   * - wet_pc_u07
+     - total watershed percentage of wetland cover for class group 7
+     - float64
+
+   * - wet_pc_u08
+     - total watershed percentage of wetland cover for class group 8
+     - float64
+
+   * - wet_pc_u09
+     - total watershed percentage of wetland cover for class group 9
+     - float64
+
+   * - for_pc_sse
+     - sub-basin forest cover extent (percentage)
+     - float64
+
+   * - for_pc_use
+     - total watershed forest cover extent (percentage)
+     - float64
+
+   * - crp_pc_sse
+     - sub-basin crop cover extent (percentage)
+     - float64
+
+   * - crp_pc_use
+     - total watershed crop cover extent (percentage)
+     - float64
+
+   * - pst_pc_sse
+     - sub-basin pasture cover extent (percentage)
+     - float64
+
+   * - pst_pc_use
+     - total watershed pasture cover extent (percentage)
+     - float64
+
+   * - ire_pc_sse
+     - sub-basin irrigated area extent (percentage)
+     - float64
+
+   * - ire_pc_use
+     - total watershed irrigated area extent (percentage)
+     - float64
+
+   * - gla_pc_sse
+     - sub-basin glacier cover (percentage)
+     - float64
+
+   * - gla_pc_use
+     - total watershed glacier cover (percentage)
+     - float64
+
+   * - prm_pc_sse
+     - sub-basin permafrost cover (percentage)
+     - float64
+
+   * - prm_pc_use
+     - total watershed permafrost cover (percentage)
+     - float64
+
+   * - pac_pc_sse
+     - sub-basin protected area cover (percentage)
+     - float64
+
+   * - pac_pc_use
+     - total watershed protected area cover (percentage)
+     - float64
+
+   * - tbi_cl_smj
+     - sub-basin terrestrial biome spatial majority classes (classes 14)
+     - float64
+
+   * - tec_cl_smj
+     - sub-basin terrestrial ecoregion spatial majority classes (classes 14)
+     - float64
+
+   * - fmh_cl_smj
+     - sub-basin spatial majority of freshwater major habitat classes (classes 13)
+     - float64
+
+   * - fec_cl_smj
+     - sub-basin spatial majority of freshwater ecoregions (classes 426)
+     - float64
+
+   * - cly_pc_sav
+     - sub-basin average clay content (percentage)
+     - float64
+
+   * - cly_pc_uav
+     - total watershed average clay content (percentage)
+     - float64
+
+   * - slt_pc_sav
+     - sub-basin average silt content (percentage)
+     - float64
+
+   * - slt_pc_uav
+     - total watershed average silt content (percentage)
+     - float64
+
+   * - snd_pc_sav
+     - sub-basin average sand content (percentage)
+     - float64
+
+   * - snd_pc_uav
+     - total watershed average sand content (percentage)
+     - float64
+
+   * - soc_th_sav
+     - sub-basin average soil organic carbon (percentage)
+     - float64
+
+   * - soc_th_uav
+     - total watershed average soil organic carbon (percentage)
+     - float64
+
+   * - swc_pc_syr
+     - sub-basin average soil water content (percentage)
+     - float64
+
+   * - swc_pc_uyr
+     - total watershed average soil water content (percentage)
+     - float64
+
+   * - swc_pc_s01
+     - sub-basin soil water content for January (percentage)
+     - float64
+
+   * - swc_pc_s02
+     - sub-basin soil water content for February (percentage)
+     - float64
+
+   * - swc_pc_s03
+     - sub-basin soil water content for March (percentage)
+     - float64
+
+   * - swc_pc_s04
+     - sub-basin soil water content for April (percentage)
+     - float64
+
+   * - swc_pc_s07
+     - sub-basin soil water content for July (percentage)
+     - float64
+
+   * - swc_pc_s08
+     - sub-basin soil water content for August (percentage)
+     - float64
+
+   * - swc_pc_s09
+     - sub-basin soil water content for September (percentage)
+     - float64
+
+   * - swc_pc_s10
+     - sub-basin soil water content for October (percentage)
+     - float64
+
+   * - swc_pc_s11
+     - sub-basin soil water content for November (percentage)
+     - float64
+
+   * - swc_pc_s12
+     - sub-basin soil water content for December (percentage)
+     - float64
+
+   * - lit_cl_smj
+     - sub-basin spatial majority lithology classes (classes 16)
+     - float64
+
+   * - kar_pc_sse
+     - sub-basin spatial extent of karst cover (percentage)
+     - float64
+
+   * - kar_pc_use
+     - total watershed spatial extent of karst cover (percentage)
+     - float64
+
+   * - ero_kh_sav
+     - sub-basin soil erosion (kg/hectare/yr)
+     - float64
+
+   * - ero_kh_uav
+     - total watershed soil erosion (kg/hectare/yr)
+     - float64
+
+   * - pop_ct_ssu
+     - sub-basin population count (count thousands)
+     - float64
+
+   * - pop_ct_usu
+     - total watershed population count (count thousands)
+     - float64
+
+   * - ppd_pk_sav
+     - sub-basin population density (people/km2)
+     - float64
+
+   * - ppd_pk_uav
+     - total watershed population density (people/km2)
+     - float64
+
+   * - urb_pc_sse
+     - sub-basin urban cover (percentage)
+     - float64
+
+   * - urb_pc_use
+     - total watershed urban cover (percentage)
+     - float64
+
+   * - nli_ix_sav
+     - sub-basin average nighttime lights index (index value)
+     - float64
+
+   * - nli_ix_uav
+     - total watershed average nighttime lights index (index value)
+     - float64
+
+   * - rdd_mk_sav
+     - sub-basin road density (m/km2)
+     - float64
+
+   * - rdd_mk_uav
+     - total watershed road density (m/km2)
+     - float64
+
+   * - hft_ix_s93
+     - sub-basin human footprint index for 1993 (index value)
+     - float64
+
+   * - hft_ix_u93
+     - total watershed human footprint index for 2009 (index value)
+     - float64
+
+   * - hft_ix_s09
+     - sub-basin human footprint index for 2009 (index value)
+     - float64
+
+   * - hft_ix_u09
+     - total watershed human footprint index for 2009 (index value)
+     - float64
+
+   * - gad_id_smj
+     - sub-basin administrative unit spatial majority (ID number)
+     - float64
+
+   * - gdp_ud_sav
+     - sub-basin average gross domestic product (USD)
+     - float64
+
+   * - gdp_ud_ssu
+     - sub-basin total gross domestic product (USD)
+     - float64
+
+   * - gdp_ud_usu
+     - total watershed gross domestic product (USD)
+     - float64
+
+   * - hdi_ix_sav
+     - sub-basin human development index (index value)
+     - float64
+
+
+
+
+.. _hydroatlas-attr_select_file:
+
+hydroatlas.attr_select_file
+---------------------------
+
+File to configure the selection of HydroATLAS attributes for parameter regionalization.
+
+Sample file path: ``inputs/region/attr_config/attr_selection_hydroatlas.csv``
+
+**Example rows:**
+
+.. csv-table::
+   :header-rows: 1
+
+   "select", "attr_name", "description"
+   "1", "dis_m3_pyr", "annual average natural discharge (m3/year)"
+   "1", "dis_m3_pmn", "annual minimum naturaldischarge (m3/month)"
+   "1", "dis_m3_pmx", "annual maximum natural discharge (m3/month)"
+
+**Schema:**
+
+.. list-table::
+   :header-rows: 1
+
+   * - Column
+     - Description
+     - Type
+   * - select
+     - Whether to select this attribute for parameter regionalization (1 for yes, 0 for no).
+     - int64
+
+   * - attr_name
+     - Name of the HydroATLAS attribute to be selected for parameter regionalization.
+     - object
+
+   * - description
+     - Description of the HydroATLAS attribute.
      - object
 
 
@@ -858,59 +2047,59 @@ Sample file path: ``inputs/region/attr_datasets/ngen/attr_ngen_conus.parquet``
      - Description
      - Type
    * - divide_id
-     - Unique identifier for each catchment.
+     - divide_id
      - object
 
    * - dksat
-     - NWM parameter: saturated hydraulic conductivity
+     - dksat
      - float64
 
    * - psisat
-     - NWM parameter: saturated capillary head
+     - psisat
      - float64
 
    * - smcmax
-     - NWM parameter: saturated soil moisture content
+     - smcmax
      - float64
 
    * - smcwlt
-     - NWM parameter: wilting point soil moisture content
+     - smcwlt
      - float64
 
    * - bexp
-     - NWM parameter: beta exponent on Clapp-Hornberger (1978) soil water relations
+     - bexp
      - float64
 
    * - ISLTYP
-     - dominant soil type
+     - ISLTYP
      - float64
 
    * - IVGTYP
-     - dominant vegetation class
+     - IVGTYP
      - float64
 
    * - cwpvt
-     - NWM parameter: Canopy wind parameter for canopy wind profile formulation
+     - cwpvt
      - float64
 
    * - mfsno
-     - NWM parameter: Melt factor for snow depletion curve
+     - mfsno
      - float64
 
    * - mp
-     - NWM parameter: Slope of Ball-Berry conductance relationship
+     - mp
      - float64
 
    * - refkdt
-     - NWM parameter: Soil infiltration parameter
+     - refkdt
      - float64
 
    * - slope_1km
-     - NWM parameter: Coeffecient controlling the drainage out of the soil bottom (0=no-flow)
+     - slope_1km
      - float64
 
    * - vcmx25
-     - NWM parameter: Maximum carboxylation at 25 degC
+     - vcmx25
      - float64
 
    * - Coeff
@@ -918,35 +2107,35 @@ Sample file path: ``inputs/region/attr_datasets/ngen/attr_ngen_conus.parquet``
      - float64
 
    * - Zmax
-     - NWM parameter: maximum storage in the conceptual reservoir
+     - Zmax
      - float64
 
    * - Expon
-     - NWM parameter: exponent for nonlinear ground water reservoir (1.0 for linear reservoir)
+     - Expon
      - float64
 
    * - centroid_x
-     - centroid_x of catchment
+     - centroid_x
      - float64
 
    * - centroid_y
-     - centroid_y of catchment
+     - centroid_y
      - float64
 
    * - impervious
-     - percentage of impervious area
+     - impervious
      - float64
 
    * - elevation
-     - mean elevation catchment
+     - elevation
      - float64
 
    * - slope
-     - mean slope of catchment
+     - slope
      - float64
 
    * - aspect
-     - mean aspect of catchment
+     - aspect
      - float64
 
    * - dist_4.twi
@@ -954,7 +2143,7 @@ Sample file path: ``inputs/region/attr_datasets/ngen/attr_ngen_conus.parquet``
      - object
 
    * - vpuid
-     - VPU ID of catchment
+     - vpuid
      - object
 
 
@@ -1964,7 +3153,7 @@ Sample file path: ``inputs/region/attr_datasets/streamcat/attr_streamcat_conus.p
      - Description
      - Type
    * - divide_id
-     - Unique identifier for each catchment.
+     - divide_id
      - object
 
    * - BFI
