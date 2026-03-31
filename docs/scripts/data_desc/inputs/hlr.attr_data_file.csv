@@ -11,5 +11,5 @@ SAND|percentage of sand in the soil
 MINELE|minimum elevation
 RELIEF|relief
 PFLATTOT|total percentage of flatland
-PFLATLOW|percentage of flatlad in the lowland area
-PFALTUP|percentage of flatlat in the upland area
+PFLATLOW|percentage of flatland in the lowland area
+PFLATUP|percentage of flatland in the upland area
