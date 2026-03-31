@@ -16,9 +16,9 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
    :header-rows: 1
 
    "gage_id", "formulation", "MFSNO", "CWP", "VCMX25", "MP", "RSURF_SNOW", "RSURF_EXP", "SCAMAX", "b", "satdk", "satpsi", "slope", "maxsmc", "wltsmc", "max_gw_storage", "Cgw", "expon", "Kn", "Klf", "refkdt", "mfmax", "uadj", "si", "mfmin", "scf", "nmf", "tipm", "pxtemp", "plwhc", "daygm", "smcmin", "smcmax", "van_genuchten_alpha", "van_genuchten_n", "hydraulic_conductivity", "ponded_depth_max", "field_capacity", "df", "cc", "hcan", "lai", "subalb", "ems", "cg", "zo", "rho", "rhog", "Ks", "de", "avo", "apr", "a_Xinanjiang_inflection_point_parameter", "b_Xinanjiang_shape_parameter", "x_Xinanjiang_shape_parameter", "uztwm", "uzfwm", "lztwm", "lzfsm", "lzfpm", "adimp", "uzk", "lzpk", "lzsk", "zperc", "rexp", "pctim", "pfree", "riva", "side"
-   "1010000", "noah-owp-modular cfe-s t-route", "2.5681848800643285", "0.3286171733536613", "98.26779571658672", "12.345915915145532", "34.57680991125569", "4.064091503042371", "0.9712745199335464", "3.7414847994010367", "0.0009141315202519", "0.2682757844834037", "0.7532535832349109", "0.4130823012978584", "0.2589183149092599", "0.1352373803701926", "0.0004228761310245", "1.1540687515916113", "0.3326644885346328", "0.8494590266511353", "3.7047342427645367", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
-   "1010000", "noah-owp-modular snow-17 lasam t-route", "1.7202166366984653", "0.2830454483663369", "55.7216447075499", "7.395125941680879", "64.91094869284314", "4.532964185028021", "0.839432321093368", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.2549536985740628", "0.1149808945005032", "3395.942668181262", "0.0402573508525195", "1.3993208237988155", "0.1860697866529445", "0.4344457454145048", "2.8034892811290693", "0.1682210213074931", "0.0212834071116516", "0.1391684172778563", "0.7052654753641924", "0.1892796609353877", "1.8393994158286835", "0.8245934418227354", "2.6163411478418066", "85.65653278592669", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
-   "1010000", "noah-owp-modular ueb cfe-x t-route", "1.6984225027876014", "0.1138073585146865", "44.18211099270653", "10.7458769168222", "41.55877300879165", "2.6584257451986466", "0.9894877010479544", "6.451208746356487", "0.0009931305806678", "0.4331962074757012", "0.2281443013468404", "0.2915759136119435", "0.1545028069618073", "0.1101811687158985", "0.00173408132033", "4.603211031471964", "0.9632723151253538", "0.1889839116526389", "0.1175267001634975", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "1.451971818772199", "0.2253714587504531", "2.6267503130197287", "1.0381689683179314", "0.2723324489894099", "0.9878101435547773", "2.104278810378881", "0.0096068438949711", "346.4354100199481", "1291.644609708449", "6.939487504771504", "0.3945507373583731", "0.8990968927991766", "83059.92094090296", "-0.4349516338584633", "2.974069284705172", "4.643406523991181", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "01010000", "noah-owp-modular cfe-s t-route", "2.5681848800643285", "0.3286171733536613", "98.26779571658672", "12.345915915145532", "34.57680991125569", "4.064091503042371", "0.9712745199335464", "3.7414847994010367", "0.0009141315202519", "0.2682757844834037", "0.7532535832349109", "0.4130823012978584", "0.2589183149092599", "0.1352373803701926", "0.0004228761310245", "1.1540687515916113", "0.3326644885346328", "0.8494590266511353", "3.7047342427645367", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "01010000", "noah-owp-modular snow-17 lasam t-route", "1.7202166366984653", "0.2830454483663369", "55.7216447075499", "7.395125941680879", "64.91094869284314", "4.532964185028021", "0.839432321093368", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "0.2549536985740628", "0.1149808945005032", "3395.942668181262", "0.0402573508525195", "1.3993208237988155", "0.1860697866529445", "0.4344457454145048", "2.8034892811290693", "0.1682210213074931", "0.0212834071116516", "0.1391684172778563", "0.7052654753641924", "0.1892796609353877", "1.8393994158286835", "0.8245934418227354", "2.6163411478418066", "85.65653278592669", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
+   "01010000", "noah-owp-modular ueb cfe-x t-route", "1.6984225027876014", "0.1138073585146865", "44.18211099270653", "10.7458769168222", "41.55877300879165", "2.6584257451986466", "0.9894877010479544", "6.451208746356487", "0.0009931305806678", "0.4331962074757012", "0.2281443013468404", "0.2915759136119435", "0.1545028069618073", "0.1101811687158985", "0.00173408132033", "4.603211031471964", "0.9632723151253538", "0.1889839116526389", "0.1175267001634975", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "1.451971818772199", "0.2253714587504531", "2.6267503130197287", "1.0381689683179314", "0.2723324489894099", "0.9878101435547773", "2.104278810378881", "0.0096068438949711", "346.4354100199481", "1291.644609708449", "6.939487504771504", "0.3945507373583731", "0.8990968927991766", "83059.92094090296", "-0.4349516338584633", "2.974069284705172", "4.643406523991181", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan", "nan"
 
 **Schema:**
 
@@ -30,7 +30,7 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
      - Type
    * - gage_id
      - Unique identifier for each calibration gage.
-     - int64
+     - object
 
    * - formulation
      - NextGen formualtion calibrated for a given gage (e.g., nom-cfes, nom-sac)
@@ -662,6 +662,10 @@ Sample file path: ``inputs/region/cwt_divide_gage/calib_gage_divide_conus.parque
 hlr.attr_data_file
 ------------------
 
+File containing HLR attribute data for all catchments in a NWM domain (e.g., CONUS).
+
+Sample file path: ``inputs/region/attr_datasets/hlr/attr_hlr_conus.parquet``
+
 **Example rows:**
 
 .. csv-table::
@@ -681,55 +685,55 @@ hlr.attr_data_file
      - Description
      - Type
    * - divide_id
-     - divide_id
+     - Unique identifier for each catchment.
      - object
 
    * - AQPERMNEW
-     - AQPERMNEW
+     - aquifer permeability
      - float64
 
    * - SLOPE
-     - SLOPE
+     - mean slope
      - float64
 
    * - TAVE
-     - TAVE
+     - mean annual temperature
      - float64
 
    * - PPT
-     - PPT
+     - mean annual precipitation
      - float64
 
    * - PET
-     - PET
+     - mean annual potential evaporatranspiration
      - float64
 
    * - SAND
-     - SAND
+     - percentage of sand in the soil
      - float64
 
    * - PMPE
-     - PMPE
+     - mean annual precpitation minus PET
      - float64
 
    * - MINELE
-     - MINELE
+     - minimum elevation
      - float64
 
    * - RELIEF
-     - RELIEF
+     - relief
      - float64
 
    * - PFLATTOT
-     - PFLATTOT
+     - total percentage of flatland
      - float64
 
    * - PFLATLOW
-     - PFLATLOW
+     - percentage of flatland in the lowland area
      - float64
 
    * - PFLATUP
-     - PFLATUP
+     - percentage of flatland in the upland area
      - float64
 
 
@@ -739,6 +743,10 @@ hlr.attr_data_file
 
 hlr.attr_select_file
 --------------------
+
+File to configure the selection of HLR attributes for parameter regionalization.
+
+Sample file path: ``inputs/region/attr_config/attr_selection_hlr.csv``
 
 **Example rows:**
 
@@ -759,15 +767,15 @@ hlr.attr_select_file
      - Description
      - Type
    * - select
-     - select
+     - Whether to select this attribute for parameter regionalization (1 for yes, 0 for no).
      - int64
 
    * - attr_name
-     - attr_name
+     - Name of the HLR attribute to be selected for parameter regionalization.
      - object
 
    * - description
-     - description
+     - Description of the HLR attribute.
      - object
 
 
@@ -790,7 +798,7 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S.csv``
    "receiver_divide_id", "receiver_gage_id", "donor_divide_id", "donor_gage_id"
    "cat-410687", "nan", "cat-423550", "nan"
    "cat-410688", "nan", "cat-423550", "nan"
-   "cat-423248", "nan", "nan", "23177483.0"
+   "cat-423248", "nan", "nan", "023177483"
 
 **Schema:**
 
@@ -806,7 +814,7 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S.csv``
 
    * - receiver_gage_id
      - Unique identifier for the receiver gage.
-     - float64
+     - object
 
    * - donor_divide_id
      - Unique identifier for the donor catchment (i.e., divide).
@@ -814,7 +822,7 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S.csv``
 
    * - donor_gage_id
      - Unique identifier for the donor gage.
-     - float64
+     - object
 
 
 
@@ -823,6 +831,10 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S.csv``
 
 ngen.attr_data_file
 -------------------
+
+File containing NGEN attribute data for all catchments in a NWM domain (e.g., CONUS).
+
+Sample file path: ``inputs/region/attr_datasets/ngen/attr_ngen_conus.parquet``
 
 **Example rows:**
 
@@ -843,59 +855,59 @@ ngen.attr_data_file
      - Description
      - Type
    * - divide_id
-     - divide_id
+     - Unique identifier for each catchment.
      - object
 
    * - dksat
-     - dksat
+     - NWM parameter: saturated hydraulic conductivity
      - float64
 
    * - psisat
-     - psisat
+     - NWM parameter: saturated capillary head
      - float64
 
    * - smcmax
-     - smcmax
+     - NWM parameter: saturated soil moisture content
      - float64
 
    * - smcwlt
-     - smcwlt
+     - NWM parameter: wilting point soil moisture content
      - float64
 
    * - bexp
-     - bexp
+     - NWM parameter: beta exponent on Clapp-Hornberger (1978) soil water relations
      - float64
 
    * - ISLTYP
-     - ISLTYP
+     - dominant soil type
      - float64
 
    * - IVGTYP
-     - IVGTYP
+     - dominant vegetation class
      - float64
 
    * - cwpvt
-     - cwpvt
+     - NWM parameter: Canopy wind parameter for canopy wind profile formulation
      - float64
 
    * - mfsno
-     - mfsno
+     - NWM parameter: Melt factor for snow depletion curve
      - float64
 
    * - mp
-     - mp
+     - NWM parameter: Slope of Ball-Berry conductance relationship
      - float64
 
    * - refkdt
-     - refkdt
+     - NWM parameter: Soil infiltration parameter
      - float64
 
    * - slope_1km
-     - slope_1km
+     - NWM parameter: Coeffecient controlling the drainage out of the soil bottom (0=no-flow)
      - float64
 
    * - vcmx25
-     - vcmx25
+     - NWM parameter: Maximum carboxylation at 25 degC
      - float64
 
    * - Coeff
@@ -903,35 +915,35 @@ ngen.attr_data_file
      - float64
 
    * - Zmax
-     - Zmax
+     - NWM parameter: maximum storage in the conceptual reservoir
      - float64
 
    * - Expon
-     - Expon
+     - NWM parameter: exponent for nonlinear ground water reservoir (1.0 for linear reservoir)
      - float64
 
    * - centroid_x
-     - centroid_x
+     - centroid_x of catchment
      - float64
 
    * - centroid_y
-     - centroid_y
+     - centroid_y of catchment
      - float64
 
    * - impervious
-     - impervious
+     - percentage of impervious area
      - float64
 
    * - elevation
-     - elevation
+     - mean elevation catchment
      - float64
 
    * - slope
-     - slope
+     - mean slope of catchment
      - float64
 
    * - aspect
-     - aspect
+     - mean aspect of catchment
      - float64
 
    * - dist_4.twi
@@ -939,7 +951,7 @@ ngen.attr_data_file
      - object
 
    * - vpuid
-     - vpuid
+     - VPU ID of catchment
      - object
 
 
@@ -949,6 +961,10 @@ ngen.attr_data_file
 
 ngen.attr_select_file
 ---------------------
+
+File to configure the selection of NGEN attributes for parameter regionalization.
+
+Sample file path: ``inputs/region/attr_config/attr_selection_ngen.csv``
 
 **Example rows:**
 
@@ -969,15 +985,15 @@ ngen.attr_select_file
      - Description
      - Type
    * - select
-     - select
+     - Whether to select this attribute for parameter regionalization (1 for yes, 0 for no).
      - int64
 
    * - attr_name
-     - attr_name
+     - Name of the NGEN attribute to be selected for parameter regionalization.
      - object
 
    * - description
-     - description
+     - Description of the NGEN attribute.
      - object
 
 
@@ -1922,6 +1938,10 @@ Sample file path: ``inputs/region/snow_frac/vpu03S_snow_frac.parquet``
 streamcat.attr_data_file
 ------------------------
 
+File containing StreamCat attribute data for all catchments in a NWM domain (e.g., CONUS).
+
+Sample file path: ``inputs/region/attr_datasets/streamcat/attr_streamcat_conus.parquet``
+
 **Example rows:**
 
 .. csv-table::
@@ -1941,163 +1961,163 @@ streamcat.attr_data_file
      - Description
      - Type
    * - divide_id
-     - divide_id
+     - Unique identifier for each catchment.
      - object
 
    * - BFI
-     - BFI
+     - Baseflow is the component of streamflow that can be attributed to ground-water discharge into streams. The Baseflow Index (BFI) is the ratio of baseflow to total flow, expressed as a percentage, within catchment.
      - float64
 
    * - CanalDens
-     - CanalDens
+     - Density of NHDPlus line features classified as canal, ditch, or pipeline within the catchment or watershed.
      - float64
 
    * - DamDens
-     - DamDens
+     - Density of georeferenced dams within catchment (dams/ square km) based on the National Inventory of Dams (https://catalog.data.gov/dataset/national-inventory-of-dams)
      - float64
 
    * - DamNIDStor
-     - DamNIDStor
+     - Total possible volume of all reservoirs (NID_STORA in NID) per unit area of catchment (cubic meters/square km) based on the National Inventory of Dams (https://catalog.data.gov/dataset/national-inventory-of-dams)
      - float64
 
    * - DamNrmStor
-     - DamNrmStor
+     - Normal (most common) volume of all reservoirs (NORM_STORA in NID) per unit area of catchment (cubic meters/square km) based on the National Inventory of Dams (https://catalog.data.gov/dataset/national-inventory-of-dams)
      - float64
 
    * - Elev
-     - Elev
+     - Mean catchment elevation in meters.
      - float64
 
    * - Perm
-     - Perm
+     - Mean permeability (cm/hour) of soils (STATSGO) within catchment.
      - float64
 
    * - Om
-     - Om
+     - Mean organic matter content (% by weight) of soils (STATSGO) within catchment.
      - float64
 
    * - RckDep
-     - RckDep
+     - Mean depth (cm) to bedrock of soils (STATSGO) within catchment.
      - float64
 
    * - WtDep
-     - WtDep
+     - Mean seasonal water table depth (cm) of soils (STATSGO) within catchment.
      - float64
 
    * - AgKffact
-     - AgKffact
+     - Mean soil erodibility (Kf) factor (unitless) of soils within catchment on agricultural land. The Kf factor is used in the Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall.
      - float64
 
    * - Kffact
-     - Kffact
+     - Mean soil erodibility (Kf) factor (unitless) of soils within catchment. The Kf factor is used in the Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall.
      - float64
 
    * - PctAlkIntruVol
-     - PctAlkIntruVol
+     - % of catchment area classified as lithology type: alkaline intrusive volcanic rock
      - float64
 
    * - PctAlluvCoast
-     - PctAlluvCoast
+     - % of catchment area classified as lithology type: alluvium and fine-textured coastal zone sediment
      - float64
 
    * - PctCarbResid
-     - PctCarbResid
+     - % of catchment area classified as lithology type: carbonate residual material
      - float64
 
    * - PctCoastCrs
-     - PctCoastCrs
+     - % of catchment area classified as lithology type: coastal zone sediment, coarse-textured
      - float64
 
    * - PctColluvSed
-     - PctColluvSed
+     - % of catchment area classified as lithology type: colluvial sediment
      - float64
 
    * - PctEolCrs
-     - PctEolCrs
+     - % of catchment area classified as lithology type: eolian sediment, coarse-textured (sand dunes)
      - float64
 
    * - PctEolFine
-     - PctEolFine
+     - % of catchment area classified as lithology type: eolian sediment, fine-textured (glacial loess)
      - float64
 
    * - PctExtruVol
-     - PctExtruVol
+     - % of catchment area classified as lithology type: extrusive volcanic rock
      - float64
 
    * - PctGlacLakeCrs
-     - PctGlacLakeCrs
+     - % of catchment area classified as lithology type: glacial outwash and glacial lake sediment, coarse-textured
      - float64
 
    * - PctGlacLakeFine
-     - PctGlacLakeFine
+     - % of catchment area classified as lithology type: glacial lake sediment, fine-textured
      - float64
 
    * - PctGlacTilClay
-     - PctGlacTilClay
+     - % of catchment area classified as lithology type: glacial till, clayey
      - float64
 
    * - PctGlacTilCrs
-     - PctGlacTilCrs
+     - % of catchment area classified as lithology type: glacial till, coarse-textured
      - float64
 
    * - PctGlacTilLoam
-     - PctGlacTilLoam
+     - % of catchment area classified as lithology type: glacial till, loamy
      - float64
 
    * - PctHydric
-     - PctHydric
+     - % of catchment area classified as lithology type: hydric, peat and muck
      - float64
 
    * - PctNonCarbResid
-     - PctNonCarbResid
+     - % of catchment area classified as lithology type: non-carbonate residual material
      - float64
 
    * - PctSalLake
-     - PctSalLake
+     - % of catchment area classified as lithology type: saline like sediment
      - float64
 
    * - PctSilicic
-     - PctSilicic
+     - % of catchment area classified as lithology type: silicic residual material
      - float64
 
    * - PctWater
-     - PctWater
+     - % of catchment area classified as lithology type: water
      - float64
 
    * - Precip
-     - Precip
+     - PRISM climate data - 30-year normal mean precipitation (mm): Annual period: 1981-2010 within catchment
      - float64
 
    * - Tmax
-     - Tmax
+     - PRISM climate data - 30-year normal maximum temperature (Â°C): Annual period: 1981-2010 within catchment
      - float64
 
    * - Tmean
-     - Tmean
+     - PRISM climate data - 30-year normal mean temperature (Â°C): Annual period: 1981-2010 within the catchment
      - float64
 
    * - Tmin
-     - Tmin
+     - PRISM climate data - 30-year normal minimum temperature (Â°C): Annual period: 1981-2010 within catchment
      - float64
 
    * - RdDens
-     - RdDens
+     - Density of roads (2010 Census Tiger Lines) within catchment (km/square km)
      - float64
 
    * - Runoff
-     - Runoff
+     - Mean runoff (mm) within catchment
      - float64
 
    * - Clay
-     - Clay
+     - Mean % clay content of soils (STATSGO) within catchment.
      - float64
 
    * - Sand
-     - Sand
+     - Mean % sand content of soils (STATSGO) within catchment.
      - float64
 
    * - Precip_Minus_EVT
-     - Precip_Minus_EVT
+     - This dataset represents surplus precipitation (mm): precipitation minus potential evaporation described in DOI: 10.1016/j.scitotenv.2020.137661 within individual,  local NHDPlusV2 catchments and upstream, contributing watersheds.
      - float64
 
 
@@ -2107,6 +2127,10 @@ streamcat.attr_data_file
 
 streamcat.attr_select_file
 --------------------------
+
+File to configure the selection of StreamCat attributes for parameter regionalization.
+
+Sample file path: ``inputs/region/attr_config/attr_selection_streamcat.csv``
 
 **Example rows:**
 
@@ -2127,15 +2151,15 @@ streamcat.attr_select_file
      - Description
      - Type
    * - select
-     - select
+     - Whether to select this attribute for parameter regionalization (1 for yes, 0 for no).
      - int64
 
    * - attr_name
-     - attr_name
+     - Name of the StreamCat attribute to be selected for parameter regionalization.
      - object
 
    * - description
-     - description
+     - Description of the StreamCat attribute.
      - object
 
 
