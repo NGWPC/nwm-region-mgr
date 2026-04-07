@@ -16,6 +16,8 @@ On the INT/EA/UAT clusters, all software dependencies for regionalization are in
 NWM-RTE (Run Time Environment, `/ngencerf-app/nwm-rte`). Regionalization workflows are executed via docker containers using an 
 [nwm-rte image](https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte).
 
+Note prior to running the regionalization workflow, make sure your user account has permissions to access the docker socket and pull images from the registry. Refer to the [Docker permissions](#docker-permissions) subsection below for details.
+
 ### Test the sample regionalization workflow
 
 - Navigate to your preferred working directory (e.g., `/ngen-oe/$USER/run_region`, `/ngen-dev/$USER/run_region`, 
@@ -112,7 +114,8 @@ image tag (e.g., for testing with a new image), set the variable `image_tag` in 
 
 ### Example application: comparing different regionalization methods
 In this section, we will walk through an example application where we compare gower vs. kmeans clustering for 
-parameter regionalization in VPU 09, using selected ngen and StreamCat attributes.
+parameter regionalization in VPU 09 (see CONUS VPU map in [Paratermeter regionalization](#parameter-regionalization)), 
+using selected ngen and StreamCat attributes.
 
 #### 0. Prepare configuration files
 We will start from the sample workflow above. First copy the configuration files to a new folder to avoid overwriting 
@@ -241,6 +244,257 @@ After completion, evaluation results will be saved in the folder `data/outputs/e
 
 Check the metrics and plots to compare/analyze the performance of the two algorithms in parameter regionalization.
 
+## Helpful tips and notes
+
+### Running regionalization on INT/EA/UAT clusters
+
+#### Docker permissions
+When first running the regionalization workflow on INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs. 
+```bash
+sudo systemctl status docker # check status
+sudo systemctl start docker # start docker service if not already running
+sudo usermod -aG docker $USER # add user to docker group
+newgrp docker # apply group change without logout/login
+```
+
+#### Compute resources
+
+Currently, each regionalization job can only run on a single compute node on the INT/EA/UAT clusters. Two partitions 
+are available on these clusters: `c5n-9xlarge` and `r8a-12xlarge`. Each partition contains 50 compute nodes, with 18
+CPUs per node for `c5n-9xlarge` and 48 CPUs per node for `r8a-12xlarge`. 
+
+Regionalization jobs are submitted to a partition based on the number of parallel processes (n_procs) specified in 
+the config file `config_general.yaml`, as follows:
+- If n_procs <= 18, the job is submitted to the `c5n-9xlarge` partition
+- If 18 < n_procs <= 48, the job is submitted to the `r8a-12xlarge` partition
+- If n_procs > 48, the job is not submitted and an error message is raised, since a single compute node supports 
+  a maximum of 48 CPUs.
+
+To fully utilize available computational resources, it is recommended to set n_procs to match the number of CPUs per node:
+- Use n_procs = 18 for the c5n-9xlarge partition.
+- Use n_procs = 48 for the r8a-12xlarge partition.
+
+Note the partition configuration on these clusters may change in the future (use `sinfo` to check the current configuration).
+
+#### Job submission
+Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
+customize the job submission (see the header of the script for usage details). You can adapt the following bash script
+for your needs:
+
+```bash
+#!/bin/bash
+
+# required argument
+CONFIG_DIR="./configs_test"
+
+# Optional arguments to override the defaults
+image_tag="pr-22-build" # default: latest. Check available image tags at: https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte
+pull_image=false #default: false
+workflow_options=(parreg ngen eval) #default: parreg. Valid options: formreg, parreg, ngen, eval
+dry_run=false #default: false
+delete_runtime_dir=false #default: false
+
+# ==== Typically no need to modify lines below ====
+SCRIPT_TO_RUN="/ngencerf-app/nwm-rte/sbatch_run_region.sh"
+
+# Build optional arguments
+extra_args=()
+
+if [ "$pull_image" = true ]; then
+    extra_args+=(--pull-image)
+fi
+
+if [ "$dry_run" = true ]; then
+    extra_args+=(--dry-run)
+fi
+
+if [ "$delete_runtime_dir" = true ]; then
+    extra_args+=(--delete-runtime-dir)
+fi
+
+"$SCRIPT_TO_RUN" \
+    "$CONFIG_DIR" \
+    "${workflow_options[@]}" \
+    --image-tag "$image_tag" \
+    "${extra_args[@]}" \
+    "$@"
+```
+
+#### Monitoring job status
+After a SLURM job is submitted, you can monitor the job status using:
+```bash
+squeue -u $USER
+```
+The job will typically remain in 'CF' (configuring) state for a few minutes. Once the job status changes to "R" 
+(running), you can monitor the progress by reviewing the log file `logs/region-${JOB_SUFFIX}-%j.log`,
+where, 
+- `${JOB_SUFFIX}` is a string formed by joining the workflows being run with "-"
+- `%j` is the SLURM job ID.
+
+```bash
+tail -f logs/region-parreg-ngen-eval-1124.log
+```
+
+To cancel a job after it has been submitted, use the command `scancel` with the job ID (obtained from `squeue`), e.g.,
+```bash
+scancel 12345678
+``` 
+
+#### Viewing regionalization outputs
+Sample regionalization outputs can be found in {ref}`Output Plots <output-plots>` and {ref}`Output Tables <output-data>`.
+
+Graphic regionalization outputs are typically saved in png format, which can be easily viewed via a Desktop or 
+VS Code session on INT/EA/UAT.
+
+By default, tabular regionalization outputs are saved in parquet format to increase storage and runtime efficiencies, 
+which can be conviently viewed using an extension (e.g., Parquet Explorer) in VS Code. However, these tools are not 
+readily available on INT/EA/UAT. 
+
+There are a couple of options for users to view the outputs:
+- Option 1: specify csv format for outputs in the config files `config_formreg.yaml` and `config_parreg.yaml` 
+  (e.g., `output.pairs.format: 'csv'`), which will allow you to save the outputs directly in csv format, e.g., 
+```bash
+output.pairs.format: 'csv'
+output.params.format: 'csv'
+``` 
+- Option 2: use the utility script `view_parquet.sh` in nwm-region-mgr to view parquet files. You can copy 
+this script to your working directory, e.g.,:
+```bash
+cp /ngencerf-app/nwm-region-mgr/util_scripts/view_parquet.sh .
+```
+The script allows you to:
+- preview the parquet file
+- query the file with SQL commands
+- convert the parquet file to csv format etc. 
+
+Check the header of the script for usage instructions.
+
+
+### Formulation regionalization
+
+- Configuration for formulation regionalization is specified in `config_general.yaml` and `config_formreg.yaml`.
+
+- The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
+
+- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
+  parameter regionalization requires formulation regionalization to be completed first.
+
+- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
+  formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
+  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
+  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
+  share the same formulation as the uncalibrated catchment.
+
+- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
+  additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
+
+### Parameter regionalization
+
+- Configuration for parameter regionalization is specified in `config_general.yaml` and `config_parreg.yaml`.
+
+- The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
+
+- Currently, three attribute datasets are supported:
+
+  * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
+  * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
+  * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
+  * [HydroATLAS attributes](<hhttps://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
+
+   Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
+
+- Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
+  algorithm inefficiency. An VPU is equivalent to a HUC2 region, except for HUC-03 and HUC-10 that are divided into 
+  multiple VPUs. The image below shows all the VPUs in the CONUS domain. Each oCONUS domain (Alaska, Hawaii, Puerto Rico) is 
+  treated as a single VPU.
+
+```{figure} _images/conus_vpu_map.jpeg
+:alt: VPUs in the CONUS domain
+:width: 60%
+:align: center
+:caption: VPUs in the CONUS domain
+:name: fig:vpu-map
+
+
+
+- Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
+  regionalization run, the workflow will first check if the required outputs from formulation regionalization for
+  the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
+  proceeding with parameter regionalization.
+
+- Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
+  depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
+
+### Other notes 
+#### AK domain regionalization
+
+  Configuration for the AK domain is slightly different in a few fields:
+  * `config_general.yaml`: `id_col.huc12` should be set to `huc12` (vs. `huc_12` for other domains) 
+  * `config_general.yaml`: `layer_name.huc12` should be set to `WBDHU12` (vs `WBDSnapshot_National` for other domains)
+  * `config_formreg.ymal.huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
+  
+#### Output cleanup
+
+  Each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv,
+  nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. Make sure to update the path in the `cd` command to point to the correct output folder for each algorithm.
+  ```bash
+  # update with your VPU, run name, and algorithm
+  VPU=03S 
+  RUN_NAME=test1 
+  ALGORITHM=gower 
+
+  cd outputs/ngen/regionalization/${RUN_NAME}_${ALGORITHM}/vpu_${VPU}
+  mv -f output output_backup 
+  mkdir output
+  mv -f output_backup/t-route* output/
+  rm -rf output_backup
+  ```
+
+#### Manual pairings
+
+  Manual pairings can be specified in the config file `config_parreg.yaml` to override the algorithm-based donor 
+  selection process for certain receiver catchments. This can be useful when users want to enforce specific 
+  donor-receiver pairs based on their expert knowledge or other considerations. To specify manual pairings, 
+  set the field `manual_pairs_file` to point to a comma-delimited csv file containing the manual pairings, with 
+  one of the following columns pairs: 
+  
+  * receiver_divide_id, donor_divide_id
+  * receiver_divide_id, donor_gage_id
+  * receiver_gage_id, donor_gage_id
+  * receiver_gage_id, donor_divide_id
+  
+  Each row in the file should be populated with exactly one valid receiver column and one valid donor column. 
+  See sample files in `nwm_region_mgr/data/inputs/region/manual_pairs/` for examples of formatting the manual pairings
+  file. The following examples are all valid formats for the manual pairings file:
+  ```bash
+  receiver_divide_id,receiver_gage_id,donor_divide_id,donor_gage_id
+  cat-410687,,cat-423550,
+  cat-410688,,cat-423550,
+  cat-423248,,,023177483
+  ,02207385,,02314500
+  ,02217475,cat-412526,
+  ```
+  ```bash
+  receiver_divide_id,donor_divide_id
+  cat-410687,cat-423550
+  cat-410688,cat-423550
+  ```
+  ```bash
+  receiver_gage_id,donor_gage_id
+  02207385,02314500
+  ```
+  Note that the specified manual pairings will be used to update the final donor-receiver pair files, for each allgorithm 
+  specified in `general.algorithm_list` in `config_parreg.yaml`. A `distSptatial` column will be added to indicate the 
+  spatial distance between the donor and receiver catchments for each manual pair, and a `tag` column will be added to 
+  indicate that these pairs are manually specified. The original pair and parameter files will be saved to backup files 
+  with `_original` added to the filename. Specifically, the following files will be updated with manual pairings:
+  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU].parquet`: the `receiver catchment/divide` vs `donor catchment/divide` pair file
+  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU]_mswm.csv`: the `donor gage` vs `receiver catchment/divide` pair file required
+    by MSWM in the ngen simulation step.
+  - `params/formulation_params_[ALGORITHM]_[DOMAIN]_[VPU].csv`: the donor gage formulation and parameter file required 
+    by MSWM in the ngen simulation step. 
+
+
 ## Run nwm_region_mgr in local environment
 The steps below walk through package installation and workflow configuration in local (non-containerized) environments.
 
@@ -339,223 +593,5 @@ python -m nwm.verf config_eval.yaml
 ```
 #### 5) Check outputs
 Outputs from evaluation can be found in *[output_dir]* as specified in **config_eval.yaml**
-
-
-## Helpful tips and notes
-
-### Running regionalization on INT/EA/UAT clusters
-
-#### Compute resources
-
-Currently, each regionalization job can only run on a single compute node on the INT/EA/UAT clusters. Two partitions 
-are available on these clusters: `c5n-9xlarge` and `r8a-12xlarge`. Each partition contains 50 compute nodes, with 18
-CPUs per node for `c5n-9xlarge` and 48 CPUs per node for `r8a-12xlarge`. 
-
-Regionalization jobs are submitted to a partition based on the number of parallel processes (n_procs) specified in 
-the config file `config_general.yaml`, as follows:
-- If n_procs <= 18, the job is submitted to the `c5n-9xlarge` partition
-- If 18 < n_procs <= 48, the job is submitted to the `r8a-12xlarge` partition
-- If n_procs > 48, the job is not submitted and an error message is raised, since a single compute node supports 
-  a maximum of 48 CPUs.
-
-To fully utilize available computational resources, it is recommended to set n_procs to match the number of CPUs per node:
-- Use n_procs = 18 for the c5n-9xlarge partition.
-- Use n_procs = 48 for the r8a-12xlarge partition.
-
-Note the partition configuration on these clusters may change in the future (use `sinfo` to check the current configuration).
-
-#### Job submission
-Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
-customize the job submission (see the header of the script for usage details). You can adapt the following bash script
-for your needs:
-
-```bash
-#!/bin/bash
-
-# required argument
-CONFIG_DIR="./configs_test"
-
-# Optional arguments to override the defaults
-image_tag="pr-22-build" # default: latest. Check available image tags at: https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte
-pull_image=false #default: false
-workflow_options=(parreg ngen eval) #default: parreg. Valid options: formreg, parreg, ngen, eval
-dry_run=false #default: false
-delete_runtime_dir=false #default: false
-
-# ==== Typically no need to modify lines below ====
-SCRIPT_TO_RUN="/ngencerf-app/nwm-rte/sbatch_run_region.sh"
-
-# Build optional arguments
-extra_args=()
-
-if [ "$pull_image" = true ]; then
-    extra_args+=(--pull-image)
-fi
-
-if [ "$dry_run" = true ]; then
-    extra_args+=(--dry-run)
-fi
-
-if [ "$delete_runtime_dir" = true ]; then
-    extra_args+=(--delete-runtime-dir)
-fi
-
-"$SCRIPT_TO_RUN" \
-    "$CONFIG_DIR" \
-    "${workflow_options[@]}" \
-    --image-tag "$image_tag" \
-    "${extra_args[@]}" \
-    "$@"
-```
-
-#### Monitoring job status
-After a SLURM job is submitted, you can monitor the job status using:
-```bash
-squeue -u $USER
-```
-The job will typically remain in 'CF' (configuring) state for a few minutes. Once the job status changes to "R" 
-(running), you can monitor the progress by reviewing the log file `logs/region-${JOB_SUFFIX}-%j.log`,
-where, 
-- `${JOB_SUFFIX}` is a string formed by joining the workflows being run with "-"
-- `%j` is the SLURM job ID.
-
-```bash
-tail -f logs/region-parreg-ngen-eval-1124.log
-```
-#### Viewing regionalization outputs
-By default, regionalization outputs are saved in parquet format to increase storage and runtime efficiencies, 
-which can be conviently viewed using an extension (e.g., Parquet Explorer) in VS Code. However, on INT/EA/UAT 
-clusters, these tools are not readily available. 
-
-There are a couple of options for users to view the outputs:
-- Option 1: specify csv format for outputs in the config files `config_formreg.yaml` and `config_parreg.yaml` 
-  (e.g., `output.pairs.format: 'csv'`), which will allow you to save the outputs directly in csv format, e.g., 
-```bash
-output.pairs.format: 'csv'
-output.params.format: 'csv'
-``` 
-- Option 2: use the utility script `view_parquet.sh` in nwm-region-mgr to view parquet files. You can copy 
-this script to your working directory, e.g.,:
-```bash
-cp /ngencerf-app/nwm-region-mgr/util_scripts/view_parquet.sh .
-```
-The script allows you to:
-- preview the parquet file
-- query the file with SQL commands
-- convert the parquet file to csv format etc. 
-
-Check the header of the script for usage instructions.
-
-
-### Formulation regionalization
-
-- Configuration for formulation regionalization is specified in `config_general.yaml` and `config_formreg.yaml`.
-
-- The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
-
-- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
-  parameter regionalization requires formulation regionalization to be completed first.
-
-- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
-  formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
-  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
-  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
-  share the same formulation as the uncalibrated catchment.
-
-- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
-  additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
-
-### Parameter regionalization
-
-- Configuration for parameter regionalization is specified in `config_general.yaml` and `config_parreg.yaml`.
-
-- The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
-
-- Currently, three attribute datasets are supported:
-
-  * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
-  * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
-  * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
-
-- Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
-  algorithm inefficiency.
-
-- Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
-  regionalization run, the workflow will first check if the required outputs from formulation regionalization for
-  the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
-  proceeding with parameter regionalization.
-
-- Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
-  depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
-
-### Other notes 
-#### AK domain regionalization
-
-  Configuration for the AK domain is slightly different in a few fields:
-  * `config_general.yaml`: `id_col.huc12` should be set to `huc12` (vs. `huc_12` for other domains) 
-  * `config_general.yaml`: `layer_name.huc12` should be set to `WBDHU12` (vs `WBDSnapshot_National` for other domains)
-  * `config_formreg.ymal.huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
-  
-#### Output cleanup
-
-  Each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv,
-  nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. Make sure to update the path in the `cd` command to point to the correct output folder for each algorithm.
-  ```bash
-  # update with your VPU, run name, and algorithm
-  VPU=03S 
-  RUN_NAME=test1 
-  ALGORITHM=gower 
-
-  cd outputs/ngen/regionalization/${RUN_NAME}_${ALGORITHM}/vpu_${VPU}
-  mv -f output output_backup 
-  mkdir output
-  mv -f output_backup/t-route* output/
-  rm -rf output_backup
-  ```
-
-#### Manual pairings
-
-  Manual pairings can be specified in the config file `config_parreg.yaml` to override the algorithm-based donor 
-  selection process for certain receiver catchments. This can be useful when users want to enforce specific 
-  donor-receiver pairs based on their expert knowledge or other considerations. To specify manual pairings, 
-  set the field `manual_pairs_file` to point to a comma-delimited csv file containing the manual pairings, with 
-  one of the following columns pairs: 
-  
-  * receiver_divide_id, donor_divide_id
-  * receiver_divide_id, donor_gage_id
-  * receiver_gage_id, donor_gage_id
-  * receiver_gage_id, donor_divide_id
-  
-  Each row in the file should be populated with exactly one valid receiver column and one valid donor column. 
-  See sample files in `nwm_region_mgr/data/inputs/region/manual_pairs/` for examples of formatting the manual pairings
-  file. The following examples are all valid formats for the manual pairings file:
-  ```bash
-  receiver_divide_id,receiver_gage_id,donor_divide_id,donor_gage_id
-  cat-410687,,cat-423550,
-  cat-410688,,cat-423550,
-  cat-423248,,,023177483
-  ,02207385,,02314500
-  ,02217475,cat-412526,
-  ```
-  ```bash
-  receiver_divide_id,donor_divide_id
-  cat-410687,cat-423550
-  cat-410688,cat-423550
-  ```
-  ```bash
-  receiver_gage_id,donor_gage_id
-  02207385,02314500
-  ```
-  Note that the specified manual pairings will be used to update the final donor-receiver pair files, for each allgorithm 
-  specified in `general.algorithm_list` in `config_parreg.yaml`. A `distSptatial` column will be added to indicate the 
-  spatial distance between the donor and receiver catchments for each manual pair, and a `tag` column will be added to 
-  indicate that these pairs are manually specified. The original pair and parameter files will be saved to backup files 
-  with `_original` added to the filename. Specifically, the following files will be updated with manual pairings:
-  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU].parquet`: the `receiver catchment/divide` vs `donor catchment/divide` pair file
-  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU]_mswm.csv`: the `donor gage` vs `receiver catchment/divide` pair file required
-    by MSWM in the ngen simulation step.
-  - `params/formulation_params_[ALGORITHM]_[DOMAIN]_[VPU].csv`: the donor gage formulation and parameter file required 
-    by MSWM in the ngen simulation step. 
-
 
 
