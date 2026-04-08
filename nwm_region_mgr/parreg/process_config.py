@@ -60,7 +60,12 @@ from nwm_region_mgr.parreg.funcs_clust import (
     KmedoidsPairer,
 )
 from nwm_region_mgr.parreg.funcs_dist import GowerPairer, ProximityPairer, URFPairer
-from nwm_region_mgr.utils import BaseConfigProcessor, read_table, save_data
+from nwm_region_mgr.utils import (
+    BaseConfigProcessor,
+    dissolve_polygons,
+    read_table,
+    save_data,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -217,19 +222,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     @property
     def combined_geom(self):
         """Dissolve all polygons into one before buffering."""
-        try:
-            geom = self.hydrofabric_gdf_3857.union_all()
-        except AttributeError as e:
-            geom = self.hydrofabric_gdf_3857.unary_union
-        polygons = []
-        if isinstance(geom, MultiPolygon):
-            for polygon in geom.geoms:
-                polygons.append(Polygon(polygon.exterior))
-            return MultiPolygon(polygons)
-        elif isinstance(geom, Polygon):
-            return geom
-        else:
-            raise TypeError(f"Expected Polygon or MultiPolygon, got {type(geom)}")
+        return dissolve_polygons(self.hydrofabric_gdf_3857, remove_holes=True)
 
     @property
     def hydrofabric_buffered_polygon(self):
