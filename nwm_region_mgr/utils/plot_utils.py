@@ -20,8 +20,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-# from matplotlib.lines import Line2D
-from shapely.ops import unary_union
+from nwm_region_mgr.utils.hydrofabric_utils import dissolve_polygons
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +57,7 @@ def _plot_columns_by_dtype(
     axes = np.array(axes).reshape(-1)  # Flatten in case of 2D grid
 
     # get the outer boundary of the GeoDataFrame
-    combined_polygon = unary_union(gdf.geometry)
+    combined_polygon = dissolve_polygons(gdf, remove_holes=True)
     boundary = combined_polygon.boundary
 
     for i, column in enumerate(columns):
