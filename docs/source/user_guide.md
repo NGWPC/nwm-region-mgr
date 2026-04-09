@@ -127,7 +127,7 @@ cp -r configs/ test1_configs/
 
 #### 0.1 Update `test1_configs/config_general.yaml`
  - Set **general.vpu_list** to ['09']
- - Set **general.run_id** to a new name: *test1*. This will be used to name the output folder for this experiment
+ - Set **general.run_name** to a new name: *test1*. This will be used to name the output folder for this experiment
   (e.g., `outputs/region/test1/`)
 
 #### 0.2 Update `test1_configs/config_parreg.yaml`
@@ -414,8 +414,7 @@ Check the header of the script for usage instructions.
 :align: center
 :caption: VPUs in the CONUS domain
 :name: fig:vpu-map
-
-
+```
 
 - Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
   regionalization run, the workflow will first check if the required outputs from formulation regionalization for
@@ -424,33 +423,34 @@ Check the header of the script for usage instructions.
 
 - Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
-
-### Other notes 
-#### AK domain regionalization
+ 
+### AK domain regionalization
 
   Configuration for the AK domain is slightly different in a few fields:
   * `config_general.yaml`: `id_col.huc12` should be set to `huc12` (vs. `huc_12` for other domains) 
   * `config_general.yaml`: `layer_name.huc12` should be set to `WBDHU12` (vs `WBDSnapshot_National` for other domains)
   * `config_formreg.ymal.huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
   
-#### Output cleanup
+### Output cleanup
+  In some cases, users may want to clean up or archive the outputs from previous runs of regionalization.
 
-  Each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv,
-  nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. Make sure to update the path in the `cd` command to point to the correct output folder for each algorithm.
+  In the first step of the workflow (regionalization), the program will first check if the required pair file already 
+  exists for a given run_name, algorithm, and VPU (e.g., `outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet`). 
+  If the file exists, the program will skip the regionalization process (as indicated in the log file) and use the existing pair file for subsequent steps (e.g., NGEN simulation). This allows users to keep the outputs from previous runs of regionalization and reuse them for NGEN simulations or evaluation, without needing to rerun the regionalization step. However, if you want to 
+  rerun regionalization for a given run_name/VPU/algorithm/ with different settings, you can simply delete or archive the existing pair file, and the workflow will run regionalization again.
+
+  In the second step of the workflow (ngen simulation), each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv, nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. Make sure to update the path in the `cd` command to point to the correct output folder for each algorithm.
   ```bash
   # update with your VPU, run name, and algorithm
   VPU=03S 
-  RUN_NAME=test1 
-  ALGORITHM=gower 
+  RUN_NAME=test 
+  ALGORITHM=kmeans
 
-  cd outputs/ngen/regionalization/${RUN_NAME}_${ALGORITHM}/vpu_${VPU}
-  mv -f output output_backup 
-  mkdir output
-  mv -f output_backup/t-route* output/
-  rm -rf output_backup
+  # remove all ngen simulation output files except for troute output
+  find outputs/ngen/regionalization/${RUN_NAME}_${ALGORITHM}/vpu_${VPU}/Output -type f ! -name 'troute_*' -delete
   ```
 
-#### Manual pairings
+### Manual pairings
 
   Manual pairings can be specified in the config file `config_parreg.yaml` to override the algorithm-based donor 
   selection process for certain receiver catchments. This can be useful when users want to enforce specific 
