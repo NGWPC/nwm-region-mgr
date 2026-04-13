@@ -186,7 +186,7 @@ In this experiment, we will run NGEN simulations using the parameter sets derive
 
 First, update the `test1_configs/config_ngen.yaml` file as follows:
  - Set **algorithm_list** to `['gower']` for the first run
- - Set **start_time** and **end_time** to define the simulation period (e.g., '2012-10-01T00:00:00' to '2020-10-03T00:00:00'). Here for demonstration purposes we use a 2-day period in October 2020.
+ - Set **start_time** and **end_time** to define the simulation period (e.g., '2020-10-01T00:00:00' to '2020-10-03T00:00:00'). Here for demonstration purposes we use a 2-day period in October 2020.
  - The other fields can remain unchanged.
 
 Run the NGEN simulation step as in Step 2 above.
