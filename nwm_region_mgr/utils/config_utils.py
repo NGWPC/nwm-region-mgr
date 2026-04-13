@@ -35,6 +35,7 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 from pydantic import BaseModel, Field, ValidationError, model_validator
+from pyparsing import col
 
 from nwm_region_mgr.utils.dict_utils import flatten_dict
 from nwm_region_mgr.utils.io_utils import read_table, save_data
@@ -560,6 +561,31 @@ class BaseOutputConfig(BaseModel):
 
         return data
 
+    def get_valid_columns(
+        self, data: pd.DataFrame | gpd.GeoDataFrame, columns: List[str]
+    ) -> List[str]:
+        """Get the list of valid columns that exist and are not entirely NaN in the data for plotting.
+
+        Args:
+            data: DataFrame or GeoDataFrame containing the data to plot.
+            columns: List of columns specified for plotting.
+        Returns:
+            List of valid columns that exist in the data for plotting.
+        """
+        cols_exist = [col for col in columns if col in data.columns]
+        cols_missing = set(columns) - set(cols_exist)
+        if cols_missing:
+            logger.warning(f"Excluding missing columns: {cols_missing} from plotting.")
+
+        cols_non_nan = [col for col in cols_exist if not data[col].isna().all()]
+        cols_all_nan = set(cols_exist) - set(cols_non_nan)
+        if cols_all_nan:
+            logger.warning(
+                f"Excluding columns with all NaN values: {cols_all_nan} from plotting."
+            )
+
+        return cols_non_nan
+
     def plot_data(
         self,
         data: pd.DataFrame | gpd.GeoDataFrame,
@@ -580,6 +606,33 @@ class BaseOutputConfig(BaseModel):
         if self.plots and self.plots.get("columns_to_plot", None) is not None:
             plot_dict["columns"] = self.plots["columns_to_plot"]
 
+        plot_dict["columns"] = self.get_valid_columns(
+            data, plot_dict.get("columns", [])
+        )
+        if not plot_dict["columns"]:
+            logger.warning(
+                "No valid columns to plot after validation. Skipping plotting."
+            )
+            return
+
+        # replace "noah-owp-modular" in formulation column to "NOM" for better readability in plots
+        if "formulation" in plot_dict["columns"]:
+            data["formulation"] = data["formulation"].str.replace(
+                "noah-owp-modular", "NOM", regex=False
+            )
+
+        # additionally replace "noah-owp-modular" in column names (required for plotting) to "NOM"
+        plot_dict["columns"] = [
+            c1.replace("noah-owp-modular", "NOM") if isinstance(c1, str) else c1
+            for c1 in plot_dict["columns"]
+        ]
+
+        # correspondingly replace "noah-owp-modular" in data.columns to "NOM"
+        data.columns = [
+            c1.replace("noah-owp-modular", "NOM") if isinstance(c1, str) else c1
+            for c1 in data.columns
+        ]
+
         if self.plots and self.plots.get("histogram", False):
             path1 = self.get_file_path(
                 plot_dict.get("vpu"),
@@ -588,7 +641,6 @@ class BaseOutputConfig(BaseModel):
             )
             plot_dict1 = plot_dict.copy()
             plot_dict1["outfile"] = path1
-            plot_dict1["ncols"] = min(2, plot_dict1.get("ncols", 2))
 
             # remove non-numeric columns from data from histogram plotting
             numeric_columns = data.select_dtypes(include=["number"]).columns.tolist()
@@ -606,7 +658,6 @@ class BaseOutputConfig(BaseModel):
             )
             plot_dict2 = plot_dict.copy()
             plot_dict2["outfile"] = path2
-            plot_dict2["ncols"] = min(3, plot_dict2.get("ncols", 3))
             plot_spatial_map(data, plot_dict2)
 
 

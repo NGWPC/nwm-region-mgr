@@ -1262,7 +1262,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
 
         form_no = list(self.formulation_dict).index(form_key) + 1
         if not receivers_in_form:
-            logger.warning(
+            logger.info(
                 f"No receivers found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
                 f"Skipping this formulation."
             )
@@ -1272,7 +1272,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
         if receivers_in_form and not donors_in_form:
             msg = f"No donors found for formulation #{form_no} ['{form_key}'] in VPU {self.vpu}. "
             msg += f"Formulation will not be used for pairing for these receivers ({len(receivers_in_form)})."
-            logger.warning(msg)
+            logger.info(msg)
             donors_in_form = self.donors
 
         logger.info(

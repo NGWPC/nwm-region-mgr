@@ -186,7 +186,7 @@ In this experiment, we will run NGEN simulations using the parameter sets derive
 
 First, update the `test1_configs/config_ngen.yaml` file as follows:
  - Set **algorithm_list** to `['gower']` for the first run
- - Set **start_time** and **end_time** to define the simulation period (e.g., '2022-10-01T00:00:00' to '2022-10-10T00:00:00'). Here for demonstration purposes we use a 10-day period in October 2022.
+ - Set **start_time** and **end_time** to define the simulation period (e.g., '2012-10-01T00:00:00' to '2020-10-03T00:00:00'). Here for demonstration purposes we use a 2-day period in October 2020.
  - The other fields can remain unchanged.
 
 Run the NGEN simulation step as in Step 2 above.
@@ -195,12 +195,12 @@ Run the NGEN simulation step as in Step 2 above.
 ```
 
 After completion, the simulation outputs will be saved in the folder
-`outputs/ngen/regionalization/test1_gower/vpu09/Output/`, where the streamflow outputs can be found in the file `troute_output_202210010000.nc`. Note that the sub-folder name `test1_gower` includes the run_name (here *test1*) and the algorithm used (here *gower*).
+`outputs/ngen/regionalization/test1_gower/vpu09/Output/`, where the streamflow outputs can be found in the file `troute_output_202010010000.nc`. Note that the sub-folder name `test1_gower` includes the run_name (here *test1*) and the algorithm used (here *gower*).
 
 Next, update the `test1_configs/config_ngen.yaml` file again to set **algorithm_list** to `['kmeans']` for the second run, while keeping other fields unchanged. Run the NGEN simulation step again.
 
 After completion, the simulation outputs will be saved in the folder
-`outputs/ngen/regionalization/test1_kmeans/vpu09/Output/`, where the streamflow outputs can be found in the file `troute_output_202210010000.nc`.
+`outputs/ngen/regionalization/test1_kmeans/vpu09/Output/`, where the streamflow outputs can be found in the file `troute_output_202010010000.nc`.
 
 Depending on available computational resources, each NGEN simulation may take up to an hour or more to complete.
 
@@ -214,12 +214,12 @@ Update the `configs/config_eval.yaml` file as follows:
  - Set **general.location_set_name** to *vpu_09*
  - Set **general.dataset_name** to *[test1_kmeans, test1_gower]*. This defines the names of the two datasets to be evaluated and intercompared, corresponding to the two algorithms used in parameter regionalization.
  - Set **general.nwm_version** to *[ngen, ngen]*. Both simulations use the ngen configuration.
- - Set **general.fcst_start_date** and **general.fcst_end_date** to define the simulation period (e.g., `'2022-10-01T00:00:00'` to `'2022-10-10T00:00:00'`), consistent with the simulation period used above. Both fields should be lists with the same length as **dataset_name**, e.g.,
+ - Set **general.fcst_start_date** and **general.fcst_end_date** to define the simulation period (e.g., `'2020-10-01T00:00:00'` to `'2020-10-03T00:00:00'`), consistent with the simulation period used above. Both fields should be lists with the same length as **dataset_name**, e.g.,
       ```bash
-      forecast_start_date: ['2012-10-01 00:00:00', '2012-10-01 00:00:00'] 
-      forecast_end_date: ['2012-10-10 00:00:00', '2012-10-10 00:00:00']
+      forecast_start_date: ['2020-10-01 00:00:00', '2020-10-01 00:00:00'] 
+      forecast_end_date: ['2020-10-03 00:00:00', '2020-10-03 00:00:00']
       ```
- - Set **general.eval_start_date** and **general.eval_end_date** to define the evaluation period (e.g., `'2022-10-03T00:00:00'` to `'2022-10-10T00:00:00'`). Here we use an 8-day evaluation period starting from October 3, 2022, to allow a 2-day spin-up period. Both fields should be lists with the same length as **dataset_name**.
+ - Set **general.eval_start_date** and **general.eval_end_date** to define the evaluation period (e.g., `'2020-10-02 00:00:00'` to `'2020-10-03 00:00:00'`). Here we use an 1-day evaluation period (October 2, 2020), to allow a 1-day spin-up period. Both fields should be lists with the same length as **dataset_name**.
  - Set **file_paths.output_dir** to point to the directory where evaluation outputs should be saved. Here we add the **run_name** from regionalization `test1` (e.g., `'{base_dir}/outputs/eval/test1/{location_set_name}'`), to ensure evaluation outputs are also organized by regionalization runs.
  - Update fields in metics and plotting sections as desired. Here we will compute and plot a set of default evaluation metrics: KGE (Kling-Gupta Efficiency), NSE (Nash-Sutcliffe Efficiency), NNSE (Normalized NSE), and Correlation (CORR). Note the **lead_times** fields are not applicable here since we are evaluating simulations.
 
