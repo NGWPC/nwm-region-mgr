@@ -160,7 +160,6 @@ def _plot_columns_by_dtype(
         else:
             ax.set_title(f"Unsupported dtype: {column}")
             ax.axis("off")
-            cax.axis("off")
             continue
 
         # antialiasing fix
