@@ -562,7 +562,6 @@ def select_formulation_donors_only(
         cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
         on=gage_id_col,
         how="inner",
-        # how="left",
     )
 
     return df_selected

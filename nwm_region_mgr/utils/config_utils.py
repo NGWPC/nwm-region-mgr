@@ -35,7 +35,6 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 from pydantic import BaseModel, Field, ValidationError, model_validator
-from pyparsing import col
 
 from nwm_region_mgr.utils.dict_utils import flatten_dict
 from nwm_region_mgr.utils.io_utils import read_table, save_data

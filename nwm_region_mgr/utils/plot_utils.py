@@ -37,7 +37,19 @@ def _plot_columns_by_dtype(
     figsize=(10, 6),
     antialiased: bool = False,
 ):
-    """Plot multiple GeoDataFrame columns in subplots based on data type."""
+    """Plot multiple GeoDataFrame columns in subplots based on data type.
+
+    Args:
+        gdf: GeoDataFrame to plot
+        columns: list of column names to plot
+        fillna_value: value to fill NaNs
+        num_bins: number of bins for numeric columns (optional)
+        cmap_numeric: colormap for numeric values
+        cmap_categorical: colormap for categorical values
+        figsize: figure size
+        antialiased: whether to disable antialiasing for the plots
+
+    """
     n = len(columns)
     ncols = min(4, n)
     nrows = math.ceil(n / ncols)
