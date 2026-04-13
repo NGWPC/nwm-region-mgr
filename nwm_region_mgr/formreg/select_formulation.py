@@ -427,7 +427,10 @@ def _select_formulation_given_score(
 
     # if there are multiple formulations with the same score, choose the one that has the lowest cost
     if df1.shape[0] > 1:
-        df1 = df1[df1["cost"] == df1["cost"].min()]
+        if df1["cost"].notna().any():
+            df1 = df1.loc[[df1["cost"].idxmin()]]
+        else:
+            df1 = df1.iloc[[0]]
 
     # drop col1
     df1 = df1.drop(columns=[col1])
@@ -504,6 +507,7 @@ def _identify_best_formulation_per_gage(
 
 def select_formulation_donors_only(
     config: cs.Config,
+    vpu: str,
     df_score: pd.DataFrame,
     cost_dict: Optional[dict] = None,
 ) -> pd.DataFrame:
@@ -527,6 +531,7 @@ def select_formulation_donors_only(
         config.general.id_col, "gage", "gage_id"
     )  # column name for gage ID in the DataFrame
     divide_id_col = getattr(config.general.id_col, "divide", "divide_id")
+    vpu_id_col = getattr(config.general.id_col, "vpu", "vpu_id")
 
     # score computing method, type, and tolerance
     score_tolerance = config.spatial_unit.best_formulation.tolerance
@@ -543,8 +548,12 @@ def select_formulation_donors_only(
     col_dtype = {
         gage_id_col: "str",
         divide_id_col: "str",
+        vpu_id_col: "str",
     }
     cwt_divide_gage = read_table(config.general.gage_divide_cwt_file, dtype=col_dtype)
+
+    # filter by vpu
+    cwt_divide_gage = cwt_divide_gage[cwt_divide_gage[vpu_id_col] == vpu].copy()
 
     # merge the crosswalk with the best formulations DataFrame
     if divide_id_col in df_best_per_gage.columns:
@@ -552,7 +561,7 @@ def select_formulation_donors_only(
     df_selected = df_best_per_gage.merge(
         cwt_divide_gage[[gage_id_col, divide_id_col]].drop_duplicates(),
         on=gage_id_col,
-        how="left",
+        how="inner",
     )
 
     return df_selected
@@ -731,7 +740,7 @@ def select_formulation_all(
         # append the selected formulation to the list
         if best_formulation.empty:
             logger.warning(
-                f"No valid formulations found for HUC ID: {huc_id}. Skipping this HUC."
+                f"No valid formulations found for HUC8 ID: {huc_id}. Skipping this HUC."
             )
             continue
 
@@ -746,11 +755,16 @@ def select_formulation_all(
         df_selected = pd.concat([df_selected, best_formulation], ignore_index=True)
 
     # merge with cwt_divide_huc12 to get the divide_id
-    df_selected = df_selected.merge(
-        cwt_divide_huc12[["huc_id", divide_id_col]].drop_duplicates(),
-        on="huc_id",
-        how="left",
-    )
+    if df_selected.empty:
+        logger.warning(
+            "No formulations were selected for any HUC IDs. Returning an empty DataFrame."
+        )
+    else:
+        df_selected = df_selected.merge(
+            cwt_divide_huc12[["huc_id", divide_id_col]].drop_duplicates(),
+            on="huc_id",
+            how="left",
+        )
 
     # handle formulation selection for calibration gages
     if config.general.approach_calib_basins == "regionalization":
@@ -758,16 +772,21 @@ def select_formulation_all(
     elif config.general.approach_calib_basins == "summary_score":
         # select formulations for donor gages based on the summary scores and costs
         df_selected_donors = select_formulation_donors_only(
-            config, df_score, cost_dict=cost_dict
+            config, vpu, df_score, cost_dict=cost_dict
         )
 
-        # replace the formulation for donors in df_selected with the one from df_selected_donors
-        form_map = df_selected_donors.drop_duplicates(divide_id_col).set_index(
-            divide_id_col
-        )["formulation"]
-        df_selected.loc[:, "formulation"] = (
-            df_selected[divide_id_col].map(form_map).fillna(df_selected["formulation"])
-        )
+        if df_selected.empty:
+            df_selected = df_selected_donors.copy()
+        else:
+            # replace the formulation for donors in df_selected with the one from df_selected_donors
+            form_map = df_selected_donors.drop_duplicates(divide_id_col).set_index(
+                divide_id_col
+            )["formulation"]
+            df_selected.loc[:, "formulation"] = (
+                df_selected[divide_id_col]
+                .map(form_map)
+                .fillna(df_selected["formulation"])
+            )
     else:
         msg = (
             f"Unknown approach for assigning formulations to calibrated basins: "
@@ -980,7 +999,9 @@ def select_formulation(
 
     if config.general.calib_basins_only:
         # select formulations for donor basins only
-        df_formulation = select_formulation_donors_only(config, df_score, cost_dict)
+        df_formulation = select_formulation_donors_only(
+            config, vpu, df_score, cost_dict
+        )
     else:
         # select formulations for all catchments in the VPU
         df_formulation = select_formulation_all(

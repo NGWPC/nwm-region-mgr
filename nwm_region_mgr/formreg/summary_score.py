@@ -342,7 +342,6 @@ def compute_summary_score(config: cs.Config, vpu: str) -> None:
             "vpu": vpu,
             "var_str": "Summary Score",
             "columns": df_score_vpu["formulation"].unique().tolist(),
-            "ncols": 3,
         }
         cc.plot_data(df_score_wide, plot_dict)
 
