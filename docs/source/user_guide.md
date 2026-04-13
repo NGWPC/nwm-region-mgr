@@ -10,9 +10,9 @@ The regionalization workflow includes the following steps:
 
 ![Regionalization Workflow](_images/regionalization_workflow.jpeg)
 
-## Run regionalization with NWM-RTE on INT/EA/UAT Clusters
+## Run regionalization with NWM-RTE in INT/EA/UAT Clusters
 
-On the INT/EA/UAT clusters, all software dependencies for regionalization are installed and managed through 
+In the INT/EA/UAT clusters, all software dependencies for regionalization are installed and managed through 
 NWM-RTE (Run Time Environment, `/ngencerf-app/nwm-rte`). Regionalization workflows are executed via docker containers using an 
 [nwm-rte image](https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte).
 
@@ -246,10 +246,10 @@ Check the metrics and plots to compare/analyze the performance of the two algori
 
 ## Helpful tips and notes
 
-### Running regionalization on INT/EA/UAT clusters
+### Running regionalization in INT/EA/UAT clusters
 
 #### Docker permissions
-When first running the regionalization workflow on INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs. 
+When first running the regionalization workflow in INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs. 
 ```bash
 sudo systemctl status docker # check status
 sudo systemctl start docker # start docker service if not already running
@@ -259,8 +259,8 @@ newgrp docker # apply group change without logout/login
 
 #### Compute resources
 
-Currently, each regionalization job can only run on a single compute node on the INT/EA/UAT clusters. Two partitions 
-are available on these clusters: `c5n-9xlarge` and `r8a-12xlarge`. Each partition contains 50 compute nodes, with 18
+Currently, each regionalization job can only run on a single compute node in the INT/EA/UAT clusters. Two partitions 
+are available in these clusters: `c5n-9xlarge` and `r8a-12xlarge`. Each partition contains 50 compute nodes, with 18
 CPUs per node for `c5n-9xlarge` and 48 CPUs per node for `r8a-12xlarge`. 
 
 Regionalization jobs are submitted to a partition based on the number of parallel processes (n_procs) specified in 
@@ -274,7 +274,7 @@ To fully utilize available computational resources, it is recommended to set n_p
 - Use n_procs = 18 for the c5n-9xlarge partition.
 - Use n_procs = 48 for the r8a-12xlarge partition.
 
-Note the partition configuration on these clusters may change in the future (use `sinfo` to check the current configuration).
+Note the partition configuration in these clusters may change in the future (use `sinfo` to check the current configuration).
 
 #### Job submission
 Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
