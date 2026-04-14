@@ -28,8 +28,9 @@ cd /ngen-oe/$USER/run_region  # or your preferred working directory
 cp -r /ngencerf-app/nwm-region-mgr/configs .
 ```
 - Run the three regionalization steps below sequentially using one of the two scripts in **nwm-rte**.
-  - `sbatch_run_region.sh`, for submitting jobs to compute nodes on INT/EA/UAT via SBATCH (recommended)
-  - `run_region.sh`, for running directly on the controller node or local AWS workspace (only for small regions or testing purposes)
+  - (RECOMMENDED) `sbatch_run_region.sh`: submitting jobs to compute nodes in INT/EA/UAT via SBATCH. See RTE 
+    documentation [here](https://ngwpc.github.io/nwm-rte/reference/shell/#sbatch_run_region.sh) for details on usage and available options.
+  - (TEST ONLY) `run_region.sh`: running jobs directly in the controller node or local AWS workspace for small regions or testing purposes. See RTE documentation [here](https://ngwpc.github.io/nwm-rte/reference/shell/#run_region.sh) for details on usage and available options.
 
 #### Step 1. Run regionalization
 
