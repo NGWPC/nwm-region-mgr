@@ -354,16 +354,15 @@ class ProcessAttrDataset(BaseModel):
                 f"WARNING: No crosswalk table created for {self.attr_dataset} for the {self.domain} domain."
             )
         else:
-            if self.domain.upper() == "CONUS":
-                print(
-                    f"Saving crosswalk table for {self.attr_dataset} to {self.cwt_file} ..."
-                )
-                Path(self.cwt_file).parent.mkdir(parents=True, exist_ok=True)
-                df_cwt.to_parquet(
-                    self.cwt_file,
-                    engine="pyarrow",
-                    index=False,
-                )
+            print(
+                f"Saving crosswalk table for {self.attr_dataset} to {self.cwt_file} ..."
+            )
+            Path(self.cwt_file).parent.mkdir(parents=True, exist_ok=True)
+            df_cwt.to_parquet(
+                self.cwt_file,
+                engine="pyarrow",
+                index=False,
+            )
 
         return
 
@@ -375,17 +374,22 @@ class ProcessAttrDataset(BaseModel):
         df_cwt = pd.read_parquet(self.cwt_file)
 
         cats_total = df_cwt[self.div_col].unique()
-        df_cwt_unmatched = df_cwt[~df_cwt["nearest_dist_m"].isna()]
-        cats_unmatched = df_cwt_unmatched[self.div_col].unique().tolist()
-        subs_unmatched = df_cwt_unmatched[self.id_col].unique().tolist()
-        subs_unmatched_vpus = df_cwt_unmatched[self.vpu_col].unique().tolist()
-        df_cwt_matched = df_cwt[df_cwt["nearest_dist_m"].isna()]
-        counts = df_cwt_matched[self.div_col].value_counts()
-
         print(
             f"\nAnalysis of CWT results for {self.attr_dataset.upper()} attributes for {self.domain.upper()}:"
         )
         print(f"Total number of catchments in {self.domain.upper()}: {len(cats_total)}")
+
+        if "nearest_dist_m" in df_cwt.columns:
+            df_cwt_unmatched = df_cwt[~df_cwt["nearest_dist_m"].isna()]
+            cats_unmatched = df_cwt_unmatched[self.div_col].unique().tolist()
+            subs_unmatched = df_cwt_unmatched[self.id_col].unique().tolist()
+            subs_unmatched_vpus = df_cwt_unmatched[self.vpu_col].unique().tolist()
+            df_cwt_matched = df_cwt[df_cwt["nearest_dist_m"].isna()]
+        else:
+            cats_unmatched = []
+            df_cwt_matched = df_cwt.copy()
+
+        counts = df_cwt_matched[self.div_col].value_counts()
         print(
             f"Number of catchments matched with nearest neighor (i.e., no overlapping): {len(cats_unmatched)}, {round(len(cats_unmatched) / len(cats_total) * 100, 2)}%"
         )
@@ -619,7 +623,8 @@ class ProcessAttrDataset(BaseModel):
         df_cwt = pd.read_parquet(self.cwt_file)
 
         # remove rows where no overlapping subbasin were found (hence the nearest subbasins were identified instead; not used here)
-        df_cwt = df_cwt[df_cwt["nearest_dist_m"].isna()]
+        if "nearest_dist_m" in df_cwt.columns:
+            df_cwt = df_cwt[df_cwt["nearest_dist_m"].isna()]
 
         # merge attributes dataset with crosswalk
         df_attrs1 = df_attrs.merge(df_cwt, on=self.id_col, how="inner")
@@ -629,8 +634,6 @@ class ProcessAttrDataset(BaseModel):
             df_attrs1[attrs].multiply(df_attrs1["overlap_percentage"], axis=0).copy()
         )
         weighted[self.div_col] = df_attrs1[self.div_col].values
-        # weighted = df_attrs1[attrs].multiply(df_attrs1["overlap_percentage"], axis=0)
-        # weighted[self.div_col] = df_attrs1[self.div_col].copy()
 
         # Group by catchment and compute sum
         weighted_sum = weighted.groupby(self.div_col).sum(min_count=1)
