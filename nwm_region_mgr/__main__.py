@@ -24,7 +24,7 @@ from nwm_region_mgr.parreg.process_config import ParameterRegionalizationProcess
 from nwm_region_mgr.utils.config_utils import BaseConfigProcessor
 from nwm_region_mgr.utils.logging_utils import setup_logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("nwm_region_mgr.__main__")
 matplotlib.use("Agg")
 
 
