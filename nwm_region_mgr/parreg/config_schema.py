@@ -264,18 +264,7 @@ class AttrDatasetConfig(BaseModel):
         """Private method to load the list of selected attributes."""
         # determine list of attributes to use from either attr_list or attr_select_file
         # if both are provided, attr_list takes priority
-        if self.attr_list:
-            # make sure attr_list is valid
-            attrs1 = [
-                x
-                for x in self.attr_list
-                if x not in pq.ParquetFile(self.attr_data_file).schema.names
-            ]
-            if attrs1:
-                msg = f"These attributes {attrs1} are not found in {self.attr_data_file}. Please check the configuration."
-                logger.error(msg)
-                raise ValueError(msg)
-        else:
+        if not self.attr_list:
             attr_select_path = Path(self.attr_select_file)
             if not attr_select_path.exists():
                 raise FileNotFoundError(
@@ -290,6 +279,29 @@ class AttrDatasetConfig(BaseModel):
                 )
 
             self.attr_list = df_attrs[df_attrs["select"] == 1]["attr_name"].to_list()
+
+        # check if attrs in attr_list are present in the attr_data_file
+        attrs1 = [
+            x
+            for x in self.attr_list
+            if x not in pq.ParquetFile(self.attr_data_file).schema.names
+        ]
+        if attrs1:
+            msg = f"The following attributes are not found in {self.attr_data_file} and will be ignored: {attrs1}"
+            logger.warning(msg)
+
+            self.attr_list = [x for x in self.attr_list if x not in attrs1]
+
+        # if final attr_list is empty after filtering, raise an error
+        if not self.attr_list:
+            msg = (
+                "No valid attributes found based on the following configurations:\n"
+                f"attr_list: {self.attr_list}\n"
+                f"attr_select_file: {self.attr_select_file}\n"
+                f"attr_data_file: {self.attr_data_file}\n"
+            )
+            logger.error(msg)
+            raise ValueError(msg)
 
     def get_attr_data(self, id_name: str = "div_id") -> pd.DataFrame:
         """Load attribute data filtered by selected attributes."""
