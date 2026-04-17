@@ -25,7 +25,6 @@ def resolve_nested_gages(
     """
     # Find divides with multiple gages
     duplicates = df[df[id_col].duplicated(keep=False)]
-
     if duplicates.empty:
         return df
 
@@ -80,8 +79,8 @@ def build_crosswalks(
     ngage = ncats = 0
 
     for domain1, domain in domains.items():
-        # nhf for oconus domains is not available yet
-        if hf_version == "nhf" and domain1 != "conus":
+        # nhf for prvi is not available yet
+        if hf_version == "nhf" and domain1 == "prvi":
             print(
                 f"NHF GPKG files are not available for {domain}, skipping crosswalk creation."
             )
