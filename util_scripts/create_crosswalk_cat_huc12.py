@@ -20,7 +20,7 @@ vpu_col = "vpuid" if hf_version == "v2.2" else "vpu_id"
 
 
 def create_cwt(
-    vpu: str, shp1: gpd.GeoDataFrame, shp2: gpd.GeoDataFrame, huc_col: str
+    shp1: gpd.GeoDataFrame, shp2: gpd.GeoDataFrame, huc_col: str, chunk_size: int = 5000
 ) -> pd.DataFrame:
     """Create crosswalk table between NextGen catchments and HUC12s for a given VPU."""
     # Convert to a projected CRS for accurate area calculations
@@ -30,8 +30,45 @@ def create_cwt(
     shp1 = shp1.to_crs(projected_crs)
     shp2 = shp2.to_crs(projected_crs)
 
+    # Build spatial index for shp1 (used for chunked intersection)
+    shp1_sindex = shp1.sindex
+
+    # Find overlapping areas (processed in chunks to avoid memory issues)
+    overlap_results = []
+    for start in range(0, len(shp2), chunk_size):
+        end = start + chunk_size
+        shp2_chunk = shp2.iloc[start:end].copy()
+
+        print(f"Processing chunk {start}:{end} ({end / len(shp2):.1%})")
+
+        # Spatial prefilter: only keep shp1 polygons that may intersect this chunk
+        # idx = shp1_sindex.query_bulk(shp2_chunk.geometry, predicate="intersects")[1]
+        # shp1_subset = shp1.iloc[idx].drop_duplicates()
+
+        idx = []
+        for geom in shp2_chunk.geometry:
+            idx.extend(shp1_sindex.intersection(geom.bounds))
+
+        idx = list(set(idx))
+        shp1_subset = shp1.iloc[idx]
+
+        if shp1_subset.empty:
+            continue
+
+        overlap = gpd.overlay(shp2_chunk, shp1_subset, how="intersection")
+
+        if overlap.empty:
+            continue
+
+        overlap_results.append(overlap)
+
+    if overlap_results:
+        overlap = pd.concat(overlap_results, ignore_index=True)
+    else:
+        overlap = gpd.GeoDataFrame(columns=[id_col, huc_col, "geometry"])
+
     # Find overlapping areas
-    overlap = gpd.overlay(shp2, shp1, how="intersection")
+    # overlap = gpd.overlay(shp2, shp1, how="intersection")
 
     # Compute area of each original polygon in shp2 (and convert to km^2)
     shp2["original_area"] = shp2.geometry.area / 1_000_000
@@ -113,14 +150,16 @@ def process_domain(domain: list | str):
         else [domain]
     )
     for domain in domains:
-        print(f"Processing domain: {domain}")
+        # check if crosswalk file already exists; if not, create it
+        outdir = Path(f"~/data/region_input/{hf_version}/cwt_ngen_huc12").expanduser()
+        outdir.mkdir(exist_ok=True, parents=True)
+        outfile = Path(outdir, "cwt_huc12_divide_" + domain + ".csv")
 
-        # skip oconus domains for now since nhf hydrofabric is not available yet
-        if hf_version == "nhf" and domain != "conus":
-            print(
-                f"Skipping domain {domain} for NHF since hydrofabric is not available yet."
-            )
+        if outfile.exists():
+            print(f"Crosswalk file already exists for {domain}: {outfile}. Skip")
             continue
+
+        print(f"Processing domain: {domain}")
 
         # Read HUC12 shapefiles
         if domain != "ak":
@@ -132,7 +171,7 @@ def process_domain(domain: list | str):
             huc_col = "HUC_12"
         else:
             shp_huc = read_huc_layer(
-                "~/data/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg", "WBDHU12"
+                "~/data/NHDPlusV21/NHD_H_Alaska_State_original.gpkg", "WBDHU12"
             ).copy()
             shp_huc["VPUID"] = "19"
             huc_col = "huc12"
@@ -142,15 +181,27 @@ def process_domain(domain: list | str):
         df_cwt = pd.DataFrame()
         for vpu in vpus:
             print(f"Processing VPU {vpu}")
-            shp1 = shp_huc[shp_huc["VPUID"] == vpu]
-            # shp2 = shp_ngen[shp_ngen["vpuid"] == vpu]
-            shp2 = gpd.read_file(
-                Path(
-                    f"~/data/hydrofabric/gpkg_{hf_version}/vpu_{vpu}.gpkg"
-                ).expanduser(),
-                layer="divides",
+            vpu1 = (
+                vpu
+                if domain == "conus"
+                else "19"
+                if domain == "ak"
+                else "20"
+                if domain == "hi"
+                else "21"
             )
-            df = create_cwt(vpu, shp1, shp2, huc_col)
+            shp1 = shp_huc[shp_huc["VPUID"] == vpu1]
+            file_stem = f"vpu_{vpu}" if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
+            gpkg_file = Path(
+                f"~/data/hydrofabric/gpkg_{hf_version}/{file_stem}.gpkg"
+            ).expanduser()
+            if not gpkg_file.exists():
+                print(f"GPKG file does not exist for VPU {vpu}: {gpkg_file}. Skipping.")
+                continue
+            shp2 = gpd.read_file(gpkg_file, layer="divides")
+            shp2[vpu_col] = shp2[vpu_col].astype(str)
+
+            df = create_cwt(shp1, shp2, huc_col)
             df.rename(columns={huc_col: huc_col.lower()}, inplace=True)
             df_cwt = pd.concat([df_cwt, df])
 
@@ -160,9 +211,6 @@ def process_domain(domain: list | str):
         )
 
         # save crosswalk to file for use in formulation regionalization later
-        outdir = Path(f"~/data/region_input/{hf_version}/cwt_ngen_huc12").expanduser()
-        outdir.mkdir(exist_ok=True, parents=True)
-        outfile = Path(outdir, "cwt_huc12_divide_" + domain + ".csv")
         df_cwt.to_csv(outfile, index=False)
 
         # print summary
