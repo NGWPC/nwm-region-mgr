@@ -4,8 +4,8 @@ set -euo pipefail
 id_type="gage_id"
 version="v1"
 #domain="CONUS"
-#domain="Puerto Rico"
-domain="Hawaii"
+domain="Puerto Rico"
+#domain="Hawaii"
 #domain="Alaska"
 
 gages_file="$HOME/repos/nwm-region-mgr/data/inputs/region/gages_nwm4_calib_all.csv"

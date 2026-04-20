@@ -175,11 +175,13 @@ class BaseGeneralConfig(BaseModel):
     vpu_list: Union[List[str], str] = Field(
         description=(
             "List of vector processing units (VPUs) to be processed within the domain. "
-            "Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs)."
+            "Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. "
+            "For oCONUS domains (ak, hi, prvi), the VPU id is the same of as the domain."
         ),
         examples=["03S"],
         default=["03S"],
     )
+
     n_procs: int = Field(
         description="Number of processors to use for parallel processing. Set to -1 to use all available processors.",
         examples=2,
@@ -188,14 +190,14 @@ class BaseGeneralConfig(BaseModel):
 
     base_dir: str = Field(
         description="Path to base directory for input/output files.",
-        examples="/root/nwm-region-mgr/data/",
-        default="./data/",
+        examples="~/run_region",
+        default="~/run_region",
     )
 
     static_data_dir: str = Field(
         description="Path to static data directory containing hydrofabric and other static input files.",
-        examples="/ngencerf-app/nwm-region-mgr/inputs/static_data/",
-        default="/ngencerf-app/nwm-region-mgr/inputs/static_data/",
+        examples="/ngencerf-app/nwm-region-mgr/data/inputs",
+        default="/ngencerf-app/nwm-region-mgr/data/inputs",
     )
 
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
@@ -206,20 +208,20 @@ class BaseGeneralConfig(BaseModel):
             "expanded to a dictionary mapping each VPU to its corresponding file."
             " This file must include columns 'div_id', 'vpu_id' and 'geometry'."
         ),
-        examples="{base_dir}/inputs/hydrofabric/vpu_09.gpkg",
-        default="vpu_03S.gpkg",
+        examples="{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg",
+        default="{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg",
     )
 
     gage_divide_cwt_file: Path | str = Field(
         description="Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'.",
-        examples="{base_dir}/inputs/calib_gage_divide_{domain}.parquet",
-        default="calib_gage_divide_{domain}.parquet",
+        examples="{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet",
+        default="{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet",
     )
 
     donor_gage_file: Path | str = Field(
         description="Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.",
-        examples="{base_dir}/inputs/gages_nwm4_calib_all.csv",
-        default="gages_nwm4_calib_all.csv",
+        examples="{static_data_dir}/region/gages_nwm4_calib_all.csv",
+        default="{static_data_dir}/region/gages_nwm4_calib_all.csv",
     )
 
     calval_stats_file: Path | str = Field(
@@ -229,8 +231,8 @@ class BaseGeneralConfig(BaseModel):
             "Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation "
             "and parameter regionalization."
         ),
-        examples=["stat_calval_all_{domain}.csv", "stat_calval_all_{domain}.parquet"],
-        default="stat_calval_all_{domain}.parquet",
+        examples="{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet",
+        default="{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet",
     )
 
     calib_param_file: Path | str = Field(
@@ -239,8 +241,8 @@ class BaseGeneralConfig(BaseModel):
             "and formulations in the domain. Must include columns for 'gage_id', 'formulation', and "
             "calibrated parameters."
         ),
-        examples=["calib_params_{domain}.csv", "calib_params_{domain}.parquet"],
-        default="calib_params_{domain}.csv",
+        examples="{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv",
+        default="{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv",
     )
 
     approach_calib_basins: Literal["regionalization", "summary_score"] = Field(
@@ -249,7 +251,7 @@ class BaseGeneralConfig(BaseModel):
             "(assign the formulation chosen for the region) or 'summary_score' (assign based on formulation "
             "summary scores for the calibrated basin)."
         ),
-        examples=["regionalization", "summary_score"],
+        examples="summary_score",
         default="summary_score",
     )
 

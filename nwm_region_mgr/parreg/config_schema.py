@@ -334,8 +334,8 @@ class AvailableAttrsConfig(BaseModel):
         ),
         examples={
             "attr_list": None,
-            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_ngen.csv",
-            "attr_data_file": "{base_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet",
+            "attr_select_file": "{static_data_dir}/inputs/attr_config/attr_selection_ngen.csv",
+            "attr_data_file": "{static_data_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet",
             "base_attr_list": ["elevation", "slope", "aspect"],
         },
     )
@@ -347,8 +347,8 @@ class AvailableAttrsConfig(BaseModel):
         ),
         examples={
             "attr_list": None,
-            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_hlr.csv",
-            "attr_data_file": "{base_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet",
+            "attr_select_file": "{static_data_dir}/inputs/attr_config/attr_selection_hlr.csv",
+            "attr_data_file": "{static_data_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet",
             "base_attr_list": ["PPT", "SAND"],
         },
     )
@@ -360,8 +360,8 @@ class AvailableAttrsConfig(BaseModel):
         ),
         examples={
             "attr_list": None,
-            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_streamcat.csv",
-            "attr_data_file": "{base_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet",
+            "attr_select_file": "{static_data_dir}/inputs/attr_config/attr_selection_streamcat.csv",
+            "attr_data_file": "{static_data_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet",
             "base_attr_list": ["Precip_Minus_EVT", "Elev", "BFI"],
         },
     )
@@ -373,8 +373,8 @@ class AvailableAttrsConfig(BaseModel):
         ),
         examples={
             "attr_list": None,
-            "attr_select_file": "{base_dir}/inputs/attr_config/attr_selection_hydroatlas.csv",
-            "attr_data_file": "{base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet",
+            "attr_select_file": "{static_data_dir}/inputs/attr_config/attr_selection_hydroatlas.csv",
+            "attr_data_file": "{static_data_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet",
             "base_attr_list": ["ele_mt_sav", "dis_m3_pyr", "run_mm_syr", "pre_mm_syr"],
         },
     )
