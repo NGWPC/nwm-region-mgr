@@ -10,6 +10,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import geopandas as gpd
+import matplotlib.pyplot as plt
 import pandas as pd
 
 hf_version = "nhf"  #  "nhf" or "v2.2"
@@ -42,21 +43,17 @@ def create_cwt(
         print(f"Processing chunk {start}:{end} ({end / len(shp2):.1%})")
 
         # Spatial prefilter: only keep shp1 polygons that may intersect this chunk
-        # idx = shp1_sindex.query_bulk(shp2_chunk.geometry, predicate="intersects")[1]
-        # shp1_subset = shp1.iloc[idx].drop_duplicates()
-
         idx = []
         for geom in shp2_chunk.geometry:
             idx.extend(shp1_sindex.intersection(geom.bounds))
 
         idx = list(set(idx))
         shp1_subset = shp1.iloc[idx]
-
         if shp1_subset.empty:
             continue
 
+        # compute intersection between shp2 chunk and relevant subset of shp1
         overlap = gpd.overlay(shp2_chunk, shp1_subset, how="intersection")
-
         if overlap.empty:
             continue
 
@@ -66,9 +63,6 @@ def create_cwt(
         overlap = pd.concat(overlap_results, ignore_index=True)
     else:
         overlap = gpd.GeoDataFrame(columns=[id_col, huc_col, "geometry"])
-
-    # Find overlapping areas
-    # overlap = gpd.overlay(shp2, shp1, how="intersection")
 
     # Compute area of each original polygon in shp2 (and convert to km^2)
     shp2["original_area"] = shp2.geometry.area / 1_000_000
@@ -138,6 +132,132 @@ def get_vpu_list(domain: str) -> list:
     return vpu_list
 
 
+def create_crosswalk_cat_huc12(domain: str, outfile: Path) -> pd.DataFrame:
+    """Create crosswalk table between NextGen catchments and HUC12s for the specified domain."""
+    # Read HUC12 shapefiles
+    if domain != "ak":
+        shp_huc = read_huc_layer(
+            "~/data/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb",
+            "WBDSnapshot_National",
+        )
+        shp_huc["VPUID"] = shp_huc["VPUID"].astype(str)
+        huc_col = "HUC_12"
+    else:
+        shp_huc = read_huc_layer(
+            "~/data/NHDPlusV21/NHD_H_Alaska_State_original.gpkg", "WBDHU12"
+        ).copy()
+        shp_huc["VPUID"] = "19"
+        huc_col = "huc12"
+
+    # Create ngen catchment - huc12 crosswalk; process by vpus to reduce memory usage
+    vpus = get_vpu_list(domain)
+    df_cwt = pd.DataFrame()
+    for vpu in vpus:
+        print(f"Processing VPU {vpu}")
+        vpu1 = (
+            vpu
+            if domain == "conus"
+            else "19"
+            if domain == "ak"
+            else "20"
+            if domain == "hi"
+            else "21"
+        )
+        shp1 = shp_huc[shp_huc["VPUID"] == vpu1]
+        file_stem = f"vpu_{vpu}" if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
+        gpkg_file = Path(
+            f"~/data/hydrofabric/gpkg_{hf_version}/{file_stem}.gpkg"
+        ).expanduser()
+        if not gpkg_file.exists():
+            print(f"GPKG file does not exist for VPU {vpu}: {gpkg_file}. Skipping.")
+            continue
+        shp2 = gpd.read_file(gpkg_file, layer="divides")
+        shp2[vpu_col] = shp2[vpu_col].astype(str)
+
+        df = create_cwt(shp1, shp2, huc_col)
+        df.rename(columns={huc_col: huc_col.lower()}, inplace=True)
+        df_cwt = pd.concat([df_cwt, df])
+
+    # Round all numeric columns to 2 decimal places
+    df_cwt[df_cwt.select_dtypes(include=["float64", "int64"]).columns] = (
+        df_cwt.select_dtypes(include=["float64", "int64"]).round(2)
+    )
+
+    # save crosswalk to file for use in formulation regionalization later
+    df_cwt.to_csv(outfile, index=False)
+
+    return df_cwt
+
+
+def plot_unmatched_catchments(df_cwt: pd.DataFrame, domain: str, outdir: Path):
+    """Plot unmatched catchments on a map."""
+    # count how many catchments are matched with HUC12 (nearest_dist_m is NA) vs not matched (nearest_dist_m is not NA)
+    n_matched = len(df_cwt[df_cwt["nearest_dist_m"].isna()])
+    n_unmatched = len(df_cwt[~df_cwt["nearest_dist_m"].isna()])
+    prc_matched = n_matched / (n_matched + n_unmatched) * 100
+    prc_unmatched = n_unmatched / (n_matched + n_unmatched) * 100
+
+    print(f"Number of catchments matched with HUC12: {n_matched} ({prc_matched:.2f}%)")
+    print(
+        f"Number of catchments not matched with HUC12: {n_unmatched} ({prc_unmatched:.2f}%)"
+    )
+
+    # summary of nearest distance for unmatched catchments
+    if n_unmatched > 0:
+        nearest_dist_summary = (
+            (df_cwt[~df_cwt["nearest_dist_m"].isna()]["nearest_dist_m"] / 1000)
+            .describe()
+            .round(0)
+        )
+        print("Nearest distance summary for unmatched catchments (in kilometers):")
+        print(nearest_dist_summary)
+
+        # read gdf and plot unmatched catchments on a map
+        cats_unmatched = df_cwt[~df_cwt["nearest_dist_m"].isna()][id_col].tolist()
+
+        # loop through list of vpus to read the geopackage file for each vpu and filter for unmatched catchments, then concatenate the results
+        vpus = get_vpu_list(domain)
+        gdfs = []
+        for vpu in vpus:
+            file_stem = f"vpu_{vpu}" if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
+            gpkg_file = Path(
+                f"~/data/hydrofabric/gpkg_{hf_version}/{file_stem}.gpkg"
+            ).expanduser()
+            if not gpkg_file.exists():
+                print(f"GPKG file does not exist for VPU {vpu}: {gpkg_file}. Skipping.")
+                continue
+            gdf = gpd.read_file(gpkg_file, layer="divides")
+            gdf = gdf[gdf[id_col].isin(cats_unmatched)]
+            gdfs.append(gdf)
+
+        if gdfs:
+            gdf_unmatched = pd.concat(gdfs, ignore_index=True)
+
+        # plot unmatched catchments
+        if not gdf_unmatched.empty:
+            url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip"
+            world = gpd.read_file(url)
+            usa = world[world["NAME"] == "United States of America"]
+
+            fig, ax = plt.subplots(figsize=(10, 8))
+
+            if usa.crs != gdf_unmatched.crs:
+                usa = usa.to_crs(gdf_unmatched.crs)
+
+            # plot background first
+            usa.boundary.plot(ax=ax, color="black", linewidth=1)
+
+            # plot unmatched catchments on top
+            gdf_unmatched.plot(ax=ax, color=None, edgecolor="red", linewidth=0.5)
+            ax.set_title(f"Unmatched Catchments in {domain.upper()} (Red)", fontsize=16)
+            ax.set_axis_off()
+
+            # save plot to file
+            plot_file = Path(outdir, f"unmatched_catchments_{domain}.png")
+            plt.savefig(plot_file)
+            print(f"Unmatched catchment plot saved to {plot_file}")
+
+
 def process_domain(domain: list | str):
     """Loop through the domains and read NextGen hydrofabric for the domain."""
     # Note: process conus, hi, and prvi first, since they can share the same 'shp_huc'from above;
@@ -155,71 +275,19 @@ def process_domain(domain: list | str):
         outdir.mkdir(exist_ok=True, parents=True)
         outfile = Path(outdir, "cwt_huc12_divide_" + domain + ".csv")
 
-        if outfile.exists():
-            print(f"Crosswalk file already exists for {domain}: {outfile}. Skip")
-            continue
-
         print(f"Processing domain: {domain}")
 
-        # Read HUC12 shapefiles
-        if domain != "ak":
-            shp_huc = read_huc_layer(
-                "~/data/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb",
-                "WBDSnapshot_National",
+        # check if crosswalk file already exists; if yes, read it; if not, create it
+        if outfile.exists():
+            print(
+                f"Crosswalk file already exists for {domain}: {outfile}.  Skipping creation."
             )
-            shp_huc["VPUID"] = shp_huc["VPUID"].astype(str)
-            huc_col = "HUC_12"
+            df_cwt = pd.read_csv(outfile)
         else:
-            shp_huc = read_huc_layer(
-                "~/data/NHDPlusV21/NHD_H_Alaska_State_original.gpkg", "WBDHU12"
-            ).copy()
-            shp_huc["VPUID"] = "19"
-            huc_col = "huc12"
+            df_cwt = create_crosswalk_cat_huc12(domain, outfile)
 
-        # Create ngen catchment - huc12 crosswalk; process by vpus to reduce memory usage
-        vpus = get_vpu_list(domain)
-        df_cwt = pd.DataFrame()
-        for vpu in vpus:
-            print(f"Processing VPU {vpu}")
-            vpu1 = (
-                vpu
-                if domain == "conus"
-                else "19"
-                if domain == "ak"
-                else "20"
-                if domain == "hi"
-                else "21"
-            )
-            shp1 = shp_huc[shp_huc["VPUID"] == vpu1]
-            file_stem = f"vpu_{vpu}" if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
-            gpkg_file = Path(
-                f"~/data/hydrofabric/gpkg_{hf_version}/{file_stem}.gpkg"
-            ).expanduser()
-            if not gpkg_file.exists():
-                print(f"GPKG file does not exist for VPU {vpu}: {gpkg_file}. Skipping.")
-                continue
-            shp2 = gpd.read_file(gpkg_file, layer="divides")
-            shp2[vpu_col] = shp2[vpu_col].astype(str)
-
-            df = create_cwt(shp1, shp2, huc_col)
-            df.rename(columns={huc_col: huc_col.lower()}, inplace=True)
-            df_cwt = pd.concat([df_cwt, df])
-
-        # Round all numeric columns to 2 decimal places
-        df_cwt[df_cwt.select_dtypes(include=["float64", "int64"]).columns] = (
-            df_cwt.select_dtypes(include=["float64", "int64"]).round(2)
-        )
-
-        # save crosswalk to file for use in formulation regionalization later
-        df_cwt.to_csv(outfile, index=False)
-
-        # print summary
-        print(
-            f"Number of catchments matched with HUC12: {len(df_cwt[df_cwt['nearest_dist_m'].isna()])}"
-        )
-        print(
-            f"Number of catchments not matched with HUC12: {len(df_cwt[~df_cwt['nearest_dist_m'].isna()])}"
-        )
+        # plot unmatched catchments
+        plot_unmatched_catchments(df_cwt, domain, outdir)
 
 
 if __name__ == "__main__":
