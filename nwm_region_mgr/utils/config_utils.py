@@ -191,13 +191,13 @@ class BaseGeneralConfig(BaseModel):
     base_dir: str = Field(
         description="Path to base directory for input/output files.",
         examples="~/run_region",
-        default="~/run_region",
+        default=None,
     )
 
     static_data_dir: str = Field(
         description="Path to static data directory containing hydrofabric and other static input files.",
         examples="/ngencerf-app/nwm-region-mgr/data/inputs",
-        default="/ngencerf-app/nwm-region-mgr/data/inputs",
+        default=None,
     )
 
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
@@ -209,19 +209,19 @@ class BaseGeneralConfig(BaseModel):
             " This file must include columns 'div_id', 'vpu_id' and 'geometry'."
         ),
         examples="{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg",
-        default="{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg",
+        default=None,
     )
 
     gage_divide_cwt_file: Path | str = Field(
         description="Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'.",
         examples="{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet",
-        default="{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet",
+        default=None,
     )
 
     donor_gage_file: Path | str = Field(
         description="Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.",
         examples="{static_data_dir}/region/gages_nwm4_calib_all.csv",
-        default="{static_data_dir}/region/gages_nwm4_calib_all.csv",
+        default=None,
     )
 
     calval_stats_file: Path | str = Field(
@@ -232,7 +232,7 @@ class BaseGeneralConfig(BaseModel):
             "and parameter regionalization."
         ),
         examples="{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet",
-        default="{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet",
+        default=None,
     )
 
     calib_param_file: Path | str = Field(
@@ -242,7 +242,7 @@ class BaseGeneralConfig(BaseModel):
             "calibrated parameters."
         ),
         examples="{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv",
-        default="{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv",
+        default=None,
     )
 
     approach_calib_basins: Literal["regionalization", "summary_score"] = Field(
