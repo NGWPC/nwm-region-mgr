@@ -464,7 +464,7 @@ Check the header of the script for usage instructions.
   configuration files for different domains.
 
 #### Valid VPUs for each domain
-  - CONUS: 18 VPUs (01, 02, 03S, 03N, 04, 05, 06, 07, 08, 09, 10E, 10W, 11, 12, 13, 14, 15, and 16)
+  - CONUS: 21 VPUs (01, 02, 03S, 03N, 03W, 04, 05, 06, 07, 08, 09, 10L, 10U, 11, 12, 13, 14, 15, 16, 17, 18)
   - AK: treated as a single VPU (id: ak)
   - HI: treated as a single VPU (id: hi)
   - PRVI: treated as a single VPU (id: prvi)
