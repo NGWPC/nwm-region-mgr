@@ -101,6 +101,7 @@ image tag (e.g., for testing with a new image), set the variable `image_tag` in 
 
 
 ### Customize and run your own regionalization workflow
+ - Prior to running your own regionalization workflow, it is hightly recommded to review documentation on [Technical Reference](tech_reference/index.md) and [Configuration](config_builder/index.md), as well as the [Notes and best practices](#notes-and-best-practices) below, to understand the available configuration options and how to customize the workflow for your specific application.
  - Prepare input data files. Refer to the [Input Data](tech_reference/input_data.rst) subsection for details. 
    - Calibration/validation statistics can be collected from earlier ngenCERF calibration runs using the commands below, which will generate a csv file (in your current run directory) containing the statistics for all specified calibration job IDs, along with another csv file listing the corresponding calibrated parameter sets. These files can then be used in the regionalization configuration files.
       ```bash
@@ -245,7 +246,61 @@ After completion, evaluation results will be saved in the folder `data/outputs/e
 
 Check the metrics and plots to compare/analyze the performance of the two algorithms in parameter regionalization.
 
-## Helpful tips and notes
+## Notes and best practices
+
+### Formulation regionalization
+
+- Configuration for formulation regionalization is specified in `config_general.yaml` and `config_formreg.yaml`.
+
+- The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
+
+- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
+  parameter regionalization requires formulation regionalization to be completed first.
+
+- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
+  formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
+  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
+  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
+  share the same formulation as the uncalibrated catchment.
+
+- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
+  additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
+
+### Parameter regionalization
+
+- Configuration for parameter regionalization is specified in `config_general.yaml` and `config_parreg.yaml`.
+
+- The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
+
+- Currently, four attribute datasets are supported:
+
+  * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
+  * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
+  * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
+  * [HydroATLAS attributes](<hhttps://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
+
+   Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
+
+- Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
+  algorithm inefficiency. An VPU is equivalent to a HUC2 region, except for HUC-03 and HUC-10 that are divided into 
+  multiple VPUs. The image below shows all the VPUs in the CONUS domain. Each oCONUS domain (Alaska, Hawaii, Puerto Rico) is 
+  treated as a single VPU.
+
+```{figure} _images/conus_vpu_map.jpeg
+:alt: VPUs in the CONUS domain
+:width: 60%
+:align: center
+:caption: VPUs in the CONUS domain
+:name: fig:vpu-map
+```
+
+- Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
+  regionalization run, the workflow will first check if the required outputs from formulation regionalization for
+  the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
+  proceeding with parameter regionalization.
+
+- Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
+  depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
 
 ### Running regionalization in INT/EA/UAT clusters
 
@@ -257,6 +312,37 @@ sudo systemctl start docker # start docker service if not already running
 sudo usermod -aG docker $USER # add user to docker group
 newgrp docker # apply group change without logout/login
 ```
+#### Input/output file paths
+The current working directory `WORK_DIR` and the root directory of all repositories on the host (`REPOS_COMMON_ROOT__HOST`) 
+are defined as environment variables and will be mounted to the same paths in the container. The run script `run_region.sh` 
+will automatically handle the volume mounting and path mapping between the host and the container. 
+
+In `config_general.yaml`, `WORK_DIR` and `REPOS_COMMON_ROOT__HOST` are used by the placeholders `{base_dir}` and 
+`{static_data_dir}`, respectively, which will be automatically replaced with the correct paths when the workflow is run.
+As long as you specify file paths for all inputs and outputs in the configuration files  using these placeholders, the 
+workflow will be able to correctly locate the files in the container regardless of where your working directory is on the host.
+
+There is a caveat. The placeholders `{base_dir}` and `{static_data_dir}` defined in `config_general.yaml` are used by 
+`config_formreg.yaml`, `config_parreg.yaml`, and `config_ngen.yaml`, but not `config_eval.yaml`, which is processed 
+separately by `nwm-eval-mgr` using its own Pydantic model for configuration. However, you can redefine `{base_dir}` 
+in `config_eval.yaml` and use the two environment variables `WORK_DIR` and `REPOS_COMMON_ROOT__HOST` to specify file paths.
+
+By default, `{static_data_dir}` is set to the input data folder installed on the host (e.g., `/ngencerf-app/nwm-region-mgr/data/inputs/`), which is the root directory for all static input data for regionalization (e.g., hydrofabric, catchment 
+attributes, crosswalk file between calibration gages and NextGen catchments, pseudo calibration/validation statistics 
+for testing, etc). In INT/EA/UAT clusters, the user will not have write access to this directory. If you would like to 
+use custom input data (e.g., your own calibration statistics), you can copy the data to your working directory and 
+update the relevant file paths in the configuration files to point to the new location. For example, if you have your 
+own calibration statistics and parameters saved in your working directory in `inputs/my_stats.csv` and `inputs/my_params.csv`, 
+you can update the file path in `config_general.yaml` as follows:
+```bash
+general.calib_stats_file: '{base_dir}/inputs/my_stats.csv'
+general.calib_params_file: '{base_dir}/inputs/my_params.csv'
+```
+By default, all outputs from the regionalization workflow will be saved in the `outputs/` folder in your working 
+directory. You can also specify a different output directory in the configuration files if desired, as long as it is 
+within your working directory. For formulation/parameter regionalization and ngen simulation steps, the output directory 
+is specified in the `output` section of `config_formreg.yaml`, `config_parreg.yaml` and `config_ngen.yaml`, respectively. 
+For the evaluation step, the output directory is specified in the `file_paths.output_dir` field in `config_eval.yaml`.
 
 #### Compute resources
 
@@ -370,76 +456,56 @@ The script allows you to:
 
 Check the header of the script for usage instructions.
 
+### Regionalization for different domains
 
-### Formulation regionalization
+  The regionalization workflow is designed to be flexible and adaptable to different domains (conus, ak, hi, prvi), 
+  as long as the required input data files are available and the configuration files are properly set up. However, 
+  due to differences in data availability and formatting across domains, some adjustments may be needed in the 
+  configuration files for different domains.
 
-- Configuration for formulation regionalization is specified in `config_general.yaml` and `config_formreg.yaml`.
-
-- The python module `nwm_region_mgr.formreg` contains functions for performing formulation regionalization.
-
-- Formulation regionalization can be run independently, without requiring parameter regionalization. However,
-  parameter regionalization requires formulation regionalization to be completed first.
-
-- If `calib_basins_only` is set to True in the configuration file, only calibrated catchments will be assigned
-  formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
-  without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
-  `calib_basins_only` is set to False, eligible donors will be limited to only those calibrated catchments that
-  share the same formulation as the uncalibrated catchment.
-
-- Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
-  additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.
-
-### Parameter regionalization
-
-- Configuration for parameter regionalization is specified in `config_general.yaml` and `config_parreg.yaml`.
-
-- The python module `nwm_region_mgr.parreg` contains functions for performing parameter regionalization.
-
-- Currently, three attribute datasets are supported:
-
-  * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
-  * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
-  * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
-  * [HydroATLAS attributes](<hhttps://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
-
-   Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
-
-- Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
-  algorithm inefficiency. An VPU is equivalent to a HUC2 region, except for HUC-03 and HUC-10 that are divided into 
-  multiple VPUs. The image below shows all the VPUs in the CONUS domain. Each oCONUS domain (Alaska, Hawaii, Puerto Rico) is 
-  treated as a single VPU.
-
-```{figure} _images/conus_vpu_map.jpeg
-:alt: VPUs in the CONUS domain
-:width: 60%
-:align: center
-:caption: VPUs in the CONUS domain
-:name: fig:vpu-map
-```
-
-- Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
-  regionalization run, the workflow will first check if the required outputs from formulation regionalization for
-  the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
-  proceeding with parameter regionalization.
-
-- Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
-  depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
- 
-### AK domain regionalization
-
-  Configuration for the AK domain is slightly different in a few fields:
+#### Valid VPUs for each domain
+  - CONUS: 18 VPUs (01, 02, 03S, 03N, 04, 05, 06, 07, 08, 09, 10E, 10W, 11, 12, 13, 14, 15, and 16)
+  - AK: treated as a single VPU (id: ak)
+  - HI: treated as a single VPU (id: hi)
+  - PRVI: treated as a single VPU (id: prvi)
+  
+#### HUC12 hydrofabric for AK domain
+  There are a few differences in the HUC12 hydrofabric for the AK domain compared to other domains, which require 
+  adjustments in the configuration files, as follows:
   * `config_general.yaml`: `id_col.huc12` should be set to `huc12` (vs. `huc_12` for other domains) 
   * `config_general.yaml`: `layer_name.huc12` should be set to `WBDHU12` (vs `WBDSnapshot_National` for other domains)
-  * `config_formreg.ymal.huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
-  
-### Output cleanup
-  In some cases, users may want to clean up or archive the outputs from previous runs of regionalization.
+  * `config_formreg.yaml`: `huc12_hydrofabric_file` should be set to `'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'`
 
+#### Forcing data source and availability
+  The forcing data used for regionalized simulations may differ across domains, depending on the availability of AORC and retrospective forcing datasets. The current workflow is set up to use the following datasets for each domain:
+  * CONUS: AORC (1979-01-01 to 2025-12-31)
+  * AK: NWM retrospective forcing (1981-01-01 to 2019-12-31)
+  * HI: NWM retrospective forcing (1994-01-01 to 2013-12-31)
+  * PRVI: NWM retrospective forcing (2008-01-01 to 2023-06-30)
+  
+  Hence, in the configuration files `config_ngen.yaml` and `config_eval.yaml`, the simulation and evaluation periods 
+  for each domain should be set within the above date ranges to ensure the availability of forcing data.
+  
+#### Attribute dataset availability
+  * ngen (hydrofabric): all domains
+  * HLR: CONUS, AK, HI
+  * StreamCat: CONUS only
+  * HydroATLAS: CONUS, AK, PRVI (only available for NHF)
+
+#### Snow basin categorization
+
+  The current workflow includes a step to categorize catchments into snow vs. non-snow basins based on mean annual
+  snow cover fraction from the HydroATLAS dataset. However, since HydroATLAS is not available for the HI domain, the field `snow_cover.consider_snowness` in `config_parreg.yaml` should be set to `False` for the HI domain to skip this step.
+   
+### Output cleanup
+  
+#### Pair files from regionalization
   In the first step of the workflow (regionalization), the program will first check if the required pair file already 
   exists for a given run_name, algorithm, and VPU (e.g., `outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet`). 
   If the file exists, the program will skip the regionalization process (as indicated in the log file) and use the existing pair file for subsequent steps (e.g., NGEN simulation). This allows users to keep the outputs from previous runs of regionalization and reuse them for NGEN simulations or evaluation, without needing to rerun the regionalization step. However, if you want to 
   rerun regionalization for a given run_name/VPU/algorithm/ with different settings, you can simply delete or archive the existing pair file, and the workflow will run regionalization again.
 
+#### Intermediate files from NGEN simulations
   In the second step of the workflow (ngen simulation), each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv, nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. 
   ```bash
   # update with your VPU, run name, and algorithm
@@ -450,6 +516,22 @@ Check the header of the script for usage instructions.
   # remove all ngen simulation output files except for troute output
   find outputs/ngen/regionalization/${RUN_NAME}_${ALGORITHM}/vpu_${VPU}/Output -type f ! -name 'troute_*' -delete
   ```
+
+#### Runtime logs
+  In addition to the SLURM job log file saved in the `logs/` folder, each run of regionalization will also generate 
+  additional log files in the temporary runtime folder (prefixed with `run_time_`) in the current working directory. 
+  These files contain more detailed logs for ngen-forcing, ngen, and individual modules for debugging purposes. It is 
+  recommended to manually remove these runtime folders afterwards. 
+  
+  Alternatively, you can use the `--delete-runtime-dir` flag when running the job submission script to automatically 
+  delete the runtime folder immediately after the run is completed, e.g.,
+
+  ```bash
+  /ngencerf-app/nwm-rte/sbatch_run_region.sh configs parreg ngen eval --delete-runtime-dir
+  ```
+
+  Note this will delete the entire runtime folder containing the detailed log files, which may be useful for debugging if 
+  any issues arise during the run. 
 
 ### Manual pairings
 
