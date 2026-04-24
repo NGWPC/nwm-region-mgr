@@ -176,7 +176,7 @@ class BaseGeneralConfig(BaseModel):
         description=(
             "List of vector processing units (VPUs) to be processed within the domain. "
             "Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. "
-            "For oCONUS domains (ak, hi, prvi), the VPU id is the same of as the domain."
+            "Valid VPUs for ak, hi, prvi are 19, 20, 21, respectively."
         ),
         examples=["03S"],
         default=["03S"],
@@ -326,9 +326,9 @@ class BaseGeneralConfig(BaseModel):
                 "17",
                 "18",
             ],
-            "ak": ["ak"],
-            "hi": ["hi"],
-            "prvi": ["prvi"],
+            "ak": ["19"],
+            "hi": ["20"],
+            "prvi": ["21"],
         }
 
         if isinstance(self.vpu_list, str) and self.vpu_list.lower() == "all":
@@ -340,7 +340,7 @@ class BaseGeneralConfig(BaseModel):
                     logger.error(msg)
                     raise ValueError(msg)
         else:
-            msg = f"'vpu_list' must be a list of VPUs or 'all'. Got: {self.vpu_list}"
+            msg = f"'vpu_list' must be a list of VPUs. Got: {self.vpu_list}"
             logger.error(msg)
             raise ValueError(msg)
 
