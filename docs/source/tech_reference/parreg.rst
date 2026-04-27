@@ -30,14 +30,16 @@ Process
 
    **Figure 1.** Example of donor catchments (colors) and receiver catchments (translucent).
 
-1. Parameter regionalization begins with data validation. The attribute and spatial distance datasets are checked to
-   make sure that all donors and receivers in each VPU are present. The percent nan values in the attribute dataset are
-   recorded. See example plot at :ref:`missing_attribute_barchart`.
+1. Parameter regionalization begins with identifying valid donors in the VPU, based on the calibration metrics file 
+   defined by ``general.calval_stats_file`` in ``config_general.yaml``, and the donor selection/screening criteria defined 
+   in the ``donor`` section in ``config_parreg.yaml``. In addition, the attribute datasets are checked to assess if all donors 
+   and receivers in each VPU are present. The percent nan values in the attribute dataset are recorded. See example 
+   plot at :ref:`missing_attribute_barchart`.
 
 2. All primary attributes, as selected with ``attr_list`` or ``attr_select_file`` for each dataset specified in the
-   configuration, are used to calculate catchment similarity when pairing receivers with donors. For distance-based
+   ``config_parreg.yaml``, are used to calculate catchment similarity when pairing receivers with donors. For distance-based
    methods, if some receivers remain unpaired after the first pass using a full attribute set, a second pass is
-   performed using a reduced set of attributes defined by ``base_attr_list`` in config_parreg.yaml.
+   performed using a reduced set of attributes defined by ``base_attr_list`` in ``config_parreg.yaml``.
 
 3. For each formulation:
 
@@ -47,7 +49,7 @@ Process
 
    * Similarly, receivers are grouped into snowy and non-snowy cohorts. Snowy receivers are paired only with snowy
      donors, and non-snowy receivers only with non-snowy donors. The snowy/non-snowy classification is determined by
-     the ``snow_cover`` settings in config_parreg.yaml.
+     the ``snow_cover`` settings in ``config_parreg.yaml``.
 
    * For each cohort:
 
