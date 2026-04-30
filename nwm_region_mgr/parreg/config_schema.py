@@ -190,14 +190,26 @@ class DonorConfig(BaseModel):
                 f"No evaluation period provided. Using all periods in {stats_file}."
             )
 
+        # build mapping of lower-case column names to actual column names to allow case-insensitive matching of metric names
+        col_map = {c.lower(): c for c in df.columns}
+
         # filter based on metric thresholds
         for col, threshold in self.metric_threshold.items():
+            col_key = col.lower()
+
+            if col_key not in col_map:
+                raise KeyError(
+                    f"Column '{col}' not found in {stats_file} (case-insensitive match failed)."
+                )
+
+            actual_col = col_map[col_key]
+
             if threshold.absolute:
-                df[col] = df[col].abs()
+                df[actual_col] = df[actual_col].abs()
             if threshold.min is not None:
-                df = df[df[col] >= threshold.min]
+                df = df[df[actual_col] >= threshold.min]
             if threshold.max is not None:
-                df = df[df[col] <= threshold.max]
+                df = df[df[actual_col] <= threshold.max]
 
         donors = df[gage_col].unique().tolist()
         donor_cats = (

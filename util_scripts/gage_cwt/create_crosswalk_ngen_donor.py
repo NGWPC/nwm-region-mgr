@@ -79,13 +79,6 @@ def build_crosswalks(
     ngage = ncats = 0
 
     for domain1, domain in domains.items():
-        # nhf for prvi is not available yet
-        if hf_version == "nhf" and domain1 == "prvi":
-            print(
-                f"NHF GPKG files are not available for {domain}, skipping crosswalk creation."
-            )
-            continue
-
         outfile = Path(outdir, f"calib_gage_divide_{domain1}.parquet")
         if outfile.exists():
             print(f"Crosswalk file already exists for {domain}: {outfile}. Skip")

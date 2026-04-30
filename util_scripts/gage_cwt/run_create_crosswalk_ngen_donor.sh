@@ -1,7 +1,7 @@
 # NHF v1
 python create_crosswalk_ngen_donor.py \
   --input-dir ~/data/hydrofabric/gpkg_nhf \
-  --outdir ~/data/region_input/nhf/cwt_divide_gage \
+  --outdir ~/run_region/region_input/nhf/cwt_divide_gage \
   --gages-file ~/repos/nwm-region-mgr/data/inputs/region/gages_nwm4_calib_all.csv \
   --nested-gages inner \
   --hf-version nhf
