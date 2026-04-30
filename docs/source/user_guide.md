@@ -145,7 +145,7 @@ cp -r configs/ test1_configs/
    - For **streamcat**: use the file `attr_selection_streamcat.csv`. Set the **select** column to 1 for desired attributes and to 0 for others. Here we select the following attributes: BFI, DamDens, Perm, RckDep, WtDep, PctCarbResid, PctEolCrs, PctWater, Precip, Tmax, Tmean, Tmin, RdDens, Runoff, Clay, Sand, Precip_Minus_EVT. Then update the field **attr_datasets.streamcat.attr_select_file** to reflect the new location of this file (e.g., `{base_dir}/attr_config/attr_selection_streamcat.csv`).
    - Alternatively, we can also specify selected attributes directly in the config file by editing the fields **attr_datasets.ngen.attr_list** and **attr_datasets.streamcat.attr_list**, respectively, for ngen and StreamCat. 
  - Set **donor.metric_eval_period.value** to 'valid' to use validation period statistics for donor selection
- - Set **snow_cover.threshold** to 10 to define catchment snowiness category based on 10% (mean annual) snowfall
+ - Set **snow_cover.threshold** to 10 to define catchment snowiness category based on 10% (mean annual) snowcover
  - Edit **output.params.plots.columns_to_plot** to include a couple of CFE parameters to visualize spatial patterns (e.g., 'b' and 'slope')
  - Edit **output.attr_data_final.plots.columns_to_plot** to include some selected attributes to visualize spatial patterns. Specifically, 
    - remove the HLR attributes, since HLR is not chosen for this experiment
@@ -463,11 +463,16 @@ Check the header of the script for usage instructions.
   due to differences in data availability and formatting across domains, some adjustments may be needed in the 
   configuration files for different domains.
 
+  [!WARNING]
+  The Alaska domain is currently not supported for regionalization base on NHF (NGWPC Hydrofabric) because the hydrofabric
+  is yet to be finalized for the AK domain. Once the hydrofabric is finalized, the input datasets can be updated accordingly to support regionalization in the AK domain.
+
+
 #### Valid VPUs for each domain
   - CONUS: 21 VPUs (01, 02, 03S, 03N, 03W, 04, 05, 06, 07, 08, 09, 10L, 10U, 11, 12, 13, 14, 15, 16, 17, 18)
-  - AK: treated as a single VPU (id: ak)
-  - HI: treated as a single VPU (id: hi)
-  - PRVI: treated as a single VPU (id: prvi)
+  - AK: treated as a single VPU (id: 19)
+  - HI: treated as a single VPU (id:20)
+  - PRVI: treated as a single VPU (id: 21)
   
 #### HUC12 hydrofabric for AK domain
   There are a few differences in the HUC12 hydrofabric for the AK domain compared to other domains, which require 

@@ -28,8 +28,8 @@ def gage_crosswalk_df():
     return pd.DataFrame(
         {
             "gage_id": ["G1", "G2"],
-            "divide_id": ["D1", "D2"],
-            "vpuid": ["01", "01"],
+            "div_id": ["D1", "D2"],
+            "vpu_id": ["01", "01"],
         }
     )
 
@@ -42,7 +42,7 @@ def fake_config():
         base_dir="/fake/base/dir",
         donor_gage_file="donor_gages.csv",
         gage_divide_cwt_file="gage_divide_crosswalk.parquet",
-        id_col={"gage": "gage_id", "divide": "divide_id"},
+        id_col={"gage": "gage_id", "divide": "div_id"},
     )
     return cfg
 
@@ -92,7 +92,7 @@ def test_donors_df_missing_coordinates_raises(monkeypatch):
     proc.config = SimpleNamespace(
         general=SimpleNamespace(
             donor_gage_file="dummy.csv",
-            id_col=SimpleNamespace(gage="gage_id", divide="divide_id"),
+            id_col=SimpleNamespace(gage="gage_id", divide="div_id"),
         )
     )
 
@@ -121,7 +121,7 @@ def test_donors_df_empty(monkeypatch):
     proc.config = SimpleNamespace(
         general=SimpleNamespace(
             donor_gage_file="dummy.csv",
-            id_col=SimpleNamespace(gage="gage_id", divide="divide_id"),
+            id_col=SimpleNamespace(gage="gage_id", divide="div_id"),
         )
     )
     with pytest.raises(ValueError, match="No donors found"):
@@ -141,7 +141,7 @@ def test_donors_df_missing_columns_raises(missing_col, monkeypatch):
     proc.config = SimpleNamespace(
         general=SimpleNamespace(
             donor_gage_file="dummy.csv",
-            id_col=SimpleNamespace(gage="gage_id", divide="divide_id"),
+            id_col=SimpleNamespace(gage="gage_id", divide="div_id"),
         )
     )
 
@@ -165,7 +165,7 @@ def test_donors_df_invalid_coordinates(monkeypatch):
     proc.config = SimpleNamespace(
         general=SimpleNamespace(
             donor_gage_file="dummy.csv",
-            id_col=SimpleNamespace(gage="gage_id", divide="divide_id"),
+            id_col=SimpleNamespace(gage="gage_id", divide="div_id"),
         )
     )
 
@@ -196,6 +196,6 @@ def test_parreg_pipeline_smoke(
 
     # Assertions: contracts, not internals
     assert not donors.empty
-    assert set(donor_df.columns) >= {"divide_id", "gage_id"}
+    assert set(donor_df.columns) >= {"div_id", "gage_id"}
     assert len(donor_df) == 2
     assert donor_df["gage_id"].tolist() == ["G1", "G2"]

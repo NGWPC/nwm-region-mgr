@@ -128,11 +128,11 @@ def plot_donor_spatial_map(
 
     """
     # read in lat/lon of all donors
-    gage_id_name = getattr(config.general.id_col, "gage", "gage_id")
-    donors_all = read_table(config.general.donor_gage_file, dtype={gage_id_name: str})
+    gage_col = getattr(config.general.id_col, "gage", "gage_id")
+    donors_all = read_table(config.general.donor_gage_file, dtype={gage_col: str})
 
     # filter donors based on the donor_basins list (qualified donors)
-    donors = donors_all[donors_all[gage_id_name].isin(donor_basins)]
+    donors = donors_all[donors_all[gage_col].isin(donor_basins)]
     donor_gdf = gpd.GeoDataFrame(
         donors,
         geometry=[Point(xy) for xy in zip(donors["longitude"], donors["latitude"])],

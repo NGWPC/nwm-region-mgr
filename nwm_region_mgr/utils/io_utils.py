@@ -184,6 +184,7 @@ def read_table_safely(
                 escapechar=escapechar,
                 delimiter=delimiter,
                 dtype=dtype,
+                skipinitialspace=True,
             )
             logger.debug(
                 f"Successfully read file with encoding: {enc} and delimiter: '{delimiter}'"
@@ -238,7 +239,7 @@ def read_table(
         raise ValueError(f"Unsupported file format: {suffix}")
 
     # remove leading/trailing whitespace from column names
-    df.columns = df.columns.str.strip()
+    df.columns = [col.strip() if isinstance(col, str) else col for col in df.columns]
 
     # Update cache and mtime
     _table_cache[file_path] = df
