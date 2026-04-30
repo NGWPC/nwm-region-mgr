@@ -1,24 +1,29 @@
-# General settings for the formulation regionalization application
+# Configuration for formulation regionalization
 general:
   huc12_hydrofabric_file: '{static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb' #non-AK domains
   #huc12_hydrofabric_file: '{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'  # AK domain
-  divide_huc12_cwt_file: '{static_data_dir}/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv' # Path to crosswalk file for HUC12 and NextGen catchments.
+  divide_huc12_cwt_file: '{static_data_dir}/region/cwt_divide_huc12/cwt_huc12_divide_{domain}.csv' # Path to crosswalk file for HUC12 and NextGen catchments.
 
   calib_basins_only: False  # whether to run formulation selection only for calibrated basins (based on summary score)
   formulation_to_include: # List of competing formulations required to be considered in the selection process
   formulation_to_exclude: # List of formulation to exclude from the selection process
-  consider_cost: True  # whether to consider computational cost
+  consider_cost: False  # whether to consider computational cost
+
+  logging: # define logging configurations
+    level: info  # logging level, options: debug, info, warning, error, critical
+    log_to_file: True  # whether to log to a file
+    file: '{base_dir}/outputs/{run_name}_formreg.log'
 
 # Define configurations for the spatial discretization for formulation regionalization
 # For each spatial unit, a single formulation will be identified and applied to all catchments within the unit
 spatial_unit: 
   huc_level: huc8  #The USGS HUC level to be used for spatial discretization of formulation selection.  
-  nmin_calib_basin: 3 # minimum number of calibration basins contained in each spatial unit
-  basin_fill_method: upscaling #method to find more calibration basins for a spatial unit: upscaling or nearest-neighbor
+  nmin_calib_basin: 3 # minimum number of calibration basins required in each spatial unit for formulation selection to be performed
+  basin_fill_method: upscaling # method to find more calibration basins for a spatial unit: upscaling or nearest-neighbor
   best_formulation: # method to select the best formulation for each spatial unit
-    method: total_score # method can be either 'total_score' or 'average_score'
+    method: average_score # method can be either 'total_score' or 'average_score'
     type: divide  # type can be either 'basin' or 'divide'
-    tolerance: 0.05  # tolerance for the summary score 
+    tolerance: 0.05  # tolerance for the summary score
 
 # Define configurations to compute the summary score for each competing formulation in each calibration basin
 # The summary score is calculated as the weighted average of selected metrics (each normalized to be between 0 and 1).
@@ -58,9 +63,7 @@ summary_score:
 
 
 # Define the computational cost of each formulation to assist in the selection process.
-formulation_cost:
-
-  #score_tolerance: 0.05 # Tolerance in percentage for summary score. 
+formulation_cost: 
   file:  '{static_data_dir}/region/formulation_costs_secs_per_catchment.csv' # Path to the file containing the computational cost of each formulation
   costs: # List of formulations and their corresponding computational costs
     "noah-owp-modular ueb cfe-x t-route": 10
