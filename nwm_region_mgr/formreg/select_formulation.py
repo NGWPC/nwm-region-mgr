@@ -368,7 +368,7 @@ def _select_formulation_given_score(
     type: str = "total_score",
     id_col: dict[str, str] = {"gage": "gage_id", "divide": "div_id"},
 ) -> pd.DataFrame:
-    """Compute total score for each spatial unit based on the method specified.
+    """Compute total or average score for each spatial unit based on the method specified.
 
     Args:
         df : pd.DataFrame
@@ -754,7 +754,7 @@ def select_formulation_all(
         best_formulation["num_gages"] = len(gages)
         best_formulation["distances"] = ", ".join(
             [str(d) for d in dists]
-        )  # join distances as a stringi
+        )  # join distances as a string
 
         df_selected = pd.concat([df_selected, best_formulation], ignore_index=True)
 
@@ -783,12 +783,19 @@ def select_formulation_all(
             df_selected = df_selected_donors.copy()
         else:
             # replace the formulation for donors in df_selected with the one from df_selected_donors
-            form_map = df_selected_donors.drop_duplicates(div_col).set_index(div_col)[
-                "formulation"
-            ]
-            df_selected.loc[:, "formulation"] = (
-                df_selected[div_col].map(form_map).fillna(df_selected["formulation"])
+            # first ensure unique mapping from donors
+            df_donors_unique = df_selected_donors.drop_duplicates(div_col).set_index(
+                div_col
             )
+
+            # align df_selected on the same index
+            df_selected = df_selected.set_index(div_col)
+
+            # update entire rows where keys match
+            df_selected.update(df_donors_unique)
+
+            # restore index
+            df_selected = df_selected.reset_index()
     else:
         msg = (
             f"Unknown approach for assigning formulations to calibrated basins: "

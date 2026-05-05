@@ -78,8 +78,8 @@ output:
       stem: 'attr_{domain}_vpu{vpu_list}'
       format: 'parquet'
       plots:
-        spatial_map: False
-        histogram: False
+        spatial_map: True
+        histogram: True
         columns_to_plot: ['ngen_slope250m_mean', 'ngen_aspect_circmean', 'ngen_elevation_mean','streamcat_Perm', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT']  # attributes to plot
     config_final:
       save: True
