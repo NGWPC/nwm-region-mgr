@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
 from shapely.geometry import MultiPolygon, Point, Polygon
+from shapely.validation import make_valid
 
 from nwm_region_mgr.parreg import config_schema as cs
 from nwm_region_mgr.utils import read_table
@@ -146,17 +147,20 @@ def plot_donor_spatial_map(
     fig, ax = plt.subplots(figsize=(8, 5))
 
     # Plot base layer, use combined_geom if ring is empty (buffer is zero)
+    gdf_buffered = make_valid(gdf_buffered)
+    combined_geom = make_valid(combined_geom)
+
     ring = gdf_buffered.difference(combined_geom)
+
     if ring.is_empty:
         base_geom = combined_geom
     else:
         base_geom = ring
+    base_geom = make_valid(base_geom)
+    base_geom = base_geom.buffer(0)  # fix any invalid geometries in the ring
     ring_gdf = gpd.GeoDataFrame(geometry=[base_geom], crs=donor_gdf.crs)
-    ring_gdf.plot(
-        ax=ax,
-        color="lightgray",
-        edgecolor="black",
-    )
+
+    ring_gdf.plot(ax=ax, facecolor="lightgray", edgecolor="black")
 
     # donor and non-donor calibration basins in the buffered VPU
     non_donor_gdf = donor_gdf[~donor_gdf["gage_id"].isin(final_donor_basins)]
