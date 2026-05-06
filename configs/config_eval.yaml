@@ -1,4 +1,5 @@
-#### configuration for the verification run
+#### Configuration for evaluation. See Confluence page for details on each configuration item:
+#### https://confluence.nextgenwaterprediction.com/spaces/NGWPC/pages/54132769/Forecast+Verification+nwm-verf+Configuration
 general:   
   steps: # define which of the 5 steps to run; each step can be run independently,
     fetch_fcst_data: true
@@ -10,7 +11,7 @@ general:
   location_set_name: vpu_03S  # user-specified name for the set of locations
   location_type: usgs_gage # location type
   location_filter: # filter locations based on column and value in the gage crosswalk file; if null, all locations in the crosswalk file will be used, unless location_list or location_list_file is specified
-    columns: ["vpuid"] 
+    columns: ["vpu_id"] 
     values: ["03S"] 
   variable_name: streamflow # currently only 'streamflow' is supported
   nwm_configuration: ngen_simulation    
@@ -25,10 +26,9 @@ general:
 #### configurations for various file paths
 file_paths:
   base_dir: '${WORK_DIR}'  # root directory to store inputs/outputs for verification
-  #location_list_file: '${REPOS_COMMON_ROOT__HOST}/nwm-verf/data/inputs/regionalization/gage_list_conus_{location_set_name}.csv' # text file containing list of usgs gage IDs (one gage ID per line)
-  crosswalk_file: '${REPOS_COMMON_ROOT__HOST}/nwm-verf/data/inputs/regionalization/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
+  crosswalk_file: '${REPOS_COMMON_ROOT__HOST}/nwm-region-mgr/data/inputs/eval/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
   calib_param_file: '${REPOS_COMMON_ROOT__HOST}/nwm-region-mgr/data/inputs/region/pseudo_calib_params/sampled_params_{domain}.csv' # calibration parameters file (used when separate_calibrated is True); must have column 'gage_id'
-  fcst_data_file: '{base_dir}/outputs/ngen/regionalization/{dataset_name}/{location_set_name}/Output/troute_output_{forecast_start_date}.nc' # forecast data directory (must be specified when nwm_forecast.data_source is set to ngenCERF)
+  fcst_data_file: '{base_dir}/outputs/ngen/regionalization/{dataset_name}/{location_set_name}/Output/troute_output_201210010000.nc' # forecast data directory (must be specified when nwm_forecast.data_source is set to ngenCERF)
   output_dir: '{base_dir}/outputs/eval/{location_set_name}' # output directory to store all output datasets, metrics and plots
 
 nwm_forecast:

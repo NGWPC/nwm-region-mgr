@@ -123,7 +123,7 @@ def area_weighted_average(
     gdf_target: gpd.GeoDataFrame,
     gdf_source: gpd.GeoDataFrame,
     value_col: str,
-    target_id_col: str = "divide_id",
+    target_id_col: str = "div_id",
     crs_proj: str = "EPSG:5070",
 ) -> gpd.GeoDataFrame:
     """Map area-weighted average of `value_col` from source polygons to target polygons.
@@ -136,7 +136,7 @@ def area_weighted_average(
         gdf_target: GeoDataFrame with target polygons
         gdf_source: GeoDataFrame with source polygons and the value to be averaged
         value_col: Name of the column in gdf_source to average
-        target_id_col: Name of unique identifier column in gdf_target (default is 'divide_id')
+        target_id_col: Name of unique identifier column in gdf_target (default is 'div_id')
         crs_proj: Projected CRS (in meters) for accurate area computation (default is 'EPSG:5070')
 
     Returns:

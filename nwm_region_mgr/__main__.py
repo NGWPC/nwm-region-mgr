@@ -17,14 +17,14 @@ from typing import Literal, get_args
 import matplotlib
 
 from nwm_region_mgr.formreg import config_schema as fcs
-from nwm_region_mgr.formreg.process_config import (
-    FormulationRegionalizationProcessor,
-)
+from nwm_region_mgr.formreg.process_config import FormulationRegionalizationProcessor
 from nwm_region_mgr.parreg import config_schema as pcs
 from nwm_region_mgr.parreg.manual_pairings import ManualPairer
 from nwm_region_mgr.parreg.process_config import ParameterRegionalizationProcessor
+from nwm_region_mgr.utils.config_utils import BaseConfigProcessor
+from nwm_region_mgr.utils.logging_utils import setup_logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("nwm_region_mgr.__main__")
 matplotlib.use("Agg")
 
 
@@ -65,9 +65,9 @@ def _resolve_config_files(
 ) -> dict[str, Path]:
     """Resolve and validate config files required for the given option."""
     required = REQUIRED_CONFIG_FILES[option]
-    config_paths = {name: config_dir / name for name in required}
+    config_paths = [config_dir / name for name in required]
 
-    missing = [str(p) for p in config_paths.values() if not p.is_file()]
+    missing = [str(p) for p in config_paths if not p.is_file()]
     if missing:
         raise FileNotFoundError(
             f"Missing required config files for option '{option}':\n"
@@ -95,43 +95,43 @@ def _run_formreg(
 
 def _run_parreg(
     frp: FormulationRegionalizationProcessor,
-    rp: ParameterRegionalizationProcessor,
+    prp: ParameterRegionalizationProcessor,
 ) -> None:
     """Run parameter regionalization (includes formulation regionalization)."""
-    for vpu in rp.config.general.vpu_list:
+    for vpu in prp.config.general.vpu_list:
         logger.info("Running parameter regionalization for VPU %s", vpu)
-        rp.run_parreg_for_vpu(vpu, frp)
+        prp.run_parreg_for_vpu(vpu, frp)
 
-    mp = ManualPairer(rp.config)
-    for vpu in rp.config.general.vpu_list:
-        logger.info("Running manual pairings for VPU %s", vpu)
-        mp.run_manual_pairing(vpu, rp, frp)
+    mp = ManualPairer(prp.config)
+    for vpu in prp.config.general.vpu_list:
+        mp.run_manual_pairing(vpu, prp, frp)
 
 
 def _run_ngen(
-    config_files: list[Path],
+    nsp: BaseConfigProcessor,
 ) -> None:
     """Run NGEN simulations."""
-    # option dependent imports
-    from nwm_region_mgr.ngen import config_schema as ngen_config_schema
-    from nwm_region_mgr.ngen.process_config import NgenSimulationProcessor
-
-    nsp = NgenSimulationProcessor(
-        config_file=config_files,
-        config_schema=ngen_config_schema.Config,
-    )
-
     for vpu in nsp.config.general.vpu_list:
         logger.info("Running NGEN simulation for VPU %s", vpu)
         nsp.run_ngen_for_vpu(vpu)
 
 
-def _build_formreg_processor(file_general, file_formreg):
+def _build_formreg_processor(config_paths: list[Path]):
     """Build formulation regionalization processor."""
-    return FormulationRegionalizationProcessor(
-        config_file=[file_general, file_formreg],
-        config_schema=fcs.Config,
-    )
+    return FormulationRegionalizationProcessor(config_paths, fcs.Config)
+
+
+def _build_parreg_processor(config_paths: dict[str, Path]):
+    """Build parameter regionalization processor."""
+    return ParameterRegionalizationProcessor(config_paths, pcs.Config)
+
+
+def _build_ngen_processor(config_paths: list[Path]):
+    """Build NGEN simulation processor."""
+    from nwm_region_mgr.ngen import config_schema as ncs
+    from nwm_region_mgr.ngen.process_config import NgenSimulationProcessor
+
+    return NgenSimulationProcessor(config_paths, ncs.Config)
 
 
 def main(
@@ -140,43 +140,38 @@ def main(
     sample_size: int | None = None,
 ) -> None:
     """Execute regionalization or NGEN simulation."""
+    # create processor instances to validate configs and file paths before starting any processing
+    config_paths = _resolve_config_files(config_dir, option)
+    if option in {"formreg", "parreg"}:
+        pc = _build_formreg_processor(config_paths)
+    if option == "parreg":
+        rpc = _build_parreg_processor(config_paths)
+    if option == "ngen":
+        pc = _build_ngen_processor(config_paths)
+
+    # set up logging
+    log_file = getattr(pc.config.general.logging, "file", None)
+    log_level = getattr(pc.config.general.logging, "level", "INFO")
+
+    setup_logging(level=log_level, log_file=log_file)
+
     logger.info("Starting nwm_region_mgr")
     logger.info("Config directory: %s", config_dir)
     logger.info("Run option: %s", option)
+    if log_file:
+        logger.info("Log file: %s", log_file)
     if sample_size is not None:
         logger.info("Sample size: %d", sample_size)
 
-    config_paths = _resolve_config_files(config_dir, option)
-
-    # create formreg processor for formreg / parreg cases
-    if option in {"formreg", "parreg"}:
-        frp = _build_formreg_processor(
-            file_general=config_paths[CONFIG.general],
-            file_formreg=config_paths[CONFIG.formreg],
-        )
-
+    # run the selected option (formreg or parreg or ngen)
     if option == "formreg":
-        _run_formreg(frp)
+        _run_formreg(pc)
 
     elif option == "parreg":
-        rp = ParameterRegionalizationProcessor(
-            config_file=[
-                config_paths[CONFIG.general],
-                config_paths[CONFIG.formreg],
-                config_paths[CONFIG.parreg],
-            ],
-            config_schema=pcs.Config,
-            sample_size=sample_size,
-        )
-        _run_parreg(frp, rp)
+        _run_parreg(pc, rpc)
 
     elif option == "ngen":
-        _run_ngen(
-            [
-                config_paths[CONFIG.general],
-                config_paths[CONFIG.ngen],
-            ]
-        )
+        _run_ngen(pc)
 
     logger.info("Completed %s", option)
 

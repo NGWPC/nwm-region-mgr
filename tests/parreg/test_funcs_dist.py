@@ -17,7 +17,7 @@ def minimal_attr_df():
     """Small attribute dataframe with donors and receivers."""
     return pd.DataFrame(
         {
-            "divide_id": ["d1", "d2", "r1", "r2"],
+            "div_id": ["d1", "d2", "r1", "r2"],
             "is_donor": [True, True, False, False],
             "snowy": [1, 0, 1, 0],
             "attr1": [0.1, 0.2, 0.15, 0.25],
@@ -43,7 +43,7 @@ def minimal_config():
     """Minimal config dictionary used by pairers."""
     return {
         "attrs": {"main": ["attr1", "attr2"], "base": ["attr1"]},
-        "non_attr_cols": ["divide_id", "is_donor", "snowy"],
+        "non_attr_cols": ["div_id", "is_donor", "snowy"],
         "min_spa_dist": 0,
         "max_spa_dist": 200,
         "zero_spa_dist": 10,
@@ -78,7 +78,7 @@ def test_get_receivers_to_process_empty_processed(dummy_pairer):
 @pytest.mark.unit
 def test_get_receivers_to_process_excludes_processed(dummy_pairer):
     """If some receivers have been processed, they should be excluded."""
-    processed = pd.DataFrame({"divide_id": ["r1"]})
+    processed = pd.DataFrame({"div_id": ["r1"]})
     out = dummy_pairer.get_receivers_to_process(processed)
     assert out == ["r2"]
 
@@ -163,7 +163,7 @@ def test_proximity_pairer_end_to_end(
         # for each receiver, assign the nearest donor based on dist_spatial
         for r in receivers:
             nearest_donor = dist_spatial.loc[r].idxmin()
-            rows.append({"divide_id": r, "donor_id": nearest_donor})
+            rows.append({"div_id": r, "donor_id": nearest_donor})
         return pd.DataFrame(rows)
 
     monkeypatch.setattr(utils_algo, "assign_donors", fake_assign)
@@ -175,7 +175,7 @@ def test_proximity_pairer_end_to_end(
     )
 
     out = p.pair()
-    assert set(out["divide_id"]) == {"r1", "r2"}
+    assert set(out["div_id"]) == {"r1", "r2"}
     assert "donor_id" in out.columns
-    assert out.loc[out["divide_id"] == "r1", "donor_id"].iloc[0] == "d1"
-    assert out.loc[out["divide_id"] == "r2", "donor_id"].iloc[0] == "d2"
+    assert out.loc[out["div_id"] == "r1", "donor_id"].iloc[0] == "d1"
+    assert out.loc[out["div_id"] == "r2", "donor_id"].iloc[0] == "d2"

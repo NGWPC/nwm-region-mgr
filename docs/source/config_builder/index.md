@@ -50,31 +50,31 @@ The tabs on the left will take you to the builder for each of the specific confi
 #### Example File
 ```yaml
 general:
-  run_name: 'test' #----------------------------------------------------------------------------Name of the run, used to create output folders and files.
-  domain: 'conus' #-----------------------------------------------------------------------------Which National Water Model Domain this run uses.
-  vpu_list: ['03S'] #---------------------------------------------------------------------------List of vector processing units (VPUs) to be processed within the domain. Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs).
-  n_procs: 2 #----------------------------------------------------------------------------------Number of processors to use for parallel processing. Set to -1 to use all available processors.
-  base_dir: '/root/nwm-region-mgr/data/' #------------------------------------------------------Path to base directory for input/output files.
-  static_data_dir: '/ngencerf-app/nwm-region-mgr/inputs/static_data/' #-------------------------Path to static data directory containing hydrofabric and other static input files.
-  ngen_hydrofabric_file: '{base_dir}/inputs/hydrofabric/vpu_09.gpkg' #--------------------------Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}.If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns 'divide_id', 'vpuid' and 'geometry'.
-  gage_divide_cwt_file: '{base_dir}/inputs/calib_gage_divide_{domain}.parquet' #----------------Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'.
-  donor_gage_file: '{base_dir}/inputs/gages_nwm4_calib_all.csv' #-------------------------------Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.
-  calval_stats_file: ['stat_calval_all_{domain}.csv', 'stat_calval_all_{domain}.parquet'] #-----Path to CSV or parquet file with calibration/validation statistics for all calibration gages and formulations, e.g., 'stat_calval_all_conus.parquet', 'stat_calval_all_conus.csv'. Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation and parameter regionalization.
-  calib_param_file: ['calib_params_{domain}.csv', 'calib_params_{domain}.parquet'] #------------Path to CSV or parquet file containing calibrated parameters for all calibration gages and formulations in the domain. Must include columns for 'gage_id', 'formulation', and calibrated parameters.
-  approach_calib_basins: ['regionalization', 'summary_score'] #---------------------------------Strategy for assigning formulations to calibrated basins. Valid options are 'regionalization' (assign the formulation chosen for the region) or 'summary_score' (assign based on formulation summary scores for the calibrated basin).
-  id_col: #-------------------------------------------------------------------------------------Dictionary mapping column names for unique identifiers in all applicable files.
-    divide: 'divide_id' #-----------------------------------------------------------------------Column name for divide (catchment) ID.
-    gage: 'gage_id' #---------------------------------------------------------------------------Column name for gage (basin) ID.
-    huc12: 'huc_12' #---------------------------------------------------------------------------Column name for HUC12 ID.
-    vpu: 'vpuid' #------------------------------------------------------------------------------Column name for VPU ID.
-    drainage_area: 'areasqkm' #-----------------------------------------------------------------Column name for drainage area.
-  layer_name: #---------------------------------------------------------------------------------Dictionary mapping layer names for hydrofabric files. Identifies the layer in each hydrofabric file to be used during regionalization.
-    huc12: 'WBDSnapshot_National' #-------------------------------------------------------------Layer name for HUC12 hydrofabric file.
-    ngen: 'divides' #---------------------------------------------------------------------------Layer name for NextGen hydrofabric file.
-  logging: #------------------------------------------------------------------------------------Logging configuration for the application.
-    level: 'info' #-----------------------------------------------------------------------------Logging level.
-    log_to_file: True #-------------------------------------------------------------------------Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console.
-    file: 'logs/{run_name}.log' #---------------------------------------------------------------Path to the log file. If not provided, logging will be written to console only.
+  run_name: 'test' #----------------------------------------------------------------------------------------Name of the run, used to create output folders and files.
+  domain: 'conus' #-----------------------------------------------------------------------------------------Which National Water Model Domain this run uses.
+  vpu_list: ['03S'] #---------------------------------------------------------------------------------------List of vector processing units (VPUs) to be processed within the domain. Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. For oCONUS domains (ak, hi, prvi), the VPU id is the same of as the domain.
+  n_procs: 2 #----------------------------------------------------------------------------------------------Number of processors to use for parallel processing. Set to -1 to use all available processors.
+  base_dir: '~/run_region' #--------------------------------------------------------------------------------Path to base directory for input/output files.
+  static_data_dir: '/ngencerf-app/nwm-region-mgr/data/inputs' #---------------------------------------------Path to static data directory containing hydrofabric and other static input files.
+  ngen_hydrofabric_file: '{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg' #---------------------Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}.If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns 'div_id', 'vpu_id' and 'geometry'.
+  gage_divide_cwt_file: '{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet' #-----Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'.
+  donor_gage_file: '{static_data_dir}/region/gages_nwm4_calib_all.csv' #------------------------------------Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'.
+  calval_stats_file: '{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet' #-------------Path to CSV or parquet file with calibration/validation statistics for all calibration gages and formulations, e.g., 'stat_calval_all_conus.parquet', 'stat_calval_all_conus.csv'. Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation and parameter regionalization.
+  calib_param_file: '{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv' #------------Path to CSV or parquet file containing calibrated parameters for all calibration gages and formulations in the domain. Must include columns for 'gage_id', 'formulation', and calibrated parameters.
+  approach_calib_basins: 'summary_score' #------------------------------------------------------------------Strategy for assigning formulations to calibrated basins. Valid options are 'regionalization' (assign the formulation chosen for the region) or 'summary_score' (assign based on formulation summary scores for the calibrated basin).
+  id_col: #-------------------------------------------------------------------------------------------------Dictionary mapping column names for unique identifiers in all applicable files.
+    divide: 'div_id' #--------------------------------------------------------------------------------------Column name for divide (catchment) ID.
+    gage: 'gage_id' #---------------------------------------------------------------------------------------Column name for gage (basin) ID.
+    huc12: 'huc_12' #---------------------------------------------------------------------------------------Column name for HUC12 ID.
+    vpu: 'vpu_id' #-----------------------------------------------------------------------------------------Column name for VPU ID.
+    drainage_area: 'area_sqkm' #----------------------------------------------------------------------------Column name for drainage area.
+  layer_name: #---------------------------------------------------------------------------------------------Dictionary mapping layer names for hydrofabric files. Identifies the layer in each hydrofabric file to be used during regionalization.
+    huc12: 'WBDSnapshot_National' #-------------------------------------------------------------------------Layer name for HUC12 hydrofabric file.
+    ngen: 'divides' #---------------------------------------------------------------------------------------Layer name for NextGen hydrofabric file.
+  logging: #------------------------------------------------------------------------------------------------Logging configuration for the application.
+    level: 'info' #-----------------------------------------------------------------------------------------Logging level.
+    log_to_file: True #-------------------------------------------------------------------------------------Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console.
+    file: 'logs/{run_name}.log' #---------------------------------------------------------------------------Path to the log file. If not provided, logging will be written to console only.
 ```
 
 #### general Schema (general)
@@ -83,17 +83,17 @@ general:
 | --- | --- | --- | --- | --- |
 | run_name | str | Name of the run, used to create output folders and files. | test | test |
 | domain | str = conus \| ak \| hi \| prvi | Which National Water Model Domain this run uses. | conus | conus |
-| vpu_list | List[str] \| str | List of vector processing units (VPUs) to be processed within the domain. Set to 'all' to process all VPUs in the domain (not recommended for conus since there are many VPUs). | ['03S'] | ['03S'] |
+| vpu_list | List[str] \| str | List of vector processing units (VPUs) to be processed within the domain. Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. For oCONUS domains (ak, hi, prvi), the VPU id is the same of as the domain. | ['03S'] | ['03S'] |
 | n_procs | int | Number of processors to use for parallel processing. Set to -1 to use all available processors. | -1 | 2 |
-| base_dir | str | Path to base directory for input/output files. | ./data/ | /root/nwm-region-mgr/data/ |
-| static_data_dir | str | Path to static data directory containing hydrofabric and other static input files. | /ngencerf-app/nwm-region-mgr/inputs/static_data/ | /ngencerf-app/nwm-region-mgr/inputs/static_data/ |
-| ngen_hydrofabric_file | Path \| str \| Dict[str, Path] \| Dict[str, str] | Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}.If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns 'divide_id', 'vpuid' and 'geometry'. | vpu_03S.gpkg | {base_dir}/inputs/hydrofabric/vpu_09.gpkg |
-| gage_divide_cwt_file | Path \| str | Path to CSV or parquet file with gage divide CWTs, with columns 'divide_id' and 'gage_id'. | calib_gage_divide_{domain}.parquet | {base_dir}/inputs/calib_gage_divide_{domain}.parquet |
-| donor_gage_file | Path \| str | Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'. | gages_nwm4_calib_all.csv | {base_dir}/inputs/gages_nwm4_calib_all.csv |
-| calval_stats_file | Path \| str | Path to CSV or parquet file with calibration/validation statistics for all calibration gages and formulations, e.g., 'stat_calval_all_conus.parquet', 'stat_calval_all_conus.csv'. Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation and parameter regionalization. | stat_calval_all_{domain}.parquet | ['stat_calval_all_{domain}.csv', 'stat_calval_all_{domain}.parquet'] |
-| calib_param_file | Path \| str | Path to CSV or parquet file containing calibrated parameters for all calibration gages and formulations in the domain. Must include columns for 'gage_id', 'formulation', and calibrated parameters. | calib_params_{domain}.csv | ['calib_params_{domain}.csv', 'calib_params_{domain}.parquet'] |
-| approach_calib_basins | str = regionalization \| summary_score | Strategy for assigning formulations to calibrated basins. Valid options are 'regionalization' (assign the formulation chosen for the region) or 'summary_score' (assign based on formulation summary scores for the calibrated basin). | summary_score | ['regionalization', 'summary_score'] |
-| id_col | FieldCrosswalk | Dictionary mapping column names for unique identifiers in all applicable files. | divide='divide_id' gage='gage_id' huc12='huc_12' vpu='vpuid' drainage_area='areasqkm' | {'divide': 'divide_id', 'gage': 'gage_id', 'huc12': 'huc_12', 'vpu': 'vpuid', 'drainage_area': 'areasqkm'} |
+| base_dir | str | Path to base directory for input/output files. | ~/run_region | ~/run_region |
+| static_data_dir | str | Path to static data directory containing hydrofabric and other static input files. | /ngencerf-app/nwm-region-mgr/data/inputs | /ngencerf-app/nwm-region-mgr/data/inputs |
+| ngen_hydrofabric_file | Path \| str \| Dict[str, Path] \| Dict[str, str] | Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}.If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns 'div_id', 'vpu_id' and 'geometry'. | {static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg | {static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg |
+| gage_divide_cwt_file | Path \| str | Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'. | {static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet | {static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet |
+| donor_gage_file | Path \| str | Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'. | {static_data_dir}/region/gages_nwm4_calib_all.csv | {static_data_dir}/region/gages_nwm4_calib_all.csv |
+| calval_stats_file | Path \| str | Path to CSV or parquet file with calibration/validation statistics for all calibration gages and formulations, e.g., 'stat_calval_all_conus.parquet', 'stat_calval_all_conus.csv'. Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation and parameter regionalization. | {static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet | {static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet |
+| calib_param_file | Path \| str | Path to CSV or parquet file containing calibrated parameters for all calibration gages and formulations in the domain. Must include columns for 'gage_id', 'formulation', and calibrated parameters. | {static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv | {static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv |
+| approach_calib_basins | str = regionalization \| summary_score | Strategy for assigning formulations to calibrated basins. Valid options are 'regionalization' (assign the formulation chosen for the region) or 'summary_score' (assign based on formulation summary scores for the calibrated basin). | summary_score | summary_score |
+| id_col | FieldCrosswalk | Dictionary mapping column names for unique identifiers in all applicable files. | divide='div_id' gage='gage_id' huc12='huc_12' vpu='vpu_id' drainage_area='area_sqkm' | {'divide': 'div_id', 'gage': 'gage_id', 'huc12': 'huc_12', 'vpu': 'vpu_id', 'drainage_area': 'area_sqkm'} |
 | layer_name | LayerCrosswalk | Dictionary mapping layer names for hydrofabric files. Identifies the layer in each hydrofabric file to be used during regionalization. | huc12='WBDSnapshot_National' ngen='divides' | {'huc12': 'WBDSnapshot_National', 'ngen': 'divides'} |
 | logging | LoggingConfig | Logging configuration for the application. | level='info' log_to_file=False file=None | {'level': 'info', 'log_to_file': True, 'file': 'logs/{run_name}.log'} |
 
@@ -101,11 +101,11 @@ general:
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| divide | str | Column name for divide (catchment) ID. | divide_id | divide_id |
+| divide | str | Column name for divide (catchment) ID. | div_id | div_id |
 | gage | str | Column name for gage (basin) ID. | gage_id | gage_id |
 | huc12 | str | Column name for HUC12 ID. | huc_12 | huc_12 |
-| vpu | str | Column name for VPU ID. | vpuid | vpuid |
-| drainage_area | str | Column name for drainage area. | areasqkm | areasqkm |
+| vpu | str | Column name for VPU ID. | vpu_id | vpu_id |
+| drainage_area | str | Column name for drainage area. | area_sqkm | area_sqkm |
 
 #### general Schema (layer_name)
 
@@ -125,26 +125,26 @@ general:
 
 #### Example File
 ```yaml
-general: #-----------------------------------------------------------------------------------------------General settings for formulation regionalization
-  huc12_hydrofabric_file: 'NationalWBDSnapshot.gdb' #----------------------------------------------------Path to HUC12 hydrofabric file containing HUC12 polygons for spatial discretization.
-  divide_huc12_cwt_file: 'cwt_divide_huc12_{domain}.csv' #-----------------------------------------------Path to crosswalk file between HUC12 basins and NextGen catchments, with columns 'divide_id' and 'huc_12'.
-  calib_basins_only: False #-----------------------------------------------------------------------------Whether to run formulation selection only for calibrated basins (based on summary score). Set to True to limit formulation selection to calibrated basins only; in such cases, parameter regionalization for uncalibrated catchments will not consider preferred formulations.
-  formulation_to_include: ['noah-owp-modular cfe-s t-route', 'noah-owp-modular ueb cfe-x t-route'] #-----List of formulations to consider. If None, all available formulations are considered.  If 'all', all formulations are included.
-  formulation_to_exclude: ['noah-owp-modular cfe-s t-route'] #-------------------------------------------List of formulations to exclude. If None, no formulations are excluded from available options.
-  consider_cost: False #---------------------------------------------------------------------------------Whether to consider computational costs of formulations in the regionalization process.
-spatial_unit: #------------------------------------------------------------------------------------------Spatial discretization settings for formulation regionalization.
-  huc_level: ['huc2', 'huc4', 'huc6', 'huc8', 'huc10', 'huc12'] #----------------------------------------USGS HUC level used for spatial discretization (e.g., 'huc8'). A single formulation is selected per spatial unit given the spatial discretization level. Accepted formats: 'huc8', 'HUC8', 'huc-8'.
-  nmin_calib_basin: 5 #----------------------------------------------------------------------------------Minimum number of calibration basins required per spatial unit for valid formulation selection.
-  basin_fill_method: 'upscaling' #-----------------------------------------------------------------------Method to handle spatial units with too few calibration basins. Options: 'upscaling' (by upscaling to a coarser spatial unit), and 'nearest-neighbor' (by pooling basins from neighboring units).
-  best_formulation: #------------------------------------------------------------------------------------Strategy to determine the best formulation for each spatial unit.
-    method: 'total_score' #------------------------------------------------------------------------------Method to determine the best formulation, options: 'total_score', 'average_score', which selects the formulation with the highest total or average summary score across all subdivisions (e.g., basins or divides as specified by the 'type' field), respectively.
-    type: 'divide' #-------------------------------------------------------------------------------------Type of subdivision to use for computing total or average score, options: 'basin', 'divide'.
-    tolerance: 0.05 #------------------------------------------------------------------------------------Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best score are considered equally good.
-summary_score: #-----------------------------------------------------------------------------------------Summary score computation configuration for formulation regionalization.
-  metric_eval_period: #----------------------------------------------------------------------------------Evaluation period of metrics to be used for screening donors.
+general: #--------------------------------------------------------------------------------------------------------General settings for formulation regionalization
+  huc12_hydrofabric_file: '{static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb' #-----Path to HUC12 hydrofabric file containing HUC12 polygons for spatial discretization.
+  divide_huc12_cwt_file: '{static_data_dir}/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv' #--------------Path to crosswalk file between HUC12 basins and NextGen catchments, with columns 'div_id' and 'huc_12'.
+  calib_basins_only: False #--------------------------------------------------------------------------------------Whether to run formulation selection only for calibrated basins (based on summary score). Set to True to limit formulation selection to calibrated basins only; in such cases, parameter regionalization for uncalibrated catchments will not consider preferred formulations.
+  formulation_to_include: ['noah-owp-modular cfe-x t-route', 'noah-owp-modular ueb cfe-x t-route'] #--------------List of formulations to consider. If None, all available formulations are considered.  If 'all', all formulations are included.
+  formulation_to_exclude: ['noah-owp-modular cfe-s t-route'] #----------------------------------------------------List of formulations to exclude. If None, no formulations are excluded from available options.
+  consider_cost: False #------------------------------------------------------------------------------------------Whether to consider computational costs of formulations in the regionalization process.
+spatial_unit: #---------------------------------------------------------------------------------------------------Spatial discretization settings for formulation regionalization.
+  huc_level: 'huc8' #---------------------------------------------------------------------------------------------USGS HUC level used for spatial discretization (e.g., 'huc8'). Valid options are HUC2, HUC4, HUC6, HUC8, HUC10, and HUC12.A single formulation is selected per spatial unit given the spatial discretization level. Accepted formats: 'huc8', 'HUC8', 'huc-8'.
+  nmin_calib_basin: 5 #-------------------------------------------------------------------------------------------Minimum number of calibration basins required per spatial unit for valid formulation selection.
+  basin_fill_method: 'upscaling' #--------------------------------------------------------------------------------Method to handle spatial units with too few calibration basins. Options: 'upscaling' (by upscaling to a coarser spatial unit), and 'nearest-neighbor' (by pooling basins from neighboring units).
+  best_formulation: #---------------------------------------------------------------------------------------------Strategy to determine the best formulation for each spatial unit.
+    method: 'total_score' #---------------------------------------------------------------------------------------Method to determine the best formulation, options: 'total_score', 'average_score', which selects the formulation with the highest total or average summary score across all subdivisions (e.g., basins or divides as specified by the 'type' field), respectively.
+    type: 'divide' #----------------------------------------------------------------------------------------------Type of subdivision to use for computing total or average score, options: 'basin', 'divide'.
+    tolerance: 0.05 #---------------------------------------------------------------------------------------------Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best score are considered equally good.
+summary_score: #--------------------------------------------------------------------------------------------------Summary score computation configuration for formulation regionalization.
+  metric_eval_period: #-------------------------------------------------------------------------------------------Evaluation period of metrics to be used for screening donors.
     col_name: evalPeriod
     value: valid
-  metrics: #---------------------------------------------------------------------------------------------Dictionary of metrics used in the summary score, keyed by metric name. Metric names must match columns in the calibration/validation stats file. Weights must sum to 1.0. Refer to schema of MetricConfig for individual metric settings.
+  metrics: #------------------------------------------------------------------------------------------------------Dictionary of metrics used in the summary score, keyed by metric name. Metric names must match columns in the calibration/validation stats file. Weights must sum to 1.0. Refer to schema of MetricConfig for individual metric settings.
     cor:
       upper: 1.0
       lower: -0.5
@@ -155,44 +155,45 @@ summary_score: #----------------------------------------------------------------
       lower: -0.5
       orientation: positive
       weight: 0.5
-formulation_cost: #--------------------------------------------------------------------------------------Computational cost configuration for each formulation.
-  file: 'formulation_costs_secs_per_catchment.csv' #-----------------------------------------------------Path to CSV file with formulation costs. If provided, costs will be read from this file.
-  costs: #-----------------------------------------------------------------------------------------------Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored.
+formulation_cost: #-----------------------------------------------------------------------------------------------Computational cost configuration for each formulation.
+  file: '{static_data_dir}/region/formulation_costs_secs_per_catchment.csv' #-------------------------------------Path to CSV file with formulation costs. If provided, costs will be read from this file.
+  costs: #--------------------------------------------------------------------------------------------------------Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored.
     noah-owp-modular ueb cfe-x t-route: 10
-output: #------------------------------------------------------------------------------------------------Output configuration for formulation regionalization.
-  formulation: #-----------------------------------------------------------------------------------------Output configurations for the selected formulations.
-    save: True #-----------------------------------------------------------------------------------------Whether to save output files
-    path: '{base_dir}/outputs/{run_name}/formulations' #-------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
-    stem: 'form_{domain}_vpu{vpu_list}' #----------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-    stem_suffix: '_pars' #-------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
-    format: 'parquet' #----------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
-    plots: #---------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
+    noah-owp-modular snow-17 sac-sma t-route: 5
+output: #---------------------------------------------------------------------------------------------------------Output configuration for formulation regionalization.
+  formulation: #--------------------------------------------------------------------------------------------------Output configurations for the selected formulations.
+    save: True #--------------------------------------------------------------------------------------------------Whether to save output files
+    path: '{base_dir}/outputs/{run_name}/formulations' #----------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
+    stem: 'form_{domain}_vpu{vpu_list}' #-------------------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
+    stem_suffix: '_pars' #----------------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
+    format: 'parquet' #-------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
+    plots: #------------------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
       spatial_map: True
       histogram: True
-    plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #--------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
-  config_final: #----------------------------------------------------------------------------------------Output configuration for the final configuration file after processing, with placeholders resolved.
-    save: True #-----------------------------------------------------------------------------------------Whether to save output files
-    path: '{base_dir}/outputs/{run_name}/config_formreg_final.yaml' #------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
-  summary_score: #---------------------------------------------------------------------------------------Output configurations for the summary score.
-    save: True #-----------------------------------------------------------------------------------------Whether to save output files
-    path: '{base_dir}/outputs/{run_name}/summary_score' #------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
-    stem: 'score_{domain}_vpu{vpu_list}' #---------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
-    stem_suffix: '_all_gages' #--------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
-    format: 'parquet' #----------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
-    plots: #---------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
+    plot_path: '{base_dir}/outputs/{run_name}/formulations/plots' #-----------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
+  config_final: #-------------------------------------------------------------------------------------------------Output configuration for the final configuration file after processing, with placeholders resolved.
+    save: True #--------------------------------------------------------------------------------------------------Whether to save output files
+    path: '{base_dir}/outputs/{run_name}/config_formreg_final.yaml' #---------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
+  summary_score: #------------------------------------------------------------------------------------------------Output configurations for the summary score.
+    save: True #--------------------------------------------------------------------------------------------------Whether to save output files
+    path: '{base_dir}/outputs/{run_name}/summary_score' #---------------------------------------------------------Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
+    stem: 'score_{domain}_vpu{vpu_list}' #------------------------------------------------------------------------File stem for output files, used to create unique file names based on the path.
+    stem_suffix: '_all_gages' #-----------------------------------------------------------------------------------Suffix for the file stem, used to create unique file names based on the path for specific needs.
+    format: 'parquet' #-------------------------------------------------------------------------------------------File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file.
+    plots: #------------------------------------------------------------------------------------------------------Configuration for output plots, if applicable.
       histogram: True
       spatial_map: True
-    plot_path: '{base_dir}/outputs/{run_name}/summary_score/plots' #-------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
+    plot_path: '{base_dir}/outputs/{run_name}/summary_score/plots' #----------------------------------------------Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
 ```
 
 #### formreg Schema (general)
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| huc12_hydrofabric_file | str \| Path \| NoneType | Path to HUC12 hydrofabric file containing HUC12 polygons for spatial discretization. | None | NationalWBDSnapshot.gdb |
-| divide_huc12_cwt_file | str \| NoneType | Path to crosswalk file between HUC12 basins and NextGen catchments, with columns 'divide_id' and 'huc_12'. | None | cwt_divide_huc12_{domain}.csv |
+| huc12_hydrofabric_file | str \| Path \| NoneType | Path to HUC12 hydrofabric file containing HUC12 polygons for spatial discretization. | None | {static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb |
+| divide_huc12_cwt_file | str \| NoneType | Path to crosswalk file between HUC12 basins and NextGen catchments, with columns 'div_id' and 'huc_12'. | None | {static_data_dir}/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv |
 | calib_basins_only | bool | Whether to run formulation selection only for calibrated basins (based on summary score). Set to True to limit formulation selection to calibrated basins only; in such cases, parameter regionalization for uncalibrated catchments will not consider preferred formulations. | False | False |
-| formulation_to_include | List[str] \| NoneType | List of formulations to consider. If None, all available formulations are considered.  If 'all', all formulations are included. | None | ['noah-owp-modular cfe-s t-route', 'noah-owp-modular ueb cfe-x t-route'] |
+| formulation_to_include | List[str] \| NoneType | List of formulations to consider. If None, all available formulations are considered.  If 'all', all formulations are included. | None | ['noah-owp-modular cfe-x t-route', 'noah-owp-modular ueb cfe-x t-route'] |
 | formulation_to_exclude | List[str] \| NoneType | List of formulations to exclude. If None, no formulations are excluded from available options. | None | ['noah-owp-modular cfe-s t-route'] |
 | consider_cost | bool | Whether to consider computational costs of formulations in the regionalization process. | True | False |
 
@@ -200,7 +201,7 @@ output: #-----------------------------------------------------------------------
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| huc_level | str | USGS HUC level used for spatial discretization (e.g., 'huc8'). A single formulation is selected per spatial unit given the spatial discretization level. Accepted formats: 'huc8', 'HUC8', 'huc-8'. | huc8 | ['huc2', 'huc4', 'huc6', 'huc8', 'huc10', 'huc12'] |
+| huc_level | str | USGS HUC level used for spatial discretization (e.g., 'huc8'). Valid options are HUC2, HUC4, HUC6, HUC8, HUC10, and HUC12.A single formulation is selected per spatial unit given the spatial discretization level. Accepted formats: 'huc8', 'HUC8', 'huc-8'. | huc8 | huc8 |
 | nmin_calib_basin | int | Minimum number of calibration basins required per spatial unit for valid formulation selection. | 3 | 5 |
 | basin_fill_method | str = upscaling \| nearest-neighbor | Method to handle spatial units with too few calibration basins. Options: 'upscaling' (by upscaling to a coarser spatial unit), and 'nearest-neighbor' (by pooling basins from neighboring units). | upscaling | upscaling |
 | best_formulation | BestFormulation | Strategy to determine the best formulation for each spatial unit. | <factory> | {'method': 'total_score', 'type': 'divide', 'tolerance': 0.05} |
@@ -241,8 +242,8 @@ output: #-----------------------------------------------------------------------
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| file | str \| NoneType | Path to CSV file with formulation costs. If provided, costs will be read from this file. | None | formulation_costs_secs_per_catchment.csv |
-| costs | Dict[str, float] \| NoneType | Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored. | None | {'noah-owp-modular ueb cfe-x t-route': 10} |
+| file | str \| NoneType | Path to CSV file with formulation costs. If provided, costs will be read from this file. | None | {static_data_dir}/region/formulation_costs_secs_per_catchment.csv |
+| costs | Dict[str, float] \| NoneType | Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored. | None | {'noah-owp-modular ueb cfe-x t-route': 10, 'noah-owp-modular snow-17 sac-sma t-route': 5} |
 
 #### formreg Schema (output)
 
@@ -269,7 +270,7 @@ output: #-----------------------------------------------------------------------
 ```yaml
 general:
   general: #-------------------------------------------------------------------------------------------------------------------------General configuration settings specific to parameter regionalization.
-    attr_dataset_list: ['ngen', 'streamcat'] #---------------------------------------------------------------------------------------List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'.
+    attr_dataset_list: ['ngen', 'streamcat'] #---------------------------------------------------------------------------------------List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
     algorithm_list: ['gower', 'kmeans'] #--------------------------------------------------------------------------------------------Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity').
     manual_pairings_file: '{static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv' #-----------------------------------Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections.
   donor: #---------------------------------------------------------------------------------------------------------------------------Configuration for donor selection.
@@ -288,21 +289,25 @@ general:
         absolute: False
   attr_datasets: #-------------------------------------------------------------------------------------------------------------------Configuration for attribute datasets available for use in regionalization.
     ngen: #--------------------------------------------------------------------------------------------------------------------------Configuration for NGEN attribute dataset.(https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html).
-      attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_ngen.csv' #----------------------------------------------------Path to file where selection of attributes to use during regionalization may be found.
-      attr_data_file: '{base_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet' #--------------------------------------------Path to file where attribute data may be found.
+      attr_select_file: '{static_data_dir}/inputs/attr_config/attr_selection_ngen.csv' #---------------------------------------------Path to file where selection of attributes to use during regionalization may be found.
+      attr_data_file: '{static_data_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet' #-------------------------------------Path to file where attribute data may be found.
       base_attr_list: ['elevation', 'slope', 'aspect'] #-----------------------------------------------------------------------------Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.
     hlr: #---------------------------------------------------------------------------------------------------------------------------Configuration for Hydrologic Landscape Regions (HLR) attribute dataset (https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states).
-      attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_hlr.csv' #-----------------------------------------------------Path to file where selection of attributes to use during regionalization may be found.
-      attr_data_file: '{base_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet' #----------------------------------------------Path to file where attribute data may be found.
+      attr_select_file: '{static_data_dir}/inputs/attr_config/attr_selection_hlr.csv' #----------------------------------------------Path to file where selection of attributes to use during regionalization may be found.
+      attr_data_file: '{static_data_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet' #---------------------------------------Path to file where attribute data may be found.
       base_attr_list: ['PPT', 'SAND'] #----------------------------------------------------------------------------------------------Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.
     streamcat: #---------------------------------------------------------------------------------------------------------------------Configuration for StreamCat attribute dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset).
-      attr_select_file: '{base_dir}/inputs/attr_config/attr_selection_streamcat.csv' #-----------------------------------------------Path to file where selection of attributes to use during regionalization may be found.
-      attr_data_file: '{base_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet' #----------------------------------Path to file where attribute data may be found.
+      attr_select_file: '{static_data_dir}/inputs/attr_config/attr_selection_streamcat.csv' #----------------------------------------Path to file where selection of attributes to use during regionalization may be found.
+      attr_data_file: '{static_data_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet' #---------------------------Path to file where attribute data may be found.
       base_attr_list: ['Precip_Minus_EVT', 'Elev', 'BFI'] #--------------------------------------------------------------------------Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.
+    hydroatlas: #--------------------------------------------------------------------------------------------------------------------Configuration for HydroATLAS attribute dataset (https://www.hydrosheds.org/hydroatlas).
+      attr_select_file: '{static_data_dir}/inputs/attr_config/attr_selection_hydroatlas.csv' #---------------------------------------Path to file where selection of attributes to use during regionalization may be found.
+      attr_data_file: '{static_data_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet' #-------------------------Path to file where attribute data may be found.
+      base_attr_list: ['ele_mt_sav', 'dis_m3_pyr', 'run_mm_syr', 'pre_mm_syr'] #-----------------------------------------------------Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.
   snow_cover: #----------------------------------------------------------------------------------------------------------------------Configuration for snow cover data to be used in determining whether catchments are snow-driven.
     consider_snowness: True #--------------------------------------------------------------------------------------------------------Whether to consider snow driven and non-snow driven catchments separately in the regionalization process. If True, snow-driven receivers will only consider snow-driven donors and non-snow-driven receivers will only consider non-snow-driven donors.
-    snow_cover_file: 'vpu{vpu_list}_snow_frac.parquet' #-----------------------------------------------------------------------------Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values.
-    column: 'snow_pc_hydroatlas' #---------------------------------------------------------------------------------------------------Column name in the snow cover data file that contains the snow cover percentage.
+    snow_cover_file: '{base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet' #---------------------------------Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values.
+    column: 'snw_pc_syr' #-----------------------------------------------------------------------------------------------------------Column name in the snow cover data file that contains the snow cover percentage.
     threshold: '20' #----------------------------------------------------------------------------------------------------------------Threshold value for snow cover percentage to determine if a catchment is considered snow-driven.
   output: #--------------------------------------------------------------------------------------------------------------------------Configuration for parameter regionalization output.
     pairs: #-------------------------------------------------------------------------------------------------------------------------Configuration for saving donor-receiver pairs.
@@ -400,9 +405,9 @@ general:
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| attr_dataset_list | List[str = ngen \| hlr \| streamcat] | List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat'. | ['ngen'] | ['ngen', 'streamcat'] |
+| attr_dataset_list | List[str = ngen \| hlr \| streamcat \| hydroatlas] | List of attribute dataset names to use. Valid options include 'ngen', 'hlr', 'streamcat', 'hydroatlas'. | ['ngen'] | ['ngen', 'streamcat'] |
 | algorithm_list | List[str = gower \| urf \| kmeans \| kmedoids \| hdbscan \| birch \| proximity] | Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'). | ['gower'] | ['gower', 'kmeans'] |
-| manual_pairings_file | Path \| str \| Dict[str, Path] \| Dict[str, str] \| NoneType | Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections. | {static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv | {static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv |
+| manual_pairings_file | Path \| str \| Dict[str, Path] \| Dict[str, str] \| NoneType | Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections. | None | {static_data_dir}/region/manual_pairings/manual_pairs_{vpu_list}.csv |
 
 #### parreg Schema (donor)
 
@@ -440,17 +445,18 @@ general:
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
-| ngen | AttrDatasetConfig | Configuration for NGEN attribute dataset.(https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{base_dir}/inputs/attr_config/attr_selection_ngen.csv', 'attr_data_file': '{base_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet', 'base_attr_list': ['elevation', 'slope', 'aspect']} |
-| hlr | AttrDatasetConfig | Configuration for Hydrologic Landscape Regions (HLR) attribute dataset (https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{base_dir}/inputs/attr_config/attr_selection_hlr.csv', 'attr_data_file': '{base_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet', 'base_attr_list': ['PPT', 'SAND']} |
-| streamcat | AttrDatasetConfig | Configuration for StreamCat attribute dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{base_dir}/inputs/attr_config/attr_selection_streamcat.csv', 'attr_data_file': '{base_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet', 'base_attr_list': ['Precip_Minus_EVT', 'Elev', 'BFI']} |
+| ngen | AttrDatasetConfig | Configuration for NGEN attribute dataset.(https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{static_data_dir}/inputs/attr_config/attr_selection_ngen.csv', 'attr_data_file': '{static_data_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet', 'base_attr_list': ['elevation', 'slope', 'aspect']} |
+| hlr | AttrDatasetConfig | Configuration for Hydrologic Landscape Regions (HLR) attribute dataset (https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{static_data_dir}/inputs/attr_config/attr_selection_hlr.csv', 'attr_data_file': '{static_data_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet', 'base_attr_list': ['PPT', 'SAND']} |
+| streamcat | AttrDatasetConfig | Configuration for StreamCat attribute dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{static_data_dir}/inputs/attr_config/attr_selection_streamcat.csv', 'attr_data_file': '{static_data_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet', 'base_attr_list': ['Precip_Minus_EVT', 'Elev', 'BFI']} |
+| hydroatlas | AttrDatasetConfig | Configuration for HydroATLAS attribute dataset (https://www.hydrosheds.org/hydroatlas). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{static_data_dir}/inputs/attr_config/attr_selection_hydroatlas.csv', 'attr_data_file': '{static_data_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet', 'base_attr_list': ['ele_mt_sav', 'dis_m3_pyr', 'run_mm_syr', 'pre_mm_syr']} |
 
 #### parreg Schema (snow_cover)
 
 | Field | Type(s) | Description | Default | Example(s) |
 | --- | --- | --- | --- | --- |
 | consider_snowness | bool \| NoneType | Whether to consider snow driven and non-snow driven catchments separately in the regionalization process. If True, snow-driven receivers will only consider snow-driven donors and non-snow-driven receivers will only consider non-snow-driven donors. | True | True |
-| snow_cover_file | Path \| str \| Dict[str, Path \| str] \| NoneType | Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values. | None | vpu{vpu_list}_snow_frac.parquet |
-| column | str \| NoneType | Column name in the snow cover data file that contains the snow cover percentage. | snow_pc_hydroatlas | snow_pc_hydroatlas |
+| snow_cover_file | Path \| str \| Dict[str, Path \| str] \| NoneType | Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values. | None | {base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet |
+| column | str \| NoneType | Column name in the snow cover data file that contains the snow cover percentage. | snw_pc_syr | snw_pc_syr |
 | threshold | float \| NoneType | Threshold value for snow cover percentage to determine if a catchment is considered snow-driven. | None | 20 |
 
 #### parreg Schema (algorithms)

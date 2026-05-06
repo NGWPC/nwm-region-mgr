@@ -5,6 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
+import pyarrow.parquet as pq
 
 from nwm_region_mgr.formreg.process_config import (
     FormulationRegionalizationProcessor as FRP,
@@ -36,7 +37,7 @@ class ManualPairer:
     @property
     def divide_col(self):
         """Get the divide column name from the configuration."""
-        return getattr(self.config.general.id_col, "divide", "divide_id")
+        return getattr(self.config.general.id_col, "divide", "div_id")
 
     @property
     def donor_col(self):
@@ -241,10 +242,17 @@ class ManualPairer:
         row_idx = dist_spatial.index.get_indexer(df_manual[self.divide_col])
         col_idx = dist_spatial.columns.get_indexer(df_manual["donor"])
 
-        if (row_idx < 0).any() or (col_idx < 0).any():
-            raise ValueError("Receiver or donor not found in distance matrix")
+        missing_rows = df_manual[self.divide_col][row_idx < 0]
+        missing_cols = df_manual["donor"][col_idx < 0]
 
-        df_manual["distSpatial"] = dist_spatial.to_numpy()[row_idx, col_idx]
+        if len(missing_rows) > 0 or len(missing_cols) > 0:
+            raise ValueError(
+                f"Missing receivers in distance matrix: {missing_rows.unique()[:5]}, "
+                f"Missing donors in distance matrix: {missing_cols.unique()[:5]}"
+            )
+
+        values = dist_spatial.to_numpy()
+        df_manual["distSpatial"] = values[row_idx, col_idx]
 
         return df_manual
 
@@ -292,17 +300,18 @@ class ManualPairer:
             df1_raw, df2_raw, df3_raw, df4_raw
         )
 
-        dist_spatial = pd.read_parquet(dist_file, columns=list(donor_divides))
+        # get valid donors (columns in the distance matrix)
+        schema = pq.read_schema(dist_file)
+        available_cols = set(schema.names)
+        valid_cols = [c for c in donor_divides if c in available_cols]
 
-        print(f"Dimensions of spatial distance matrix: {dist_spatial.shape}")
-
-        # check if 'cat-417543' is in dist_spatial row index
-        if "cat-417543" in dist_spatial.index:
-            logger.warning("Receiver 'cat-417543' found in spatial distance matrix.")
-        else:
+        missing = set(donor_divides) - available_cols
+        if missing:
             logger.warning(
-                "Receiver 'cat-417543' not found in spatial distance matrix. "
+                f"The following donor divides specified in the manual pairings file are not present in the distance matrix: {missing}"
             )
+
+        dist_spatial = pd.read_parquet(dist_file, columns=valid_cols)
 
         # initialize empty dataframes with correct columns
         df1 = df2 = df3 = df4 = pd.DataFrame(columns=[self.divide_col, "donor"])
