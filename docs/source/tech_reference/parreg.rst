@@ -37,7 +37,7 @@ Process
    plot at :ref:`missing_attribute_barchart`.
 
 2. All primary attributes, as selected with ``attr_list`` or ``attr_select_file`` for each dataset specified in the
-   configuration, are used to calculate catchment similarity when pairing receivers with donors. For distance-based
+   ``config_parreg.yaml``, are used to calculate catchment similarity when pairing receivers with donors. For distance-based
    methods, if some receivers remain unpaired after the first pass using a full attribute set, a second pass is
    performed using a reduced set of attributes defined by ``base_attr_list`` in ``config_parreg.yaml``.
 
