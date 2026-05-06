@@ -225,7 +225,12 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
     @property
     def hydrofabric_buffered_polygon(self):
         """Buffered hydrofabric Polygon."""
-        return self.combined_geom.buffer(self.config.donor.buffer_km * 1000)
+        buffer_km = float(self.config.donor.buffer_km)
+        if buffer_km < 10e-6:  # allow a small tolerance for zero or negative buffer
+            return self.combined_geom
+
+        buffered = self.combined_geom.buffer(buffer_km * 1000)
+        return buffered.buffer(0)  # clean geometry
 
     @property
     def donor_basins_all(self) -> list:
