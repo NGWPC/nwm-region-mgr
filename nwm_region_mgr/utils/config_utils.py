@@ -1021,9 +1021,11 @@ class BaseConfigProcessor:
                         if "ngen" in file_key
                         else getattr(config.general.layer_name, "huc12", None)
                     )
-                    check_columns_hydrofabric(file, required_columns, layer_name=layer)
+                    check_columns_hydrofabric(
+                        file, required_columns, layer_name=layer, case_sensitive=False
+                    )
                 else:
-                    check_columns_dataframe(file, required_columns)
+                    check_columns_dataframe(file, required_columns, case_sensitive=True)
 
     @property
     @lru_cache
