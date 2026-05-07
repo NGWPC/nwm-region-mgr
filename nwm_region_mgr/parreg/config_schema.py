@@ -123,8 +123,9 @@ class DonorConfig(BaseModel):
 
     metric_threshold: Dict[str, MetricThreshold] = Field(
         description=(
-            "Dictionary of metric thresholds to be used for screening donors. Each key is a metric name, "
-            "and the value is a MetricThreshold object specifying the min, max, and absolute settings. "
+            "Dictionary of metric thresholds to be used for screening donors. Each key is a metric name, and "
+            "metric names must match columns in the calibration/validation stats file (case sensitive). "
+            "The value is a MetricThreshold object specifying the min, max, and absolute settings. "
             "Refer to schema of MetricThreshold for details."
         ),
         examples={
@@ -669,16 +670,14 @@ class AlgorithmConfig(BaseModel):
 
     hdbscan: HDBSCAN = Field(
         description=(
-            "Configurations for the clustering algorithm Hierarchical Density Based Spatial Clustering "
-            "of Applications with Noise (HDBSCAN)",
+            "Configurations for the clustering algorithm Hierarchical Density Based Spatial Clustering of Applications with Noise (HDBSCAN)",
         ),
         default_factory=HDBSCAN,
     )
 
     birch: Birch = Field(
         description=(
-            "Configurations for the clustering algorithm Balanced Iterative Reducing and "
-            "Clustering using Hierarchies (BIRCH)",
+            "Configurations for the clustering algorithm Balanced Iterative Reducing and Clustering using Hierarchies (BIRCH)",
         ),
         default_factory=Birch,
     )
@@ -752,7 +751,7 @@ class ParameterOutputConfig(BaseModel):
         description=(
             "Configuration for saving and plotting final attribute data used in regionalization. "
             "Note only selected attributes are saved, and attribute names are prefixed with "
-            "the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev').",
+            "the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev')."
         ),
         default_factory=BaseOutputConfig,
         examples={
