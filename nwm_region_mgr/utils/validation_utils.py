@@ -3,9 +3,9 @@
 validation_utils.py
 
 Functions:
-- check_columns_dataframe: Check if the required columns are present in a DataFrame (CSV or Parquet).
-- check_columns_hydrofabric: Check if the required fields are present in a hydrofabric file (GeoPackage or Shapefile).
-- check_options: Check if the provided option is valid against a list of valid options.
+    - check_columns_dataframe: Check if the required columns are present in a DataFrame (CSV or Parquet).
+    - check_columns_hydrofabric: Check if the required fields are present in a hydrofabric file (GeoPackage or Shapefile).
+    - check_options: Check if the provided option is valid against a list of valid options.
 
 """
 
