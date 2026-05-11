@@ -17,7 +17,6 @@ param_file_pattern = "sampled_params"
 column_name = "formulation"
 modules = ("cfe-s", "cfe-x")
 insert_modules = ["smp", "sft"]
-append_str = "_".join(insert_modules)
 
 domains = ["conus", "ak", "hi", "prvi"]
 
@@ -114,7 +113,7 @@ def process_files(
 ):
     """Process files in the specified directory matching the pattern and extension."""
     for domain in domains:
-        file = directory / f"{file_pattern}_{domain}.{extension}"
+        file = Path(f"{directory}.old") / f"{file_pattern}_{domain}.{extension}"
 
         if not file.exists():
             print(f"Skipping missing file: {file}")
@@ -144,7 +143,7 @@ def process_files(
         df = df.replace(-9999, np.nan)
 
         # write
-        out_file = directory / f"{file_pattern}_{domain}_{append_str}.{extension_new}"
+        out_file = directory / f"{file_pattern}_{domain}.{extension_new}"
 
         if extension_new == "parquet":
             df.to_parquet(out_file, index=False)
