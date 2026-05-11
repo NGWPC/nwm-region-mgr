@@ -56,7 +56,7 @@ metrics:
 plots:
   histogram:
     plot: true
-    metric_subset: [KGE, NSE, CORR, NSE]
+    metric_subset: [KGE, NSE, CORR, NNSE]
     binning:
       KGE: [-inf, -1, -0.5, 0, 0.2, 0.4, 0.6, 0.8, 1.0]
       NSE: [-inf, -1, -0.5, 0, 0.2, 0.4, 0.6, 0.8, 1.0]
@@ -66,7 +66,7 @@ plots:
 
   boxplot: 
     plot: true
-    metric_subset: [KGE, NSE, CORR, NSE]
+    metric_subset: [KGE, NSE, CORR, NNSE]
     scaling:
       KGE: [-0.5, 1]
       NSE: [-0.5, 1]
@@ -82,7 +82,7 @@ plots:
 
   spatial_map:
     plot: true
-    metric_subset: [KGE, NSE, CORR, NSE]
+    metric_subset: [KGE, NSE, CORR, NNSE]
     scaling:
       KGE: [-0.5, 1]
       NSE: [-0.5, 1]
