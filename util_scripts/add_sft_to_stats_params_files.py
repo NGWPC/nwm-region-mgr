@@ -141,7 +141,7 @@ def process_files(
         df = add_job_ids(df)
 
         # loop through columns and convert to -9999 to NaN
-        df = df.replace(-9999, "nan")
+        df = df.replace(-9999, np.nan)
 
         # write
         out_file = directory / f"{file_pattern}_{domain}_{append_str}.{extension_new}"
