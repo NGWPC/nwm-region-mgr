@@ -463,10 +463,15 @@ Check the header of the script for usage instructions.
   due to differences in data availability and formatting across domains, some adjustments may be needed in the 
   configuration files for different domains.
 
-  [!WARNING]
+  Sample configuration files for different domains can be found at `/ngencerf-app/nwm-region-mgr/`:
+  - **conus**: `configs`
+  - **hi**: `configs_hi`
+  - **prvi**: `configs_prvi`
+
+  ```{warning}
   The Alaska domain is currently not supported for regionalization base on NHF (NGWPC Hydrofabric) because the hydrofabric
   is yet to be finalized for the AK domain. Once the hydrofabric is finalized, the input datasets can be updated accordingly to support regionalization in the AK domain.
-
+  ```
 
 #### Valid VPUs for each domain
   - CONUS: 21 VPUs (01, 02, 03S, 03N, 03W, 04, 05, 06, 07, 08, 09, 10L, 10U, 11, 12, 13, 14, 15, 16, 17, 18)
