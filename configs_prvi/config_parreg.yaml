@@ -1,6 +1,6 @@
 ### Configuration for parameter regionalization application
 general:
-  attr_dataset_list: ['ngen','streamcat'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
+  attr_dataset_list: ['ngen','hydroatlas'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization. Supported options: 'gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'. 
   #manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu_list}_nhf.csv'  # path to the manual pairings file; if specified, the manual pairings will override the algorithm-based pairings
 
@@ -10,7 +10,7 @@ general:
     file: '{base_dir}/outputs/region/{run_name}/parreg_{domain}.log'
     
 donor:
-  buffer_km: 200
+  buffer_km: 0
   metric_eval_period: # Evaluation period to be used in identifying qualified donor basins based on metrics
     col_name: 'evalPeriod'
     value: 'full'
@@ -48,7 +48,7 @@ attr_datasets:
     base_attr_list: ['ele_mt_sav', 'dis_m3_pyr','run_mm_syr','pre_mm_syr']
 
 snow_cover:
-  consider_snowness: True  # whether to perform regionalization separately for snow-covered and snow-free basins (must be False for hi and prvi domains)
+  consider_snowness: False  # whether to perform regionalization separately for snow-covered and snow-free basins (must be False for hi and prvi domains)
   snow_cover_file: '{static_data_dir}/region/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet'  # path to the snow cover data file
   column: 'snw_pc_syr'  # column name for snow cover percent in the snow cover data file
   threshold: 20 # threshold for snow cover percent to determine snowiness category
@@ -80,7 +80,7 @@ output:
       plots:
         spatial_map: True
         histogram: True
-        columns_to_plot: ['ngen_slope250m_mean', 'ngen_aspect_circmean', 'ngen_elevation_mean','streamcat_Perm', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT']  # attributes to plot
+        columns_to_plot: ['ngen_slope250m_mean', 'ngen_aspect_circmean', 'ngen_elevation_mean','hydroatlas_dis_m3_pyr','hydroatlas_run_mm_syr','hydroatlas_pre_mm_syr']  # attributes to plot
     config_final:
       save: True
       path: '{base_dir}/outputs/region/{run_name}'

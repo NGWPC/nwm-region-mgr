@@ -252,7 +252,7 @@ class FormulationSummaryScoreConfig(BaseModel):
     metrics: Dict[str, MetricConfig] = Field(
         description=(
             "Dictionary of metrics used in the summary score, keyed by metric name. "
-            "Metric names must match columns in the calibration/validation stats file. Weights must sum to 1.0. "
+            "Metric names must match columns in the calibration/validation stats file (case sensitive). Weights must sum to 1.0. "
             "Refer to schema of MetricConfig for individual metric settings."
         ),
         examples={
