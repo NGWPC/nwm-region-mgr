@@ -12,7 +12,7 @@ general:
   logging: # define logging configurations
     level: info  # logging level, options: debug, info, warning, error, critical
     log_to_file: True  # whether to log to a file
-    file: '{base_dir}/outputs/{run_name}/formreg_{domain}.log'
+    file: '{base_dir}/outputs/region/{run_name}/formreg_{domain}.log'
 
 # Define configurations for the spatial discretization for formulation regionalization
 # For each spatial unit, a single formulation will be identified and applied to all catchments within the unit
