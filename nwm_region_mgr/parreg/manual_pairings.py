@@ -168,10 +168,22 @@ class ManualPairer:
             receiver_divides = self.cwt_df.loc[
                 self.cwt_df[self.gage_col] == receiver_gage, self.divide_col
             ]
+            receiver_divides = [r for r in receiver_divides if r in dist_spatial.index]
+            if not receiver_divides:
+                logger.warning(
+                    f"Manual pairing: no receiver divides found for receiver gage {receiver_gage} in spatial distance matrix. Skipping this pairing."
+                )
+                continue
 
             donor_divides = self.cwt_df.loc[
                 self.cwt_df[self.gage_col] == donor_gage, self.divide_col
             ]
+            donor_divides = [d for d in donor_divides if d in dist_spatial.columns]
+            if not donor_divides:
+                logger.warning(
+                    f"Manual pairing: no donor divides found for donor gage {donor_gage} in spatial distance matrix. Skipping this pairing."
+                )
+                continue
 
             for r in receiver_divides:
                 d = dist_spatial.loc[r, donor_divides].idxmin()
@@ -189,22 +201,28 @@ class ManualPairer:
 
         for _, row in df.iterrows():
             receiver_divide = row[f"receiver_{self.divide_col}"]
+
+            # Check receiver exists
+            if receiver_divide not in dist_spatial.index:
+                logger.warning(
+                    f"Manual pairing: receiver divide {receiver_divide} not found in spatial distance matrix. Skipping this pairing."
+                )
+                continue
+
             donor_gage = row[f"donor_{self.gage_col}"]
 
             donor_divides = self.cwt_df.loc[
                 self.cwt_df[self.gage_col] == donor_gage, self.divide_col
             ]
-
             valid_donors = [d for d in donor_divides if d in dist_spatial.columns]
 
             if not valid_donors:
                 logger.warning(
-                    f"No donor divides found for receiver divide {receiver_divide}"
+                    f"Manual pairing: no donor divides found for receiver divide {receiver_divide} in spatial distance matrix. Skipping this pairing."
                 )
                 continue
 
             series = dist_spatial.loc[receiver_divide, valid_donors]
-
             if series.empty:
                 logger.warning(
                     f"No spatial distances found for receiver divide {receiver_divide}"
