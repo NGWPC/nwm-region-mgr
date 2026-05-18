@@ -171,7 +171,7 @@ class ManualPairer:
             receiver_divides = [r for r in receiver_divides if r in dist_spatial.index]
             if not receiver_divides:
                 logger.warning(
-                    f"Manual pairing: no receiver divides found for receiver gage {receiver_gage} in spatial distance matrix. Skipping this pairing."
+                    f"Invalid manual pairing for receiver gage {receiver_gage}. Skipping this pairing."
                 )
                 continue
 
@@ -181,7 +181,7 @@ class ManualPairer:
             donor_divides = [d for d in donor_divides if d in dist_spatial.columns]
             if not donor_divides:
                 logger.warning(
-                    f"Manual pairing: no donor divides found for donor gage {donor_gage} in spatial distance matrix. Skipping this pairing."
+                    f"Invalid manual pairing for donor gage {donor_gage}. Skipping this pairing."
                 )
                 continue
 
@@ -205,7 +205,7 @@ class ManualPairer:
             # Check receiver exists
             if receiver_divide not in dist_spatial.index:
                 logger.warning(
-                    f"Manual pairing: receiver divide {receiver_divide} not found in spatial distance matrix. Skipping this pairing."
+                    f"Invalid manual pairing for receiver divide {receiver_divide}. Skipping this pairing."
                 )
                 continue
 
@@ -218,7 +218,7 @@ class ManualPairer:
 
             if not valid_donors:
                 logger.warning(
-                    f"Manual pairing: no donor divides found for receiver divide {receiver_divide} in spatial distance matrix. Skipping this pairing."
+                    f"Invalid manual pairing for receiver divide {receiver_divide}. Skipping this pairing."
                 )
                 continue
 
