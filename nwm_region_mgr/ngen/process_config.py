@@ -86,7 +86,7 @@ class NgenSimulationProcessor(BaseConfigProcessor):
 
         try:
             general_domain = domain_map[domain].lower()
-            forcing_domain = domain_map[domain]
+            # forcing_domain = domain_map[domain]
         except KeyError:
             raise ValueError(
                 f"Unsupported domain: {domain}. "
@@ -108,7 +108,7 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             nprocs=self.resolve_num_processes(self.config.general.n_procs),
             static_data_dir=self.config.general.static_data_dir,
             domain=general_domain,
-            global_domain=forcing_domain,
+            # global_domain=forcing_domain,
             forcing_configuration=forcing_source,
         )
 
