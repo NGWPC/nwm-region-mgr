@@ -27,14 +27,18 @@ TIMESTAMP_FMT1 = "%Y-%m-%d %H:%M:%S"
 
 
 def validate_timestamp(value: str) -> str:
-    """Validate that the given string is in the correct timestamp format."""
-    try:
-        datetime.strptime(value, TIMESTAMP_FMT)
-    except ValueError:
-        raise ValueError(
-            f"Invalid timestamp '{value}'. Expected format {TIMESTAMP_FMT}"
-        )
-    return value
+    """Validate that the given string matches one of the supported timestamp formats."""
+    for fmt in (TIMESTAMP_FMT, TIMESTAMP_FMT1):
+        try:
+            datetime.strptime(value, fmt)
+            return value
+        except ValueError:
+            continue
+
+    raise ValueError(
+        f"Invalid timestamp '{value}'. Expected format "
+        f"{TIMESTAMP_FMT!r} or {TIMESTAMP_FMT1!r}"
+    )
 
 
 class NgenGeneralSettings(BaseGeneralConfig):
