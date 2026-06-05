@@ -68,10 +68,30 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             template_content = f.read()
 
         # format start and end times (as required by MSWM)
-        start_time = datetime.strptime(self.config.general.start_time, TIMESTAMP_FMT)
-        end_time = datetime.strptime(self.config.general.end_time, TIMESTAMP_FMT)
-        self.config.general.start_time = start_time.strftime(TIMESTAMP_FMT1)
-        self.config.general.end_time = end_time.strftime(TIMESTAMP_FMT1)
+        def ensure_timestamp_format(ts: str) -> str:
+            """Return timestamp in TIMESTAMP_FMT1 format."""
+            # Already in desired format?
+            try:
+                datetime.strptime(ts, TIMESTAMP_FMT1)
+                return ts
+            except ValueError:
+                pass
+
+            # Convert from original format
+            try:
+                return datetime.strptime(ts, TIMESTAMP_FMT).strftime(TIMESTAMP_FMT1)
+            except ValueError:
+                raise ValueError(
+                    f"Timestamp '{ts}' is not in either {TIMESTAMP_FMT!r} "
+                    f"or {TIMESTAMP_FMT1!r} format."
+                )
+
+        self.config.general.start_time = ensure_timestamp_format(
+            self.config.general.start_time
+        )
+        self.config.general.end_time = ensure_timestamp_format(
+            self.config.general.end_time
+        )
 
         # global_domain for ngen-forcing
         domain_map = {
