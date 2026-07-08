@@ -18,6 +18,7 @@ import logging
 import os
 import subprocess
 from datetime import datetime
+from importlib.resources import as_file, files
 from pathlib import Path
 
 from mswm.build_inputs import RealizationBuilder
@@ -64,8 +65,20 @@ class NgenSimulationProcessor(BaseConfigProcessor):
 
     def create_mswm_config(self, vpu: str, algo: str) -> Path:
         """Create MSWM config file based on template."""
-        with open(self.config.general.config_template, "r") as f:
-            template_content = f.read()
+        # Read the template file
+        template = self.config.general.config_template
+        template_path = Path(template)
+
+        if template_path.exists():
+            # User-provided external template
+            template_content = template_path.read_text()
+        else:
+            # Packaged template
+            template_content = (
+                files("nwm_region_mgr.ngen.templates")
+                .joinpath(str(template))
+                .read_text()
+            )
 
         # format start and end times (as required by MSWM)
         def ensure_timestamp_format(ts: str) -> str:
@@ -116,21 +129,22 @@ class NgenSimulationProcessor(BaseConfigProcessor):
         forcing_source = "aorc" if domain == "conus" else "nwm"
 
         # Replace placeholders in the template
-        config_content = template_content.format(
-            vpu="vpu_" + vpu,
-            run_name=self.config.general.run_name + "_" + algo,
-            start_time=self.config.general.start_time,
-            end_time=self.config.general.end_time,
-            par_file=self.config.general.par_file.get(f"{vpu}_{algo}", None),
-            pair_file=self.config.general.pair_file.get(f"{vpu}_{algo}", None),
-            gpkg_file=self.config.general.ngen_hydrofabric_file.get(f"{vpu}", None),
-            work_dir=self.ngen_work_dir,
-            nprocs=self.resolve_num_processes(self.config.general.n_procs),
-            static_data_dir=self.config.general.static_data_dir,
-            domain=general_domain,
-            # global_domain=forcing_domain,
-            forcing_configuration=forcing_source,
-        )
+        format_values = {
+            "vpu": "vpu_" + vpu,
+            "run_name": self.config.general.run_name + "_" + algo,
+            "start_time": self.config.general.start_time,
+            "end_time": self.config.general.end_time,
+            "par_file": self.config.general.par_file.get(f"{vpu}_{algo}", None),
+            "pair_file": self.config.general.pair_file.get(f"{vpu}_{algo}", None),
+            "gpkg_file": self.config.general.ngen_hydrofabric_file.get(f"{vpu}", None),
+            "work_dir": self.ngen_work_dir,
+            "nprocs": self.resolve_num_processes(self.config.general.n_procs),
+            "static_data_dir": self.config.general.static_data_dir,
+            "domain": general_domain,
+            "forcing_configuration": forcing_source,
+            "mswm_parameter_dir": str(files("mswm").joinpath("module_parameter_files")),
+        }
+        config_content = template_content.format(**format_values)
 
         # Write the new config file
         config_path = (
