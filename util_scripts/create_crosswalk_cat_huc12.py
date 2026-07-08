@@ -13,7 +13,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 
-hf_version = "nhf"  #  "nhf" or "v2.2"
+hf_version = "nhf_1.2.0"  #  "nhf" or "v2.2"
 
 id_col = "divide_id" if hf_version == "v2.2" else "div_id"
 area_col = "areasqkm" if hf_version == "v2.2" else "area_sqkm"
@@ -121,11 +121,11 @@ def get_vpu_list(domain: str) -> list:
             ]
             # fmt: on
         case "ak":
-            vpu_list = ["ak"]
+            vpu_list = ["19"]
         case "hi":
-            vpu_list = ["hi"]
+            vpu_list = ["20"]
         case "prvi":
-            vpu_list = ["prvi"]
+            vpu_list = ["21"]
         case _:
             raise Exception(f"Unsupported domain: {domain}")
 
@@ -164,7 +164,7 @@ def create_crosswalk_cat_huc12(domain: str, outfile: Path) -> pd.DataFrame:
             else "21"
         )
         shp1 = shp_huc[shp_huc["VPUID"] == vpu1]
-        file_stem = f"vpu_{vpu}" if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
+        file_stem = f"vpu_{vpu1}"  # if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
         gpkg_file = Path(
             f"~/data/hydrofabric/gpkg_{hf_version}/{file_stem}.gpkg"
         ).expanduser()
@@ -219,7 +219,7 @@ def plot_unmatched_catchments(df_cwt: pd.DataFrame, domain: str, outdir: Path):
         vpus = get_vpu_list(domain)
         gdfs = []
         for vpu in vpus:
-            file_stem = f"vpu_{vpu}" if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
+            file_stem = f"vpu_{vpu}"  # if domain == "conus" else f"vpu_{vpu}_nhf_1.1.3"
             gpkg_file = Path(
                 f"~/data/hydrofabric/gpkg_{hf_version}/{file_stem}.gpkg"
             ).expanduser()

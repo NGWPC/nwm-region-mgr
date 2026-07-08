@@ -263,11 +263,11 @@ class ProcessAttrDataset(BaseModel):
                 ]
                 # fmt: on
             case "ak":
-                vpu_list = ["ak"]
+                vpu_list = ["19"]
             case "hi":
-                vpu_list = ["hi"]
+                vpu_list = ["20"]
             case "prvi":
-                vpu_list = ["prvi"]
+                vpu_list = ["21"]
             case _:
                 raise Exception(f"Unsupported domain: {self.domain}")
 
