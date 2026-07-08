@@ -18,7 +18,7 @@ import logging
 import os
 import subprocess
 from datetime import datetime
-from importlib.resources import as_file, files
+from importlib.resources import files
 from pathlib import Path
 
 from mswm.build_inputs import RealizationBuilder
