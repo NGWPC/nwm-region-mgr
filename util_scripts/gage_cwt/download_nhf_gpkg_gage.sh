@@ -6,8 +6,8 @@
 set -euo pipefail
 
 id_type="gage_id"
-version="v1"
-version_local="1.2.0"
+version_api="v1"
+version_nhf="1.2.0"
 
 domains=("CONUS" "Puerto_Rico" "Hawaii" "Alaska")
 gages_file="$HOME/repos/nwm-region-mgr/data/inputs/region/gages_nwm4_calib_all.csv"
@@ -19,7 +19,7 @@ for domain in "${domains[@]}"; do
     echo "Processing domain: $domain"
 
     domain1="${domain// /_}" # replace spaces with underscores for file paths
-    dest_dir="$HOME/data/hydrofabric/gpkg_nhf_${version_local}/${domain1}/"
+    dest_dir="$HOME/data/hydrofabric/gpkg_nhf_${version_nhf}/${domain1}/"
     mkdir -p "$dest_dir"
 
 
@@ -51,7 +51,7 @@ EOF
             continue
         fi
 
-        url="http://edfs.test.nextgenwaterprediction.com/api/${version}/hydrofabric/${gage}/gpkg?id_type=${id_type}&source=nhf&domain=${domain1}"
+        url="http://edfs.test.nextgenwaterprediction.com/api/${version_api}/hydrofabric/${gage}/gpkg?id_type=${id_type}&source=nhf&domain=${domain1}"
 
         echo "Downloading GPKG for Gage $gage ... from URL: $url"
         curl -L -o "$dest_file" "$url"

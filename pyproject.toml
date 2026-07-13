@@ -55,6 +55,8 @@ repository = "https://github.com/NGWPC/nwm-region-mgr"
 where = ["."]
 include = ["nwm_region_mgr*"]
 
+[tool.setuptools.package-data]
+"nwm_region_mgr.ngen.templates" = ["*.txt", "*.yaml", "*.json", "*.csv"]
 
 [tool.setuptools.dynamic]
 version = {attr = "nwm_region_mgr.__version__"}

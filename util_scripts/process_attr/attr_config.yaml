@@ -1,4 +1,4 @@
-hf_version: nhf  # options: nhf, v2.2
+hf_version: nhf_1.2.0  # options: nhf, v2.2
 domain: conus
 attr_dataset: streamcat # options: hlr, ngen, streamcat, hydroatlas
 attr_list: 
@@ -8,8 +8,8 @@ base_dir: ~/data/region_input/{hf_version}
 gpkg_dir: ~/data/hydrofabric/gpkg_{hf_version}
 cwt_file: '{base_dir}/cwt_ngen_{attr_dataset}/cwt_ngen_{attr_dataset}_{domain}.parquet'
 attr_file: '{base_dir}/attr_datasets/{attr_dataset}/attr_{attr_dataset}_{domain}.parquet'
-process_cwt: false
-analyze_cwt: false
+process_cwt: true
+analyze_cwt: true
 process_attr: true
 
 hlr:

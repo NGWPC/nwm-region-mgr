@@ -73,8 +73,9 @@ class NgenGeneralSettings(BaseGeneralConfig):
     )
 
     config_template: Path | str = Field(
-        description="Path to the MSWM configuration template file.",
-        examples="ngen/mswm.config.template.docker",
+        default="default_mswm_template.txt",
+        description="Path to the MSWM configuration template file for NGEN simulation.",
+        examples=["default_mswm_template.txt"],
     )
 
     # validate timestamp fields
