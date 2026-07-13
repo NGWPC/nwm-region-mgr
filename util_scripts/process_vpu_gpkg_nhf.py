@@ -2,6 +2,9 @@
 
 The script checks and reprojects CRS if necessary, and removes empty nexuses (i.e., nexuses with no upstream catchments)
 from the nexus layer. The processed GPKG files will be used as input for regionalized NGEN simulations.
+
+Note for NHF 1.2.0, only the oCONUS domains (Alaska, Hawaii, Puerto Rico & Virgin Islands) needs to be processed,
+as the CONUS VPUs are already in EPSG:4326.
 """
 
 import shutil
@@ -121,11 +124,12 @@ def process_gpkg(input_gpkg, target_gpkg):
 if __name__ == "__main__":
     # fmt: off
     vpus = [
+        ## CONUS vpus
         #"01", "02", "03N", "03S", "03W", "04", "05", "06", "07", "08", "09",
         #"10L", "10U", "11", "12", "13", "14", "15", "16", "17", "18",
-        # oCONUS VPUs
-        #"19",  # Alaska
-        #"20",  # Hawaii
+        ## oCONUS VPUs
+        "19",  # Alaska
+        "20",  # Hawaii
         "21"   # Puerto Rico & Virgin Islands
     ]
     # fmt: on

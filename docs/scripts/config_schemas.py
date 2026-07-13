@@ -499,6 +499,7 @@ def main(docs_to_create: dict) -> None:
     file_path = Path(__file__).parent.parent / "source" / "config_builder" / "index.md"
     file_path.parent.mkdir(parents=True, exist_ok=True)
     file_path.write_text(md_text, encoding="utf-8")
+    print(f"Config schemas generated and saved to {file_path}")
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ general:
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization
   par_file: '{base_dir}/outputs/region/{run_name}/params/formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}.csv'
   pair_file: '{base_dir}/outputs/region/{run_name}/pairs/pairs_{algorithm_list}_{domain}_vpu{vpu_list}_mswm.csv'
-  config_template: '{static_data_dir}/ngen/mswm.config.template.docker'
+  config_template: 'default_mswm_template.txt'
 
 output:
   ngen:

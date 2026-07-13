@@ -290,6 +290,7 @@ def process_schema(
     all_schemas.append(".. toctree::\n   :maxdepth: 2")
     with open(output_rst, "w") as f:
         f.write("\n".join(all_schemas))
+    print(f"Schema documentation generated and saved to {output_rst}")
 
 
 if __name__ == "__main__":
@@ -306,7 +307,7 @@ if __name__ == "__main__":
 
     # process input data schemas
     input_files = get_sample_data_files(Path(args.prefix), Path("data_desc/inputs"))
-    print("============ Creating schemas for input files ============")
+    print("====== Creating schemas for input files ======")
     pprint(input_files)
     process_schema(
         dict(sorted(input_files.items())), file_path / "input_data.rst", args.bucket
@@ -314,7 +315,7 @@ if __name__ == "__main__":
 
     # process output data schemas
     output_files = get_sample_data_files(Path(args.prefix), Path("data_desc/outputs"))
-    print("\n============ Creating schemas for output files ============")
+    print("\n====== Creating schemas for output files ======")
     pprint(output_files)
     process_schema(
         dict(sorted(output_files.items())), file_path / "output_data.rst", args.bucket

@@ -2,7 +2,7 @@
 general:
   attr_dataset_list: ['ngen','streamcat'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization. Supported options: 'gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'. 
-  #manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu_list}_nhf.csv'  # path to the manual pairings file; if specified, the manual pairings will override the algorithm-based pairings
+  manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu_list}_nhf.csv'  # path to the manual pairings file; if specified, the manual pairings will override the algorithm-based pairings
 
   logging: # define logging configurations
     level: info  # logging level, options: debug, info, warning, error, critical
