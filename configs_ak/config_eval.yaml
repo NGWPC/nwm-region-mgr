@@ -45,8 +45,12 @@ metrics:
   overwrite: true # whether to overwrite existing metric files
   library: nwm.eval # currently supported options: teehr, nwm.eval
   metric_subset: [KGE, NSE, CORR, NNSE]
-  flow_threshold_categorical: 0.9 # non-exceedance probability threshold of streamflow to be used for categorical metrics in nwm.eval 
-  flow_threshold_event: 0.9 # non-exceedance probability threshold of streamflow to be used for event-based metrics in nwm.eval
+  threshold_categorical:
+    value: 0.9 # threshold value to be used for categorical metrics in nwm.eval 
+    type: quantile # type of threshold for categorical metrics in nwm.eval; options are 'quantile' or 'absolute'
+  threshold_event:
+    value: 0.9 # threshold value to be used for event-based metrics in nwm.eval
+    type: quantile # type of threshold for event-based metrics in nwm.eval; options are 'quantile' or 'absolute'
   lead_times: ['all'] # list of lead times (in hours) for which metrics should be calculated for  
   file_format: parquet # file format for metrics. Options are: parquet, csv. Default is parquet.
 
