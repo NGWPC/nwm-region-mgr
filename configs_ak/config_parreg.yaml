@@ -2,7 +2,7 @@
 general:
   attr_dataset_list: ['ngen','hlr','hydroatlas'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization. Supported options: 'gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'. 
-  #manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu_list}_nhf.csv'  # path to the manual pairings file; if specified, the manual pairings will override the algorithm-based pairings
+  #manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu}_nhf.csv'  # path to the manual pairings file; if specified, the manual pairings will override the algorithm-based pairings
 
 
   logging: # define logging configurations
@@ -50,7 +50,7 @@ attr_datasets:
 
 snow_cover:
   consider_snowness: False  # whether to perform regionalization separately for snow-covered and snow-free basins (must be False for hi and prvi domains)
-  snow_cover_file: '{static_data_dir}/region/snow_frac/vpu{vpu_list}_snow_frac.parquet'  # path to the snow cover data file
+  snow_cover_file: '{static_data_dir}/region/snow_frac/vpu{vpu}_snow_frac.parquet'  # path to the snow cover data file
   column: 'snow_pc_hydroatlas'  # column name for snow cover percent in the snow cover data file
   threshold: 20 # threshold for snow cover percent to determine snowiness category
 
@@ -58,7 +58,7 @@ output:
     pairs:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/pairs'
-      stem: 'pairs_{algorithm_list}_{domain}_vpu{vpu_list}'
+      stem: 'pairs_{algorithm_list}_{domain}_vpu{vpu}'
       stem_suffix: '_mswm'  # suffix for the pairs file to be used by MSWM
       format: 'parquet'
       plots:
@@ -68,7 +68,7 @@ output:
     params:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/params'
-      stem: 'formulation_params_{algorithm_list}_{domain}_vpu{vpu_list}'
+      stem: 'formulation_params_{algorithm_list}_{domain}_vpu{vpu}'
       format: 'csv'
       plots:
         spatial_map: False
@@ -76,7 +76,7 @@ output:
     attr_data_final:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/attr_data_final'
-      stem: 'attr_{domain}_vpu{vpu_list}'
+      stem: 'attr_{domain}_vpu{vpu}'
       format: 'parquet'
       plots:
         spatial_map: False
@@ -85,7 +85,7 @@ output:
     config_final:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/config_parreg_final.yaml'
-      format: 
+      format: 'yaml'
     spatial_distance:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/spatial_distance'

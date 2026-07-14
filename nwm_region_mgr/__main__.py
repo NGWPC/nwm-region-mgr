@@ -79,41 +79,40 @@ def _resolve_config_files(
 
 def _run_formreg(
     frp: FormulationRegionalizationProcessor,
+    vpu: str,
 ) -> None:
     """Run formulation regionalization."""
-    for vpu in frp.config.general.vpu_list:
-        logger.info("Running formulation regionalization for VPU %s", vpu)
-        frp.run_formreg_for_vpu(
+    logger.info("Running formulation regionalization for VPU %s", vpu)
+    frp.run_formreg_for_vpu(
+        vpu,
+        frp.get_output_file_path(
+            "formulation",
             vpu,
-            frp.get_output_file_path(
-                "formulation",
-                vpu,
-                use_stem_suffix=True,
-            ),
-        )
+            use_stem_suffix=True,
+        ),
+    )
 
 
 def _run_parreg(
     frp: FormulationRegionalizationProcessor,
     prp: ParameterRegionalizationProcessor,
+    vpu: str,
 ) -> None:
     """Run parameter regionalization (includes formulation regionalization)."""
-    for vpu in prp.config.general.vpu_list:
-        logger.info("Running parameter regionalization for VPU %s", vpu)
-        prp.run_parreg_for_vpu(vpu, frp)
+    logger.info("Running parameter regionalization for VPU %s", vpu)
+    prp.run_parreg_for_vpu(vpu, frp)
 
     mp = ManualPairer(prp.config)
-    for vpu in prp.config.general.vpu_list:
-        mp.run_manual_pairing(vpu, prp, frp)
+    mp.run_manual_pairing(vpu, prp, frp)
 
 
 def _run_ngen(
     nsp: BaseConfigProcessor,
+    vpu: str,
 ) -> None:
     """Run NGEN simulations."""
-    for vpu in nsp.config.general.vpu_list:
-        logger.info("Running NGEN simulation for VPU %s", vpu)
-        nsp.run_ngen_for_vpu(vpu)
+    logger.info("Running NGEN simulation for VPU %s", vpu)
+    nsp.run_ngen_for_vpu(vpu)
 
 
 def _build_formreg_processor(config_paths: list[Path]):
@@ -164,14 +163,24 @@ def main(
         logger.info("Sample size: %d", sample_size)
 
     # run the selected option (formreg or parreg or ngen)
-    if option == "formreg":
-        _run_formreg(pc)
+    vpu = pc.config.general.vpu if hasattr(pc.config.general, "vpu") else None
+    if not vpu:
+        logger.warning(
+            "VPU is not specified in the configuration. Please set the 'vpu' field in the config_general.yaml file."
+        )
+        return
 
-    elif option == "parreg":
-        _run_parreg(pc, rpc)
+    if vpu:
+        logger.info("Processing VPU: %s", vpu)
 
-    elif option == "ngen":
-        _run_ngen(pc)
+        if option == "formreg":
+            _run_formreg(pc, vpu)
+
+        elif option == "parreg":
+            _run_parreg(pc, rpc, vpu)
+
+        elif option == "ngen":
+            _run_ngen(pc, vpu)
 
     logger.info("Completed %s", option)
 

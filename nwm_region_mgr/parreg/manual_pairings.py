@@ -28,11 +28,7 @@ class ManualPairer:
     @property
     def manual_pairings_file(self) -> Path:
         """Path to the manual pairings file."""
-        files = getattr(self.config.general, "manual_pairings_file", None)
-        if files is None:
-            return None
-
-        return files[self.vpu]
+        return getattr(self.config.general, "manual_pairings_file", None)
 
     @property
     def divide_col(self):

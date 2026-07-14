@@ -172,14 +172,14 @@ class BaseGeneralConfig(BaseModel):
         default="conus",
     )
 
-    vpu_list: Union[List[str], str] = Field(
+    vpu: str = Field(
         description=(
-            "List of vector processing units (VPUs) to be processed within the domain. "
+            "Vector processing unit (VPU) to be processed within the domain. "
             "Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. "
             "Valid VPUs for ak, hi, prvi are 19, 20, 21, respectively."
         ),
-        examples=["03S"],
-        default=["03S"],
+        examples="03S",
+        default="03S",
     )
 
     n_procs: int = Field(
@@ -203,8 +203,8 @@ class BaseGeneralConfig(BaseModel):
     ngen_hydrofabric_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
         description=(
             "Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' "
-            "or 2) a dictionary mapping VPU strings to file paths, e.g., {'09': 'vpu_09.gpkg'}."
-            "If providing a string with placeholders like {vpu_list}, they will be substituted accordingly and "
+            "or 2) a dictionary mapping VPU strings to file paths, e.g., {'01': 'vpu_01.gpkg'}."
+            "If providing a string with placeholders like {vpu}, they will be substituted accordingly and "
             "expanded to a dictionary mapping each VPU to its corresponding file."
             " This file must include columns 'div_id', 'vpu_id' and 'geometry'."
         ),
@@ -214,7 +214,9 @@ class BaseGeneralConfig(BaseModel):
 
     gage_divide_cwt_file: Path | str = Field(
         description="Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'.",
-        examples="{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet",
+        examples=[
+            "{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet"
+        ],
         default=None,
     )
 
@@ -290,6 +292,23 @@ class BaseGeneralConfig(BaseModel):
     )
 
     @model_validator(mode="after")
+    def normalize_hydrofabric_file(self) -> "BaseGeneralConfig":
+        """Normalize the hydrofabric file path to a dictionary mapping VPU to file paths."""
+        if isinstance(self.ngen_hydrofabric_file, (str, Path)):
+            # If it's a single path, create a dictionary with the current VPU
+            self.ngen_hydrofabric_file = {self.vpu: str(self.ngen_hydrofabric_file)}
+        elif isinstance(self.ngen_hydrofabric_file, dict):
+            # If it's a dict, ensure all keys are strings and values are strings
+            self.ngen_hydrofabric_file = {
+                str(k): str(v) for k, v in self.ngen_hydrofabric_file.items()
+            }
+        else:
+            raise ValueError(
+                "ngen_hydrofabric_file must be a string, Path, or dictionary mapping VPU to file paths."
+            )
+        return self
+
+    @model_validator(mode="after")
     def lower_case_ids(self) -> "BaseGeneralConfig":
         """Ensure that all ID columns are in lower case."""
         if self.id_col:
@@ -300,47 +319,22 @@ class BaseGeneralConfig(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def check_vpu_list(self) -> "BaseGeneralConfig":
-        """Ensure that the VPU list is valid."""
+    def check_vpu(self) -> "BaseGeneralConfig":
+        """Ensure that the VPU is valid."""
+        # fmt: off
         valid_vpus = {
             "conus": [
-                "01",
-                "02",
-                "03N",
-                "03S",
-                "03W",
-                "04",
-                "05",
-                "06",
-                "07",
-                "08",
-                "09",
-                "10L",
-                "10U",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15",
-                "16",
-                "17",
-                "18",
+                "01", "02", "03N", "03S", "03W", "04", "05", "06", "07", "08", "09",
+                "10L", "10U", "11", "12", "13", "14", "15", "16", "17", "18",
             ],
             "ak": ["19"],
             "hi": ["20"],
             "prvi": ["21"],
         }
+        # fmt: on
 
-        if isinstance(self.vpu_list, str) and self.vpu_list.lower() == "all":
-            self.vpu_list = valid_vpus[self.domain]
-        elif isinstance(self.vpu_list, list):
-            for vpu in self.vpu_list:
-                if vpu not in valid_vpus[self.domain]:
-                    msg = f"Invalid VPU '{vpu}' for domain '{self.domain}'. Valid options are: {valid_vpus[self.domain]}"
-                    logger.error(msg)
-                    raise ValueError(msg)
-        else:
-            msg = f"'vpu_list' must be a list of VPUs. Got: {self.vpu_list}"
+        if self.vpu not in valid_vpus[self.domain]:
+            msg = f"Invalid VPU '{self.vpu}' for domain '{self.domain}'. Valid options are: {valid_vpus[self.domain]}"
             logger.error(msg)
             raise ValueError(msg)
 
@@ -777,9 +771,7 @@ class BaseConfigProcessor:
             "base_dir": config.general.base_dir
             if hasattr(config.general, "base_dir")
             else None,
-            "vpu_list": config.general.vpu_list
-            if hasattr(config.general, "vpu_list")
-            else None,
+            "vpu": config.general.vpu if hasattr(config.general, "vpu") else None,
             "algorithm_list": config.general.algorithm_list
             if hasattr(config.general, "algorithm_list")
             else None,
@@ -1182,11 +1174,18 @@ class BaseConfigProcessor:
 
         add_entry_if_missing(self.config.general.ngen_hydrofabric_file, vpu)
 
+        # expand the output configuration for summary_score and formulation because the results from neighboring VPUs
+        # may be needed for the current VPU
         co = getattr(self.config.output, "summary_score", None)
         if co is not None:
+            if not isinstance(co.stem, dict):
+                co.stem = {self.config.general.vpu: co.stem}
             add_entry_if_missing(co.stem, vpu)
+
         co = getattr(self.config.output, "formulation", None)
         if co is not None:
+            if not isinstance(co.stem, dict):
+                co.stem = {self.config.general.vpu: co.stem}
             add_entry_if_missing(co.stem, vpu)
 
         # save the expanded configuration
