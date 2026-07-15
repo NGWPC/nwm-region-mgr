@@ -65,11 +65,11 @@ class NgenGeneralSettings(BaseGeneralConfig):
 
     par_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
         description="Path to the formulation parameters file for NGEN simulation.",
-        examples="outputs/region/{run_name}/params/formulation_params_{algorithm_list}_conus_vpu{vpu_list}.csv",
+        examples="outputs/region/{run_name}/params/formulation_params_{algorithm_list}_conus_vpu{vpu}.csv",
     )
     pair_file: Path | str | Dict[str, Path] | Dict[str, str] = Field(
         description="Path to the pairing file for NGEN simulation.",
-        examples="outputs/region/{run_name}/pairs/pairs_{algorithm_list}_conus_vpu{vpu_list}_mswm.csv",
+        examples="outputs/region/{run_name}/pairs/pairs_{algorithm_list}_conus_vpu{vpu}_mswm.csv",
     )
 
     config_template: Path | str = Field(

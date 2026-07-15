@@ -128,7 +128,7 @@ cp -r configs/ test1_configs/
 ```
 
 #### 0.1 Update `test1_configs/config_general.yaml`
- - Set **general.vpu_list** to ['09']
+ - Set **general.vpu** to '09'
  - Set **general.run_name** to a new name: *test1*. This will be used to name the output folder for this experiment
   (e.g., `outputs/region/test1/`)
 
