@@ -21,7 +21,8 @@ from datetime import datetime
 from importlib.resources import files
 from pathlib import Path
 
-# from mswm.build_inputs import RealizationBuilder
+from mswm.build_inputs import RealizationBuilder
+
 from nwm_region_mgr.ngen.config_schema import TIMESTAMP_FMT, TIMESTAMP_FMT1
 from nwm_region_mgr.utils import BaseConfigProcessor
 
