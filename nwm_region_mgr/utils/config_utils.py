@@ -425,18 +425,15 @@ class BaseOutputConfig(BaseModel):
                 msg = f"File 'stem' and 'format' must be specified if 'path' is a directory: {file_path}"
                 logger.error(msg)
                 raise ValueError(msg)
+            print(
+                f"##### file_path: {file_path}, stem: {self.stem}, format: {self.format}"
+            )
             if isinstance(self.stem, dict):
-                # If stem is a dict (for different VPUs), find the stem for current VPU
-                if vpu and not algorithm:
-                    file_stem = self.stem.get(f"{vpu}")
-                elif vpu and algorithm:
-                    file_stem = self.stem.get(f"{vpu}_{algorithm}")
-                elif algorithm and not vpu:
+                # if stem is a dict (for different algorithms), find the stem for current algorithm
+                if algorithm:
                     file_stem = self.stem.get(f"{algorithm}")
                 else:
-                    file_stem = re.sub(
-                        r"_vpu.*$", "", next(iter(self.stem.values()))
-                    )  # remove VPU part from stem
+                    file_stem = next(iter(self.stem.values()))
             elif isinstance(self.stem, str):
                 file_stem = self.stem
             else:
