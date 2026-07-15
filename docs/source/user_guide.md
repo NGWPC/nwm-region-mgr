@@ -543,6 +543,20 @@ Check the header of the script for usage instructions.
   Note this will delete the entire runtime folder containing the detailed log files, which may be useful for debugging if 
   any issues arise during the run. 
 
+### Assemble domain results
+
+  After running regionalization for all VPUs in the CONUS domain, the metric results can be assembled to create 
+  evaluation plots for the entire domain. This is done by a single run of the `eval` step with 
+  the following updates to the `config_eval.yaml` file:
+  - Set **general.assemble_domain** to `true`
+  - Set **general.location_set_name** to `conus`
+  - Make sure **general.steps.compute_metrics** and **general.steps.plot_metrics** are set to `true` 
+
+  The run will look for the existing metric results file for each VPU in the CONUS domain (e.g., `outputs/eval/vpu_03S/metrics/test_kmeans.ngen.ngen_simulation.metrics.parquet`, `outputs/eval/vpu_03N/metrics/test_kmeans.ngen.ngen_simulation.metrics.parquet`), and assemble them into a single metrics file for the entire domain (e.g., `outputs/eval/conus/metrics/test_kmeans.ngen.ngen_simulation.metrics.parquet`).
+
+  Then, the evaluation plots for the entire domain (excluding VPUs without existing metric files) will be generated based on the assembled metrics file, and saved in the folder `outputs/eval/conus/plots/ngen_simulation/`.
+
+
 ### Manual pairings
 
   Manual pairings can be specified in the config file `config_parreg.yaml` to override the algorithm-based donor 

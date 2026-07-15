@@ -425,9 +425,7 @@ class BaseOutputConfig(BaseModel):
                 msg = f"File 'stem' and 'format' must be specified if 'path' is a directory: {file_path}"
                 logger.error(msg)
                 raise ValueError(msg)
-            print(
-                f"##### file_path: {file_path}, stem: {self.stem}, format: {self.format}"
-            )
+
             if isinstance(self.stem, dict):
                 # if stem is a dict (for different algorithms), find the stem for current algorithm
                 if algorithm:
