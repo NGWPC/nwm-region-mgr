@@ -43,10 +43,10 @@ class NgenSimulationProcessor(BaseConfigProcessor):
         )
         logger.info(f"Working dir:    {self.config.general.base_dir}")
         logger.info(
-            f"Parameter file:   {self.config.general.par_file.get(f'{vpu}_{algo}', None)}"
+            f"Parameter file:   {self.config.general.par_file.get(f'{algo}', None)}"
         )
         logger.info(
-            f"Pair file:        {self.config.general.pair_file.get(f'{vpu}_{algo}', None)}"
+            f"Pair file:        {self.config.general.pair_file.get(f'{algo}', None)}"
         )
         logger.info(
             f"GeoPackage file:  {self.config.general.ngen_hydrofabric_file.get(f'{vpu}', None)}"
@@ -134,8 +134,8 @@ class NgenSimulationProcessor(BaseConfigProcessor):
             "run_name": self.config.general.run_name + "_" + algo,
             "start_time": self.config.general.start_time,
             "end_time": self.config.general.end_time,
-            "par_file": self.config.general.par_file.get(f"{vpu}_{algo}", None),
-            "pair_file": self.config.general.pair_file.get(f"{vpu}_{algo}", None),
+            "par_file": self.config.general.par_file.get(f"{algo}", None),
+            "pair_file": self.config.general.pair_file.get(f"{algo}", None),
             "gpkg_file": self.config.general.ngen_hydrofabric_file.get(f"{vpu}", None),
             "work_dir": self.ngen_work_dir,
             "nprocs": self.resolve_num_processes(self.config.general.n_procs),
