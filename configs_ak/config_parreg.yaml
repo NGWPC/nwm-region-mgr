@@ -1,6 +1,6 @@
 ### general 
 general:
-  attr_dataset_list: ['ngen','hlr','hydroatlas'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
+  attr_dataset_list: ['ngen','hlr'] # list of attribute datasets. Supported options: 'ngen', 'hlr', 'streamcat', 'hydroatlas'.
   algorithm_list: ['kmeans']  # list of algorithms to use for parameter regionalization. Supported options: 'gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'. 
   #manual_pairings_file: '{static_data_dir}/region/manual_pairs/manual_pairs_vpu{vpu}_nhf.csv'  # path to the manual pairings file; if specified, the manual pairings will override the algorithm-based pairings
 
@@ -84,8 +84,9 @@ output:
         columns_to_plot: ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT','hlr_PMPE', 'hlr_SAND','hlr_TAVE']  # attributes to plot
     config_final:
       save: True
-      path: '{base_dir}/outputs/region/{run_name}/config_parreg_final.yaml'
-      format: 'yaml'
+      path: '{base_dir}/outputs/region/{run_name}'
+      stem: 'config_parreg_final_{domain}_vpu{vpu}'
+      format: yaml
     spatial_distance:
       save: True
       path: '{base_dir}/outputs/region/{run_name}/spatial_distance'

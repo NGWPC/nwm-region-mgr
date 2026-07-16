@@ -467,11 +467,8 @@ Check the header of the script for usage instructions.
   - **conus**: `configs`
   - **hi**: `configs_hi`
   - **prvi**: `configs_prvi`
-
-  ```{warning}
-  The Alaska domain is currently not supported for regionalization base on NHF (NGWPC Hydrofabric) because the hydrofabric
-  is yet to be finalized for the AK domain. Once the hydrofabric is finalized, the input datasets can be updated accordingly to support regionalization in the AK domain.
-  ```
+  - **ak**: `configs_ak`
+s
 
 #### Valid VPUs for each domain
   - CONUS: 21 VPUs (01, 02, 03S, 03N, 03W, 04, 05, 06, 07, 08, 09, 10L, 10U, 11, 12, 13, 14, 15, 16, 17, 18)
@@ -500,7 +497,7 @@ Check the header of the script for usage instructions.
   * ngen (hydrofabric): all domains
   * HLR: CONUS, AK, HI
   * StreamCat: CONUS only
-  * HydroATLAS: CONUS, AK, PRVI (only available for NHF)
+  * HydroATLAS: CONUS, AK, PRVI
 
 #### Snow basin categorization
 

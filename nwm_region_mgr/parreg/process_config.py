@@ -464,7 +464,9 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             # check if all donors are in the hydrofabric
             donors_missing = set(donors0) - set(donors)
             if len(donors_missing) > 0:
-                logger.warning(f"Missing donors in hydrofabric: {donors_missing}")
+                logger.warning(
+                    f"Missing {len(donors_missing)} donors in hydrofabric: {list(donors_missing)}"
+                )
 
             # gather donors and receivers in GeoDataFrame
             gdf_donors = pd.concat([gdf_donors, gdf1])

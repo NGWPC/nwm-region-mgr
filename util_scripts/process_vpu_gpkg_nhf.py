@@ -13,6 +13,7 @@ from pathlib import Path
 
 import fiona
 import geopandas as gpd
+import pandas as pd
 from shapely.ops import transform
 
 
@@ -74,6 +75,11 @@ def reproject_gpkg(
         # Drop Z dimension if present
         gdf["geometry"] = gdf.geometry.apply(drop_z)
 
+        # if any column ending with _id is not integer, convert to integer
+        for col in gdf.columns:
+            if col.endswith("_id") and not pd.api.types.is_integer_dtype(gdf[col]):
+                gdf[col] = gdf[col].astype("Int64")
+
         gdf.to_file(
             output_gpkg,
             layer=layer,
@@ -129,8 +135,8 @@ if __name__ == "__main__":
         #"10L", "10U", "11", "12", "13", "14", "15", "16", "17", "18",
         ## oCONUS VPUs
         "19",  # Alaska
-        "20",  # Hawaii
-        "21"   # Puerto Rico & Virgin Islands
+        #"20",  # Hawaii
+        #"21"   # Puerto Rico & Virgin Islands
     ]
     # fmt: on
 

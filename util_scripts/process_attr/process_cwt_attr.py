@@ -777,9 +777,13 @@ class ProcessAttrDataset(BaseModel):
             df_attrs_weighted = df_attrs.copy()
 
         # make sure div_col column is string type
-        df_attrs_weighted[self.div_col] = df_attrs_weighted[self.div_col].astype(
-            "string"
+        df_attrs_weighted[self.div_col] = (
+            df_attrs_weighted[self.div_col].astype("Int64").astype("string")
         )
+
+        print(df_attrs_weighted[self.div_col].dtype)
+        print(df_attrs_weighted[self.div_col].head())
+        print(df_attrs_weighted[self.div_col].map(type).value_counts())
 
         # save attr data to parquet file
         Path(self.attr_file).parent.mkdir(parents=True, exist_ok=True)
