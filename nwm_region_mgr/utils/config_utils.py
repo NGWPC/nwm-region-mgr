@@ -631,7 +631,6 @@ class BaseOutputConfig(BaseModel):
         ):
             vpu_file = vpu_dict
 
-        logger.info(f"@@@@ vpu_dict: {vpu_dict}, vpu_file: {vpu_file}")
         if self.plots and self.plots.get("histogram", False):
             path1 = self.get_file_path(
                 vpu_file,
