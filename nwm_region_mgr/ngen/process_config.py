@@ -21,8 +21,7 @@ from datetime import datetime
 from importlib.resources import files
 from pathlib import Path
 
-from mswm.build_inputs import RealizationBuilder
-
+# from mswm.build_inputs import RealizationBuilder
 from nwm_region_mgr.ngen.config_schema import TIMESTAMP_FMT, TIMESTAMP_FMT1
 from nwm_region_mgr.utils import BaseConfigProcessor
 
@@ -148,8 +147,9 @@ class NgenSimulationProcessor(BaseConfigProcessor):
 
         # Write the new config file
         config_path = (
-            self.ngen_work_dir.parent
-            / f"mswm.config_{self.config.general.run_name}_{algo}_vpu{vpu}"
+            self.ngen_work_dir
+            / f"{self.config.general.run_name}"
+            / f"mswm_config_{algo}_vpu{vpu}.txt"
         )
         with open(config_path, "w") as f:
             f.write(config_content)
