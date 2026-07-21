@@ -17,6 +17,8 @@ output:
   ngen:
     save: true
     path: '{base_dir}/outputs/ngen/' # root directory for NGEN simulation inputs/outputs (with sub-folders created by MSWM as needed)
-  config_final:
-    save: true
-    path: '{base_dir}/outputs/ngen/{run_name}/config_ngen_final_{domain}_vpu{vpu}.yaml'
+  config_final: # Final configuration file after processing and validation
+    save: True
+    path: '{base_dir}/outputs/ngen/{run_name}'
+    stem: 'config_ngen_final_{domain}_vpu{vpu}'
+    format: yaml
