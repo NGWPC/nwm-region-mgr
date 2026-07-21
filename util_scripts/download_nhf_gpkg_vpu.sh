@@ -5,7 +5,7 @@ set -euo pipefail
 
 id_type="vpu_id"
 version_api="v1"
-version_nhf="1.2.0"
+version_nhf="1.2.2"
 
 domains=("CONUS" "Puerto_Rico" "Hawaii" "Alaska")
 

@@ -140,13 +140,13 @@ def main(
 ) -> None:
     """Execute regionalization or NGEN simulation."""
     # create processor instances to validate configs and file paths before starting any processing
-    config_paths = _resolve_config_files(config_dir, option)
-    if option in {"formreg", "parreg"}:
-        pc = _build_formreg_processor(config_paths)
-    if option == "parreg":
-        rpc = _build_parreg_processor(config_paths)
-    if option == "ngen":
-        pc = _build_ngen_processor(config_paths)
+    if option == "formreg":
+        pc = _build_formreg_processor(_resolve_config_files(config_dir, "formreg"))
+    elif option == "parreg":
+        fpc = _build_formreg_processor(_resolve_config_files(config_dir, "formreg"))
+        pc = _build_parreg_processor(_resolve_config_files(config_dir, "parreg"))
+    elif option == "ngen":
+        pc = _build_ngen_processor(_resolve_config_files(config_dir, "ngen"))
 
     # set up logging
     log_file = getattr(pc.config.general.logging, "file", None)
@@ -177,7 +177,7 @@ def main(
             _run_formreg(pc, vpu)
 
         elif option == "parreg":
-            _run_parreg(pc, rpc, vpu)
+            _run_parreg(fpc, pc, vpu)
 
         elif option == "ngen":
             _run_ngen(pc, vpu)

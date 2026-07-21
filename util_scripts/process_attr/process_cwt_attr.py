@@ -777,11 +777,12 @@ class ProcessAttrDataset(BaseModel):
             df_attrs_weighted = df_attrs.copy()
 
         # make sure div_col column is string type
-        df_attrs_weighted[self.div_col] = df_attrs_weighted[self.div_col].astype(
-            "string"
+        df_attrs_weighted[self.div_col] = (
+            df_attrs_weighted[self.div_col].astype("Int64").astype("string")
         )
 
         # save attr data to parquet file
+        gc.collect()
         Path(self.attr_file).parent.mkdir(parents=True, exist_ok=True)
         df_attrs_weighted.to_parquet(self.attr_file, engine="pyarrow")
         print(f"Saved processed {self.attr_dataset} attributes to {self.attr_file}")

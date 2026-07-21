@@ -13,6 +13,7 @@ from pathlib import Path
 
 import fiona
 import geopandas as gpd
+import pandas as pd
 from shapely.ops import transform
 
 
@@ -73,6 +74,11 @@ def reproject_gpkg(
 
         # Drop Z dimension if present
         gdf["geometry"] = gdf.geometry.apply(drop_z)
+
+        # if any column ending with _id is not integer, convert to integer
+        for col in gdf.columns:
+            if col.endswith("_id") and not pd.api.types.is_integer_dtype(gdf[col]):
+                gdf[col] = gdf[col].astype("Int64")
 
         gdf.to_file(
             output_gpkg,
@@ -136,7 +142,7 @@ if __name__ == "__main__":
 
     for vpu in vpus:
         input_gpkg = Path(
-            "~/data/hydrofabric/gpkg_nhf_1.2.0", f"vpu_{vpu}.gpkg"
+            "~/data/hydrofabric/gpkg_nhf_1.2.2", f"vpu_{vpu}.gpkg"
         ).expanduser()
         target_gpkg = Path(
             "~/repos/nwm-region-mgr/data/inputs/region/hydrofabric/gpkg_vpu",
