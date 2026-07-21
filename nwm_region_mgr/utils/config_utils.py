@@ -427,8 +427,12 @@ class BaseOutputConfig(BaseModel):
                 raise ValueError(msg)
 
             if isinstance(self.stem, dict):
-                # if stem is a dict (for different algorithms), find the stem for current algorithm
-                if algorithm:
+                # if stem is a dict (for different algorithms or vpus), find the stem for current algorithm and/or vpu
+                if vpu and not algorithm:
+                    file_stem = self.stem.get(f"{vpu}")
+                elif vpu and algorithm:
+                    file_stem = self.stem.get(f"{vpu}_{algorithm}")
+                elif algorithm and not vpu:
                     file_stem = self.stem.get(f"{algorithm}")
                 else:
                     file_stem = next(iter(self.stem.values()))
@@ -439,11 +443,6 @@ class BaseOutputConfig(BaseModel):
                 logger.error(msg)
                 raise ValueError(msg)
 
-            if not file_stem:
-                if isinstance(self.stem, dict):
-                    file_stem = next(iter(self.stem.values())).replace(
-                        f"{next(iter(self.stem))}", f"{vpu}"
-                    )
             if not file_stem:
                 msg = f"File stem not found for VPU {vpu}: {self.stem}"
                 logger.error(msg)
@@ -622,9 +621,20 @@ class BaseOutputConfig(BaseModel):
             for c1 in data.columns
         ]
 
+        vpu_dict = plot_dict.get("vpu", None)
+        vpu_file = None
+        if (
+            self.stem
+            and isinstance(self.stem, dict)
+            and vpu_dict
+            and vpu_dict in self.stem
+        ):
+            vpu_file = vpu_dict
+
+        logger.info(f"@@@@ vpu_dict: {vpu_dict}, vpu_file: {vpu_file}")
         if self.plots and self.plots.get("histogram", False):
             path1 = self.get_file_path(
-                plot_dict.get("vpu"),
+                vpu_file,
                 algorithm=plot_dict.get("algorithm"),
                 plot_type="hist",
             )
@@ -641,7 +651,7 @@ class BaseOutputConfig(BaseModel):
 
         if self.plots and self.plots.get("spatial_map", False):
             path2 = self.get_file_path(
-                plot_dict.get("vpu"),
+                vpu_file,
                 algorithm=plot_dict.get("algorithm"),
                 plot_type="map",
             )
