@@ -13,7 +13,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 
-hf_version = "nhf_1.2.0"  #  "nhf" or "v2.2"
+hf_version = "nhf_1.2.2"  #  "nhf" or "v2.2"
 
 id_col = "divide_id" if hf_version == "v2.2" else "div_id"
 area_col = "areasqkm" if hf_version == "v2.2" else "area_sqkm"
@@ -293,4 +293,4 @@ def process_domain(domain: list | str):
 
 if __name__ == "__main__":
     # process_domain("all")
-    process_domain("ak")
+    process_domain("conus")

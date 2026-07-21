@@ -1,6 +1,6 @@
-hf_version: nhf_1.2.0  # options: nhf, v2.2
-domain: ak  # options: conus, ak, hi, prvi
-attr_dataset: hlr # options: hlr, ngen, streamcat, hydroatlas
+hf_version: nhf_1.2.2  # options: nhf, v2.2
+domain: conus  # options: conus, ak, hi, prvi
+attr_dataset: hydroatlas # options: hlr, ngen, streamcat, hydroatlas
 attr_list: 
 overlap_threshold_max: 0.99
 overlap_threshold_min: 0.2

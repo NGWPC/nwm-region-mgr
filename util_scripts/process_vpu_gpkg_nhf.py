@@ -135,14 +135,14 @@ if __name__ == "__main__":
         #"10L", "10U", "11", "12", "13", "14", "15", "16", "17", "18",
         ## oCONUS VPUs
         "19",  # Alaska
-        #"20",  # Hawaii
-        #"21"   # Puerto Rico & Virgin Islands
+        "20",  # Hawaii
+        "21"   # Puerto Rico & Virgin Islands
     ]
     # fmt: on
 
     for vpu in vpus:
         input_gpkg = Path(
-            "~/data/hydrofabric/gpkg_nhf_1.2.0", f"vpu_{vpu}.gpkg"
+            "~/data/hydrofabric/gpkg_nhf_1.2.2", f"vpu_{vpu}.gpkg"
         ).expanduser()
         target_gpkg = Path(
             "~/repos/nwm-region-mgr/data/inputs/region/hydrofabric/gpkg_vpu",
