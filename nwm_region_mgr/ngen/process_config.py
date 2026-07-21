@@ -148,8 +148,9 @@ class NgenSimulationProcessor(BaseConfigProcessor):
 
         # Write the new config file
         config_path = (
-            self.ngen_work_dir.parent
-            / f"mswm.config_{self.config.general.run_name}_{algo}_vpu{vpu}"
+            self.ngen_work_dir
+            / f"{self.config.general.run_name}"
+            / f"mswm_config_{algo}_vpu{vpu}.txt"
         )
         with open(config_path, "w") as f:
             f.write(config_content)
