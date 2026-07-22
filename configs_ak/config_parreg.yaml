@@ -62,8 +62,8 @@ output:
       stem_suffix: '_mswm'  # suffix for the pairs file to be used by MSWM
       format: 'parquet'
       plots:
-        spatial_map: False
-        histogram: False
+        spatial_map: True
+        histogram: True
         columns_to_plot: ['distSpatial', 'distAttr']  # columns to plot    
     params:
       save: True
@@ -71,7 +71,7 @@ output:
       stem: 'formulation_params_{algorithm_list}_{domain}_vpu{vpu}'
       format: 'csv'
       plots:
-        spatial_map: False
+        spatial_map: True
         columns_to_plot: ['MP', 'MFSNO', 'uztwm', 'uzfwm', 'pxtemp', 'plwhc']  
     attr_data_final:
       save: True
@@ -79,8 +79,8 @@ output:
       stem: 'attr_{domain}_vpu{vpu}'
       format: 'parquet'
       plots:
-        spatial_map: False
-        histogram: False
+        spatial_map: True
+        histogram: True
         columns_to_plot: ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT','hlr_PMPE', 'hlr_SAND','hlr_TAVE']  # attributes to plot
     config_final:
       save: True
