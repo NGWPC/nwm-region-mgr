@@ -78,8 +78,8 @@ output:
     stem_suffix: '_pars'  # suffix for the formulation file with parameters
     format: 'parquet' # file format for the formulation output. Options are: parquet, csv. Default is parquet.
     plots:
-      spatial_map: False  # whether to create spatial map of selected formulations & scores
-      histogram: False  # whether to create histogram of scores
+      spatial_map: True  # whether to create spatial map of selected formulations & scores
+      histogram: True  # whether to create histogram of scores
 
   config_final: # Final configuration file after processing and validation
     save: True
@@ -94,5 +94,5 @@ output:
     stem_suffix: '_all_gages'  # suffix for the summary score file containing all gages in the domain
     format: 'parquet'
     plots:
-      histogram: False
-      spatial_map: False
+      histogram: True
+      spatial_map: True
