@@ -686,7 +686,6 @@ class BaseConfigProcessor:
         self.config_schema = config_schema
         self.config = self.load_and_process_config
         self.sample_size = sample_size
-        self._expand_user_file_paths(self.config)
 
         self.validate_files()
 
@@ -1034,6 +1033,10 @@ class BaseConfigProcessor:
         """
         # Load and validate the configuration
         config = self._load_and_validate_config(self.config_file, self.config_schema)
+
+        # Expand user home directory and environment variables in file paths. This needs to be done before
+        # substituting placeholders to work properly for paths that contain both environment variables and placeholders.
+        config = self._expand_user_file_paths(config)
 
         # Substitute placeholders in the configuration
         config = self._substitute_placeholders(config)
