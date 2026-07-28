@@ -6,7 +6,7 @@ The regionalization workflow includes the following steps:
  - **STEP 0**: run calibration and collect formulation prameters and calibration/validation statistics
  - **STEP 1**: formulation & parameter regionalization (via nwm-region-mgr)
  - **STEP 2**: regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
- - **STEP 3**: evaluation of regionalized simulations (via nwm-verf and nwm-eval-mgr)
+ - **STEP 3**: evaluation of regionalized simulations (via nwm-eval-mgr)
 
 ![Regionalization Workflow](_images/regionalization_workflow.jpeg)
 
@@ -225,8 +225,8 @@ Update the `configs/config_eval.yaml` file as follows:
  - Set **file_paths.output_dir** to point to the directory where evaluation outputs should be saved. Here we add the **run_name** from regionalization `test1` (e.g., `'{base_dir}/outputs/eval/test1/{location_set_name}'`), to ensure evaluation outputs are also organized by regionalization runs.
  - Update fields in metics and plotting sections as desired. Here we will compute and plot a set of default evaluation metrics: KGE (Kling-Gupta Efficiency), NSE (Nash-Sutcliffe Efficiency), NNSE (Normalized NSE), and Correlation (CORR). Note the **lead_times** fields are not applicable here since we are evaluating simulations.
 
-Note: if you would like to explore other configuration options for evaluation, refer to the [nwm.verf documentation](
-https://confluence.nextgenwaterprediction.com/spaces/NGWPC/pages/54132769/Forecast+Verification+nwm-verf+Configuration)
+Note: if you would like to explore other configuration options for evaluation, refer to [nwm-eval-mgr documentation](
+https://ngwpc.github.io/nwm-eval-mgr/index.html) for details.
 
 Run the evaluation step as in Step 3 above.
 ```bash
@@ -242,7 +242,7 @@ After completion, evaluation results will be saved in the folder `data/outputs/e
  - `test1_gower/ngen_simulation/`: streamflow time series data for all locations using gower method
  - `test1_kmeans/ngen_simulation/`: streamflow time series data for all locations using kmeans method
  - `usgs/`: observed streamflow time series data for all locations
- - `nwm_verf_config_expanded.yaml`: the final (expanded) configuration file used in this run.
+ - `nwm_eval_config_expanded.yaml`: the final (expanded) configuration file used in this run.
 
 Check the metrics and plots to compare/analyze the performance of the two algorithms in parameter regionalization.
 
@@ -661,28 +661,26 @@ python -m nwm_region_mgr configs parreg # to run parameter regionalization (and 
 
 ### STEP 2: Run NGEN simulation with regionalized parameters
 
-To void complications from building ngen and its submodules locally, we recommend you always run NGEN simulation 
+To avoid complications from building ngen and its submodules locally, we recommend you always run NGEN simulation
 with regionalized parameters and formulations from a Docker container. Follow instructions from the **Docker Run Time Environment (RTE)** section above. 
 
-### STEP 3: Evaluate NGEN simulation with nwm.verf
+### STEP 3: Evaluate NGEN simulation with nwm-eval-mgr
 
-#### 1) Donwload and install [nwm.verf](https://github.com/NGWPC/nwm-verf)
-It is recommentded you install nwm.verf in its own venv. Note [nwm.eval](https://github.com/NGWPC/nwm-eval-mgr) needs to installed as a dependency
+#### 1) Download and install [nwm-eval-mgr](https://github.com/NGWPC/nwm-eval-mgr)
+It is recommended you install nwm-eval-mgr in its own venv. 
 
 #### 2) Set up configurations for evaluation
-Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/sample_files/configs/config_eval.yaml)
-
-Check out what metrics are currently supported [here](https://confluence.nextgenwaterprediction.com/display/NGWPC/Forecast+Verification+%28ngen-verf%29%3A+Configuration)
+Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/configs/config_eval.yaml)
 
 Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/data/inputs/eval** 
 
-#### 3) Activate venv for nwm.verf
+#### 3) Activate venv for nwm-eval-mgr
 ```bash
-source ~/repos/nwm-verf/venv/bin/activate
+source ~/repos/nwm-eval-mgr/venv/bin/activate
 ```
 #### 4) Run evaluation
 ```bash
-python -m nwm.verf config_eval.yaml
+python -m nwm_eval config_eval.yaml
 ```
 #### 5) Check outputs
 Outputs from evaluation can be found in *[output_dir]* as specified in **config_eval.yaml**

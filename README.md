@@ -162,36 +162,27 @@ python -m nwm_region_mgr configs region # to run parameter regionalization (and 
 To void complications from building ngen and its submodules locally, we recommend you always run NGEN simulation 
 with regionalized parameters and formulations from a Docker container. Follow instructions from the **Docker Run Time Environment (RTE)** section above. 
 
-### STEP 3: Evaluate NGEN simulation with nwm.verf
+### STEP 3: Evaluate NGEN simulation with nwm-eval-mgr
 
-#### 1) Donwload and install [nwm.verf](https://github.com/NGWPC/nwm-verf)
-It is recommentded you install nwm.verf in its own venv. Note [nwm.eval](https://github.com/NGWPC/nwm-eval-mgr) needs to installed as a dependency
+#### 1) Download and install [nwm-eval-mgr](https://github.com/NGWPC/nwm-eval-mgr)
+It is recommended you install nwm-eval-mgr in its own venv. 
 
 #### 2) Set up configurations for evaluation
-Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/sample_files/configs/config_eval.yaml)
-
-Check out what metrics are currently supported [here](https://confluence.nextgenwaterprediction.com/display/NGWPC/Forecast+Verification+%28ngen-verf%29%3A+Configuration)
+Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/configs/config_eval.yaml
 
 Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/data/inputs/eval** 
 
-#### 3) Activate venv for nwm.verf
+#### 3) Activate venv for nwm-eval-mgr
 ```bash
-source ~/repos/nwm-verf/venv/bin/activate
+source ~/repos/nwm-eval-mgr/venv/bin/activate
 ```
 #### 4) Run evaluation
 ```bash
-python -m nwm.verf config_eval.yaml
+python -m nwm_eval config_eval.yaml
 ```
 #### 5) Check outputs
 Outputs from evaluation can be found in *[output_dir]* as specified in **config_eval.yaml**
 
-
-### Test regionalization for other VPUs or different formulations
-
-- Create pseudo forcing data by recycling existing forcing files, using this [script](https://github.com/NGWPC/nwm-region-mgr/blob/yliu_NGPWC-6984/util_scripts/run_create_pseudo_forcing_csv.sh)
-- Create new pseduo calibration/validation stats for different formulations, using this [script](https://github.com/NGWPC/nwm-region-mgr/blob/yliu_NGPWC-6984/util_scripts/run_create_pseudo_calval_stats.sh)
-- Create geopackages for a new VPU using this [script](https://github.com/NGWPC/nwm-region-mgr/blob/yliu_NGPWC-6984/util_scripts/subset_conus_gpkg_by_vpu.py)
-- Create gage list files and NGEN divide-gage crosswalk file for a new domain using this [script](https://github.com/NGWPC/nwm-verf/blob/yliu_NGWPC-6986/utils/create_ngen_crosswalk_regionalization.py)
 
 ## Testing
 
