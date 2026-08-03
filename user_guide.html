@@ -1,0 +1,1286 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>User Guide &#8212; nwm_region_mgr  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=d1833e3e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="_static/jquery.js?v=5d32c60e"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="_static/form2yaml.js?v=4b298b11"></script>
+    <script src="_static/components/form-field.js?v=f85f97bb"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Frequently Asked Questions" href="faq.html" />
+    <link rel="prev" title="NWM Regionalization" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo" href="index.html">
+    <span class="logo" style="font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: bold; font-size: 24px; color: var(--pst-color-secondary);">
+        nwm_region_mgr
+      </span>
+  </a></div>
+    
+      <div class="navbar-item">0.1.0</div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="config_builder/index.html">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tech_reference/index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="config_builder/index.html">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="tech_reference/index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">User Guide</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading">#</a></h1>
+<section id="overview-of-regionalization-workflow">
+<h2>Overview of regionalization workflow<a class="headerlink" href="#overview-of-regionalization-workflow" title="Link to this heading">#</a></h2>
+<p>The regionalization workflow includes the following steps:</p>
+<ul class="simple">
+<li><p><strong>STEP 0</strong>: run calibration and collect formulation prameters and calibration/validation statistics</p></li>
+<li><p><strong>STEP 1</strong>: formulation &amp; parameter regionalization (via nwm-region-mgr)</p></li>
+<li><p><strong>STEP 2</strong>: regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution</p></li>
+<li><p><strong>STEP 3</strong>: evaluation of regionalized simulations (via nwm-eval-mgr)</p></li>
+</ul>
+<p><img alt="Regionalization Workflow" src="_images/regionalization_workflow.jpeg" /></p>
+</section>
+<section id="run-regionalization-with-nwm-rte-in-int-ea-uat-clusters">
+<h2>Run regionalization with NWM-RTE in INT/EA/UAT Clusters<a class="headerlink" href="#run-regionalization-with-nwm-rte-in-int-ea-uat-clusters" title="Link to this heading">#</a></h2>
+<p>In the INT/EA/UAT clusters, all software dependencies for regionalization are installed and managed through
+NWM-RTE (Run Time Environment, <code class="docutils literal notranslate"><span class="pre">/ngencerf-app/nwm-rte</span></code>). Regionalization workflows are executed via docker containers using an
+<a class="reference external" href="https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte">nwm-rte image</a>.</p>
+<p>Note prior to running the regionalization workflow, make sure your user account has permissions to access the docker socket and pull images from the registry. Refer to the <a class="reference internal" href="#docker-permissions"><span class="xref myst">Docker permissions</span></a> subsection below for details.</p>
+<section id="test-the-sample-regionalization-workflow">
+<h3>Test the sample regionalization workflow<a class="headerlink" href="#test-the-sample-regionalization-workflow" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Navigate to your preferred working directory (e.g., <code class="docutils literal notranslate"><span class="pre">/ngen-oe/$USER/run_region</span></code>, <code class="docutils literal notranslate"><span class="pre">/ngen-dev/$USER/run_region</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">~/run_region</span></code>).</p></li>
+<li><p>Copy sample config files from <code class="docutils literal notranslate"><span class="pre">/ngencerf-app/nwm-region-mgr/configs/</span></code> to your working directory., e.g.,</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/ngen-oe/<span class="nv">$USER</span>/run_region<span class="w">  </span><span class="c1"># or your preferred working directory</span>
+cp<span class="w"> </span>-r<span class="w"> </span>/ngencerf-app/nwm-region-mgr/configs<span class="w"> </span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Run the three regionalization steps below sequentially using one of the two scripts in <strong>nwm-rte</strong>.</p>
+<ul>
+<li><p>(RECOMMENDED) <code class="docutils literal notranslate"><span class="pre">sbatch_run_region.sh</span></code>: submitting jobs to compute nodes in INT/EA/UAT via SBATCH. See RTE
+documentation <a class="reference external" href="https://ngwpc.github.io/nwm-rte/reference/shell/#sbatch_run_region.sh">here</a> for details on usage and available options.</p></li>
+<li><p>(TEST ONLY) <code class="docutils literal notranslate"><span class="pre">run_region.sh</span></code>: running jobs directly in the controller node or local AWS workspace for small regions or testing purposes. See RTE documentation <a class="reference external" href="https://ngwpc.github.io/nwm-rte/reference/shell/#run_region.sh">here</a> for details on usage and available options.</p></li>
+</ul>
+</li>
+</ul>
+<section id="step-1-run-regionalization">
+<h4>Step 1. Run regionalization<a class="headerlink" href="#step-1-run-regionalization" title="Link to this heading">#</a></h4>
+<p>a) Run formulation regionalization alone (no parreg):
+Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite. Prior to running, configure the settings in <code class="docutils literal notranslate"><span class="pre">configs/config_general.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">configs/config_formreg.yaml</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># submit to compute nodes on INT/EA/UAT</span>
+/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>configs<span class="w"> </span>formreg
+
+<span class="c1"># or run directly in controller node or local AWS workspace</span>
+<span class="nb">time</span><span class="w"> </span>/ngencerf-app/nwm-rte/run_region.sh<span class="w"> </span>-c<span class="w"> </span>configs<span class="w"> </span>--formreg
+</pre></div>
+</div>
+<p>b) Run parameter regionalization (formreg is also run as a prerequisite):
+Prior to running, configure the settings in <code class="docutils literal notranslate"><span class="pre">configs/config_general.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">configs/config_formreg.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">configs/config_parreg.yaml</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># submit to compute nodes on INT/EA/UAT</span>
+/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>configs<span class="w"> </span>parreg
+
+<span class="c1"># or run directly in controller node or local AWS workspace</span>
+<span class="nb">time</span><span class="w"> </span>/ngencerf-app/nwm-rte/run_region.sh<span class="w"> </span>-c<span class="w"> </span>configs<span class="w"> </span>--parreg
+</pre></div>
+</div>
+</section>
+<section id="step-2-run-ngen">
+<h4>Step 2. Run NGEN<a class="headerlink" href="#step-2-run-ngen" title="Link to this heading">#</a></h4>
+<p>Run NGEN simulations. Prior to running, configure the settings in <code class="docutils literal notranslate"><span class="pre">configs/config_general.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">configs/config_ngen.yaml</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># submit to compute nodes on INT/EA/UAT</span>
+/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>configs<span class="w"> </span>ngen
+
+<span class="c1"># or run directly in controller node or local AWS workspace</span>
+<span class="nb">time</span><span class="w"> </span>/ngencerf-app/nwm-rte/run_region.sh<span class="w"> </span>-c<span class="w"> </span>configs<span class="w"> </span>--ngen
+</pre></div>
+</div>
+</section>
+<section id="step-3-run-evaluation">
+<h4>Step 3. Run Evaluation<a class="headerlink" href="#step-3-run-evaluation" title="Link to this heading">#</a></h4>
+<p>Run an evaluation. Prior to running, configure the settings in <code class="docutils literal notranslate"><span class="pre">configs/config_eval.yaml</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># submit to compute nodes on INT/EA/UAT</span>
+/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>configs<span class="w"> </span><span class="nb">eval</span>
+
+<span class="c1"># or run directly in controller node or local AWS workspace</span>
+<span class="nb">time</span><span class="w"> </span>/ngencerf-app/nwm-rte/run_region.sh<span class="w"> </span>-c<span class="w"> </span>configs<span class="w"> </span>--eval
+</pre></div>
+</div>
+</section>
+<section id="run-all-steps-in-one-command">
+<h4>Run all steps in one command<a class="headerlink" href="#run-all-steps-in-one-command" title="Link to this heading">#</a></h4>
+<p>Users may prefer running the above steps sequencially so they can inspect the outputs from each step before
+proceeding to the next step. However, it is possible to run all three steps in one command as shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># submit to compute nodes on INT/EA/UAT</span>
+/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>configs<span class="w"> </span>parreg<span class="w"> </span>ngen<span class="w"> </span><span class="nb">eval</span>
+
+<span class="c1"># or run directly in controller node or local AWS workspace</span>
+<span class="nb">time</span><span class="w"> </span>/ngencerf-app/nwm-rte/run_region.sh<span class="w"> </span>-c<span class="w"> </span>configs<span class="w"> </span>--parreg<span class="w"> </span>--ngen<span class="w"> </span>--eval
+</pre></div>
+</div>
+<p>Note: When using <code class="docutils literal notranslate"><span class="pre">run_region.sh</span></code>, the short flags <code class="docutils literal notranslate"><span class="pre">-f</span></code>, <code class="docutils literal notranslate"><span class="pre">-p</span></code>, <code class="docutils literal notranslate"><span class="pre">-n</span></code>, and <code class="docutils literal notranslate"><span class="pre">-e</span></code> can also be used in place of <code class="docutils literal notranslate"><span class="pre">--formreg</span></code>,
+<code class="docutils literal notranslate"><span class="pre">--parreg</span></code>, <code class="docutils literal notranslate"><span class="pre">--ngen</span></code>, and <code class="docutils literal notranslate"><span class="pre">--eval</span></code>, respectively. The short flags are not supported when using <code class="docutils literal notranslate"><span class="pre">sbatch_run_region.sh</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># run all steps with short flags (only for run_region.sh)</span>
+<span class="nb">time</span><span class="w"> </span>/ngencerf-app/nwm-rte/run_region.sh<span class="w"> </span>-c<span class="w"> </span>configs<span class="w"> </span>-f<span class="w"> </span>-p<span class="w"> </span>-n<span class="w"> </span>-e
+</pre></div>
+</div>
+</section>
+<section id="run-regionalization-with-a-specific-rte-image-tag">
+<h4>Run regionalization with a specific RTE image tag<a class="headerlink" href="#run-regionalization-with-a-specific-rte-image-tag" title="Link to this heading">#</a></h4>
+<p>By default, the nwm-rte image with tag <code class="docutils literal notranslate"><span class="pre">latest</span></code> will be used to run the regionalization workflow. To use a specific
+image tag (e.g., for testing with a new image), set the variable <code class="docutils literal notranslate"><span class="pre">image_tag</span></code> in the script as shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># run all steps with sample configle and a specific image tag</span>
+/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>/ngencerf-app/nwm-region-mgr/configs<span class="w"> </span>parreg<span class="w"> </span>ngen<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>--image-tag<span class="w"> </span>pr-22-build
+</pre></div>
+</div>
+</section>
+</section>
+<section id="customize-and-run-your-own-regionalization-workflow">
+<h3>Customize and run your own regionalization workflow<a class="headerlink" href="#customize-and-run-your-own-regionalization-workflow" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>Prior to running your own regionalization workflow, it is hightly recommded to review documentation on <a class="reference internal" href="tech_reference/index.html"><span class="std std-doc">Technical Reference</span></a> and <a class="reference internal" href="config_builder/index.html"><span class="std std-doc">Configuration</span></a>, as well as the <a class="reference internal" href="#notes-and-best-practices"><span class="xref myst">Notes and best practices</span></a> below, to understand the available configuration options and how to customize the workflow for your specific application.</p></li>
+<li><p>Prepare input data files. Refer to the <a class="reference internal" href="tech_reference/input_data.html"><span class="std std-doc">Input Data</span></a> subsection for details.</p>
+<ul>
+<li><p>Calibration/validation statistics can be collected from earlier ngenCERF calibration runs using the commands below, which will generate a csv file (in your current run directory) containing the statistics for all specified calibration job IDs, along with another csv file listing the corresponding calibrated parameter sets. These files can then be used in the regionalization configuration files.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">  </span>ngencerf<span class="w"> </span>regionalization<span class="w"> </span><span class="m">609</span><span class="w"> </span><span class="m">610</span><span class="w"> </span><span class="c1"># where 609 and 610 are example calibration job IDs</span>
+
+<span class="w">  </span><span class="c1"># or specify a list of calibration job IDs in a text file</span>
+<span class="w">  </span>ngencerf<span class="w"> </span>regionalization<span class="w"> </span>--id-file<span class="w"> </span>job_ids.txt
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p>Adjust configuration files in <code class="docutils literal notranslate"><span class="pre">configs/</span></code> to set up your desired regionalization experiment. Refer to the
+<a class="reference internal" href="config_builder/index.html"><span class="std std-doc">Configuration</span></a> tab for details on each config file and available options.</p></li>
+<li><p>Follow Steps 1-3 above to execute the regionalization workflow.</p></li>
+</ul>
+</section>
+<section id="example-application-comparing-different-regionalization-methods">
+<h3>Example application: comparing different regionalization methods<a class="headerlink" href="#example-application-comparing-different-regionalization-methods" title="Link to this heading">#</a></h3>
+<p>In this section, we will walk through an example application where we compare gower vs. kmeans clustering for
+parameter regionalization in VPU 09 (see CONUS VPU map in <a class="reference internal" href="#parameter-regionalization"><span class="xref myst">Paratermeter regionalization</span></a>),
+using selected ngen and StreamCat attributes.</p>
+<section id="prepare-configuration-files">
+<h4>0. Prepare configuration files<a class="headerlink" href="#prepare-configuration-files" title="Link to this heading">#</a></h4>
+<p>We will start from the sample workflow above. First copy the configuration files to a new folder to avoid overwriting
+the original files, e.g.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>-r<span class="w"> </span>configs/<span class="w"> </span>test1_configs/
+</pre></div>
+</div>
+</section>
+<section id="update-test1-configs-config-general-yaml">
+<h4>0.1 Update <code class="docutils literal notranslate"><span class="pre">test1_configs/config_general.yaml</span></code><a class="headerlink" href="#update-test1-configs-config-general-yaml" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Set <strong>general.vpu</strong> to ‘09’</p></li>
+<li><p>Set <strong>general.run_name</strong> to a new name: <em>test1</em>. This will be used to name the output folder for this experiment
+(e.g., <code class="docutils literal notranslate"><span class="pre">outputs/region/test1/</span></code>)</p></li>
+</ul>
+</section>
+<section id="update-test1-configs-config-parreg-yaml">
+<h4>0.2 Update <code class="docutils literal notranslate"><span class="pre">test1_configs/config_parreg.yaml</span></code><a class="headerlink" href="#update-test1-configs-config-parreg-yaml" title="Link to this heading">#</a></h4>
+<ul>
+<li><p>Set <strong>general.attr_dataset_list</strong> to <em>[‘ngen’,’streamcat’]</em> as the attribute datasets for computing catchment similarity</p></li>
+<li><p>Set <strong>general.algorithm_list</strong> to <em>[‘gower’, ‘kmeans’]</em>. This will run parameter regionalization using both algorithms sequentially.</p></li>
+<li><p>Set <strong>donor.buffer_km</strong> to 100 (instead of 200) to use a smaller donor search neighbourhood (around the VPU) for this experiment</p></li>
+<li><p>Select specific attributes from each dataset using the attribution selection file</p>
+<ul class="simple">
+<li><p>copy sample attribute selection files from <code class="docutils literal notranslate"><span class="pre">/ngencerf-app/nwm-region-mgr/data/inputs/region/attr_config/</span></code> to working directory</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>cp<span class="w"> </span>-r<span class="w"> </span>/ngencerf-app/nwm-region-mgr/data/inputs/region/attr_config<span class="w"> </span>.
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>For <strong>ngen</strong>: use the file <code class="docutils literal notranslate"><span class="pre">attr_selection_ngen.csv</span></code>. Set the <strong>select</strong> column to 1 for desired attributes and to 0 for others. Here we select all available ngen attributes except for centroid_x, centroid_y, impervious, ISLTPY, and IVGTYP. Then upate the field <strong>attr_datasets.ngen.attr_select_file</strong> to reflect the new location of this file (e.g., <code class="docutils literal notranslate"><span class="pre">{base_dir}/attr_config/attr_selection_ngen.csv</span></code>).</p></li>
+<li><p>For <strong>streamcat</strong>: use the file <code class="docutils literal notranslate"><span class="pre">attr_selection_streamcat.csv</span></code>. Set the <strong>select</strong> column to 1 for desired attributes and to 0 for others. Here we select the following attributes: BFI, DamDens, Perm, RckDep, WtDep, PctCarbResid, PctEolCrs, PctWater, Precip, Tmax, Tmean, Tmin, RdDens, Runoff, Clay, Sand, Precip_Minus_EVT. Then update the field <strong>attr_datasets.streamcat.attr_select_file</strong> to reflect the new location of this file (e.g., <code class="docutils literal notranslate"><span class="pre">{base_dir}/attr_config/attr_selection_streamcat.csv</span></code>).</p></li>
+<li><p>Alternatively, we can also specify selected attributes directly in the config file by editing the fields <strong>attr_datasets.ngen.attr_list</strong> and <strong>attr_datasets.streamcat.attr_list</strong>, respectively, for ngen and StreamCat.</p></li>
+</ul>
+</li>
+<li><p>Set <strong>donor.metric_eval_period.value</strong> to ‘valid’ to use validation period statistics for donor selection</p></li>
+<li><p>Set <strong>snow_cover.threshold</strong> to 10 to define catchment snowiness category based on 10% (mean annual) snowcover</p></li>
+<li><p>Edit <strong>output.params.plots.columns_to_plot</strong> to include a couple of CFE parameters to visualize spatial patterns (e.g., ‘b’ and ‘slope’)</p></li>
+<li><p>Edit <strong>output.attr_data_final.plots.columns_to_plot</strong> to include some selected attributes to visualize spatial patterns. Specifically,</p>
+<ul class="simple">
+<li><p>remove the HLR attributes, since HLR is not chosen for this experiment</p></li>
+<li><p>change <em>streamcat_Elev</em> to <em>streamcat_Perm</em>, since <em>Elev</em> is not selected in <strong>attr_datasets.streamcat.attr_list</strong></p></li>
+<li><p>add a few ngen attributes: <em>ngen_slope</em>, <em>ngen_aspect</em>, <em>ngen_elevation</em>
+Note here the attribute names should be prefixed by their dataset names (e.g., ‘ngen_’ or ‘streamcat_’).</p></li>
+</ul>
+</li>
+<li><p>Set <strong>algorithm.algo_general.max_spa_dist</strong> to 1000 to limit the maximum spatial distance for donor selection to 1000 km</p></li>
+<li><p>Set <strong>algorithm.gower.max_attr_dist</strong> to 0.3 to allow a larger maximum attribute distance for donor selection when using gower method. Attribute distances ranges from 0 to 1, with smaller values indicating higher similarity.</p></li>
+<li><p>Set <strong>algorithm.kmeans.n_init</strong> to 5 to increase the number of random initializations for more robust clustering results (with slightly increased computational cost).</p></li>
+</ul>
+</section>
+<section id="run-regionalization">
+<h4>1. Run regionalization<a class="headerlink" href="#run-regionalization" title="Link to this heading">#</a></h4>
+<p>Run the regionalization step as in Step 1 above, using the updated configuration files in <code class="docutils literal notranslate"><span class="pre">test1_configs/</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>test1_configs<span class="w"> </span>parreg
+</pre></div>
+</div>
+<p>Execution time will take 10-20 minutes depending on available computational resources. While running,
+intermediate log messages will be printed to the terminal, while also being written to the log file
+<code class="docutils literal notranslate"><span class="pre">outputs/region/test1.log</span></code>, as specified in config_general.yaml.</p>
+<p>After completion, check the output folder <code class="docutils literal notranslate"><span class="pre">outputs/region/test1/</span></code>, which contains sub-folders for</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_data_final/</span></code>: files and plots for catchment attributes used in regionalization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">formulations/</span></code>: regionalized formulation files and diagnostic plots</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">params/</span></code>: regionalized formulation and parameter files and plots for each algorithm, with file names indicating the algorithm used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pairs/</span></code>: donor-receiver pair files for each algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spatial_distance/</span></code>: matrices of spatial distances between receiver (row) and donor (column) catchments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">summary_score/</span></code>: summary score for all donor candidates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config_formreg_final.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">config_parreg_final.yaml</span></code>: the final (expanded) configuration files used in this run.</p></li>
+</ul>
+<p>See the <strong>Output Directory Structure</strong> subsection in the <a class="reference internal" href="tech_reference/index.html#output-directory-structure"><span class="std std-ref">Technical Reference</span></a> tab for details on the output directory structure.</p>
+<p>See the <a class="reference internal" href="tech_reference/output_data.html"><span class="std std-doc">Output Tables</span></a> and <a class="reference internal" href="tech_reference/output_plot.html"><span class="std std-doc">Output Plots</span></a> subsections in the <a class="reference internal" href="tech_reference/index.html"><span class="std std-doc">Technical Reference</span></a> tab for details on output files and plots.</p>
+</section>
+<section id="run-ngen-simulations">
+<h4>2. Run NGEN simulations<a class="headerlink" href="#run-ngen-simulations" title="Link to this heading">#</a></h4>
+<p>In this experiment, we will run NGEN simulations using the parameter sets derived from both gower and kmeans methods, respectively.</p>
+<p>First, update the <code class="docutils literal notranslate"><span class="pre">test1_configs/config_ngen.yaml</span></code> file as follows:</p>
+<ul class="simple">
+<li><p>Set <strong>algorithm_list</strong> to <code class="docutils literal notranslate"><span class="pre">['gower']</span></code> for the first run</p></li>
+<li><p>Set <strong>start_time</strong> and <strong>end_time</strong> to define the simulation period (e.g., ‘2020-10-01T00:00:00’ to ‘2020-10-03T00:00:00’). Here for demonstration purposes we use a 2-day period in October 2020.</p></li>
+<li><p>The other fields can remain unchanged.</p></li>
+</ul>
+<p>Run the NGEN simulation step as in Step 2 above.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>test1_configs<span class="w"> </span>ngen
+</pre></div>
+</div>
+<p>After completion, the simulation outputs will be saved in the folder
+<code class="docutils literal notranslate"><span class="pre">outputs/ngen/regionalization/test1_gower/vpu09/Output/</span></code>, where the streamflow outputs can be found in the file <code class="docutils literal notranslate"><span class="pre">troute_output_202010010000.nc</span></code>. Note that the sub-folder name <code class="docutils literal notranslate"><span class="pre">test1_gower</span></code> includes the run_name (here <em>test1</em>) and the algorithm used (here <em>gower</em>).</p>
+<p>Next, update the <code class="docutils literal notranslate"><span class="pre">test1_configs/config_ngen.yaml</span></code> file again to set <strong>algorithm_list</strong> to <code class="docutils literal notranslate"><span class="pre">['kmeans']</span></code> for the second run, while keeping other fields unchanged. Run the NGEN simulation step again.</p>
+<p>After completion, the simulation outputs will be saved in the folder
+<code class="docutils literal notranslate"><span class="pre">outputs/ngen/regionalization/test1_kmeans/vpu09/Output/</span></code>, where the streamflow outputs can be found in the file <code class="docutils literal notranslate"><span class="pre">troute_output_202010010000.nc</span></code>.</p>
+<p>Depending on available computational resources, each NGEN simulation may take up to an hour or more to complete.</p>
+<p>Alternatively, you can also run NGEN simulation for both gower and kmeans methods in a single run by setting <strong>algorithm_list</strong> to <code class="docutils literal notranslate"><span class="pre">['gower',</span> <span class="pre">'kmeans']</span></code>.</p>
+</section>
+<section id="run-evaluation">
+<h4>3. Run evaluation<a class="headerlink" href="#run-evaluation" title="Link to this heading">#</a></h4>
+<p>Finally, we will evaluate the two NGEN simulations against observed streamflow data.</p>
+<p>Update the <code class="docutils literal notranslate"><span class="pre">configs/config_eval.yaml</span></code> file as follows:</p>
+<ul>
+<li><p>Set <strong>general.location_set_name</strong> to <em>vpu_09</em></p></li>
+<li><p>Set <strong>general.dataset_name</strong> to <em>[test1_kmeans, test1_gower]</em>. This defines the names of the two datasets to be evaluated and intercompared, corresponding to the two algorithms used in parameter regionalization.</p></li>
+<li><p>Set <strong>general.nwm_version</strong> to <em>[ngen, ngen]</em>. Both simulations use the ngen configuration.</p></li>
+<li><p>Set <strong>general.fcst_start_date</strong> and <strong>general.fcst_end_date</strong> to define the simulation period (e.g., <code class="docutils literal notranslate"><span class="pre">'2020-10-01T00:00:00'</span></code> to <code class="docutils literal notranslate"><span class="pre">'2020-10-03T00:00:00'</span></code>), consistent with the simulation period used above. Both fields should be lists with the same length as <strong>dataset_name</strong>, e.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>forecast_start_date:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;2020-10-01 00:00:00&#39;</span>,<span class="w"> </span><span class="s1">&#39;2020-10-01 00:00:00&#39;</span><span class="o">]</span><span class="w"> </span>
+forecast_end_date:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;2020-10-03 00:00:00&#39;</span>,<span class="w"> </span><span class="s1">&#39;2020-10-03 00:00:00&#39;</span><span class="o">]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Set <strong>general.eval_start_date</strong> and <strong>general.eval_end_date</strong> to define the evaluation period (e.g., <code class="docutils literal notranslate"><span class="pre">'2020-10-02</span> <span class="pre">00:00:00'</span></code> to <code class="docutils literal notranslate"><span class="pre">'2020-10-03</span> <span class="pre">00:00:00'</span></code>). Here we use an 1-day evaluation period (October 2, 2020), to allow a 1-day spin-up period. Both fields should be lists with the same length as <strong>dataset_name</strong>.</p></li>
+<li><p>Set <strong>file_paths.output_dir</strong> to point to the directory where evaluation outputs should be saved. Here we add the <strong>run_name</strong> from regionalization <code class="docutils literal notranslate"><span class="pre">test1</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">'{base_dir}/outputs/eval/test1/{location_set_name}'</span></code>), to ensure evaluation outputs are also organized by regionalization runs.</p></li>
+<li><p>Update fields in metics and plotting sections as desired. Here we will compute and plot a set of default evaluation metrics: KGE (Kling-Gupta Efficiency), NSE (Nash-Sutcliffe Efficiency), NNSE (Normalized NSE), and Correlation (CORR). Note the <strong>lead_times</strong> fields are not applicable here since we are evaluating simulations.</p></li>
+</ul>
+<p>Note: if you would like to explore other configuration options for evaluation, refer to <a class="reference external" href="https://ngwpc.github.io/nwm-eval-mgr/index.html">nwm-eval-mgr documentation</a> for details.</p>
+<p>Run the evaluation step as in Step 3 above.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>test1_configs<span class="w"> </span><span class="nb">eval</span>
+</pre></div>
+</div>
+<p>After completion, evaluation results will be saved in the folder <code class="docutils literal notranslate"><span class="pre">data/outputs/eval/test1/vpu_09/</span></code>, including</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">joined/</span></code>: combined observed and simulated streamflow data for all locations in parquet format; each file corresponds to one dataset (i.e., algorithm)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metrics/</span></code>: evaluation metrics tables for all locations in parquet format; each file corresponds to one dataset (i.e., algorithm)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">plots/ngen_simulation/</span></code>: evaluation plots for all locations, comparing the two algorithms</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">boxplot/</span></code>: boxplots of evaluation metrics across all locations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">histogram/</span></code>: histograms of evaluation metrics across all locations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spatial_map/</span></code>: spatial maps of evaluation metrics for each algorithm</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test1_gower/ngen_simulation/</span></code>: streamflow time series data for all locations using gower method</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test1_kmeans/ngen_simulation/</span></code>: streamflow time series data for all locations using kmeans method</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">usgs/</span></code>: observed streamflow time series data for all locations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nwm_eval_config_expanded.yaml</span></code>: the final (expanded) configuration file used in this run.</p></li>
+</ul>
+<p>Check the metrics and plots to compare/analyze the performance of the two algorithms in parameter regionalization.</p>
+</section>
+</section>
+</section>
+<section id="notes-and-best-practices">
+<h2>Notes and best practices<a class="headerlink" href="#notes-and-best-practices" title="Link to this heading">#</a></h2>
+<section id="formulation-regionalization">
+<h3>Formulation regionalization<a class="headerlink" href="#formulation-regionalization" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Configuration for formulation regionalization is specified in <code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">config_formreg.yaml</span></code>.</p></li>
+<li><p>The python module <code class="docutils literal notranslate"><span class="pre">nwm_region_mgr.formreg</span></code> contains functions for performing formulation regionalization.</p></li>
+<li><p>Formulation regionalization can be run independently, without requiring parameter regionalization. However,
+parameter regionalization requires formulation regionalization to be completed first.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">calib_basins_only</span></code> is set to True in the configuration file, only calibrated catchments will be assigned
+formulations. During parameter regionalization, donors will be selected for uncalibrated catchments
+without any formulation constraints, i.e., any calibrated catchment is eligible as a donor. Othwerwise, if
+<code class="docutils literal notranslate"><span class="pre">calib_basins_only</span></code> is set to False, eligible donors will be limited to only those calibrated catchments that
+share the same formulation as the uncalibrated catchment.</p></li>
+<li><p>Currently, formulation regionalization relies on calibration/validation statistics only. In the future,
+additional criteria (e.g., physiographic similarity) may be incorporated into the formulation selection process.</p></li>
+</ul>
+</section>
+<section id="parameter-regionalization">
+<h3>Parameter regionalization<a class="headerlink" href="#parameter-regionalization" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>Configuration for parameter regionalization is specified in <code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code>.</p></li>
+<li><p>The python module <code class="docutils literal notranslate"><span class="pre">nwm_region_mgr.parreg</span></code> contains functions for performing parameter regionalization.</p></li>
+<li><p>Currently, four attribute datasets are supported:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html">NextGen attributes</a> (available for all domains)</p></li>
+<li><p><a class="reference external" href="https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states">Hydrologic Landscape Regions (HLR) attributes</a>(only available for conus, ak, and hi domains)</p></li>
+<li><p><a class="reference external" href="https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset">StreamCat attributes</a> (only available for conus)</p></li>
+<li><p><a class="reference internal" href="#hhttps://www.hydrosheds.org/hydroatlas"><span class="xref myst">HydroATLAS attributes</span></a> (available for all domains except hi)</p></li>
+</ul>
+<p>Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.</p>
+</li>
+<li><p>Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
+algorithm inefficiency. An VPU is equivalent to a HUC2 region, except for HUC-03 and HUC-10 that are divided into
+multiple VPUs. The image below shows all the VPUs in the CONUS domain. Each oCONUS domain (Alaska, Hawaii, Puerto Rico) is
+treated as a single VPU.</p></li>
+</ul>
+<figure class="align-center" id="fig-vpu-map">
+<a class="reference internal image-reference" href="_images/conus_vpu_map.jpeg"><img alt="VPUs in the CONUS domain" src="_images/conus_vpu_map.jpeg" style="width: 60%;" />
+</a>
+</figure>
+<ul class="simple">
+<li><p>Parameter regionalization requires formulation regionalization to be completed first. Hence, for each parameter
+regionalization run, the workflow will first check if the required outputs from formulation regionalization for
+the relevant VPUs already exist; if not, the workflow will run formulation regionalization for the relevant VPUs before
+proceeding with parameter regionalization.</p></li>
+<li><p>Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
+depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.</p></li>
+</ul>
+</section>
+<section id="running-regionalization-in-int-ea-uat-clusters">
+<h3>Running regionalization in INT/EA/UAT clusters<a class="headerlink" href="#running-regionalization-in-int-ea-uat-clusters" title="Link to this heading">#</a></h3>
+<section id="docker-permissions">
+<h4>Docker permissions<a class="headerlink" href="#docker-permissions" title="Link to this heading">#</a></h4>
+<p>When first running the regionalization workflow in INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>docker<span class="w"> </span><span class="c1"># check status</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>docker<span class="w"> </span><span class="c1"># start docker service if not already running</span>
+sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span><span class="nv">$USER</span><span class="w"> </span><span class="c1"># add user to docker group</span>
+newgrp<span class="w"> </span>docker<span class="w"> </span><span class="c1"># apply group change without logout/login</span>
+</pre></div>
+</div>
+</section>
+<section id="input-output-file-paths">
+<h4>Input/output file paths<a class="headerlink" href="#input-output-file-paths" title="Link to this heading">#</a></h4>
+<p>The current working directory <code class="docutils literal notranslate"><span class="pre">WORK_DIR</span></code> and the root directory of all repositories on the host (<code class="docutils literal notranslate"><span class="pre">REPOS_COMMON_ROOT__HOST</span></code>)
+are defined as environment variables and will be mounted to the same paths in the container. The run script <code class="docutils literal notranslate"><span class="pre">run_region.sh</span></code>
+will automatically handle the volume mounting and path mapping between the host and the container.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">WORK_DIR</span></code> and <code class="docutils literal notranslate"><span class="pre">REPOS_COMMON_ROOT__HOST</span></code> are used by the placeholders <code class="docutils literal notranslate"><span class="pre">{base_dir}</span></code> and
+<code class="docutils literal notranslate"><span class="pre">{static_data_dir}</span></code>, respectively, which will be automatically replaced with the correct paths when the workflow is run.
+As long as you specify file paths for all inputs and outputs in the configuration files  using these placeholders, the
+workflow will be able to correctly locate the files in the container regardless of where your working directory is on the host.</p>
+<p>There is a caveat. The placeholders <code class="docutils literal notranslate"><span class="pre">{base_dir}</span></code> and <code class="docutils literal notranslate"><span class="pre">{static_data_dir}</span></code> defined in <code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code> are used by
+<code class="docutils literal notranslate"><span class="pre">config_formreg.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code>, and <code class="docutils literal notranslate"><span class="pre">config_ngen.yaml</span></code>, but not <code class="docutils literal notranslate"><span class="pre">config_eval.yaml</span></code>, which is processed
+separately by <code class="docutils literal notranslate"><span class="pre">nwm-eval-mgr</span></code> using its own Pydantic model for configuration. However, you can redefine <code class="docutils literal notranslate"><span class="pre">{base_dir}</span></code>
+in <code class="docutils literal notranslate"><span class="pre">config_eval.yaml</span></code> and use the two environment variables <code class="docutils literal notranslate"><span class="pre">WORK_DIR</span></code> and <code class="docutils literal notranslate"><span class="pre">REPOS_COMMON_ROOT__HOST</span></code> to specify file paths.</p>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">{static_data_dir}</span></code> is set to the input data folder installed on the host (e.g., <code class="docutils literal notranslate"><span class="pre">/ngencerf-app/nwm-region-mgr/data/inputs/</span></code>), which is the root directory for all static input data for regionalization (e.g., hydrofabric, catchment
+attributes, crosswalk file between calibration gages and NextGen catchments, pseudo calibration/validation statistics
+for testing, etc). In INT/EA/UAT clusters, the user will not have write access to this directory. If you would like to
+use custom input data (e.g., your own calibration statistics), you can copy the data to your working directory and
+update the relevant file paths in the configuration files to point to the new location. For example, if you have your
+own calibration statistics and parameters saved in your working directory in <code class="docutils literal notranslate"><span class="pre">inputs/my_stats.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">inputs/my_params.csv</span></code>,
+you can update the file path in <code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code> as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>general.calib_stats_file:<span class="w"> </span><span class="s1">&#39;{base_dir}/inputs/my_stats.csv&#39;</span>
+general.calib_params_file:<span class="w"> </span><span class="s1">&#39;{base_dir}/inputs/my_params.csv&#39;</span>
+</pre></div>
+</div>
+<p>By default, all outputs from the regionalization workflow will be saved in the <code class="docutils literal notranslate"><span class="pre">outputs/</span></code> folder in your working
+directory. You can also specify a different output directory in the configuration files if desired, as long as it is
+within your working directory. For formulation/parameter regionalization and ngen simulation steps, the output directory
+is specified in the <code class="docutils literal notranslate"><span class="pre">output</span></code> section of <code class="docutils literal notranslate"><span class="pre">config_formreg.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">config_ngen.yaml</span></code>, respectively.
+For the evaluation step, the output directory is specified in the <code class="docutils literal notranslate"><span class="pre">file_paths.output_dir</span></code> field in <code class="docutils literal notranslate"><span class="pre">config_eval.yaml</span></code>.</p>
+</section>
+<section id="compute-resources">
+<h4>Compute resources<a class="headerlink" href="#compute-resources" title="Link to this heading">#</a></h4>
+<p>Currently, each regionalization job can only run on a single compute node in the INT/EA/UAT clusters. Two partitions
+are available in these clusters: <code class="docutils literal notranslate"><span class="pre">c5n-9xlarge</span></code> and <code class="docutils literal notranslate"><span class="pre">r8a-12xlarge</span></code>. Each partition contains 50 compute nodes, with 18
+CPUs per node for <code class="docutils literal notranslate"><span class="pre">c5n-9xlarge</span></code> and 48 CPUs per node for <code class="docutils literal notranslate"><span class="pre">r8a-12xlarge</span></code>.</p>
+<p>Regionalization jobs are submitted to a partition based on the number of parallel processes (n_procs) specified in
+the config file <code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code>, as follows:</p>
+<ul class="simple">
+<li><p>If n_procs &lt;= 18, the job is submitted to the <code class="docutils literal notranslate"><span class="pre">c5n-9xlarge</span></code> partition</p></li>
+<li><p>If 18 &lt; n_procs &lt;= 48, the job is submitted to the <code class="docutils literal notranslate"><span class="pre">r8a-12xlarge</span></code> partition</p></li>
+<li><p>If n_procs &gt; 48, the job is not submitted and an error message is raised, since a single compute node supports
+a maximum of 48 CPUs.</p></li>
+</ul>
+<p>To fully utilize available computational resources, it is recommended to set n_procs to match the number of CPUs per node:</p>
+<ul class="simple">
+<li><p>Use n_procs = 18 for the c5n-9xlarge partition.</p></li>
+<li><p>Use n_procs = 48 for the r8a-12xlarge partition.</p></li>
+</ul>
+<p>Note the partition configuration in these clusters may change in the future (use <code class="docutils literal notranslate"><span class="pre">sinfo</span></code> to check the current configuration).</p>
+</section>
+<section id="job-submission">
+<h4>Job submission<a class="headerlink" href="#job-submission" title="Link to this heading">#</a></h4>
+<p>Regionalization jobs are submitted via the <code class="docutils literal notranslate"><span class="pre">/ngencerf-app/nwm-rte/sbatch_run_region.sh</span></code> script. There are multiple options to
+customize the job submission (see the header of the script for usage details). You can adapt the following bash script
+for your needs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="c1"># required argument</span>
+<span class="nv">CONFIG_DIR</span><span class="o">=</span><span class="s2">&quot;./configs_test&quot;</span>
+
+<span class="c1"># Optional arguments to override the defaults</span>
+<span class="nv">image_tag</span><span class="o">=</span><span class="s2">&quot;pr-22-build&quot;</span><span class="w"> </span><span class="c1"># default: latest. Check available image tags at: https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte</span>
+<span class="nv">pull_image</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="c1">#default: false</span>
+<span class="nv">workflow_options</span><span class="o">=(</span>parreg<span class="w"> </span>ngen<span class="w"> </span><span class="nb">eval</span><span class="o">)</span><span class="w"> </span><span class="c1">#default: parreg. Valid options: formreg, parreg, ngen, eval</span>
+<span class="nv">dry_run</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="c1">#default: false</span>
+<span class="nv">delete_runtime_dir</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="c1">#default: false</span>
+
+<span class="c1"># ==== Typically no need to modify lines below ====</span>
+<span class="nv">SCRIPT_TO_RUN</span><span class="o">=</span><span class="s2">&quot;/ngencerf-app/nwm-rte/sbatch_run_region.sh&quot;</span>
+
+<span class="c1"># Build optional arguments</span>
+<span class="nv">extra_args</span><span class="o">=()</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$pull_image</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nv">extra_args</span><span class="o">+=(</span>--pull-image<span class="o">)</span>
+<span class="k">fi</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$dry_run</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nv">extra_args</span><span class="o">+=(</span>--dry-run<span class="o">)</span>
+<span class="k">fi</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$delete_runtime_dir</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nv">extra_args</span><span class="o">+=(</span>--delete-runtime-dir<span class="o">)</span>
+<span class="k">fi</span>
+
+<span class="s2">&quot;</span><span class="nv">$SCRIPT_TO_RUN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;</span><span class="nv">$CONFIG_DIR</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">workflow_options</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--image-tag<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$image_tag</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">extra_args</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="monitoring-job-status">
+<h4>Monitoring job status<a class="headerlink" href="#monitoring-job-status" title="Link to this heading">#</a></h4>
+<p>After a SLURM job is submitted, you can monitor the job status using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>squeue<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USER</span>
+</pre></div>
+</div>
+<p>The job will typically remain in ‘CF’ (configuring) state for a few minutes. Once the job status changes to “R”
+(running), you can monitor the progress by reviewing the log file <code class="docutils literal notranslate"><span class="pre">logs/region-${JOB_SUFFIX}-%j.log</span></code>,
+where,</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">${JOB_SUFFIX}</span></code> is a string formed by joining the workflows being run with “-”</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">%j</span></code> is the SLURM job ID.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tail<span class="w"> </span>-f<span class="w"> </span>logs/region-parreg-ngen-eval-1124.log
+</pre></div>
+</div>
+<p>To cancel a job after it has been submitted, use the command <code class="docutils literal notranslate"><span class="pre">scancel</span></code> with the job ID (obtained from <code class="docutils literal notranslate"><span class="pre">squeue</span></code>), e.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scancel<span class="w"> </span><span class="m">12345678</span>
+</pre></div>
+</div>
+</section>
+<section id="viewing-regionalization-outputs">
+<h4>Viewing regionalization outputs<a class="headerlink" href="#viewing-regionalization-outputs" title="Link to this heading">#</a></h4>
+<p>Sample regionalization outputs can be found in <a class="reference internal" href="tech_reference/output_plot.html#output-plots"><span class="std std-ref">Output Plots</span></a> and <span class="xref std std-ref">Output Tables</span>.</p>
+<p>Graphic regionalization outputs are typically saved in png format, which can be easily viewed via a Desktop or
+VS Code session on INT/EA/UAT.</p>
+<p>By default, tabular regionalization outputs are saved in parquet format to increase storage and runtime efficiencies,
+which can be conviently viewed using an extension (e.g., Parquet Explorer) in VS Code. However, these tools are not
+readily available on INT/EA/UAT.</p>
+<p>There are a couple of options for users to view the outputs:</p>
+<ul class="simple">
+<li><p>Option 1: specify csv format for outputs in the config files <code class="docutils literal notranslate"><span class="pre">config_formreg.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code>
+(e.g., <code class="docutils literal notranslate"><span class="pre">output.pairs.format:</span> <span class="pre">'csv'</span></code>), which will allow you to save the outputs directly in csv format, e.g.,</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>output.pairs.format:<span class="w"> </span><span class="s1">&#39;csv&#39;</span>
+output.params.format:<span class="w"> </span><span class="s1">&#39;csv&#39;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Option 2: use the utility script <code class="docutils literal notranslate"><span class="pre">view_parquet.sh</span></code> in nwm-region-mgr to view parquet files. You can copy
+this script to your working directory, e.g.,:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>/ngencerf-app/nwm-region-mgr/util_scripts/view_parquet.sh<span class="w"> </span>.
+</pre></div>
+</div>
+<p>The script allows you to:</p>
+<ul class="simple">
+<li><p>preview the parquet file</p></li>
+<li><p>query the file with SQL commands</p></li>
+<li><p>convert the parquet file to csv format etc.</p></li>
+</ul>
+<p>Check the header of the script for usage instructions.</p>
+</section>
+</section>
+<section id="regionalization-for-different-domains">
+<h3>Regionalization for different domains<a class="headerlink" href="#regionalization-for-different-domains" title="Link to this heading">#</a></h3>
+<p>The regionalization workflow is designed to be flexible and adaptable to different domains (conus, ak, hi, prvi),
+as long as the required input data files are available and the configuration files are properly set up. However,
+due to differences in data availability and formatting across domains, some adjustments may be needed in the
+configuration files for different domains.</p>
+<p>Sample configuration files for different domains can be found at <code class="docutils literal notranslate"><span class="pre">/ngencerf-app/nwm-region-mgr/</span></code>:</p>
+<ul class="simple">
+<li><p><strong>conus</strong>: <code class="docutils literal notranslate"><span class="pre">configs</span></code></p></li>
+<li><p><strong>hi</strong>: <code class="docutils literal notranslate"><span class="pre">configs_hi</span></code></p></li>
+<li><p><strong>prvi</strong>: <code class="docutils literal notranslate"><span class="pre">configs_prvi</span></code></p></li>
+<li><p><strong>ak</strong>: <code class="docutils literal notranslate"><span class="pre">configs_ak</span></code>
+s</p></li>
+</ul>
+<section id="valid-vpus-for-each-domain">
+<h4>Valid VPUs for each domain<a class="headerlink" href="#valid-vpus-for-each-domain" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>CONUS: 21 VPUs (01, 02, 03S, 03N, 03W, 04, 05, 06, 07, 08, 09, 10L, 10U, 11, 12, 13, 14, 15, 16, 17, 18)</p></li>
+<li><p>AK: treated as a single VPU (id: 19)</p></li>
+<li><p>HI: treated as a single VPU (id:20)</p></li>
+<li><p>PRVI: treated as a single VPU (id: 21)</p></li>
+</ul>
+</section>
+<section id="huc12-hydrofabric-for-ak-domain">
+<h4>HUC12 hydrofabric for AK domain<a class="headerlink" href="#huc12-hydrofabric-for-ak-domain" title="Link to this heading">#</a></h4>
+<p>There are a few differences in the HUC12 hydrofabric for the AK domain compared to other domains, which require
+adjustments in the configuration files, as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code>: <code class="docutils literal notranslate"><span class="pre">id_col.huc12</span></code> should be set to <code class="docutils literal notranslate"><span class="pre">huc12</span></code> (vs. <code class="docutils literal notranslate"><span class="pre">huc_12</span></code> for other domains)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config_general.yaml</span></code>: <code class="docutils literal notranslate"><span class="pre">layer_name.huc12</span></code> should be set to <code class="docutils literal notranslate"><span class="pre">WBDHU12</span></code> (vs <code class="docutils literal notranslate"><span class="pre">WBDSnapshot_National</span></code> for other domains)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config_formreg.yaml</span></code>: <code class="docutils literal notranslate"><span class="pre">huc12_hydrofabric_file</span></code> should be set to <code class="docutils literal notranslate"><span class="pre">'{static_data_dir}/region/NHDPlusV21/NHD_H_Alaska_State_GPKG.gpkg'</span></code></p></li>
+</ul>
+</section>
+<section id="forcing-data-source-and-availability">
+<h4>Forcing data source and availability<a class="headerlink" href="#forcing-data-source-and-availability" title="Link to this heading">#</a></h4>
+<p>The forcing data used for regionalized simulations may differ across domains, depending on the availability of AORC and retrospective forcing datasets. The current workflow is set up to use the following datasets for each domain:</p>
+<ul class="simple">
+<li><p>CONUS: AORC (1979-01-01 to 2025-12-31)</p></li>
+<li><p>AK: NWM retrospective forcing (1981-01-01 to 2019-12-31)</p></li>
+<li><p>HI: NWM retrospective forcing (1994-01-01 to 2013-12-31)</p></li>
+<li><p>PRVI: NWM retrospective forcing (2008-01-01 to 2023-06-30)</p></li>
+</ul>
+<p>Hence, in the configuration files <code class="docutils literal notranslate"><span class="pre">config_ngen.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">config_eval.yaml</span></code>, the simulation and evaluation periods
+for each domain should be set within the above date ranges to ensure the availability of forcing data.</p>
+</section>
+<section id="attribute-dataset-availability">
+<h4>Attribute dataset availability<a class="headerlink" href="#attribute-dataset-availability" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>ngen (hydrofabric): all domains</p></li>
+<li><p>HLR: CONUS, AK, HI</p></li>
+<li><p>StreamCat: CONUS only</p></li>
+<li><p>HydroATLAS: CONUS, AK, PRVI</p></li>
+</ul>
+</section>
+<section id="snow-basin-categorization">
+<h4>Snow basin categorization<a class="headerlink" href="#snow-basin-categorization" title="Link to this heading">#</a></h4>
+<p>The current workflow includes a step to categorize catchments into snow vs. non-snow basins based on mean annual
+snow cover fraction from the HydroATLAS dataset. However, since HydroATLAS is not available for the HI domain, the field <code class="docutils literal notranslate"><span class="pre">snow_cover.consider_snowness</span></code> in <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code> should be set to <code class="docutils literal notranslate"><span class="pre">False</span></code> for the HI domain to skip this step.</p>
+</section>
+</section>
+<section id="output-cleanup">
+<h3>Output cleanup<a class="headerlink" href="#output-cleanup" title="Link to this heading">#</a></h3>
+<section id="pair-files-from-regionalization">
+<h4>Pair files from regionalization<a class="headerlink" href="#pair-files-from-regionalization" title="Link to this heading">#</a></h4>
+<p>In the first step of the workflow (regionalization), the program will first check if the required pair file already
+exists for a given run_name, algorithm, and VPU (e.g., <code class="docutils literal notranslate"><span class="pre">outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet</span></code>).
+If the file exists, the program will skip the regionalization process (as indicated in the log file) and use the existing pair file for subsequent steps (e.g., NGEN simulation). This allows users to keep the outputs from previous runs of regionalization and reuse them for NGEN simulations or evaluation, without needing to rerun the regionalization step. However, if you want to
+rerun regionalization for a given run_name/VPU/algorithm/ with different settings, you can simply delete or archive the existing pair file, and the workflow will run regionalization again.</p>
+</section>
+<section id="intermediate-files-from-ngen-simulations">
+<h4>Intermediate files from NGEN simulations<a class="headerlink" href="#intermediate-files-from-ngen-simulations" title="Link to this heading">#</a></h4>
+<p>In the second step of the workflow (ngen simulation), each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-*.csv, nex-*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step <code class="docutils literal notranslate"><span class="pre">eval</span></code> only requires the <strong>t-route</strong> output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># update with your VPU, run name, and algorithm</span>
+<span class="nv">VPU</span><span class="o">=</span>03S<span class="w"> </span>
+<span class="nv">RUN_NAME</span><span class="o">=</span><span class="nb">test</span><span class="w"> </span>
+<span class="nv">ALGORITHM</span><span class="o">=</span>kmeans
+
+<span class="c1"># remove all ngen simulation output files except for troute output</span>
+find<span class="w"> </span>outputs/ngen/regionalization/<span class="si">${</span><span class="nv">RUN_NAME</span><span class="si">}</span>_<span class="si">${</span><span class="nv">ALGORITHM</span><span class="si">}</span>/vpu_<span class="si">${</span><span class="nv">VPU</span><span class="si">}</span>/Output<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>!<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;troute_*&#39;</span><span class="w"> </span>-delete
+</pre></div>
+</div>
+</section>
+<section id="runtime-logs">
+<h4>Runtime logs<a class="headerlink" href="#runtime-logs" title="Link to this heading">#</a></h4>
+<p>In addition to the SLURM job log file saved in the <code class="docutils literal notranslate"><span class="pre">logs/</span></code> folder, each run of regionalization will also generate
+additional log files in the temporary runtime folder (prefixed with <code class="docutils literal notranslate"><span class="pre">run_time_</span></code>) in the current working directory.
+These files contain more detailed logs for ngen-forcing, ngen, and individual modules for debugging purposes. It is
+recommended to manually remove these runtime folders afterwards.</p>
+<p>Alternatively, you can use the <code class="docutils literal notranslate"><span class="pre">--delete-runtime-dir</span></code> flag when running the job submission script to automatically
+delete the runtime folder immediately after the run is completed, e.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/ngencerf-app/nwm-rte/sbatch_run_region.sh<span class="w"> </span>configs<span class="w"> </span>parreg<span class="w"> </span>ngen<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>--delete-runtime-dir
+</pre></div>
+</div>
+<p>Note this will delete the entire runtime folder containing the detailed log files, which may be useful for debugging if
+any issues arise during the run.</p>
+</section>
+</section>
+<section id="assemble-domain-results">
+<h3>Assemble domain results<a class="headerlink" href="#assemble-domain-results" title="Link to this heading">#</a></h3>
+<p>After running regionalization for all VPUs in the CONUS domain, the metric results can be assembled to create
+evaluation plots for the entire domain. This is done by a single run of the <code class="docutils literal notranslate"><span class="pre">eval</span></code> step with
+the following updates to the <code class="docutils literal notranslate"><span class="pre">config_eval.yaml</span></code> file:</p>
+<ul class="simple">
+<li><p>Set <strong>general.assemble_domain</strong> to <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+<li><p>Set <strong>general.location_set_name</strong> to <code class="docutils literal notranslate"><span class="pre">conus</span></code></p></li>
+<li><p>Make sure <strong>general.steps.compute_metrics</strong> and <strong>general.steps.plot_metrics</strong> are set to <code class="docutils literal notranslate"><span class="pre">true</span></code></p></li>
+</ul>
+<p>The run will look for the existing metric results file for each VPU in the CONUS domain (e.g., <code class="docutils literal notranslate"><span class="pre">outputs/eval/vpu_03S/metrics/test_kmeans.ngen.ngen_simulation.metrics.parquet</span></code>, <code class="docutils literal notranslate"><span class="pre">outputs/eval/vpu_03N/metrics/test_kmeans.ngen.ngen_simulation.metrics.parquet</span></code>), and assemble them into a single metrics file for the entire domain (e.g., <code class="docutils literal notranslate"><span class="pre">outputs/eval/conus/metrics/test_kmeans.ngen.ngen_simulation.metrics.parquet</span></code>).</p>
+<p>Then, the evaluation plots for the entire domain (excluding VPUs without existing metric files) will be generated based on the assembled metrics file, and saved in the folder <code class="docutils literal notranslate"><span class="pre">outputs/eval/conus/plots/ngen_simulation/</span></code>.</p>
+</section>
+<section id="manual-pairings">
+<h3>Manual pairings<a class="headerlink" href="#manual-pairings" title="Link to this heading">#</a></h3>
+<p>Manual pairings can be specified in the config file <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code> to override the algorithm-based donor
+selection process for certain receiver catchments. This can be useful when users want to enforce specific
+donor-receiver pairs based on their expert knowledge or other considerations. To specify manual pairings,
+set the field <code class="docutils literal notranslate"><span class="pre">manual_pairs_file</span></code> to point to a comma-delimited csv file containing the manual pairings, with
+one of the following columns pairs:</p>
+<ul class="simple">
+<li><p>receiver_divide_id, donor_divide_id</p></li>
+<li><p>receiver_divide_id, donor_gage_id</p></li>
+<li><p>receiver_gage_id, donor_gage_id</p></li>
+<li><p>receiver_gage_id, donor_divide_id</p></li>
+</ul>
+<p>Each row in the file should be populated with exactly one valid receiver column and one valid donor column.
+See sample files in <code class="docutils literal notranslate"><span class="pre">nwm_region_mgr/data/inputs/region/manual_pairs/</span></code> for examples of formatting the manual pairings
+file. The following examples are all valid formats for the manual pairings file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>receiver_divide_id,receiver_gage_id,donor_divide_id,donor_gage_id
+cat-410687,,cat-423550,
+cat-410688,,cat-423550,
+cat-423248,,,023177483
+,02207385,,02314500
+,02217475,cat-412526,
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>receiver_divide_id,donor_divide_id
+cat-410687,cat-423550
+cat-410688,cat-423550
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>receiver_gage_id,donor_gage_id
+<span class="m">02207385</span>,02314500
+</pre></div>
+</div>
+<p>Note that the specified manual pairings will be used to update the final donor-receiver pair files, for each allgorithm
+specified in <code class="docutils literal notranslate"><span class="pre">general.algorithm_list</span></code> in <code class="docutils literal notranslate"><span class="pre">config_parreg.yaml</span></code>. A <code class="docutils literal notranslate"><span class="pre">distSptatial</span></code> column will be added to indicate the
+spatial distance between the donor and receiver catchments for each manual pair, and a <code class="docutils literal notranslate"><span class="pre">tag</span></code> column will be added to
+indicate that these pairs are manually specified. The original pair and parameter files will be saved to backup files
+with <code class="docutils literal notranslate"><span class="pre">_original</span></code> added to the filename. Specifically, the following files will be updated with manual pairings:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU].parquet</span></code>: the <code class="docutils literal notranslate"><span class="pre">receiver</span> <span class="pre">catchment/divide</span></code> vs <code class="docutils literal notranslate"><span class="pre">donor</span> <span class="pre">catchment/divide</span></code> pair file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU]_mswm.csv</span></code>: the <code class="docutils literal notranslate"><span class="pre">donor</span> <span class="pre">gage</span></code> vs <code class="docutils literal notranslate"><span class="pre">receiver</span> <span class="pre">catchment/divide</span></code> pair file required
+by MSWM in the ngen simulation step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">params/formulation_params_[ALGORITHM]_[DOMAIN]_[VPU].csv</span></code>: the donor gage formulation and parameter file required
+by MSWM in the ngen simulation step.</p></li>
+</ul>
+</section>
+</section>
+<section id="run-nwm-region-mgr-in-local-environment">
+<h2>Run nwm_region_mgr in local environment<a class="headerlink" href="#run-nwm-region-mgr-in-local-environment" title="Link to this heading">#</a></h2>
+<p>The steps below walk through package installation and workflow configuration in local (non-containerized) environments.</p>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h3>
+<p>Installing nwm_region_mgr requires</p>
+<ul class="simple">
+<li><p>Python 3.11</p></li>
+<li><p>Python venv (typically included with Python)</p></li>
+<li><p>git</p></li>
+</ul>
+<p>Since nwm_region_mgr is not currently on PyPI, it must be installed from source. To download this repository, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NGWPC/nwm-region-mgr.git
+<span class="nb">cd</span><span class="w"> </span>nwm-region-mgr
+</pre></div>
+</div>
+<p>To get the most up-to-date code, switch to the development branch.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>development
+</pre></div>
+</div>
+<p>Next, create a virtual environment to isolate the dependencies of this library from your base Python environment.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3.11<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</pre></div>
+</div>
+<p>You will then be able to install nwm_region_mgr. There are a few download variants that users may be interested in.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Regular package install</span>
+pip<span class="w"> </span>install<span class="w"> </span>.
+<span class="c1"># Install the package in edit mode (for development)</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<span class="c1"># Install the additional dependencies for parameter regionalization</span>
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>parreg<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="step-1-run-regionalization-to-produce-regionalized-parameters-and-formulations">
+<h3>STEP 1: Run regionalization to produce regionalized parameters and formulations<a class="headerlink" href="#step-1-run-regionalization-to-produce-regionalized-parameters-and-formulations" title="Link to this heading">#</a></h3>
+<section id="set-up-configuration-yaml-files">
+<h4>1) Set up configuration yaml files<a class="headerlink" href="#set-up-configuration-yaml-files" title="Link to this heading">#</a></h4>
+<p>Three yaml config files are needed to run regionalization</p>
+<ul class="simple">
+<li><p><strong>config_general.yaml</strong>: general settings for the overall regionalization process.</p></li>
+<li><p><strong>onfig_formreg.yaml</strong>: specific settings for the formulation regionalization process.</p></li>
+<li><p><strong>config_parreg.yaml</strong>: specific settings for the parameter regionalization process.</p></li>
+</ul>
+<p>Follow the sample config files (nwm_region_mgr/configs) to set up the configurations
+for your regionalization application as needed.</p>
+<p>Sample input data can be downloaded from <strong>s3://ngwpc-dev/regionalization/inputs</strong></p>
+</section>
+<section id="run-the-regionalization-script">
+<h4>2) Run the regionalization script<a class="headerlink" href="#run-the-regionalization-script" title="Link to this heading">#</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>nwm_region_mgr<span class="w"> </span><span class="o">[</span>COFIG_DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>REG_TYPE<span class="o">]</span>
+</pre></div>
+</div>
+<p>Where:</p>
+<ul class="simple">
+<li><p>[COFIG_DIR] refers to the directory containing the config files as noted in 1)</p></li>
+<li><p>[REG_TYPE] refers to the type of regionalization to run, either ‘formreg’ (formulation regionalization only) or ‘parreg’ (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is ‘parreg’.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>nwm_region_mgr<span class="w"> </span>configs<span class="w"> </span>formreg<span class="w"> </span><span class="c1"># to run formulation regionalization only</span>
+python<span class="w"> </span>-m<span class="w"> </span>nwm_region_mgr<span class="w"> </span>configs<span class="w"> </span>parreg<span class="w"> </span><span class="c1"># to run parameter regionalization (and formulation regionalization if not done already)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-2-run-ngen-simulation-with-regionalized-parameters">
+<h3>STEP 2: Run NGEN simulation with regionalized parameters<a class="headerlink" href="#step-2-run-ngen-simulation-with-regionalized-parameters" title="Link to this heading">#</a></h3>
+<p>To avoid complications from building ngen and its submodules locally, we recommend you always run NGEN simulation
+with regionalized parameters and formulations from a Docker container. Follow instructions from the <strong>Docker Run Time Environment (RTE)</strong> section above.</p>
+</section>
+<section id="step-3-evaluate-ngen-simulation-with-nwm-eval-mgr">
+<h3>STEP 3: Evaluate NGEN simulation with nwm-eval-mgr<a class="headerlink" href="#step-3-evaluate-ngen-simulation-with-nwm-eval-mgr" title="Link to this heading">#</a></h3>
+<section id="download-and-install-nwm-eval-mgr">
+<h4>1) Download and install <a class="reference external" href="https://github.com/NGWPC/nwm-eval-mgr">nwm-eval-mgr</a><a class="headerlink" href="#download-and-install-nwm-eval-mgr" title="Link to this heading">#</a></h4>
+<p>It is recommended you install nwm-eval-mgr in its own venv.</p>
+</section>
+<section id="set-up-configurations-for-evaluation">
+<h4>2) Set up configurations for evaluation<a class="headerlink" href="#set-up-configurations-for-evaluation" title="Link to this heading">#</a></h4>
+<p>Follow example config at <a class="reference external" href="https://github.com/NGWPC/nwm-region-mgr/blob/development/configs/config_eval.yaml">config_eval.yaml</a></p>
+<p>Sample input data can be downloaded from <strong>s3://ngwpc-dev/regionalization/data/inputs/eval</strong></p>
+</section>
+<section id="activate-venv-for-nwm-eval-mgr">
+<h4>3) Activate venv for nwm-eval-mgr<a class="headerlink" href="#activate-venv-for-nwm-eval-mgr" title="Link to this heading">#</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/repos/nwm-eval-mgr/venv/bin/activate
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h4>4) Run evaluation<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>nwm_eval<span class="w"> </span>config_eval.yaml
+</pre></div>
+</div>
+</section>
+<section id="check-outputs">
+<h4>5) Check outputs<a class="headerlink" href="#check-outputs" title="Link to this heading">#</a></h4>
+<p>Outputs from evaluation can be found in <em>[output_dir]</em> as specified in <strong>config_eval.yaml</strong></p>
+</section>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">NWM Regionalization</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="faq.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Frequently Asked Questions</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview-of-regionalization-workflow">Overview of regionalization workflow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-regionalization-with-nwm-rte-in-int-ea-uat-clusters">Run regionalization with NWM-RTE in INT/EA/UAT Clusters</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#test-the-sample-regionalization-workflow">Test the sample regionalization workflow</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-run-regionalization">Step 1. Run regionalization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-run-ngen">Step 2. Run NGEN</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-run-evaluation">Step 3. Run Evaluation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-all-steps-in-one-command">Run all steps in one command</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-regionalization-with-a-specific-rte-image-tag">Run regionalization with a specific RTE image tag</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#customize-and-run-your-own-regionalization-workflow">Customize and run your own regionalization workflow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-application-comparing-different-regionalization-methods">Example application: comparing different regionalization methods</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#prepare-configuration-files">0. Prepare configuration files</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#update-test1-configs-config-general-yaml">0.1 Update <code class="docutils literal notranslate"><span class="pre">test1_configs/config_general.yaml</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#update-test1-configs-config-parreg-yaml">0.2 Update <code class="docutils literal notranslate"><span class="pre">test1_configs/config_parreg.yaml</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-regionalization">1. Run regionalization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-ngen-simulations">2. Run NGEN simulations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-evaluation">3. Run evaluation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#notes-and-best-practices">Notes and best practices</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formulation-regionalization">Formulation regionalization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-regionalization">Parameter regionalization</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-regionalization-in-int-ea-uat-clusters">Running regionalization in INT/EA/UAT clusters</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#docker-permissions">Docker permissions</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#input-output-file-paths">Input/output file paths</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#compute-resources">Compute resources</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#job-submission">Job submission</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#monitoring-job-status">Monitoring job status</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#viewing-regionalization-outputs">Viewing regionalization outputs</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regionalization-for-different-domains">Regionalization for different domains</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#valid-vpus-for-each-domain">Valid VPUs for each domain</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#huc12-hydrofabric-for-ak-domain">HUC12 hydrofabric for AK domain</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#forcing-data-source-and-availability">Forcing data source and availability</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#attribute-dataset-availability">Attribute dataset availability</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#snow-basin-categorization">Snow basin categorization</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#output-cleanup">Output cleanup</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#pair-files-from-regionalization">Pair files from regionalization</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#intermediate-files-from-ngen-simulations">Intermediate files from NGEN simulations</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#runtime-logs">Runtime logs</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#assemble-domain-results">Assemble domain results</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#manual-pairings">Manual pairings</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-nwm-region-mgr-in-local-environment">Run nwm_region_mgr in local environment</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-run-regionalization-to-produce-regionalized-parameters-and-formulations">STEP 1: Run regionalization to produce regionalized parameters and formulations</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-configuration-yaml-files">1) Set up configuration yaml files</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#run-the-regionalization-script">2) Run the regionalization script</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-run-ngen-simulation-with-regionalized-parameters">STEP 2: Run NGEN simulation with regionalized parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-evaluate-ngen-simulation-with-nwm-eval-mgr">STEP 3: Evaluate NGEN simulation with nwm-eval-mgr</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#download-and-install-nwm-eval-mgr">1) Download and install nwm-eval-mgr</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#set-up-configurations-for-evaluation">2) Set up configurations for evaluation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#activate-venv-for-nwm-eval-mgr">3) Activate venv for nwm-eval-mgr</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">4) Run evaluation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#check-outputs">5) Check outputs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/user_guide.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, RTX.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

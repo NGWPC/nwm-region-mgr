@@ -1,0 +1,2481 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Schemas &#8212; nwm_region_mgr  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d1833e3e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tech_reference/output_data';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/form2yaml.js?v=4b298b11"></script>
+    <script src="../_static/components/form-field.js?v=f85f97bb"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Regionalization Output Plots" href="output_plot.html" />
+    <link rel="prev" title="Schemas" href="input_data.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo" href="../index.html">
+    <span class="logo" style="font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: bold; font-size: 24px; color: var(--pst-color-secondary);">
+        nwm_region_mgr
+      </span>
+  </a></div>
+    
+      <div class="navbar-item">0.1.0</div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../config_builder/index.html">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../config_builder/index.html">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Subsections</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="formreg.html">Formulation Regionalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="parreg.html">Parameter Regionalization</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="input_data.html">Input Data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Output Tables</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="output_plot.html">Output Plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_tree.html">Input directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output_tree.html">Output directory structure</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Technical Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Schemas</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="schemas">
+<h1>Schemas<a class="headerlink" href="#schemas" title="Link to this heading">#</a></h1>
+<section id="attr-data-final">
+<span id="id1"></span><h2>attr_data_final<a class="headerlink" href="#attr-data-final" title="Link to this heading">#</a></h2>
+<p>Final attribute data used for regionalization, based on attribute selection in the configuration. Each attribute is prefixed by its corresponding dataset name.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/attr_data_final/attr_conus_vpu03S.parquet</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>div_id</p></th>
+<th class="head"><p>is_donor</p></th>
+<th class="head"><p>ngen_area_sqkm</p></th>
+<th class="head"><p>ngen_elevation_mean</p></th>
+<th class="head"><p>ngen_slope250m_mean</p></th>
+<th class="head"><p>ngen_aspect_circmean</p></th>
+<th class="head"><p>ngen_glacier_percent</p></th>
+<th class="head"><p>ngen_bexp_mode</p></th>
+<th class="head"><p>ngen_dksat_geomean</p></th>
+<th class="head"><p>ngen_psisat_geomean</p></th>
+<th class="head"><p>ngen_cwpvt_mean</p></th>
+<th class="head"><p>ngen_mp_mean</p></th>
+<th class="head"><p>ngen_mfsno_mean</p></th>
+<th class="head"><p>ngen_quartz_mean</p></th>
+<th class="head"><p>ngen_refkdt_mean</p></th>
+<th class="head"><p>ngen_slope1km_mean</p></th>
+<th class="head"><p>ngen_smcmax_mean</p></th>
+<th class="head"><p>ngen_smcwlt_mean</p></th>
+<th class="head"><p>ngen_vcmx_mean</p></th>
+<th class="head"><p>ngen_cgw</p></th>
+<th class="head"><p>ngen_expon</p></th>
+<th class="head"><p>ngen_max_gw_storage</p></th>
+<th class="head"><p>ngen_imperv_mean</p></th>
+<th class="head"><p>streamcat_BFI</p></th>
+<th class="head"><p>streamcat_DamDens</p></th>
+<th class="head"><p>streamcat_Elev</p></th>
+<th class="head"><p>streamcat_Perm</p></th>
+<th class="head"><p>streamcat_RckDep</p></th>
+<th class="head"><p>streamcat_WtDep</p></th>
+<th class="head"><p>streamcat_AgKffact</p></th>
+<th class="head"><p>streamcat_Kffact</p></th>
+<th class="head"><p>streamcat_PctCarbResid</p></th>
+<th class="head"><p>streamcat_PctNonCarbResid</p></th>
+<th class="head"><p>streamcat_PctWater</p></th>
+<th class="head"><p>streamcat_Precip</p></th>
+<th class="head"><p>streamcat_Tmax</p></th>
+<th class="head"><p>streamcat_Tmean</p></th>
+<th class="head"><p>streamcat_Tmin</p></th>
+<th class="head"><p>streamcat_Runoff</p></th>
+<th class="head"><p>streamcat_Clay</p></th>
+<th class="head"><p>streamcat_Sand</p></th>
+<th class="head"><p>streamcat_Precip_Minus_EVT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1074100210157824</p></td>
+<td><p>True</p></td>
+<td><p>20.24730033750234</p></td>
+<td><p>5.020439271508947</p></td>
+<td><p>0.050928353325520447</p></td>
+<td><p>172.92101692389082</p></td>
+<td><p>0.0</p></td>
+<td><p>4.4523773193359375</p></td>
+<td><p>1.4478479897661595e-05</p></td>
+<td><p>0.06899999827146534</p></td>
+<td><p>0.14919112988133473</p></td>
+<td><p>11.784592853553853</p></td>
+<td><p>2.0</p></td>
+<td><p>0.9200000166893008</p></td>
+<td><p>2.0</p></td>
+<td><p>0.010160143808876183</p></td>
+<td><p>0.4043118836827545</p></td>
+<td><p>0.00999999977648258</p></td>
+<td><p>43.64731831779272</p></td>
+<td><p>0.00499999988824129</p></td>
+<td><p>3.9253879051716494</p></td>
+<td><p>0.06470147436680382</p></td>
+<td><p>0.16334463421591597</p></td>
+<td><p>32.0</p></td>
+<td><p>0.0</p></td>
+<td><p>4.5478</p></td>
+<td><p>25.250000000000004</p></td>
+<td><p>149.8</p></td>
+<td><p>23.88</p></td>
+<td><p>0.0</p></td>
+<td><p>0.1</p></td>
+<td><p>83.96000000000001</p></td>
+<td><p>0.0</p></td>
+<td><p>0.0</p></td>
+<td><p>1378.2362236479592</p></td>
+<td><p>28.84888893791454</p></td>
+<td><p>22.977240365975767</p></td>
+<td><p>10.56380756533801</p></td>
+<td><p>347.0</p></td>
+<td><p>7.05</p></td>
+<td><p>87.22</p></td>
+<td><p>19.4876</p></td>
+</tr>
+<tr class="row-odd"><td><p>1074100266143509</p></td>
+<td><p>True</p></td>
+<td><p>78.22304914951064</p></td>
+<td><p>7.055796156358193</p></td>
+<td><p>0.04167822450070077</p></td>
+<td><p>192.4173795558176</p></td>
+<td><p>0.0</p></td>
+<td><p>4.4523773193359375</p></td>
+<td><p>1.4478479897661595e-05</p></td>
+<td><p>0.06899999827146529</p></td>
+<td><p>0.155594989657402</p></td>
+<td><p>11.646737281362407</p></td>
+<td><p>2.0</p></td>
+<td><p>0.9200000166893008</p></td>
+<td><p>2.0</p></td>
+<td><p>0.010782891968241698</p></td>
+<td><p>0.40411582589149475</p></td>
+<td><p>0.009999999776482582</p></td>
+<td><p>47.60119198625999</p></td>
+<td><p>0.004999999888241291</p></td>
+<td><p>3.9863010478722907</p></td>
+<td><p>0.06679029803763824</p></td>
+<td><p>0.08909301754866751</p></td>
+<td><p>31.634</p></td>
+<td><p>0.0</p></td>
+<td><p>7.7015</p></td>
+<td><p>25.25</p></td>
+<td><p>149.8</p></td>
+<td><p>23.88</p></td>
+<td><p>0.0083</p></td>
+<td><p>0.1</p></td>
+<td><p>0.2</p></td>
+<td><p>0.0</p></td>
+<td><p>0.0</p></td>
+<td><p>1366.8317469048638</p></td>
+<td><p>28.86652985321995</p></td>
+<td><p>22.855665871942897</p></td>
+<td><p>10.000218427780162</p></td>
+<td><p>347.0</p></td>
+<td><p>7.05</p></td>
+<td><p>87.22</p></td>
+<td><p>19.2913</p></td>
+</tr>
+<tr class="row-even"><td><p>1074100268056066</p></td>
+<td><p>True</p></td>
+<td><p>12.953250648004571</p></td>
+<td><p>6.241271202318929</p></td>
+<td><p>0.038436133457750876</p></td>
+<td><p>189.08256717289498</p></td>
+<td><p>0.0</p></td>
+<td><p>4.4523773193359375</p></td>
+<td><p>1.4478479897661595e-05</p></td>
+<td><p>0.06899999827146532</p></td>
+<td><p>0.15559498965740204</p></td>
+<td><p>11.710038185119627</p></td>
+<td><p>2.0</p></td>
+<td><p>0.9200000166893006</p></td>
+<td><p>2.0</p></td>
+<td><p>0.010782891968241696</p></td>
+<td><p>0.4041158258914948</p></td>
+<td><p>0.009999999776482582</p></td>
+<td><p>41.95553671434628</p></td>
+<td><p>0.00499999988824129</p></td>
+<td><p>3.8740487875770593</p></td>
+<td><p>0.06568874706210683</p></td>
+<td><p>0.10135902554998757</p></td>
+<td><p>32.0427</p></td>
+<td><p>0.0</p></td>
+<td><p>6.6057999999999995</p></td>
+<td><p>25.25</p></td>
+<td><p>149.8</p></td>
+<td><p>23.88</p></td>
+<td><p>0.0</p></td>
+<td><p>0.1</p></td>
+<td><p>82.52</p></td>
+<td><p>0.0</p></td>
+<td><p>0.0</p></td>
+<td><p>1355.4270608590857</p></td>
+<td><p>28.87487424670741</p></td>
+<td><p>22.99455195325816</p></td>
+<td><p>10.272436855642592</p></td>
+<td><p>347.0</p></td>
+<td><p>7.050000000000001</p></td>
+<td><p>87.22</p></td>
+<td><p>17.9823</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>div_id</p></td>
+<td><p>Unique identifier for each catchment.</p></td>
+<td><p>string</p></td>
+</tr>
+<tr class="row-odd"><td><p>is_donor</p></td>
+<td><p>Indicates whether the catchment is a donor (true) or receiver (false).</p></td>
+<td><p>bool</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_area_sqkm</p></td>
+<td><p>Area of the catchment in square kilometers</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_elevation_mean</p></td>
+<td><p>Mean elevation of the catchment</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_slope250m_mean</p></td>
+<td><p>Mean slope of the catchment at 250m resolution</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_aspect_circmean</p></td>
+<td><p>Aspect of the catchment in circular mean</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_glacier_percent</p></td>
+<td><p>Percentage of the catchment covered by glaciers</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_bexp_mode</p></td>
+<td><p>Mode of the beta exponent on Clapp-Hornberger (1978) soil water relations</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_dksat_geomean</p></td>
+<td><p>Geometric mean of saturated hydraulic conductivity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_psisat_geomean</p></td>
+<td><p>Geometric mean of saturated capillary head</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_cwpvt_mean</p></td>
+<td><p>Mean canopy wind parameter for canopy wind profile formulation</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_mp_mean</p></td>
+<td><p>Mean slope of Ball-Berry conductance relationship</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_mfsno_mean</p></td>
+<td><p>Mean melt factor for snow depletion curve</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_quartz_mean</p></td>
+<td><p>Mean quartz content of the soil</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_refkdt_mean</p></td>
+<td><p>Mean soil infiltration parameter</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_slope1km_mean</p></td>
+<td><p>Mean slope of the catchment at 1km resolution</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_smcmax_mean</p></td>
+<td><p>Mean saturated soil moisture content</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_smcwlt_mean</p></td>
+<td><p>Mean wilting point soil moisture content</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_vcmx_mean</p></td>
+<td><p>Mean maximum carboxylation at 25 degC</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_cgw</p></td>
+<td><p>Coefficient controlling the drainage out of the soil bottom (0=no-flow)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_expon</p></td>
+<td><p>Exponent for nonlinear ground water reservoir (1.0 for linear reservoir)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen_max_gw_storage</p></td>
+<td><p>Maximum storage in the conceptual ground water reservoir</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_imperv_mean</p></td>
+<td><p>Mean percentage of impervious area</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_BFI</p></td>
+<td><p>Baseflow is the component of streamflow that can be attributed to ground-water discharge into streams. The Baseflow Index (BFI) is the ratio of baseflow to total flow, expressed as a percentage, within catchment.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_DamDens</p></td>
+<td><p>Density of georeferenced dams within catchment (dams/ square km) based on the National Inventory of Dams (<a class="reference external" href="https://catalog.data.gov/dataset/national-inventory-of-dams">https://catalog.data.gov/dataset/national-inventory-of-dams</a>)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_Elev</p></td>
+<td><p>Mean catchment elevation in meters.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_Perm</p></td>
+<td><p>Mean permeability (cm/hour) of soils (STATSGO) within catchment.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_RckDep</p></td>
+<td><p>Mean depth (cm) to bedrock of soils (STATSGO) within catchment.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_WtDep</p></td>
+<td><p>Mean seasonal water table depth (cm) of soils (STATSGO) within catchment.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_AgKffact</p></td>
+<td><p>Mean soil erodibility (Kf) factor (unitless) of soils within catchment on agricultural land. The Kf factor is used in the Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_Kffact</p></td>
+<td><p>Mean soil erodibility (Kf) factor (unitless) of soils within catchment. The Kf factor is used in the Universal Soil Loss Equation (USLE) and represents a relative index of susceptibility of bare, cultivated soil to particle detachment and transport by rainfall.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_PctCarbResid</p></td>
+<td><p>% of catchment area classified as lithology type: carbonate residual material</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_PctNonCarbResid</p></td>
+<td><p>% of catchment area classified as lithology type: non-carbonate residual material</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_PctWater</p></td>
+<td><p>% of catchment area classified as lithology type: water</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_Precip</p></td>
+<td><p>PRISM climate data - 30-year normal mean precipitation (mm): Annual period: 1981-2010 within catchment</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_Tmax</p></td>
+<td><p>PRISM climate data - 30-year normal maximum temperature (Â°C): Annual period: 1981-2010 within catchment</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_Tmean</p></td>
+<td><p>PRISM climate data - 30-year normal mean temperature (Â°C): Annual period: 1981-2010 within the catchment</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_Tmin</p></td>
+<td><p>PRISM climate data - 30-year normal minimum temperature (Â°C): Annual period: 1981-2010 within catchment</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_Runoff</p></td>
+<td><p>Mean runoff (mm) within catchment</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_Clay</p></td>
+<td><p>Mean % clay content of soils (STATSGO) within catchment.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat_Sand</p></td>
+<td><p>Mean % sand content of soils (STATSGO) within catchment.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamcat_Precip_Minus_EVT</p></td>
+<td><p>This dataset represents surplus precipitation (mm): precipitation minus potential evaporation described in DOI: 10.1016/j.scitotenv.2020.137661 within individual,  local NHDPlusV2 catchments and upstream, contributing watersheds.</p></td>
+<td><p>float64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formulations">
+<span id="id2"></span><h2>formulations<a class="headerlink" href="#formulations" title="Link to this heading">#</a></h2>
+<p>Formulations selected for each catchment from formulation regionalization.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/formulations/form_conus_vpu03S.parquet</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>vpu</p></th>
+<th class="head"><p>div_id</p></th>
+<th class="head"><p>formulation</p></th>
+<th class="head"><p>huc_id</p></th>
+<th class="head"><p>average_score</p></th>
+<th class="head"><p>summary_score</p></th>
+<th class="head"><p>cost</p></th>
+<th class="head"><p>num_gages</p></th>
+<th class="head"><p>upscale_huc</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>03S</p></td>
+<td><p>1271188450740293</p></td>
+<td><p>noah-owp-modular ueb cfe-s smp sft t-route</p></td>
+<td><p>03070103</p></td>
+<td><p>0.804790125940259</p></td>
+<td><p>0.804790125940259</p></td>
+<td><p>None</p></td>
+<td><p>3</p></td>
+<td><p>huc8</p></td>
+</tr>
+<tr class="row-odd"><td><p>03S</p></td>
+<td><p>1271188467006295</p></td>
+<td><p>noah-owp-modular ueb cfe-s smp sft t-route</p></td>
+<td><p>03070103</p></td>
+<td><p>0.804790125940259</p></td>
+<td><p>0.804790125940259</p></td>
+<td><p>None</p></td>
+<td><p>3</p></td>
+<td><p>huc8</p></td>
+</tr>
+<tr class="row-even"><td><p>03S</p></td>
+<td><p>1271189672895076</p></td>
+<td><p>noah-owp-modular ueb cfe-s smp sft t-route</p></td>
+<td><p>03070103</p></td>
+<td><p>0.804790125940259</p></td>
+<td><p>0.804790125940259</p></td>
+<td><p>None</p></td>
+<td><p>3</p></td>
+<td><p>huc8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>vpu</p></td>
+<td><p>Hydrologic VPU the catchment belongs to.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>div_id</p></td>
+<td><p>Unique identifier for each catchment.</p></td>
+<td><p>string</p></td>
+</tr>
+<tr class="row-even"><td><p>formulation</p></td>
+<td><p>Formulation assigned to the catchment.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>huc_id</p></td>
+<td><p>HUC ID the catchment belongs to (given the huc level specified in the configuration).</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>average_score</p></td>
+<td><p>average_score</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>summary_score</p></td>
+<td><p>Highest summary score for the assigned formulation calibrated basins in the HUC region.</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>cost</p></td>
+<td><p>Computational cost associated with the assigned formulation in the HUC region.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>num_gages</p></td>
+<td><p>Number of calibrated basins using the assigned formulation in the HUC region.</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-even"><td><p>upscale_huc</p></td>
+<td><p>HUC level used for upscaling in order to find sufficient number of calibrated basins in the HUC region. If same as the HUC level defined in the configuration, then no upscaling was performed.</p></td>
+<td><p>object</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formulations-pars">
+<span id="id3"></span><h2>formulations_pars<a class="headerlink" href="#formulations-pars" title="Link to this heading">#</a></h2>
+<p>Formulations selected for each catchment from formulation regionalization.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/formulations/form_conus_vpu03S.parquet</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>gage_id</p></th>
+<th class="head"><p>formulation</p></th>
+<th class="head"><p>calibration_run_id</p></th>
+<th class="head"><p>validation_run_id</p></th>
+<th class="head"><p>MFSNO</p></th>
+<th class="head"><p>CWP</p></th>
+<th class="head"><p>VCMX25</p></th>
+<th class="head"><p>MP</p></th>
+<th class="head"><p>RSURF_SNOW</p></th>
+<th class="head"><p>RSURF_EXP</p></th>
+<th class="head"><p>SCAMAX</p></th>
+<th class="head"><p>b</p></th>
+<th class="head"><p>satdk</p></th>
+<th class="head"><p>satpsi</p></th>
+<th class="head"><p>slope</p></th>
+<th class="head"><p>maxsmc</p></th>
+<th class="head"><p>wltsmc</p></th>
+<th class="head"><p>max_gw_storage</p></th>
+<th class="head"><p>Cgw</p></th>
+<th class="head"><p>expon</p></th>
+<th class="head"><p>Kn</p></th>
+<th class="head"><p>Klf</p></th>
+<th class="head"><p>refkdt</p></th>
+<th class="head"><p>mfmax</p></th>
+<th class="head"><p>uadj</p></th>
+<th class="head"><p>si</p></th>
+<th class="head"><p>mfmin</p></th>
+<th class="head"><p>scf</p></th>
+<th class="head"><p>nmf</p></th>
+<th class="head"><p>tipm</p></th>
+<th class="head"><p>pxtemp</p></th>
+<th class="head"><p>plwhc</p></th>
+<th class="head"><p>daygm</p></th>
+<th class="head"><p>smcmin</p></th>
+<th class="head"><p>smcmax</p></th>
+<th class="head"><p>van_genuchten_alpha</p></th>
+<th class="head"><p>van_genuchten_n</p></th>
+<th class="head"><p>hydraulic_conductivity</p></th>
+<th class="head"><p>ponded_depth_max</p></th>
+<th class="head"><p>field_capacity</p></th>
+<th class="head"><p>df</p></th>
+<th class="head"><p>cc</p></th>
+<th class="head"><p>hcan</p></th>
+<th class="head"><p>lai</p></th>
+<th class="head"><p>subalb</p></th>
+<th class="head"><p>ems</p></th>
+<th class="head"><p>cg</p></th>
+<th class="head"><p>zo</p></th>
+<th class="head"><p>rho</p></th>
+<th class="head"><p>rhog</p></th>
+<th class="head"><p>Ks</p></th>
+<th class="head"><p>de</p></th>
+<th class="head"><p>avo</p></th>
+<th class="head"><p>apr</p></th>
+<th class="head"><p>a_Xinanjiang_inflection_point_parameter</p></th>
+<th class="head"><p>b_Xinanjiang_shape_parameter</p></th>
+<th class="head"><p>x_Xinanjiang_shape_parameter</p></th>
+<th class="head"><p>uztwm</p></th>
+<th class="head"><p>uzfwm</p></th>
+<th class="head"><p>lztwm</p></th>
+<th class="head"><p>lzfsm</p></th>
+<th class="head"><p>lzfpm</p></th>
+<th class="head"><p>adimp</p></th>
+<th class="head"><p>uzk</p></th>
+<th class="head"><p>lzpk</p></th>
+<th class="head"><p>lzsk</p></th>
+<th class="head"><p>zperc</p></th>
+<th class="head"><p>rexp</p></th>
+<th class="head"><p>pctim</p></th>
+<th class="head"><p>pfree</p></th>
+<th class="head"><p>riva</p></th>
+<th class="head"><p>side</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>02216180</p></td>
+<td><p>noah-owp-modular lasam t-route</p></td>
+<td><p>96238</p></td>
+<td><p>53303</p></td>
+<td><p>1.449569578948323</p></td>
+<td><p>0.164207594424006</p></td>
+<td><p>47.01652132743059</p></td>
+<td><p>7.337431193205311</p></td>
+<td><p>45.6603354954644</p></td>
+<td><p>3.3852757306824355</p></td>
+<td><p>0.8620794050971368</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>0.0882979562129701</p></td>
+<td><p>0.4285296502213604</p></td>
+<td><p>0.162326318541275</p></td>
+<td><p>2.992162535953276</p></td>
+<td><p>44.40302103261308</p></td>
+<td><p>1.0127676448876892</p></td>
+<td><p>487.1728361088875</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+<tr class="row-odd"><td><p>02314500</p></td>
+<td><p>noah-owp-modular ueb cfe-s smp sft t-route</p></td>
+<td><p>88591</p></td>
+<td><p>80712</p></td>
+<td><p>1.1325899771720942</p></td>
+<td><p>0.3050381541331196</p></td>
+<td><p>44.96433920899859</p></td>
+<td><p>6.700948175356739</p></td>
+<td><p>43.21754378633932</p></td>
+<td><p>5.666193523098661</p></td>
+<td><p>0.8836436461002298</p></td>
+<td><p>9.841014919134896</p></td>
+<td><p>0.0004752459531049</p></td>
+<td><p>0.3259986215337735</p></td>
+<td><p>0.3287783350496248</p></td>
+<td><p>0.2424021325179127</p></td>
+<td><p>0.1294704192930534</p></td>
+<td><p>0.1903773911813904</p></td>
+<td><p>0.000315847996914</p></td>
+<td><p>1.0286695847053466</p></td>
+<td><p>0.711895430547453</p></td>
+<td><p>0.0292708176802384</p></td>
+<td><p>3.5165720023979383</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>4.543191925283374</p></td>
+<td><p>0.2494196031410354</p></td>
+<td><p>0.1200504307212102</p></td>
+<td><p>3.710661501583241</p></td>
+<td><p>0.5752800932656159</p></td>
+<td><p>0.9892993201070314</p></td>
+<td><p>2.115022608296266</p></td>
+<td><p>0.0063527715210404</p></td>
+<td><p>106.99245558555344</p></td>
+<td><p>1142.5080069501605</p></td>
+<td><p>1.3193811960679946</p></td>
+<td><p>0.3430321122963723</p></td>
+<td><p>0.9240509177196808</p></td>
+<td><p>100339.3662896397</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+<tr class="row-even"><td><p>02321000</p></td>
+<td><p>noah-owp-modular lasam t-route</p></td>
+<td><p>72245</p></td>
+<td><p>22061</p></td>
+<td><p>2.588923871809641</p></td>
+<td><p>0.3570326160631324</p></td>
+<td><p>88.2976789453302</p></td>
+<td><p>4.916485113930023</p></td>
+<td><p>24.665098758431288</p></td>
+<td><p>2.1993202670785763</p></td>
+<td><p>0.9209599825667656</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>0.0814888628651469</p></td>
+<td><p>0.5683632880298866</p></td>
+<td><p>0.1457649445299749</p></td>
+<td><p>2.7350358513641218</p></td>
+<td><p>76.93400451382719</p></td>
+<td><p>2.6014852261146744</p></td>
+<td><p>241.39833908885825</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>gage_id</p></td>
+<td><p>gage_id</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>formulation</p></td>
+<td><p>Formulation assigned to the catchment.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>calibration_run_id</p></td>
+<td><p>calibration_run_id</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-odd"><td><p>validation_run_id</p></td>
+<td><p>validation_run_id</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-even"><td><p>MFSNO</p></td>
+<td><p>MFSNO</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>CWP</p></td>
+<td><p>CWP</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>VCMX25</p></td>
+<td><p>VCMX25</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>MP</p></td>
+<td><p>MP</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>RSURF_SNOW</p></td>
+<td><p>RSURF_SNOW</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>RSURF_EXP</p></td>
+<td><p>RSURF_EXP</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>SCAMAX</p></td>
+<td><p>SCAMAX</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>b</p></td>
+<td><p>b</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>satdk</p></td>
+<td><p>satdk</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>satpsi</p></td>
+<td><p>satpsi</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>slope</p></td>
+<td><p>slope</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>maxsmc</p></td>
+<td><p>maxsmc</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>wltsmc</p></td>
+<td><p>wltsmc</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>max_gw_storage</p></td>
+<td><p>max_gw_storage</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>Cgw</p></td>
+<td><p>Cgw</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>expon</p></td>
+<td><p>expon</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>Kn</p></td>
+<td><p>Kn</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>Klf</p></td>
+<td><p>Klf</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>refkdt</p></td>
+<td><p>refkdt</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>mfmax</p></td>
+<td><p>mfmax</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>uadj</p></td>
+<td><p>uadj</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>si</p></td>
+<td><p>si</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>mfmin</p></td>
+<td><p>mfmin</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>scf</p></td>
+<td><p>scf</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>nmf</p></td>
+<td><p>nmf</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>tipm</p></td>
+<td><p>tipm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>pxtemp</p></td>
+<td><p>pxtemp</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>plwhc</p></td>
+<td><p>plwhc</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>daygm</p></td>
+<td><p>daygm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>smcmin</p></td>
+<td><p>smcmin</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>smcmax</p></td>
+<td><p>smcmax</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>van_genuchten_alpha</p></td>
+<td><p>van_genuchten_alpha</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>van_genuchten_n</p></td>
+<td><p>van_genuchten_n</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydraulic_conductivity</p></td>
+<td><p>hydraulic_conductivity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ponded_depth_max</p></td>
+<td><p>ponded_depth_max</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>field_capacity</p></td>
+<td><p>field_capacity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>df</p></td>
+<td><p>df</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>cc</p></td>
+<td><p>cc</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>hcan</p></td>
+<td><p>hcan</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lai</p></td>
+<td><p>lai</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>subalb</p></td>
+<td><p>subalb</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ems</p></td>
+<td><p>ems</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>cg</p></td>
+<td><p>cg</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>zo</p></td>
+<td><p>zo</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>rho</p></td>
+<td><p>rho</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>rhog</p></td>
+<td><p>rhog</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>Ks</p></td>
+<td><p>Ks</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>de</p></td>
+<td><p>de</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>avo</p></td>
+<td><p>avo</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>apr</p></td>
+<td><p>apr</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>a_Xinanjiang_inflection_point_parameter</p></td>
+<td><p>a_Xinanjiang_inflection_point_parameter</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>b_Xinanjiang_shape_parameter</p></td>
+<td><p>b_Xinanjiang_shape_parameter</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>x_Xinanjiang_shape_parameter</p></td>
+<td><p>x_Xinanjiang_shape_parameter</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>uztwm</p></td>
+<td><p>uztwm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>uzfwm</p></td>
+<td><p>uzfwm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lztwm</p></td>
+<td><p>lztwm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>lzfsm</p></td>
+<td><p>lzfsm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lzfpm</p></td>
+<td><p>lzfpm</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>adimp</p></td>
+<td><p>adimp</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>uzk</p></td>
+<td><p>uzk</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>lzpk</p></td>
+<td><p>lzpk</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lzsk</p></td>
+<td><p>lzsk</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>zperc</p></td>
+<td><p>zperc</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>rexp</p></td>
+<td><p>rexp</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>pctim</p></td>
+<td><p>pctim</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>pfree</p></td>
+<td><p>pfree</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>riva</p></td>
+<td><p>riva</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>side</p></td>
+<td><p>side</p></td>
+<td><p>float64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="pairs-cluster-algorithms">
+<span id="id4"></span><h2>pairs_cluster_algorithms<a class="headerlink" href="#pairs-cluster-algorithms" title="Link to this heading">#</a></h2>
+<p>Receiver-donor pairs generated from parameter regionalization using clustering-based algorithms (currently KMeans, KMedoids, HDBSCAN, and BIRCH). Attribute distances are not calculated for these algorithms.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>div_id</p></th>
+<th class="head"><p>tag</p></th>
+<th class="head"><p>donor</p></th>
+<th class="head"><p>distSpatial</p></th>
+<th class="head"><p>donors</p></th>
+<th class="head"><p>distSpatials</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1072639236903480</p></td>
+<td><p>main</p></td>
+<td><p>1074646019530148</p></td>
+<td><p>393</p></td>
+<td><p>1074646019530148,1270210323434343,1270210349671160</p></td>
+<td><p>393,638,641</p></td>
+</tr>
+<tr class="row-odd"><td><p>1072639243699931</p></td>
+<td><p>main</p></td>
+<td><p>1074646019530148</p></td>
+<td><p>393</p></td>
+<td><p>1074646019530148</p></td>
+<td><p>393</p></td>
+</tr>
+<tr class="row-even"><td><p>1072639267016356</p></td>
+<td><p>main</p></td>
+<td><p>1074646019530148</p></td>
+<td><p>391</p></td>
+<td><p>1074646019530148</p></td>
+<td><p>391</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>div_id</p></td>
+<td><p>Unique identifier for each receiver catchment.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>tag</p></td>
+<td><p>Identifier indicating whether the donor is found using all selected attributes during the “main” run or using basic attributes during the “basic” run.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>donor</p></td>
+<td><p>Unique identifier for each donor catchment.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>distSpatial</p></td>
+<td><p>Spatial distance between the receiver and donor catchments (in kilometers).</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-even"><td><p>donors</p></td>
+<td><p>The final set of donors considered for the receiver catchment. The number of final donors is determined by the “n_donor_max” parameter specified in the configuration.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>distSpatials</p></td>
+<td><p>Spatial distances corresponding to the final set of donors (in kilometers).</p></td>
+<td><p>object</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="pairs-distance-algorithms">
+<span id="id5"></span><h2>pairs_distance_algorithms<a class="headerlink" href="#pairs-distance-algorithms" title="Link to this heading">#</a></h2>
+<p>Receiver-donor pairs generated from parameter regionalization using distance-based algorithms (currently Gower and URF).</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/pairs/pairs_gower_conus_vpu03S.parquet</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>div_id</p></th>
+<th class="head"><p>tag</p></th>
+<th class="head"><p>donor</p></th>
+<th class="head"><p>distSpatial</p></th>
+<th class="head"><p>donors</p></th>
+<th class="head"><p>distSpatials</p></th>
+<th class="head"><p>distAttr</p></th>
+<th class="head"><p>distAttrs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1072639236903480</p></td>
+<td><p>main</p></td>
+<td><p>1074646017687319</p></td>
+<td><p>391</p></td>
+<td><p>1074646017687319,1074646019530148,1074620126761110</p></td>
+<td><p>391,393,397</p></td>
+<td><p>0.098</p></td>
+<td><p>0.098,0.07,0.097</p></td>
+</tr>
+<tr class="row-odd"><td><p>1072639243699931</p></td>
+<td><p>main</p></td>
+<td><p>1074646017687319</p></td>
+<td><p>392</p></td>
+<td><p>1074646017687319,1074644787668201,1074644581103738</p></td>
+<td><p>392,392,395</p></td>
+<td><p>0.076</p></td>
+<td><p>0.076,0.077,0.081</p></td>
+</tr>
+<tr class="row-even"><td><p>1072639267016356</p></td>
+<td><p>main</p></td>
+<td><p>1074646017687319</p></td>
+<td><p>389</p></td>
+<td><p>1074646017687319,1074644787668201,1074644581103738</p></td>
+<td><p>389,390,393</p></td>
+<td><p>0.076</p></td>
+<td><p>0.076,0.076,0.08</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>div_id</p></td>
+<td><p>Unique identifier for each receiver catchment.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>tag</p></td>
+<td><p>Identifier indicating whether the donor is found using all selected attributes during the “main” run or using basic attributes during the “basic” run.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>donor</p></td>
+<td><p>Unique identifier for each donor catchment.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>distSpatial</p></td>
+<td><p>Spatial distance between the receiver and donor catchments (in kilometers).</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-even"><td><p>donors</p></td>
+<td><p>The final set of donors considered for the receiver catchment. The number of final donors is determined by the “n_donor_max” parameter specified in the configuration.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>distSpatials</p></td>
+<td><p>Spatial distances corresponding to the final set of donors (in kilometers).</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>distAttr</p></td>
+<td><p>Attribute distance between the receiver and donor catchments (unitless).</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>distAttrs</p></td>
+<td><p>Attribute distances corresponding to the final set of donors (unitless).</p></td>
+<td><p>object</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="pairs-mswm">
+<span id="id6"></span><h2>pairs_mswm<a class="headerlink" href="#pairs-mswm" title="Link to this heading">#</a></h2>
+<p>Receiver-donor pairs generated from parameter regionalization to be used by MSWM.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/pairs/pairs_kmeans_conus_vpu03S_mswm.csv</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>gage_id</p></th>
+<th class="head"><p>div_id</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>02204130</p></td>
+<td><p>1270722761765509</p></td>
+</tr>
+<tr class="row-odd"><td><p>02204130</p></td>
+<td><p>1270720284062617</p></td>
+</tr>
+<tr class="row-even"><td><p>02204130</p></td>
+<td><p>1270720286076263</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>gage_id</p></td>
+<td><p>Unique identifier for each donor basin.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>div_id</p></td>
+<td><p>Unique identifier for each receiver catchment in the VPU.</p></td>
+<td><p>int64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="params">
+<span id="id7"></span><h2>params<a class="headerlink" href="#params" title="Link to this heading">#</a></h2>
+<p>Formulation and calibrated parameters for each donor basin.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/params/formulation_params_kmeans_conus_vpu03S.csv</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>gage_id</p></th>
+<th class="head"><p>formulation</p></th>
+<th class="head"><p>calibration_run_id</p></th>
+<th class="head"><p>validation_run_id</p></th>
+<th class="head"><p>MFSNO</p></th>
+<th class="head"><p>CWP</p></th>
+<th class="head"><p>VCMX25</p></th>
+<th class="head"><p>MP</p></th>
+<th class="head"><p>RSURF_SNOW</p></th>
+<th class="head"><p>RSURF_EXP</p></th>
+<th class="head"><p>SCAMAX</p></th>
+<th class="head"><p>b</p></th>
+<th class="head"><p>satdk</p></th>
+<th class="head"><p>satpsi</p></th>
+<th class="head"><p>slope</p></th>
+<th class="head"><p>maxsmc</p></th>
+<th class="head"><p>wltsmc</p></th>
+<th class="head"><p>max_gw_storage</p></th>
+<th class="head"><p>Cgw</p></th>
+<th class="head"><p>expon</p></th>
+<th class="head"><p>Kn</p></th>
+<th class="head"><p>Klf</p></th>
+<th class="head"><p>refkdt</p></th>
+<th class="head"><p>mfmax</p></th>
+<th class="head"><p>uadj</p></th>
+<th class="head"><p>si</p></th>
+<th class="head"><p>mfmin</p></th>
+<th class="head"><p>scf</p></th>
+<th class="head"><p>nmf</p></th>
+<th class="head"><p>tipm</p></th>
+<th class="head"><p>pxtemp</p></th>
+<th class="head"><p>plwhc</p></th>
+<th class="head"><p>daygm</p></th>
+<th class="head"><p>smcmin</p></th>
+<th class="head"><p>smcmax</p></th>
+<th class="head"><p>van_genuchten_alpha</p></th>
+<th class="head"><p>van_genuchten_n</p></th>
+<th class="head"><p>hydraulic_conductivity</p></th>
+<th class="head"><p>ponded_depth_max</p></th>
+<th class="head"><p>field_capacity</p></th>
+<th class="head"><p>df</p></th>
+<th class="head"><p>cc</p></th>
+<th class="head"><p>hcan</p></th>
+<th class="head"><p>lai</p></th>
+<th class="head"><p>subalb</p></th>
+<th class="head"><p>ems</p></th>
+<th class="head"><p>cg</p></th>
+<th class="head"><p>zo</p></th>
+<th class="head"><p>rho</p></th>
+<th class="head"><p>rhog</p></th>
+<th class="head"><p>Ks</p></th>
+<th class="head"><p>de</p></th>
+<th class="head"><p>avo</p></th>
+<th class="head"><p>apr</p></th>
+<th class="head"><p>a_Xinanjiang_inflection_point_parameter</p></th>
+<th class="head"><p>b_Xinanjiang_shape_parameter</p></th>
+<th class="head"><p>x_Xinanjiang_shape_parameter</p></th>
+<th class="head"><p>uztwm</p></th>
+<th class="head"><p>uzfwm</p></th>
+<th class="head"><p>lztwm</p></th>
+<th class="head"><p>lzfsm</p></th>
+<th class="head"><p>lzfpm</p></th>
+<th class="head"><p>adimp</p></th>
+<th class="head"><p>uzk</p></th>
+<th class="head"><p>lzpk</p></th>
+<th class="head"><p>lzsk</p></th>
+<th class="head"><p>zperc</p></th>
+<th class="head"><p>rexp</p></th>
+<th class="head"><p>pctim</p></th>
+<th class="head"><p>pfree</p></th>
+<th class="head"><p>riva</p></th>
+<th class="head"><p>side</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>02418760</p></td>
+<td><p>noah-owp-modular lasam t-route</p></td>
+<td><p>87047</p></td>
+<td><p>64087</p></td>
+<td><p>3.3259953587437594</p></td>
+<td><p>0.267237405479078</p></td>
+<td><p>25.095078744337528</p></td>
+<td><p>9.924152873914972</p></td>
+<td><p>11.844002617531284</p></td>
+<td><p>3.703894840320293</p></td>
+<td><p>0.7092745859760993</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>0.1164208248787974</p></td>
+<td><p>0.3875411718430442</p></td>
+<td><p>0.0052213416668847</p></td>
+<td><p>1.255381126414214</p></td>
+<td><p>57.08059904345664</p></td>
+<td><p>0.5933512594541368</p></td>
+<td><p>271.74458091143015</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+<tr class="row-odd"><td><p>02361000</p></td>
+<td><p>noah-owp-modular lasam t-route</p></td>
+<td><p>88399</p></td>
+<td><p>62797</p></td>
+<td><p>1.185222985859238</p></td>
+<td><p>0.2998390535466202</p></td>
+<td><p>68.58398198517835</p></td>
+<td><p>11.325266784087388</p></td>
+<td><p>4.963195549310472</p></td>
+<td><p>1.2136957290869923</p></td>
+<td><p>0.7183911792975753</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>0.1374381401049788</p></td>
+<td><p>0.3444166119202376</p></td>
+<td><p>0.2877229013589725</p></td>
+<td><p>2.13134034735349</p></td>
+<td><p>76.65264731971207</p></td>
+<td><p>2.1584872945634057</p></td>
+<td><p>133.8472366173122</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+<tr class="row-even"><td><p>02327100</p></td>
+<td><p>noah-owp-modular lasam t-route</p></td>
+<td><p>91176</p></td>
+<td><p>11929</p></td>
+<td><p>3.79004333980786</p></td>
+<td><p>0.254276697190028</p></td>
+<td><p>40.15436097151438</p></td>
+<td><p>4.49508109249586</p></td>
+<td><p>41.740596648531735</p></td>
+<td><p>1.086010058809768</p></td>
+<td><p>0.8559430344165491</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>0.0287898726148542</p></td>
+<td><p>0.3807174973809346</p></td>
+<td><p>0.2040935272201232</p></td>
+<td><p>2.882401314333724</p></td>
+<td><p>83.82046866015068</p></td>
+<td><p>1.3033211409669754</p></td>
+<td><p>300.5137976264068</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+<td><p>nan</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>gage_id</p></td>
+<td><p>gage_id</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>formulation</p></td>
+<td><p>Formulation assigned to the calibration basin. Modules within the formulation are separated by commas.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>calibration_run_id</p></td>
+<td><p>calibration_run_id</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-odd"><td><p>validation_run_id</p></td>
+<td><p>validation_run_id</p></td>
+<td><p>int64</p></td>
+</tr>
+<tr class="row-even"><td><p>MFSNO</p></td>
+<td><p>NOM parameter: Melt factor for snow depletion curve</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>CWP</p></td>
+<td><p>NOM parameter: Canopy wind parameter for canopy wind profile formulation</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>VCMX25</p></td>
+<td><p>NOM parameter: Maximum carboxylation at 25 deg C</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>MP</p></td>
+<td><p>NOM parameter: Slope of Ball-Berry conductance relationship</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>RSURF_SNOW</p></td>
+<td><p>NOM parameter: Soil surface resistance for snow</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>RSURF_EXP</p></td>
+<td><p>NOM parameter: Exponent in the resistance equation for soil evaporation</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>SCAMAX</p></td>
+<td><p>NOM parameter: Maximum fractional snow cover area</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>b</p></td>
+<td><p>CFE parameter: beta exponent on Clapp-Hornberger (1978) soil water relations</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>satdk</p></td>
+<td><p>CFE parameter: saturated hydraulic conductivity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>satpsi</p></td>
+<td><p>CFE parameter: saturated capillary head</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>slope</p></td>
+<td><p>CFE parameter: this factor (0-1) modifies the gradient of the hydraulic head at the soil bottom. 0=no-flow</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>maxsmc</p></td>
+<td><p>CFE parameter: maximum soil moisture content</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>wltsmc</p></td>
+<td><p>CFE parameter: wilting point soil moisture content</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>max_gw_storage</p></td>
+<td><p>CFE parameter: maximum storage in the conceptual reservoir</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>Cgw</p></td>
+<td><p>CFE parameter: the primary outlet coefficient</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>expon</p></td>
+<td><p>CFE parameter: exponent for nonlinear ground water reservoir (1.0 for linear reservoir)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>Kn</p></td>
+<td><p>CFE parameter: Nash Config param for lateral subsurface runoff (Nash discharge to storage ratio)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>Klf</p></td>
+<td><p>CFE parameter: Nash Config param - primary reservoir</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>refkdt</p></td>
+<td><p>CFE parameter: Reference Soil Infiltration Parameter (used in runoff formulation)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>mfmax</p></td>
+<td><p>snow-17 parameter: maximum non-rain melt factor</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>uadj</p></td>
+<td><p>snow-17 parameter: Average wind function for rain on snow</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>si</p></td>
+<td><p>snow-17 parameter:       100% snow cover threshold</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>mfmin</p></td>
+<td><p>snow-17 parameter: minimum non-rain melt factor</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>scf</p></td>
+<td><p>snow-17 parameter: Snow Correction Factor</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>nmf</p></td>
+<td><p>snow-17 parameter: maximum negative melt factor</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>tipm</p></td>
+<td><p>snow-17 parameter: Antecedent snow temperature index</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>pxtemp</p></td>
+<td><p>snow-17 parameter: Precipitation vs Snow threshold temperature</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>plwhc</p></td>
+<td><p>snow-17 parameter: percent liquid water holding capacity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>daygm</p></td>
+<td><p>snow-17 parameter: daily ground melt</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>smcmin</p></td>
+<td><p>lasam parameter: residual water content (theta_r), or the minimum volumetric water content that a soil layer can naturally attain</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>smcmax</p></td>
+<td><p>lasam parameter: the maximum volumetric water content (theta_s) that a soil layer can naturally attain. Must be greater than theta_r</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>van_genuchten_alpha</p></td>
+<td><p>lasam parameter: van_genuchten_alpha</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>van_genuchten_n</p></td>
+<td><p>lasam parameter: van_genuchten_n</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydraulic_conductivity</p></td>
+<td><p>lasam parameter: hydraulic_conductivity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>ponded_depth_max</p></td>
+<td><p>lasam parameter: the maximum amount of ponded water that is allowed to accumulate on the soil surface</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>field_capacity</p></td>
+<td><p>lasam parameter: capillary head corresponding to volumetric water content at which gravity drainage becomes slower</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>df</p></td>
+<td><p>UEB parameter: Drift multiplier</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>cc</p></td>
+<td><p>UEB parameter: Canopy cover fraction</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>hcan</p></td>
+<td><p>UEB parameter: Canopy height</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lai</p></td>
+<td><p>UEB parameter: Leaf area index</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>subalb</p></td>
+<td><p>UEB parameter: Substrate albedo</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>ems</p></td>
+<td><p>UEB parameter: Emissivity of snow</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>cg</p></td>
+<td><p>UEB parameter: Ground heat capacity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>zo</p></td>
+<td><p>UEB parameter: Roughness length</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>rho</p></td>
+<td><p>UEB parameter: Snow density</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>rhog</p></td>
+<td><p>UEB parameter: Soil density</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>Ks</p></td>
+<td><p>UEB parameter: Snow saturated hydraulic conductivity</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>de</p></td>
+<td><p>UEB parameter: Thermally active soil depth</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>avo</p></td>
+<td><p>UEB parameter: Visual new snow albedo</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>apr</p></td>
+<td><p>UEB parameter: Atmospheric pressure</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>a_Xinanjiang_inflection_point_parameter</p></td>
+<td><p>CFE-X parameter: Xinanjiang ‘a’ coefficient when surface_water_partitioning_scheme=Xinanjiang</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>b_Xinanjiang_shape_parameter</p></td>
+<td><p>CFE-X parameter: Xinanjiang ‘b’ coefficient when surface_water_partitioning_scheme=Xinanjiang</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>x_Xinanjiang_shape_parameter</p></td>
+<td><p>CFE-X parameter: Xinanjiang ‘x’ coefficient when surface_water_partitioning_scheme=Xinanjiang</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>uztwm</p></td>
+<td><p>sac-sma parameter: Maximum upper zone tension water</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>uzfwm</p></td>
+<td><p>sac-sma parameter: Maximum upper zone free water</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lztwm</p></td>
+<td><p>sac-sma parameter: Maximum lower zone tension water</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>lzfsm</p></td>
+<td><p>sac-sma parameter: Maximum lower zone free water, secondary (aka supplemental)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lzfpm</p></td>
+<td><p>sac-sma parameter: Maximum lower zone free water, primary</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>adimp</p></td>
+<td><p>sac-sma parameter: Additional “impervious” area due to saturation</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>uzk</p></td>
+<td><p>sac-sma parameter: Upper zone recession coefficient</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>lzpk</p></td>
+<td><p>sac-sma parameter: Lower zone recession coefficient, primary</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>lzsk</p></td>
+<td><p>sac-sma parameter: Lower zone recession coefficient, secondary (aka supplemental)</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>zperc</p></td>
+<td><p>sac-sma parameter: Minimum percolation rate coefficient</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>rexp</p></td>
+<td><p>sac-sma parameter: Percolation equation exponent</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>pctim</p></td>
+<td><p>sac-sma parameter: Minimum percent impervious area</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>pfree</p></td>
+<td><p>sac-sma parameter: Percent percolating directly to lower zone free wate</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-even"><td><p>riva</p></td>
+<td><p>sac-sma parameter: Percent of the basin that is riparian area</p></td>
+<td><p>float64</p></td>
+</tr>
+<tr class="row-odd"><td><p>side</p></td>
+<td><p>sac-sma parameter: Portion of the baseflow which does not go to the stream</p></td>
+<td><p>float64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="spatial-distance">
+<span id="id8"></span><h2>spatial_distance<a class="headerlink" href="#spatial-distance" title="Link to this heading">#</a></h2>
+<p>Spatial distances between donor and receiver catchments within the VPU. Columns represent donor catchments, and rows represent receiver catchments.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/spatial_distance/donor_receiver_dist_conus_vpu03S.parquet</span></code></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Schema table omitted for spatial_distance files due to large number of columns.</p>
+</div>
+</section>
+<section id="summary-score">
+<span id="id9"></span><h2>summary_score<a class="headerlink" href="#summary-score" title="Link to this heading">#</a></h2>
+<p>Summary scores for each calibrated formulation and basin.</p>
+<p>Sample file path: <code class="docutils literal notranslate"><span class="pre">outputs/region/test/summary_score/score_conus_vpu03S.parquet</span></code></p>
+<p><strong>Example rows:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>gage_id</p></th>
+<th class="head"><p>formulation</p></th>
+<th class="head"><p>summary_score</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>02204130</p></td>
+<td><p>noah-owp-modular lasam t-route</p></td>
+<td><p>0.7157593162362361</p></td>
+</tr>
+<tr class="row-odd"><td><p>02204130</p></td>
+<td><p>noah-owp-modular snow-17 cfe-x smp sft t-route</p></td>
+<td><p>0.7767337722121507</p></td>
+</tr>
+<tr class="row-even"><td><p>02204130</p></td>
+<td><p>noah-owp-modular ueb cfe-s smp sft t-route</p></td>
+<td><p>0.6668881187748419</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Schema:</strong></p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>gage_id</p></td>
+<td><p>Unique identifier for each calibration basin.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-odd"><td><p>formulation</p></td>
+<td><p>Formulation calibrated for each calibration basin.</p></td>
+<td><p>object</p></td>
+</tr>
+<tr class="row-even"><td><p>summary_score</p></td>
+<td><p>Summary score for the calibrated formulation and basin.</p></td>
+<td><p>float64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="input_data.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Schemas</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="output_plot.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Regionalization Output Plots</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attr-data-final">attr_data_final</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#formulations">formulations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#formulations-pars">formulations_pars</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pairs-cluster-algorithms">pairs_cluster_algorithms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pairs-distance-algorithms">pairs_distance_algorithms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pairs-mswm">pairs_mswm</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#params">params</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spatial-distance">spatial_distance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary-score">summary_score</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/tech_reference/output_data.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, RTX.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

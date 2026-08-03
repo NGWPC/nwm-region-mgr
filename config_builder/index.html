@@ -1,0 +1,2103 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Regionalization Configuration &#8212; nwm_region_mgr  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=90905a2f556bf617f1a9" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d1833e3e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=90905a2f556bf617f1a9"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'config_builder/index';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/form2yaml.js?v=4b298b11"></script>
+    <script src="../_static/components/form-field.js?v=f85f97bb"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="General Configuration File" href="general.html" />
+    <link rel="prev" title="Frequently Asked Questions" href="../faq.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.0" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo" href="../index.html">
+    <span class="logo" style="font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: bold; font-size: 24px; color: var(--pst-color-secondary);">
+        nwm_region_mgr
+      </span>
+  </a></div>
+    
+      <div class="navbar-item">0.1.0</div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tech_reference/index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../tech_reference/index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="general.html">General</a></li>
+<li class="toctree-l1"><a class="reference internal" href="formreg.html">Formulation Regionalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parreg.html">Parameter Regionalization</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Regionalization Configuration</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="regionalization-configuration">
+<h1>Regionalization Configuration<a class="headerlink" href="#regionalization-configuration" title="Link to this heading">#</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h2>
+<p>This section provides detailed documentation for the configuration files used in the NWM Regionalization Manager (nwm-region-mgr) tool. The configuration files define the parameters and settings for both formulation and parameter regionalization processes.</p>
+<p>Example files and schemas for all configuration fields and subfields are included below. You can navigate to each config file or schema section using the tabs on the right or the table of contents below.</p>
+<p>The tabs on the left will take you to the builder for each of the specific config files. Currently, only the general configuration builder is available. The builders for formulation and parameter regionalizations are still under development. In the builder, you will be prompted to enter setup information for your regionalization run, or you can scroll to the bottom to fill in default values. Once done, hit ‘download’ to save the generated configuration YAML file to your local system.</p>
+</section>
+<section id="schema-reference-and-sample-yaml-config-files">
+<h2>Schema Reference and Sample YAML Config Files<a class="headerlink" href="#schema-reference-and-sample-yaml-config-files" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#general-configurations-shared-by-formulation-parameter-regionalizations"><span class="xref myst">General configurations (shared by formulation &amp; parameter regionalizations)</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#example-file"><span class="xref myst">Example File</span></a></p></li>
+<li><p><a class="reference internal" href="#general-schema-general"><span class="xref myst">general Schema (general)</span></a></p></li>
+<li><p><a class="reference internal" href="#general-schema-id-col"><span class="xref myst">general Schema (id_col)</span></a></p></li>
+<li><p><a class="reference internal" href="#general-schema-layer-name"><span class="xref myst">general Schema (layer_name)</span></a></p></li>
+<li><p><a class="reference internal" href="#general-schema-logging"><span class="xref myst">general Schema (logging)</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#specific-configurations-for-formulation-regionalization-formreg"><span class="xref myst">Specific configurations for formulation regionalization (formreg)</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#example-file"><span class="xref myst">Example File</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-general"><span class="xref myst">formreg Schema (general)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-spatial-unit"><span class="xref myst">formreg Schema (spatial_unit)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-best-formulation"><span class="xref myst">formreg Schema (best_formulation)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-summary-score"><span class="xref myst">formreg Schema (summary_score)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-metric-eval-period"><span class="xref myst">formreg Schema (metric_eval_period)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-metrics"><span class="xref myst">formreg Schema (metrics)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-formulation-cost"><span class="xref myst">formreg Schema (formulation_cost)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-output"><span class="xref myst">formreg Schema (output)</span></a></p></li>
+<li><p><a class="reference internal" href="#formreg-schema-baseoutputconfig"><span class="xref myst">formreg Schema (BaseOutputConfig)</span></a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#specific-configurations-for-parameter-regionalization-parreg"><span class="xref myst">Specific configurations for parameter regionalization (parreg)</span></a></p>
+<ul>
+<li><p><a class="reference internal" href="#example-file"><span class="xref myst">Example File</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-general"><span class="xref myst">parreg Schema (general)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-donor"><span class="xref myst">parreg Schema (donor)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-metric-eval-period"><span class="xref myst">parreg Schema (metric_eval_period)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-metric-threshold"><span class="xref myst">parreg Schema (metric_threshold)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-attr-datasets-config"><span class="xref myst">parreg Schema (attr_datasets_config)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-attr-datasets"><span class="xref myst">parreg Schema (attr_datasets)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-snow-cover"><span class="xref myst">parreg Schema (snow_cover)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-algorithms"><span class="xref myst">parreg Schema (algorithms)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-algo-general"><span class="xref myst">parreg Schema (algo_general)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-gower"><span class="xref myst">parreg Schema (gower)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-kmeans"><span class="xref myst">parreg Schema (kmeans)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-kmedoids"><span class="xref myst">parreg Schema (kmedoids)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-birch"><span class="xref myst">parreg Schema (birch)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-hdbscan"><span class="xref myst">parreg Schema (hdbscan)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-output"><span class="xref myst">parreg Schema (output)</span></a></p></li>
+<li><p><a class="reference internal" href="#parreg-schema-baseoutputconfig"><span class="xref myst">parreg Schema (BaseOutputConfig)</span></a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="general-configurations-shared-by-formulation-parameter-regionalizations">
+<h2>General configurations (shared by formulation &amp; parameter regionalizations)<a class="headerlink" href="#general-configurations-shared-by-formulation-parameter-regionalizations" title="Link to this heading">#</a></h2>
+<section id="example-file">
+<h3>Example File<a class="headerlink" href="#example-file" title="Link to this heading">#</a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">general</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">run_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;test&#39;</span><span class="w">     </span><span class="c1"># Name of the run, used to create output folders and files.</span>
+<span class="w">  </span><span class="nt">domain</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;conus&#39;</span><span class="w">     </span><span class="c1"># Which National Water Model Domain this run uses.</span>
+<span class="w">  </span><span class="nt">vpu</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;03S&#39;</span><span class="w">     </span><span class="c1"># Vector processing unit (VPU) to be processed within the domain. Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. Valid VPUs for ak, hi, prvi are 19, 20, 21, respectively.</span>
+<span class="w">  </span><span class="nt">n_procs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">     </span><span class="c1"># Number of processors to use for parallel processing. Set to -1 to use all available processors.</span>
+<span class="w">  </span><span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;~/run_region&#39;</span><span class="w">     </span><span class="c1"># Path to base directory for input/output files.</span>
+<span class="w">  </span><span class="nt">static_data_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;/ngencerf-app/nwm-region-mgr/data/inputs&#39;</span><span class="w">     </span><span class="c1"># Path to static data directory containing hydrofabric and other static input files.</span>
+<span class="w">  </span><span class="nt">ngen_hydrofabric_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg&#39;</span><span class="w">     </span><span class="c1"># Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., &#39;vpu_01.gpkg&#39; or 2) a dictionary mapping VPU strings to file paths, e.g., {&#39;01&#39;: &#39;vpu_01.gpkg&#39;}.If providing a string with placeholders like {vpu}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns &#39;div_id&#39;, &#39;vpu_id&#39; and &#39;geometry&#39;.</span>
+<span class="w">  </span><span class="nt">gage_divide_cwt_file</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># Path to CSV or parquet file with gage divide CWTs, with columns &#39;div_id&#39; and &#39;gage_id&#39;.</span>
+<span class="w">  </span><span class="nt">donor_gage_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/gages_nwm4_calib_all.csv&#39;</span><span class="w">     </span><span class="c1"># Path to CSV file with donor gage information, including &#39;gage_id&#39;, &#39;longitude&#39;, and &#39;latitude&#39;.</span>
+<span class="w">  </span><span class="nt">calval_stats_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet&#39;</span><span class="w">     </span><span class="c1"># Path to CSV or parquet file with calibration/validation statistics for all calibration gages and formulations, e.g., &#39;stat_calval_all_conus.parquet&#39;, &#39;stat_calval_all_conus.csv&#39;. Must include columns for &#39;gage_id&#39;, &#39;formulation&#39;, and relevant metrics to be used for formulation and parameter regionalization.</span>
+<span class="w">  </span><span class="nt">calib_param_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv&#39;</span><span class="w">     </span><span class="c1"># Path to CSV or parquet file containing calibrated parameters for all calibration gages and formulations in the domain. Must include columns for &#39;gage_id&#39;, &#39;formulation&#39;, and calibrated parameters.</span>
+<span class="w">  </span><span class="nt">approach_calib_basins</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;summary_score&#39;</span><span class="w">     </span><span class="c1"># Strategy for assigning formulations to calibrated basins. Valid options are &#39;regionalization&#39; (assign the formulation chosen for the region) or &#39;summary_score&#39; (assign based on formulation summary scores for the calibrated basin).</span>
+<span class="w">  </span><span class="nt">id_col</span><span class="p">:</span><span class="w">     </span><span class="c1"># Dictionary mapping column names for unique identifiers in all applicable files.</span>
+<span class="w">    </span><span class="nt">divide</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;div_id&#39;</span><span class="w">     </span><span class="c1"># Column name for divide (catchment) ID.</span>
+<span class="w">    </span><span class="nt">gage</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;gage_id&#39;</span><span class="w">     </span><span class="c1"># Column name for gage (basin) ID.</span>
+<span class="w">    </span><span class="nt">huc12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;huc_12&#39;</span><span class="w">     </span><span class="c1"># Column name for HUC12 ID.</span>
+<span class="w">    </span><span class="nt">vpu</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;vpu_id&#39;</span><span class="w">     </span><span class="c1"># Column name for VPU ID.</span>
+<span class="w">    </span><span class="nt">drainage_area</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;area_sqkm&#39;</span><span class="w">     </span><span class="c1"># Column name for drainage area.</span>
+<span class="w">  </span><span class="nt">layer_name</span><span class="p">:</span><span class="w">     </span><span class="c1"># Dictionary mapping layer names for hydrofabric files. Identifies the layer in each hydrofabric file to be used during regionalization.</span>
+<span class="w">    </span><span class="nt">huc12</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;WBDSnapshot_National&#39;</span><span class="w">     </span><span class="c1"># Layer name for HUC12 hydrofabric file.</span>
+<span class="w">    </span><span class="nt">ngen</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;divides&#39;</span><span class="w">     </span><span class="c1"># Layer name for NextGen hydrofabric file.</span>
+<span class="w">  </span><span class="nt">logging</span><span class="p">:</span><span class="w">     </span><span class="c1"># Logging configuration for the application.</span>
+<span class="w">    </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;info&#39;</span><span class="w">     </span><span class="c1"># Logging level.</span>
+<span class="w">    </span><span class="nt">log_to_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console.</span>
+<span class="w">    </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;logs/{run_name}.log&#39;</span><span class="w">     </span><span class="c1"># Path to the log file. If not provided, logging will be written to console only.</span>
+</pre></div>
+</div>
+</section>
+<section id="general-schema-general">
+<h3>general Schema (general)<a class="headerlink" href="#general-schema-general" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>run_name</p></td>
+<td><p>str</p></td>
+<td><p>Name of the run, used to create output folders and files.</p></td>
+<td><p>test</p></td>
+<td><p>test</p></td>
+</tr>
+<tr class="row-odd"><td><p>domain</p></td>
+<td><p>str = conus | ak | hi | prvi</p></td>
+<td><p>Which National Water Model Domain this run uses.</p></td>
+<td><p>conus</p></td>
+<td><p>conus</p></td>
+</tr>
+<tr class="row-even"><td><p>vpu</p></td>
+<td><p>str</p></td>
+<td><p>Vector processing unit (VPU) to be processed within the domain. Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. Valid VPUs for ak, hi, prvi are 19, 20, 21, respectively.</p></td>
+<td><p>03S</p></td>
+<td><p>03S</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_procs</p></td>
+<td><p>int</p></td>
+<td><p>Number of processors to use for parallel processing. Set to -1 to use all available processors.</p></td>
+<td><p>-1</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>base_dir</p></td>
+<td><p>str</p></td>
+<td><p>Path to base directory for input/output files.</p></td>
+<td><p>None</p></td>
+<td><p>~/run_region</p></td>
+</tr>
+<tr class="row-odd"><td><p>static_data_dir</p></td>
+<td><p>str</p></td>
+<td><p>Path to static data directory containing hydrofabric and other static input files.</p></td>
+<td><p>None</p></td>
+<td><p>/ngencerf-app/nwm-region-mgr/data/inputs</p></td>
+</tr>
+<tr class="row-even"><td><p>ngen_hydrofabric_file</p></td>
+<td><p>Path | str | Dict[str, Path] | Dict[str, str]</p></td>
+<td><p>Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., ‘vpu_01.gpkg’ or 2) a dictionary mapping VPU strings to file paths, e.g., {‘01’: ‘vpu_01.gpkg’}.If providing a string with placeholders like {vpu}, they will be substituted accordingly and expanded to a dictionary mapping each VPU to its corresponding file. This file must include columns ‘div_id’, ‘vpu_id’ and ‘geometry’.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg</p></td>
+</tr>
+<tr class="row-odd"><td><p>gage_divide_cwt_file</p></td>
+<td><p>Path | str</p></td>
+<td><p>Path to CSV or parquet file with gage divide CWTs, with columns ‘div_id’ and ‘gage_id’.</p></td>
+<td><p>None</p></td>
+<td><p>[‘{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet’]</p></td>
+</tr>
+<tr class="row-even"><td><p>donor_gage_file</p></td>
+<td><p>Path | str</p></td>
+<td><p>Path to CSV file with donor gage information, including ‘gage_id’, ‘longitude’, and ‘latitude’.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/gages_nwm4_calib_all.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>calval_stats_file</p></td>
+<td><p>Path | str</p></td>
+<td><p>Path to CSV or parquet file with calibration/validation statistics for all calibration gages and formulations, e.g., ‘stat_calval_all_conus.parquet’, ‘stat_calval_all_conus.csv’. Must include columns for ‘gage_id’, ‘formulation’, and relevant metrics to be used for formulation and parameter regionalization.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/calval_stats/stat_calval_all_{domain}.parquet</p></td>
+</tr>
+<tr class="row-even"><td><p>calib_param_file</p></td>
+<td><p>Path | str</p></td>
+<td><p>Path to CSV or parquet file containing calibrated parameters for all calibration gages and formulations in the domain. Must include columns for ‘gage_id’, ‘formulation’, and calibrated parameters.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/pseudo_calib_params/sampled_params_{domain}.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>approach_calib_basins</p></td>
+<td><p>str = regionalization | summary_score</p></td>
+<td><p>Strategy for assigning formulations to calibrated basins. Valid options are ‘regionalization’ (assign the formulation chosen for the region) or ‘summary_score’ (assign based on formulation summary scores for the calibrated basin).</p></td>
+<td><p>summary_score</p></td>
+<td><p>summary_score</p></td>
+</tr>
+<tr class="row-even"><td><p>id_col</p></td>
+<td><p>FieldCrosswalk</p></td>
+<td><p>Dictionary mapping column names for unique identifiers in all applicable files.</p></td>
+<td><p>divide=’div_id’ gage=’gage_id’ huc12=’huc_12’ vpu=’vpu_id’ drainage_area=’area_sqkm’</p></td>
+<td><p>{‘divide’: ‘div_id’, ‘gage’: ‘gage_id’, ‘huc12’: ‘huc_12’, ‘vpu’: ‘vpu_id’, ‘drainage_area’: ‘area_sqkm’}</p></td>
+</tr>
+<tr class="row-odd"><td><p>layer_name</p></td>
+<td><p>LayerCrosswalk</p></td>
+<td><p>Dictionary mapping layer names for hydrofabric files. Identifies the layer in each hydrofabric file to be used during regionalization.</p></td>
+<td><p>huc12=’WBDSnapshot_National’ ngen=’divides’</p></td>
+<td><p>{‘huc12’: ‘WBDSnapshot_National’, ‘ngen’: ‘divides’}</p></td>
+</tr>
+<tr class="row-even"><td><p>logging</p></td>
+<td><p>LoggingConfig</p></td>
+<td><p>Logging configuration for the application.</p></td>
+<td><p>level=’info’ log_to_file=False file=None</p></td>
+<td><p>{‘level’: ‘info’, ‘log_to_file’: True, ‘file’: ‘logs/{run_name}.log’}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="general-schema-id-col">
+<h3>general Schema (id_col)<a class="headerlink" href="#general-schema-id-col" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>divide</p></td>
+<td><p>str</p></td>
+<td><p>Column name for divide (catchment) ID.</p></td>
+<td><p>div_id</p></td>
+<td><p>div_id</p></td>
+</tr>
+<tr class="row-odd"><td><p>gage</p></td>
+<td><p>str</p></td>
+<td><p>Column name for gage (basin) ID.</p></td>
+<td><p>gage_id</p></td>
+<td><p>gage_id</p></td>
+</tr>
+<tr class="row-even"><td><p>huc12</p></td>
+<td><p>str</p></td>
+<td><p>Column name for HUC12 ID.</p></td>
+<td><p>huc_12</p></td>
+<td><p>huc_12</p></td>
+</tr>
+<tr class="row-odd"><td><p>vpu</p></td>
+<td><p>str</p></td>
+<td><p>Column name for VPU ID.</p></td>
+<td><p>vpu_id</p></td>
+<td><p>vpu_id</p></td>
+</tr>
+<tr class="row-even"><td><p>drainage_area</p></td>
+<td><p>str</p></td>
+<td><p>Column name for drainage area.</p></td>
+<td><p>area_sqkm</p></td>
+<td><p>area_sqkm</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="general-schema-layer-name">
+<h3>general Schema (layer_name)<a class="headerlink" href="#general-schema-layer-name" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>huc12</p></td>
+<td><p>str</p></td>
+<td><p>Layer name for HUC12 hydrofabric file.</p></td>
+<td><p>WBDSnapshot_National</p></td>
+<td><p>WBDSnapshot_National</p></td>
+</tr>
+<tr class="row-odd"><td><p>ngen</p></td>
+<td><p>str</p></td>
+<td><p>Layer name for NextGen hydrofabric file.</p></td>
+<td><p>divides</p></td>
+<td><p>divides</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="general-schema-logging">
+<h3>general Schema (logging)<a class="headerlink" href="#general-schema-logging" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>level</p></td>
+<td><p>str = debug | info | warning | error | critical</p></td>
+<td><p>Logging level.</p></td>
+<td><p>info</p></td>
+<td><p>debug</p></td>
+</tr>
+<tr class="row-odd"><td><p>log_to_file</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console.</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>file</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Path to the log file. If not provided, logging will be written to console only.</p></td>
+<td><p>None</p></td>
+<td><p>logfile.log</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="specific-configurations-for-formulation-regionalization-formreg">
+<h2>Specific configurations for formulation regionalization (formreg)<a class="headerlink" href="#specific-configurations-for-formulation-regionalization-formreg" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Example File<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">general</span><span class="p">:</span><span class="w">     </span><span class="c1"># General settings for formulation regionalization</span>
+<span class="w">  </span><span class="nt">huc12_hydrofabric_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb&#39;</span><span class="w">     </span><span class="c1"># Path to HUC12 hydrofabric file containing HUC12 polygons for spatial discretization.</span>
+<span class="w">  </span><span class="nt">divide_huc12_cwt_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv&#39;</span><span class="w">     </span><span class="c1"># Path to crosswalk file between HUC12 basins and NextGen catchments, with columns &#39;div_id&#39; and &#39;huc_12&#39;.</span>
+<span class="w">  </span><span class="nt">calib_basins_only</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">     </span><span class="c1"># Whether to run formulation selection only for calibrated basins (based on summary score). Set to True to limit formulation selection to calibrated basins only; in such cases, parameter regionalization for uncalibrated catchments will not consider preferred formulations.</span>
+<span class="w">  </span><span class="nt">formulation_to_include</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;noah-owp-modular</span><span class="nv"> </span><span class="s">cfe-x</span><span class="nv"> </span><span class="s">t-route&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;noah-owp-modular</span><span class="nv"> </span><span class="s">ueb</span><span class="nv"> </span><span class="s">cfe-x</span><span class="nv"> </span><span class="s">t-route&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># List of formulations to consider. If None, all available formulations are considered.  If &#39;all&#39;, all formulations are included.</span>
+<span class="w">  </span><span class="nt">formulation_to_exclude</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;noah-owp-modular</span><span class="nv"> </span><span class="s">cfe-s</span><span class="nv"> </span><span class="s">t-route&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># List of formulations to exclude. If None, no formulations are excluded from available options.</span>
+<span class="w">  </span><span class="nt">consider_cost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">     </span><span class="c1"># Whether to consider computational costs of formulations in the regionalization process.</span>
+<span class="nt">spatial_unit</span><span class="p">:</span><span class="w">     </span><span class="c1"># Spatial discretization settings for formulation regionalization.</span>
+<span class="w">  </span><span class="nt">huc_level</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;huc8&#39;</span><span class="w">     </span><span class="c1"># USGS HUC level used for spatial discretization (e.g., &#39;huc8&#39;). Valid options are HUC2, HUC4, HUC6, HUC8, HUC10, and HUC12.A single formulation is selected per spatial unit given the spatial discretization level. Accepted formats: &#39;huc8&#39;, &#39;HUC8&#39;, &#39;huc-8&#39;.</span>
+<span class="w">  </span><span class="nt">nmin_calib_basin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">     </span><span class="c1"># Minimum number of calibration basins required per spatial unit for valid formulation selection.</span>
+<span class="w">  </span><span class="nt">basin_fill_method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;upscaling&#39;</span><span class="w">     </span><span class="c1"># Method to handle spatial units with too few calibration basins. Options: &#39;upscaling&#39; (by upscaling to a coarser spatial unit), and &#39;nearest-neighbor&#39; (by pooling basins from neighboring units).</span>
+<span class="w">  </span><span class="nt">best_formulation</span><span class="p">:</span><span class="w">     </span><span class="c1"># Strategy to determine the best formulation for each spatial unit.</span>
+<span class="w">    </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;total_score&#39;</span><span class="w">     </span><span class="c1"># Method to determine the best formulation, options: &#39;total_score&#39;, &#39;average_score&#39;, which selects the formulation with the highest total or average summary score across all subdivisions (e.g., basins or divides as specified by the &#39;type&#39; field), respectively.</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;divide&#39;</span><span class="w">     </span><span class="c1"># Type of subdivision to use for computing total or average score, options: &#39;basin&#39;, &#39;divide&#39;.</span>
+<span class="w">    </span><span class="nt">tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w">     </span><span class="c1"># Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best score are considered equally good.</span>
+<span class="nt">summary_score</span><span class="p">:</span><span class="w">     </span><span class="c1"># Summary score computation configuration for formulation regionalization.</span>
+<span class="w">  </span><span class="nt">metric_eval_period</span><span class="p">:</span><span class="w">     </span><span class="c1"># Evaluation period of metrics to be used for screening donors.</span>
+<span class="w">    </span><span class="nt">col_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">evalPeriod</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valid</span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span><span class="w">     </span><span class="c1"># Dictionary of metrics used in the summary score, keyed by metric name. Metric names must match columns in the calibration/validation stats file (case sensitive). Weights must sum to 1.0. Refer to schema of MetricConfig for individual metric settings.</span>
+<span class="w">    </span><span class="nt">cor</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">upper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">lower</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span>
+<span class="w">      </span><span class="nt">orientation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
+<span class="w">      </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">    </span><span class="nt">kge</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">upper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">      </span><span class="nt">lower</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.5</span>
+<span class="w">      </span><span class="nt">orientation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positive</span>
+<span class="w">      </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="nt">formulation_cost</span><span class="p">:</span><span class="w">     </span><span class="c1"># Computational cost configuration for each formulation.</span>
+<span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/formulation_costs_secs_per_catchment.csv&#39;</span><span class="w">     </span><span class="c1"># Path to CSV file with formulation costs. If provided, costs will be read from this file.</span>
+<span class="w">  </span><span class="nt">costs</span><span class="p">:</span><span class="w">     </span><span class="c1"># Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored.</span>
+<span class="w">    </span><span class="nt">noah-owp-modular ueb cfe-x t-route</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">    </span><span class="nt">noah-owp-modular snow-17 sac-sma t-route</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="nt">output</span><span class="p">:</span><span class="w">     </span><span class="c1"># Output configuration for formulation regionalization.</span>
+<span class="w">  </span><span class="nt">formulation</span><span class="p">:</span><span class="w">     </span><span class="c1"># Output configurations for the selected formulations.</span>
+<span class="w">    </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/formulations&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">    </span><span class="nt">stem</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;form_{domain}_vpu{vpu}&#39;</span><span class="w">     </span><span class="c1"># File stem for output files, used to create unique file names based on the path.</span>
+<span class="w">    </span><span class="nt">stem_suffix</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;_pars&#39;</span><span class="w">     </span><span class="c1"># Suffix for the file stem, used to create unique file names based on the path for specific needs.</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;parquet&#39;</span><span class="w">     </span><span class="c1"># File format for output files, e.g., &#39;parquet&#39;, &#39;csv&#39;, &#39;yaml&#39;. If not specified, the path must be a file.</span>
+<span class="w">    </span><span class="nt">plots</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for output plots, if applicable.</span>
+<span class="w">      </span><span class="nt">spatial_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">      </span><span class="nt">histogram</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/formulations/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+<span class="w">  </span><span class="nt">config_final</span><span class="p">:</span><span class="w">     </span><span class="c1"># Output configuration for the final configuration file after processing, with placeholders resolved.</span>
+<span class="w">    </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/config_formreg_final.yaml&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">  </span><span class="nt">summary_score</span><span class="p">:</span><span class="w">     </span><span class="c1"># Output configurations for the summary score.</span>
+<span class="w">    </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/summary_score&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">    </span><span class="nt">stem</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;score_{domain}_vpu{vpu}&#39;</span><span class="w">     </span><span class="c1"># File stem for output files, used to create unique file names based on the path.</span>
+<span class="w">    </span><span class="nt">stem_suffix</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;_all_gages&#39;</span><span class="w">     </span><span class="c1"># Suffix for the file stem, used to create unique file names based on the path for specific needs.</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;parquet&#39;</span><span class="w">     </span><span class="c1"># File format for output files, e.g., &#39;parquet&#39;, &#39;csv&#39;, &#39;yaml&#39;. If not specified, the path must be a file.</span>
+<span class="w">    </span><span class="nt">plots</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for output plots, if applicable.</span>
+<span class="w">      </span><span class="nt">histogram</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">      </span><span class="nt">spatial_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">    </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/summary_score/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+</pre></div>
+</div>
+</section>
+<section id="formreg-schema-general">
+<h3>formreg Schema (general)<a class="headerlink" href="#formreg-schema-general" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>huc12_hydrofabric_file</p></td>
+<td><p>str | Path | NoneType</p></td>
+<td><p>Path to HUC12 hydrofabric file containing HUC12 polygons for spatial discretization.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/NHDPlusV21/NHDPlusNationalData/NationalWBDSnapshot.gdb</p></td>
+</tr>
+<tr class="row-odd"><td><p>divide_huc12_cwt_file</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Path to crosswalk file between HUC12 basins and NextGen catchments, with columns ‘div_id’ and ‘huc_12’.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/cwt_divide_huc12/cwt_divide_huc12_{domain}.csv</p></td>
+</tr>
+<tr class="row-even"><td><p>calib_basins_only</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to run formulation selection only for calibrated basins (based on summary score). Set to True to limit formulation selection to calibrated basins only; in such cases, parameter regionalization for uncalibrated catchments will not consider preferred formulations.</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>formulation_to_include</p></td>
+<td><p>List[str] | NoneType</p></td>
+<td><p>List of formulations to consider. If None, all available formulations are considered.  If ‘all’, all formulations are included.</p></td>
+<td><p>None</p></td>
+<td><p>[‘noah-owp-modular cfe-x t-route’, ‘noah-owp-modular ueb cfe-x t-route’]</p></td>
+</tr>
+<tr class="row-even"><td><p>formulation_to_exclude</p></td>
+<td><p>List[str] | NoneType</p></td>
+<td><p>List of formulations to exclude. If None, no formulations are excluded from available options.</p></td>
+<td><p>None</p></td>
+<td><p>[‘noah-owp-modular cfe-s t-route’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>consider_cost</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to consider computational costs of formulations in the regionalization process.</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-spatial-unit">
+<h3>formreg Schema (spatial_unit)<a class="headerlink" href="#formreg-schema-spatial-unit" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>huc_level</p></td>
+<td><p>str</p></td>
+<td><p>USGS HUC level used for spatial discretization (e.g., ‘huc8’). Valid options are HUC2, HUC4, HUC6, HUC8, HUC10, and HUC12.A single formulation is selected per spatial unit given the spatial discretization level. Accepted formats: ‘huc8’, ‘HUC8’, ‘huc-8’.</p></td>
+<td><p>huc8</p></td>
+<td><p>huc8</p></td>
+</tr>
+<tr class="row-odd"><td><p>nmin_calib_basin</p></td>
+<td><p>int</p></td>
+<td><p>Minimum number of calibration basins required per spatial unit for valid formulation selection.</p></td>
+<td><p>3</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>basin_fill_method</p></td>
+<td><p>str = upscaling | nearest-neighbor</p></td>
+<td><p>Method to handle spatial units with too few calibration basins. Options: ‘upscaling’ (by upscaling to a coarser spatial unit), and ‘nearest-neighbor’ (by pooling basins from neighboring units).</p></td>
+<td><p>upscaling</p></td>
+<td><p>upscaling</p></td>
+</tr>
+<tr class="row-odd"><td><p>best_formulation</p></td>
+<td><p>BestFormulation</p></td>
+<td><p>Strategy to determine the best formulation for each spatial unit.</p></td>
+<td><p><factory></p></td>
+<td><p>{‘method’: ‘total_score’, ‘type’: ‘divide’, ‘tolerance’: 0.05}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-best-formulation">
+<h3>formreg Schema (best_formulation)<a class="headerlink" href="#formreg-schema-best-formulation" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>method</p></td>
+<td><p>str = total_score | average_score</p></td>
+<td><p>Method to determine the best formulation, options: ‘total_score’, ‘average_score’, which selects the formulation with the highest total or average summary score across all subdivisions (e.g., basins or divides as specified by the ‘type’ field), respectively.</p></td>
+<td><p>total_score</p></td>
+<td><p>total_score</p></td>
+</tr>
+<tr class="row-odd"><td><p>type</p></td>
+<td><p>str = basin | divide</p></td>
+<td><p>Type of subdivision to use for computing total or average score, options: ‘basin’, ‘divide’.</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>basin</p></td>
+</tr>
+<tr class="row-even"><td><p>tolerance</p></td>
+<td><p>float</p></td>
+<td><p>Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best score are considered equally good.</p></td>
+<td><p>0.05</p></td>
+<td><p>0.05</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-summary-score">
+<h3>formreg Schema (summary_score)<a class="headerlink" href="#formreg-schema-summary-score" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>metric_eval_period</p></td>
+<td><p>MetricEvalPeriod | NoneType</p></td>
+<td><p>Evaluation period of metrics to be used for screening donors.</p></td>
+<td><p>None</p></td>
+<td><p>{‘col_name’: ‘evalPeriod’, ‘value’: ‘valid’}</p></td>
+</tr>
+<tr class="row-odd"><td><p>metrics</p></td>
+<td><p>Dict[str, MetricConfig]</p></td>
+<td><p>Dictionary of metrics used in the summary score, keyed by metric name. Metric names must match columns in the calibration/validation stats file (case sensitive). Weights must sum to 1.0. Refer to schema of MetricConfig for individual metric settings.</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘cor’: {‘upper’: 1.0, ‘lower’: -0.5, ‘orientation’: ‘positive’, ‘weight’: 0.5}, ‘kge’: {‘upper’: 1.0, ‘lower’: -0.5, ‘orientation’: ‘positive’, ‘weight’: 0.5}}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-metric-eval-period">
+<h3>formreg Schema (metric_eval_period)<a class="headerlink" href="#formreg-schema-metric-eval-period" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>col_name</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Name of the column in the donor stats file that contains the evaluation period. No filtering by evaluation period if None.</p></td>
+<td><p>None</p></td>
+<td><p>evalPeriod</p></td>
+</tr>
+<tr class="row-odd"><td><p>value</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Value of the evaluation period to filter donor stats. No filtering by evaluation period if None.</p></td>
+<td><p>None</p></td>
+<td><p>full</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-metrics">
+<h3>formreg Schema (metrics)<a class="headerlink" href="#formreg-schema-metrics" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>upper</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Upper bound for scaling and normalization, must be greater than lower bound.</p></td>
+<td><p>None</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>lower</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Lower bound for scaling and normalization, must be less than upper bound.</p></td>
+<td><p>None</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>orientation</p></td>
+<td><p>str = positive | negative</p></td>
+<td><p>Orientation of the metric, either ‘positive’ or ‘negative’.</p></td>
+<td><p>positive</p></td>
+<td><p>positive</p></td>
+</tr>
+<tr class="row-odd"><td><p>weight</p></td>
+<td><p>float</p></td>
+<td><p>Weight of the metric in the summary score, must be between 0.0 and 1.0. If 0.0, the metric is ignored.</p></td>
+<td><p>0.0</p></td>
+<td><p>0.25</p></td>
+</tr>
+<tr class="row-even"><td><p>absolute</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to use the absolute value of the metric (e.g., for bias) for normalization.</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-formulation-cost">
+<h3>formreg Schema (formulation_cost)<a class="headerlink" href="#formreg-schema-formulation-cost" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>file</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Path to CSV file with formulation costs. If provided, costs will be read from this file.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/formulation_costs_secs_per_catchment.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>costs</p></td>
+<td><p>Dict[str, float] | NoneType</p></td>
+<td><p>Dictionary of formulation costs, keyed by formulation name. If <code class="docutils literal notranslate"><span class="pre">file</span></code> is provided, this is ignored.</p></td>
+<td><p>None</p></td>
+<td><p>{‘noah-owp-modular ueb cfe-x t-route’: 10, ‘noah-owp-modular snow-17 sac-sma t-route’: 5}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-output">
+<h3>formreg Schema (output)<a class="headerlink" href="#formreg-schema-output" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>formulation</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Output configurations for the selected formulations.</p></td>
+<td><p>save=True path=None stem=None stem_suffix=None format=None plots=None plot_path=’None/plots’</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/formulations’, ‘stem’: ‘form_{domain}_vpu{vpu}’, ‘stem_suffix’: ‘_pars’, ‘format’: ‘parquet’, ‘plots’: {‘spatial_map’: True, ‘histogram’: True}, ‘plot_path’: ‘{base_dir}/outputs/{run_name}/formulations/plots’}</p></td>
+</tr>
+<tr class="row-odd"><td><p>config_final</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Output configuration for the final configuration file after processing, with placeholders resolved.</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/config_formreg_final.yaml’}</p></td>
+</tr>
+<tr class="row-even"><td><p>summary_score</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Output configurations for the summary score.</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/summary_score’, ‘stem’: ‘score_{domain}_vpu{vpu}’, ‘stem_suffix’: ‘_all_gages’, ‘format’: ‘parquet’, ‘plots’: {‘histogram’: True, ‘spatial_map’: True}, ‘plot_path’: ‘{base_dir}/outputs/{run_name}/summary_score/plots’}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="formreg-schema-baseoutputconfig">
+<h3>formreg Schema (BaseOutputConfig)<a class="headerlink" href="#formreg-schema-baseoutputconfig" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>save</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to save output files</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>path</p></td>
+<td><p>Path | str</p></td>
+<td><p>Path to save output file or files. If a directory, the ‘stem’ and ‘format’ must be specified.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>stem</p></td>
+<td><p>str | Dict[str, str] | NoneType</p></td>
+<td><p>File stem for output files, used to create unique file names based on the path.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>stem_suffix</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Suffix for the file stem, used to create unique file names based on the path for specific needs.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>format</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>File format for output files, e.g., ‘parquet’, ‘csv’, ‘yaml’. If not specified, the path must be a file.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>plots</p></td>
+<td><p>Dict[str, Any] | NoneType</p></td>
+<td><p>Configuration for output plots, if applicable.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_path</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder ‘plots’ in the defined output path.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="specific-configurations-for-parameter-regionalization-parreg">
+<h2>Specific configurations for parameter regionalization (parreg)<a class="headerlink" href="#specific-configurations-for-parameter-regionalization-parreg" title="Link to this heading">#</a></h2>
+<section id="id2">
+<h3>Example File<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">general</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">general</span><span class="p">:</span><span class="w">     </span><span class="c1"># General configuration settings specific to parameter regionalization.</span>
+<span class="w">    </span><span class="nt">attr_dataset_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;ngen&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;streamcat&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># List of attribute dataset names to use. Valid options include &#39;ngen&#39;, &#39;hlr&#39;, &#39;streamcat&#39;, &#39;hydroatlas&#39;.</span>
+<span class="w">    </span><span class="nt">algorithm_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;gower&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;kmeans&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># Algorithms to use. Valid options (&#39;gower&#39;, &#39;urf&#39;, &#39;kmeans&#39;, &#39;kmedoids&#39;, &#39;hdbscan&#39;, &#39;birch&#39;, &#39;proximity&#39;).</span>
+<span class="w">    </span><span class="nt">manual_pairings_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/region/manual_pairings/manual_pairs_{vpu}.csv&#39;</span><span class="w">     </span><span class="c1"># Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections.</span>
+<span class="w">  </span><span class="nt">donor</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for donor selection.</span>
+<span class="w">    </span><span class="nt">buffer_km</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0</span><span class="w">     </span><span class="c1"># Size of buffer (in km) around current VPU to identify qualified donors.</span>
+<span class="w">    </span><span class="nt">metric_eval_period</span><span class="p">:</span><span class="w">     </span><span class="c1"># Evaluation period of metrics to be used for screening donors.</span>
+<span class="w">      </span><span class="nt">col_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eval_period</span>
+<span class="w">      </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">full</span>
+<span class="w">    </span><span class="nt">metric_threshold</span><span class="p">:</span><span class="w">     </span><span class="c1"># Dictionary of metric thresholds to be used for screening donors. Each key is a metric name, and metric names must match columns in the calibration/validation stats file (case sensitive). The value is a MetricThreshold object specifying the min, max, and absolute settings. Refer to schema of MetricThreshold for details.</span>
+<span class="w">      </span><span class="nt">cor</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.4</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">        </span><span class="nt">absolute</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">      </span><span class="nt">kge</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">        </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">None</span>
+<span class="w">        </span><span class="nt">absolute</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">  </span><span class="nt">attr_datasets</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for attribute datasets available for use in regionalization.</span>
+<span class="w">    </span><span class="nt">ngen</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for NGEN attribute dataset.(https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html).</span>
+<span class="w">      </span><span class="nt">attr_select_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_config/attr_selection_ngen.csv&#39;</span><span class="w">     </span><span class="c1"># Path to file where selection of attributes to use during regionalization may be found.</span>
+<span class="w">      </span><span class="nt">attr_data_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet&#39;</span><span class="w">     </span><span class="c1"># Path to file where attribute data may be found.</span>
+<span class="w">      </span><span class="nt">base_attr_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;elevation&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;slope&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;aspect&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.</span>
+<span class="w">    </span><span class="nt">hlr</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for Hydrologic Landscape Regions (HLR) attribute dataset (https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states).</span>
+<span class="w">      </span><span class="nt">attr_select_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_config/attr_selection_hlr.csv&#39;</span><span class="w">     </span><span class="c1"># Path to file where selection of attributes to use during regionalization may be found.</span>
+<span class="w">      </span><span class="nt">attr_data_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet&#39;</span><span class="w">     </span><span class="c1"># Path to file where attribute data may be found.</span>
+<span class="w">      </span><span class="nt">base_attr_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;PPT&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;SAND&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.</span>
+<span class="w">    </span><span class="nt">streamcat</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for StreamCat attribute dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset).</span>
+<span class="w">      </span><span class="nt">attr_select_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_config/attr_selection_streamcat.csv&#39;</span><span class="w">     </span><span class="c1"># Path to file where selection of attributes to use during regionalization may be found.</span>
+<span class="w">      </span><span class="nt">attr_data_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet&#39;</span><span class="w">     </span><span class="c1"># Path to file where attribute data may be found.</span>
+<span class="w">      </span><span class="nt">base_attr_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;Precip_Minus_EVT&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;Elev&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;BFI&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.</span>
+<span class="w">    </span><span class="nt">hydroatlas</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for HydroATLAS attribute dataset (https://www.hydrosheds.org/hydroatlas).</span>
+<span class="w">      </span><span class="nt">attr_select_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_config/attr_selection_hydroatlas.csv&#39;</span><span class="w">     </span><span class="c1"># Path to file where selection of attributes to use during regionalization may be found.</span>
+<span class="w">      </span><span class="nt">attr_data_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{static_data_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet&#39;</span><span class="w">     </span><span class="c1"># Path to file where attribute data may be found.</span>
+<span class="w">      </span><span class="nt">base_attr_list</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;ele_mt_sav&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;dis_m3_pyr&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;run_mm_syr&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;pre_mm_syr&#39;</span><span class="p p-Indicator">]</span><span class="w">     </span><span class="c1"># Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.</span>
+<span class="w">  </span><span class="nt">snow_cover</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for snow cover data to be used in determining whether catchments are snow-driven.</span>
+<span class="w">    </span><span class="nt">consider_snowness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to consider snow driven and non-snow driven catchments separately in the regionalization process. If True, snow-driven receivers will only consider snow-driven donors and non-snow-driven receivers will only consider non-snow-driven donors.</span>
+<span class="w">    </span><span class="nt">snow_cover_file</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet&#39;</span><span class="w">     </span><span class="c1"># Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values.</span>
+<span class="w">    </span><span class="nt">column</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;snw_pc_syr&#39;</span><span class="w">     </span><span class="c1"># Column name in the snow cover data file that contains the snow cover percentage.</span>
+<span class="w">    </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;20&#39;</span><span class="w">     </span><span class="c1"># Threshold value for snow cover percentage to determine if a catchment is considered snow-driven.</span>
+<span class="w">  </span><span class="nt">output</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for parameter regionalization output.</span>
+<span class="w">    </span><span class="nt">pairs</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for saving donor-receiver pairs.</span>
+<span class="w">      </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/pairs&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">      </span><span class="nt">stem</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pairs_{algorithm_list}_{domain}_vpu{vpu}&#39;</span><span class="w">     </span><span class="c1"># File stem for output files, used to create unique file names based on the path.</span>
+<span class="w">      </span><span class="nt">stem_suffix</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;_mswm&#39;</span><span class="w">     </span><span class="c1"># Suffix for the file stem, used to create unique file names based on the path for specific needs.</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;parquet&#39;</span><span class="w">     </span><span class="c1"># File format for output files, e.g., &#39;parquet&#39;, &#39;csv&#39;, &#39;yaml&#39;. If not specified, the path must be a file.</span>
+<span class="w">      </span><span class="nt">plots</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for output plots, if applicable.</span>
+<span class="w">        </span><span class="nt">spatial_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">histogram</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">columns_to_plot</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;distSpatial&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;distAttr&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/pairs/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+<span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for saving regionalized parameters.</span>
+<span class="w">      </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/params&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">      </span><span class="nt">stem</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;formulation_params_{algorithm_list}_{domain}_vpu{vpu}&#39;</span><span class="w">     </span><span class="c1"># File stem for output files, used to create unique file names based on the path.</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;csv&#39;</span><span class="w">     </span><span class="c1"># File format for output files, e.g., &#39;parquet&#39;, &#39;csv&#39;, &#39;yaml&#39;. If not specified, the path must be a file.</span>
+<span class="w">      </span><span class="nt">plots</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for output plots, if applicable.</span>
+<span class="w">        </span><span class="nt">spatial_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">columns_to_plot</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;MP&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;MFSNO&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;uztwm&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;uzfwm&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;pxtemp&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;plwhc&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/params/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+<span class="w">    </span><span class="nt">attr_data_final</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., &#39;Elev&#39; in StreamCat becomes &#39;streamcat_Elev&#39;).</span>
+<span class="w">      </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/attr_data_final&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">      </span><span class="nt">stem</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;attr_{domain}_vpu{vpu}&#39;</span><span class="w">     </span><span class="c1"># File stem for output files, used to create unique file names based on the path.</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;parquet&#39;</span><span class="w">     </span><span class="c1"># File format for output files, e.g., &#39;parquet&#39;, &#39;csv&#39;, &#39;yaml&#39;. If not specified, the path must be a file.</span>
+<span class="w">      </span><span class="nt">plots</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for output plots, if applicable.</span>
+<span class="w">        </span><span class="nt">spatial_map</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">histogram</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">        </span><span class="nt">columns_to_plot</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;streamcat_Elev&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;streamcat_BFI&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;streamcat_Precip_Minus_EVT&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;hlr_PMPE&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;hlr_SAND&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;hlr_TAVE&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/attr_data_final/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+<span class="w">    </span><span class="nt">config_final</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for saving final configuration file used in regionalization.</span>
+<span class="w">      </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/config_parreg_final.yaml&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">      </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;None/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+<span class="w">    </span><span class="nt">spatial_distance</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configuration for saving spatial distance data.</span>
+<span class="w">      </span><span class="nt">save</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">     </span><span class="c1"># Whether to save output files</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{base_dir}/outputs/{run_name}/spatial_distance&#39;</span><span class="w">     </span><span class="c1"># Path to save output file or files. If a directory, the &#39;stem&#39; and &#39;format&#39; must be specified.</span>
+<span class="w">      </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;parquet&#39;</span><span class="w">     </span><span class="c1"># File format for output files, e.g., &#39;parquet&#39;, &#39;csv&#39;, &#39;yaml&#39;. If not specified, the path must be a file.</span>
+<span class="w">      </span><span class="nt">plot_path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;None/plots&#39;</span><span class="w">     </span><span class="c1"># Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder &#39;plots&#39; in the defined output path.</span>
+<span class="w">  </span><span class="nt">algorithms</span><span class="p">:</span><span class="w">     </span><span class="c1"># Algorithm configuration class.  See specific algorithms for additional arguments.</span>
+<span class="w">    </span><span class="nt">algo_general</span><span class="p">:</span><span class="w">     </span><span class="c1"># General configurations shared by all regionalization algorithms.</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">    </span><span class="nt">gower</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configurations for the distance-based algorithm Gower.</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">      </span><span class="nt">min_attr_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">     </span><span class="c1"># Minimum attribute distance. If one or more donors have a distance to receiver smaller than this threshold, stop searching.</span>
+<span class="w">      </span><span class="nt">max_attr_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span><span class="w">     </span><span class="c1"># Maximum attribute distance. Donors with distance to receiver larger than this value are discarded, unless no donor smaller than this threshold is available.</span>
+<span class="w">      </span><span class="nt">min_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200.0</span><span class="w">     </span><span class="c1"># Starting distance (km) to iteratively search for donors in the neighborhood</span>
+<span class="w">      </span><span class="nt">zero_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">     </span><span class="c1"># Distance threshold (in km) where receiver adopts a donor directly (i.e., donor/receiver are considered overlapping each other)</span>
+<span class="w">    </span><span class="nt">urf</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configurations for the distance-based algorithm Unsupervised Random Forest (URF)</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">      </span><span class="nt">pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span><span class="w">     </span><span class="c1"># Whether to perform PCA on the attribute data before building the forest. Preliminary testing indicates limited difference in results with/without PCA.</span>
+<span class="w">      </span><span class="nt">n_trees</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span><span class="w">     </span><span class="c1"># Number of trees in the random forest.</span>
+<span class="w">      </span><span class="nt">max_depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum depth of each tree. If None, nodes are expanded until all leaves are pure.</span>
+<span class="w">      </span><span class="nt">min_attr_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">     </span><span class="c1"># Minimum attribute distance. If one or more donors have a distance to receiver smaller than this threshold, stop searching.</span>
+<span class="w">      </span><span class="nt">max_attr_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span><span class="w">     </span><span class="c1"># Maximum attribute distance. Donors with distance to receiver larger than this value are discarded, unless no donor smaller than this threshold is available.</span>
+<span class="w">      </span><span class="nt">min_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200.0</span><span class="w">     </span><span class="c1"># Starting distance (km) to iteratively search for donors in the neighborhood</span>
+<span class="w">      </span><span class="nt">zero_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">     </span><span class="c1"># Distance threshold (in km) where receiver adopts a donor directly (i.e., donor/receiver are considered overlapping each other)</span>
+<span class="w">    </span><span class="nt">kmeans</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configurations for the clustering algorithm K-means</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">      </span><span class="nt">n_iter_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w">     </span><span class="c1"># Maximum number of iterations for the algorithm.</span>
+<span class="w">      </span><span class="nt">init</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;k-means++&#39;</span><span class="w">     </span><span class="c1"># Method for initialization.</span>
+<span class="w">      </span><span class="nt">n_init</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Number of times the k-means algorithm will be run with different centroid seeds.</span>
+<span class="w">    </span><span class="nt">kmedoids</span><span class="p">:</span><span class="w">     </span><span class="c1"># Configurations for the clustering algorithm K-medoids</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">      </span><span class="nt">n_iter_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w">     </span><span class="c1"># Maximum number of iterations for the algorithm.</span>
+<span class="w">      </span><span class="nt">init</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;heuristic&#39;</span><span class="w">     </span><span class="c1"># Method for initialization.</span>
+<span class="w">    </span><span class="nt">hdbscan</span><span class="p">:</span><span class="w">     </span><span class="c1"># (&#39;Configurations for the clustering algorithm Hierarchical Density Based Spatial Clustering of Applications with Noise (HDBSCAN)&#39;,)</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria.</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">      </span><span class="nt">min_cluster_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Minimum size of clusters (to avoid being considered noise)</span>
+<span class="w">    </span><span class="nt">birch</span><span class="p">:</span><span class="w">     </span><span class="c1"># (&#39;Configurations for the clustering algorithm Balanced Iterative Reducing and Clustering using Hierarchies (BIRCH)&#39;,)</span>
+<span class="w">      </span><span class="nt">max_spa_dist</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1500.0</span><span class="w">     </span><span class="c1"># Maximum spatial distance (km) to consider a donor suitable</span>
+<span class="w">      </span><span class="nt">n_donor_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">     </span><span class="c1"># Maximum number of donors to keep that satisfy all criteria</span>
+<span class="w">      </span><span class="nt">min_var_pca</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span><span class="w">     </span><span class="c1"># Minimum total variance explained by chosen PCA components</span>
+<span class="w">      </span><span class="nt">branching_factor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">     </span><span class="c1"># Branching factor for the BIRCH algorithm.</span>
+<span class="w">      </span><span class="nt">min_thresh</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span><span class="w">     </span><span class="c1"># Minimum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds between min_thresh and max_thresh to identify a suitable threshold.</span>
+<span class="w">      </span><span class="nt">max_thresh</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.0</span><span class="w">     </span><span class="c1"># Maximum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds between min_thresh and max_thresh to identify a suitable threshold.</span>
+<span class="w">      </span><span class="nt">max_resample</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">     </span><span class="c1"># Maximum number of resamples.</span>
+</pre></div>
+</div>
+</section>
+<section id="parreg-schema-general">
+<h3>parreg Schema (general)<a class="headerlink" href="#parreg-schema-general" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>attr_dataset_list</p></td>
+<td><p>List[str = ngen | hlr | streamcat | hydroatlas]</p></td>
+<td><p>List of attribute dataset names to use. Valid options include ‘ngen’, ‘hlr’, ‘streamcat’, ‘hydroatlas’.</p></td>
+<td><p>[‘ngen’]</p></td>
+<td><p>[‘ngen’, ‘streamcat’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>algorithm_list</p></td>
+<td><p>List[str = gower | urf | kmeans | kmedoids | hdbscan | birch | proximity]</p></td>
+<td><p>Algorithms to use. Valid options (‘gower’, ‘urf’, ‘kmeans’, ‘kmedoids’, ‘hdbscan’, ‘birch’, ‘proximity’).</p></td>
+<td><p>[‘gower’]</p></td>
+<td><p>[‘gower’, ‘kmeans’]</p></td>
+</tr>
+<tr class="row-even"><td><p>manual_pairings_file</p></td>
+<td><p>Path | str | Dict[str, Path] | Dict[str, str] | NoneType</p></td>
+<td><p>Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections.</p></td>
+<td><p>None</p></td>
+<td><p>{static_data_dir}/region/manual_pairings/manual_pairs_{vpu}.csv</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-donor">
+<h3>parreg Schema (donor)<a class="headerlink" href="#parreg-schema-donor" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>buffer_km</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Size of buffer (in km) around current VPU to identify qualified donors.</p></td>
+<td><p>0.0</p></td>
+<td><p>100.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>metric_eval_period</p></td>
+<td><p>MetricEvalPeriod | NoneType</p></td>
+<td><p>Evaluation period of metrics to be used for screening donors.</p></td>
+<td><p>None</p></td>
+<td><p>{‘col_name’: ‘eval_period’, ‘value’: ‘full’}</p></td>
+</tr>
+<tr class="row-even"><td><p>metric_threshold</p></td>
+<td><p>Dict[str, MetricThreshold]</p></td>
+<td><p>Dictionary of metric thresholds to be used for screening donors. Each key is a metric name, and metric names must match columns in the calibration/validation stats file (case sensitive). The value is a MetricThreshold object specifying the min, max, and absolute settings. Refer to schema of MetricThreshold for details.</p></td>
+<td><p>None</p></td>
+<td><p>{‘cor’: {‘min’: 0.4, ‘max’: None, ‘absolute’: False}, ‘kge’: {‘min’: 0.2, ‘max’: None, ‘absolute’: False}}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-metric-eval-period">
+<h3>parreg Schema (metric_eval_period)<a class="headerlink" href="#parreg-schema-metric-eval-period" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>col_name</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Name of the column in the donor stats file that contains the evaluation period. No filtering by evaluation period if None.</p></td>
+<td><p>None</p></td>
+<td><p>evalPeriod</p></td>
+</tr>
+<tr class="row-odd"><td><p>value</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Value of the evaluation period to filter donor stats. No filtering by evaluation period if None.</p></td>
+<td><p>None</p></td>
+<td><p>full</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-metric-threshold">
+<h3>parreg Schema (metric_threshold)<a class="headerlink" href="#parreg-schema-metric-threshold" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>min</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum threshold for the metric. If None, no minimum threshold is applied.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>max</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum threshold for the metric. If None, no maximum threshold is applied.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>absolute</p></td>
+<td><p>bool | NoneType</p></td>
+<td><p>If True, apply the absolute value of the metric before applying the thresholds.</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-attr-datasets-config">
+<h3>parreg Schema (attr_datasets_config)<a class="headerlink" href="#parreg-schema-attr-datasets-config" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>attr_list</p></td>
+<td><p>list | NoneType</p></td>
+<td><p>List of attributes to use from this dataset. If not provided, attributes will be determined from attr_select_file. Either this field or attr_select_file must be provided.If both are provided, attr_list takes priority.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>attr_select_file</p></td>
+<td><p>Path | str | NoneType</p></td>
+<td><p>Path to file where selection of attributes to use during regionalization may be found.</p></td>
+<td><p>None</p></td>
+<td><p>[‘attr_selection_ngen.csv’]</p></td>
+</tr>
+<tr class="row-even"><td><p>attr_data_file</p></td>
+<td><p>Path | str | NoneType</p></td>
+<td><p>Path to file where attribute data may be found.</p></td>
+<td><p>None</p></td>
+<td><p>[‘attr_ngen_{domain}.parquet’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>base_attr_list</p></td>
+<td><p>list | NoneType</p></td>
+<td><p>Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round.</p></td>
+<td><p>None</p></td>
+<td><p>[‘elevation’, ‘slope’, ‘aspect’]</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-attr-datasets">
+<h3>parreg Schema (attr_datasets)<a class="headerlink" href="#parreg-schema-attr-datasets" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ngen</p></td>
+<td><p>AttrDatasetConfig</p></td>
+<td><p>Configuration for NGEN attribute dataset.(https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html).</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘attr_list’: None, ‘attr_select_file’: ‘{static_data_dir}/inputs/attr_config/attr_selection_ngen.csv’, ‘attr_data_file’: ‘{static_data_dir}/inputs/attr_datasets/ngen/attr_ngen_{domain}.parquet’, ‘base_attr_list’: [‘elevation’, ‘slope’, ‘aspect’]}</p></td>
+</tr>
+<tr class="row-odd"><td><p>hlr</p></td>
+<td><p>AttrDatasetConfig</p></td>
+<td><p>Configuration for Hydrologic Landscape Regions (HLR) attribute dataset (https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states).</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘attr_list’: None, ‘attr_select_file’: ‘{static_data_dir}/inputs/attr_config/attr_selection_hlr.csv’, ‘attr_data_file’: ‘{static_data_dir}/inputs/attr_datasets/hlr/attr_hlr_{domain}.parquet’, ‘base_attr_list’: [‘PPT’, ‘SAND’]}</p></td>
+</tr>
+<tr class="row-even"><td><p>streamcat</p></td>
+<td><p>AttrDatasetConfig</p></td>
+<td><p>Configuration for StreamCat attribute dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset).</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘attr_list’: None, ‘attr_select_file’: ‘{static_data_dir}/inputs/attr_config/attr_selection_streamcat.csv’, ‘attr_data_file’: ‘{static_data_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet’, ‘base_attr_list’: [‘Precip_Minus_EVT’, ‘Elev’, ‘BFI’]}</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydroatlas</p></td>
+<td><p>AttrDatasetConfig</p></td>
+<td><p>Configuration for HydroATLAS attribute dataset (https://www.hydrosheds.org/hydroatlas).</p></td>
+<td><p>PydanticUndefined</p></td>
+<td><p>{‘attr_list’: None, ‘attr_select_file’: ‘{static_data_dir}/inputs/attr_config/attr_selection_hydroatlas.csv’, ‘attr_data_file’: ‘{static_data_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet’, ‘base_attr_list’: [‘ele_mt_sav’, ‘dis_m3_pyr’, ‘run_mm_syr’, ‘pre_mm_syr’]}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-snow-cover">
+<h3>parreg Schema (snow_cover)<a class="headerlink" href="#parreg-schema-snow-cover" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>consider_snowness</p></td>
+<td><p>bool | NoneType</p></td>
+<td><p>Whether to consider snow driven and non-snow driven catchments separately in the regionalization process. If True, snow-driven receivers will only consider snow-driven donors and non-snow-driven receivers will only consider non-snow-driven donors.</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>snow_cover_file</p></td>
+<td><p>Path | str | Dict[str, Path | str] | NoneType</p></td>
+<td><p>Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values.</p></td>
+<td><p>None</p></td>
+<td><p>{base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet</p></td>
+</tr>
+<tr class="row-even"><td><p>column</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Column name in the snow cover data file that contains the snow cover percentage.</p></td>
+<td><p>snw_pc_syr</p></td>
+<td><p>snw_pc_syr</p></td>
+</tr>
+<tr class="row-odd"><td><p>threshold</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Threshold value for snow cover percentage to determine if a catchment is considered snow-driven.</p></td>
+<td><p>None</p></td>
+<td><p>20</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-algorithms">
+<h3>parreg Schema (algorithms)<a class="headerlink" href="#parreg-schema-algorithms" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>algo_general</p></td>
+<td><p>AlgoGeneral</p></td>
+<td><p>General configurations shared by all regionalization algorithms.</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>gower</p></td>
+<td><p>Gower</p></td>
+<td><p>Configurations for the distance-based algorithm Gower.</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 min_attr_dist=0.1 max_attr_dist=0.2 min_spa_dist=100.0 zero_spa_dist=1.0</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 min_attr_dist=0.1 max_attr_dist=0.2 min_spa_dist=100.0 zero_spa_dist=1.0</p></td>
+</tr>
+<tr class="row-even"><td><p>urf</p></td>
+<td><p>URF</p></td>
+<td><p>Configurations for the distance-based algorithm Unsupervised Random Forest (URF)</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 pca=False n_trees=500 max_depth=3 min_attr_dist=None max_attr_dist=None min_spa_dist=None zero_spa_dist=None</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 pca=False n_trees=500 max_depth=3 min_attr_dist=None max_attr_dist=None min_spa_dist=None zero_spa_dist=None</p></td>
+</tr>
+<tr class="row-odd"><td><p>kmeans</p></td>
+<td><p>KMeans</p></td>
+<td><p>Configurations for the clustering algorithm K-means</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 n_iter_max=100 init=’k-means++’ n_init=None</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 n_iter_max=100 init=’k-means++’ n_init=None</p></td>
+</tr>
+<tr class="row-even"><td><p>kmedoids</p></td>
+<td><p>KMedoids</p></td>
+<td><p>Configurations for the clustering algorithm K-medoids</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 n_iter_max=None init=’heuristic’</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 n_iter_max=None init=’heuristic’</p></td>
+</tr>
+<tr class="row-odd"><td><p>hdbscan</p></td>
+<td><p>HDBSCAN</p></td>
+<td><p>(‘Configurations for the clustering algorithm Hierarchical Density Based Spatial Clustering of Applications with Noise (HDBSCAN)’,)</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=20 min_var_pca=0.9 min_cluster_size=3</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=20 min_var_pca=0.9 min_cluster_size=3</p></td>
+</tr>
+<tr class="row-even"><td><p>birch</p></td>
+<td><p>Birch</p></td>
+<td><p>(‘Configurations for the clustering algorithm Balanced Iterative Reducing and Clustering using Hierarchies (BIRCH)’,)</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 branching_factor=50 min_thresh=1.5 max_thresh=4.0 max_resample=20</p></td>
+<td><p>max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 branching_factor=50 min_thresh=1.5 max_thresh=4.0 max_resample=20</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-algo-general">
+<h3>parreg Schema (algo_general)<a class="headerlink" href="#parreg-schema-algo-general" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>max_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum spatial distance (km) to consider a donor suitable</p></td>
+<td><p>1000.0</p></td>
+<td><p>1500.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_donor_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of donors to keep that satisfy all criteria</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>min_var_pca</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum total variance explained by chosen PCA components</p></td>
+<td><p>0.9</p></td>
+<td><p>0.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-gower">
+<h3>parreg Schema (gower)<a class="headerlink" href="#parreg-schema-gower" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>max_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum spatial distance (km) to consider a donor suitable</p></td>
+<td><p>1000.0</p></td>
+<td><p>1500.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_donor_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of donors to keep that satisfy all criteria</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>min_var_pca</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum total variance explained by chosen PCA components</p></td>
+<td><p>0.9</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>min_attr_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum attribute distance. If one or more donors have a distance to receiver smaller than this threshold, stop searching.</p></td>
+<td><p>0.1</p></td>
+<td><p>0.1</p></td>
+</tr>
+<tr class="row-even"><td><p>max_attr_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum attribute distance. Donors with distance to receiver larger than this value are discarded, unless no donor smaller than this threshold is available.</p></td>
+<td><p>0.2</p></td>
+<td><p>0.25</p></td>
+</tr>
+<tr class="row-odd"><td><p>min_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Starting distance (km) to iteratively search for donors in the neighborhood</p></td>
+<td><p>100.0</p></td>
+<td><p>200.0</p></td>
+</tr>
+<tr class="row-even"><td><p>zero_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Distance threshold (in km) where receiver adopts a donor directly (i.e., donor/receiver are considered overlapping each other)</p></td>
+<td><p>1.0</p></td>
+<td><p>1.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-kmeans">
+<h3>parreg Schema (kmeans)<a class="headerlink" href="#parreg-schema-kmeans" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>max_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum spatial distance (km) to consider a donor suitable</p></td>
+<td><p>1000.0</p></td>
+<td><p>1500.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_donor_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of donors to keep that satisfy all criteria</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>min_var_pca</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum total variance explained by chosen PCA components</p></td>
+<td><p>0.9</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_iter_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of iterations for the algorithm.</p></td>
+<td><p>100</p></td>
+<td><p>100</p></td>
+</tr>
+<tr class="row-even"><td><p>init</p></td>
+<td><p>str = k-means++ | random | NoneType</p></td>
+<td><p>Method for initialization.</p></td>
+<td><p>k-means++</p></td>
+<td><p>k-means++</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_init</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Number of times the k-means algorithm will be run with different centroid seeds.</p></td>
+<td><p>None</p></td>
+<td><p>3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-kmedoids">
+<h3>parreg Schema (kmedoids)<a class="headerlink" href="#parreg-schema-kmedoids" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>max_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum spatial distance (km) to consider a donor suitable</p></td>
+<td><p>1000.0</p></td>
+<td><p>1500.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_donor_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of donors to keep that satisfy all criteria</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>min_var_pca</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum total variance explained by chosen PCA components</p></td>
+<td><p>0.9</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_iter_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of iterations for the algorithm.</p></td>
+<td><p>None</p></td>
+<td><p>100</p></td>
+</tr>
+<tr class="row-even"><td><p>init</p></td>
+<td><p>str = random | heuristic | k-medoids++ | build | NoneType</p></td>
+<td><p>Method for initialization.</p></td>
+<td><p>heuristic</p></td>
+<td><p>heuristic</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-birch">
+<h3>parreg Schema (birch)<a class="headerlink" href="#parreg-schema-birch" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>max_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum spatial distance (km) to consider a donor suitable</p></td>
+<td><p>1000.0</p></td>
+<td><p>1500.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_donor_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of donors to keep that satisfy all criteria</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>min_var_pca</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum total variance explained by chosen PCA components</p></td>
+<td><p>0.9</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>branching_factor</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Branching factor for the BIRCH algorithm.</p></td>
+<td><p>50</p></td>
+<td><p>50</p></td>
+</tr>
+<tr class="row-even"><td><p>min_thresh</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds between min_thresh and max_thresh to identify a suitable threshold.</p></td>
+<td><p>1.5</p></td>
+<td><p>1.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>max_thresh</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds between min_thresh and max_thresh to identify a suitable threshold.</p></td>
+<td><p>4.0</p></td>
+<td><p>4.0</p></td>
+</tr>
+<tr class="row-even"><td><p>max_resample</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of resamples.</p></td>
+<td><p>20</p></td>
+<td><p>20</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-hdbscan">
+<h3>parreg Schema (hdbscan)<a class="headerlink" href="#parreg-schema-hdbscan" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>max_spa_dist</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Maximum spatial distance (km) to consider a donor suitable</p></td>
+<td><p>1000.0</p></td>
+<td><p>1500.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>n_donor_max</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Maximum number of donors to keep that satisfy all criteria.</p></td>
+<td><p>20</p></td>
+<td><p>20</p></td>
+</tr>
+<tr class="row-even"><td><p>min_var_pca</p></td>
+<td><p>float | NoneType</p></td>
+<td><p>Minimum total variance explained by chosen PCA components</p></td>
+<td><p>0.9</p></td>
+<td><p>0.8</p></td>
+</tr>
+<tr class="row-odd"><td><p>min_cluster_size</p></td>
+<td><p>int | NoneType</p></td>
+<td><p>Minimum size of clusters (to avoid being considered noise)</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-output">
+<h3>parreg Schema (output)<a class="headerlink" href="#parreg-schema-output" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>pairs</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Configuration for saving donor-receiver pairs.</p></td>
+<td><p>save=True path=None stem=None stem_suffix=None format=None plots=None plot_path=’None/plots’</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/pairs’, ‘stem’: ‘pairs_{algorithm_list}_{domain}_vpu{vpu}’, ‘stem_suffix’: ‘_mswm’, ‘format’: ‘parquet’, ‘plots’: {‘spatial_map’: True, ‘histogram’: True, ‘columns_to_plot’: [‘distSpatial’, ‘distAttr’]}, ‘plot_path’: ‘{base_dir}/outputs/{run_name}/pairs/plots’}</p></td>
+</tr>
+<tr class="row-odd"><td><p>params</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Configuration for saving regionalized parameters.</p></td>
+<td><p>save=True path=None stem=None stem_suffix=None format=None plots=None plot_path=’None/plots’</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/params’, ‘stem’: ‘formulation_params_{algorithm_list}_{domain}_vpu{vpu}’, ‘format’: ‘csv’, ‘plots’: {‘spatial_map’: True, ‘columns_to_plot’: [‘MP’, ‘MFSNO’, ‘uztwm’, ‘uzfwm’, ‘pxtemp’, ‘plwhc’]}, ‘plot_path’: ‘{base_dir}/outputs/{run_name}/params/plots’}</p></td>
+</tr>
+<tr class="row-even"><td><p>attr_data_final</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., ‘Elev’ in StreamCat becomes ‘streamcat_Elev’).</p></td>
+<td><p>save=True path=None stem=None stem_suffix=None format=None plots=None plot_path=’None/plots’</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/attr_data_final’, ‘stem’: ‘attr_{domain}_vpu{vpu}’, ‘format’: ‘parquet’, ‘plots’: {‘spatial_map’: True, ‘histogram’: True, ‘columns_to_plot’: [‘streamcat_Elev’, ‘streamcat_BFI’, ‘streamcat_Precip_Minus_EVT’, ‘hlr_PMPE’, ‘hlr_SAND’, ‘hlr_TAVE’]}, ‘plot_path’: ‘{base_dir}/outputs/{run_name}/attr_data_final/plots’}</p></td>
+</tr>
+<tr class="row-odd"><td><p>config_final</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Configuration for saving final configuration file used in regionalization.</p></td>
+<td><p>save=True path=None stem=None stem_suffix=None format=None plots=None plot_path=’None/plots’</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/config_parreg_final.yaml’}</p></td>
+</tr>
+<tr class="row-even"><td><p>spatial_distance</p></td>
+<td><p>BaseOutputConfig</p></td>
+<td><p>Configuration for saving spatial distance data.</p></td>
+<td><p>save=True path=None stem=None stem_suffix=None format=None plots=None plot_path=’None/plots’</p></td>
+<td><p>{‘save’: True, ‘path’: ‘{base_dir}/outputs/{run_name}/spatial_distance’, ‘format’: ‘parquet’}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="parreg-schema-baseoutputconfig">
+<h3>parreg Schema (BaseOutputConfig)<a class="headerlink" href="#parreg-schema-baseoutputconfig" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type(s)</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Example(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>save</p></td>
+<td><p>bool</p></td>
+<td><p>Whether to save output files</p></td>
+<td><p>True</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>path</p></td>
+<td><p>Path | str</p></td>
+<td><p>Path to save output file or files. If a directory, the ‘stem’ and ‘format’ must be specified.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>stem</p></td>
+<td><p>str | Dict[str, str] | NoneType</p></td>
+<td><p>File stem for output files, used to create unique file names based on the path.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>stem_suffix</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Suffix for the file stem, used to create unique file names based on the path for specific needs.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>format</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>File format for output files, e.g., ‘parquet’, ‘csv’, ‘yaml’. If not specified, the path must be a file.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-odd"><td><p>plots</p></td>
+<td><p>Dict[str, Any] | NoneType</p></td>
+<td><p>Configuration for output plots, if applicable.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_path</p></td>
+<td><p>str | NoneType</p></td>
+<td><p>Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder ‘plots’ in the defined output path.</p></td>
+<td><p>None</p></td>
+<td><p>None</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../faq.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Frequently Asked Questions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="general.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">General Configuration File</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#schema-reference-and-sample-yaml-config-files">Schema Reference and Sample YAML Config Files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general-configurations-shared-by-formulation-parameter-regionalizations">General configurations (shared by formulation &amp; parameter regionalizations)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example-file">Example File</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-schema-general">general Schema (general)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-schema-id-col">general Schema (id_col)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-schema-layer-name">general Schema (layer_name)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-schema-logging">general Schema (logging)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specific-configurations-for-formulation-regionalization-formreg">Specific configurations for formulation regionalization (formreg)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Example File</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-general">formreg Schema (general)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-spatial-unit">formreg Schema (spatial_unit)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-best-formulation">formreg Schema (best_formulation)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-summary-score">formreg Schema (summary_score)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-metric-eval-period">formreg Schema (metric_eval_period)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-metrics">formreg Schema (metrics)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-formulation-cost">formreg Schema (formulation_cost)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-output">formreg Schema (output)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formreg-schema-baseoutputconfig">formreg Schema (BaseOutputConfig)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specific-configurations-for-parameter-regionalization-parreg">Specific configurations for parameter regionalization (parreg)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Example File</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-general">parreg Schema (general)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-donor">parreg Schema (donor)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-metric-eval-period">parreg Schema (metric_eval_period)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-metric-threshold">parreg Schema (metric_threshold)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-attr-datasets-config">parreg Schema (attr_datasets_config)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-attr-datasets">parreg Schema (attr_datasets)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-snow-cover">parreg Schema (snow_cover)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-algorithms">parreg Schema (algorithms)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-algo-general">parreg Schema (algo_general)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-gower">parreg Schema (gower)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-kmeans">parreg Schema (kmeans)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-kmedoids">parreg Schema (kmedoids)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-birch">parreg Schema (birch)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-hdbscan">parreg Schema (hdbscan)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-output">parreg Schema (output)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parreg-schema-baseoutputconfig">parreg Schema (BaseOutputConfig)</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/config_builder/index.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=90905a2f556bf617f1a9"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=90905a2f556bf617f1a9"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, RTX.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.20.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

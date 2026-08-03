@@ -1,0 +1,36 @@
+﻿nwm\_region\_mgr.ngen
+=====================
+
+.. automodule:: nwm_region_mgr.ngen
+
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+    
+
+
+    
+        .. rubric:: Modules
+
+        .. autosummary::
+            :toctree:
+            :template: autosummary/module.rst
+            :recursive:
+            
+                config_schema
+                process_config
+
+    
+
+

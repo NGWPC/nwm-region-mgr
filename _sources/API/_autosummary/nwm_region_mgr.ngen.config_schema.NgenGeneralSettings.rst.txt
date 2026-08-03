@@ -1,0 +1,142 @@
+nwm\_region\_mgr.ngen.config\_schema.NgenGeneralSettings
+========================================================
+
+.. currentmodule:: nwm_region_mgr.ngen.config_schema
+
+.. autoclass:: NgenGeneralSettings
+
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+        ~NgenGeneralSettings.model_computed_fields
+      
+      
+        ~NgenGeneralSettings.model_config
+      
+      
+        ~NgenGeneralSettings.model_extra
+      
+      
+        ~NgenGeneralSettings.model_fields
+      
+      
+        ~NgenGeneralSettings.model_fields_set
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+   
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+      
+        ~NgenGeneralSettings.check_vpu
+      
+      
+        ~NgenGeneralSettings.construct
+      
+      
+        ~NgenGeneralSettings.copy
+      
+      
+        ~NgenGeneralSettings.dict
+      
+      
+        ~NgenGeneralSettings.from_orm
+      
+      
+        ~NgenGeneralSettings.json
+      
+      
+        ~NgenGeneralSettings.lower_case_ids
+      
+      
+        ~NgenGeneralSettings.model_construct
+      
+      
+        ~NgenGeneralSettings.model_copy
+      
+      
+        ~NgenGeneralSettings.model_dump
+      
+      
+        ~NgenGeneralSettings.model_dump_json
+      
+      
+        ~NgenGeneralSettings.model_json_schema
+      
+      
+        ~NgenGeneralSettings.model_parametrized_name
+      
+      
+        ~NgenGeneralSettings.model_post_init
+      
+      
+        ~NgenGeneralSettings.model_rebuild
+      
+      
+        ~NgenGeneralSettings.model_validate
+      
+      
+        ~NgenGeneralSettings.model_validate_json
+      
+      
+        ~NgenGeneralSettings.model_validate_strings
+      
+      
+        ~NgenGeneralSettings.normalize_hydrofabric_file
+      
+      
+        ~NgenGeneralSettings.parse_file
+      
+      
+        ~NgenGeneralSettings.parse_obj
+      
+      
+        ~NgenGeneralSettings.parse_raw
+      
+      
+        ~NgenGeneralSettings.schema
+      
+      
+        ~NgenGeneralSettings.schema_json
+      
+      
+        ~NgenGeneralSettings.update_forward_refs
+      
+      
+        ~NgenGeneralSettings.validate
+      
+
+   
+   
