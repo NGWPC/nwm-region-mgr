@@ -21,7 +21,7 @@ spatial_unit:
   nmin_calib_basin: 3 # minimum number of calibration basins contained in each spatial unit
   basin_fill_method: upscaling #method to find more calibration basins for a spatial unit: upscaling or nearest-neighbor
   best_formulation: # method to select the best formulation for each spatial unit
-    method: total_score # method can be either 'total_score' or 'total_count'
+    method: total_score # method can be either 'total_score' or 'average_score'
     type: divide  # type can be either 'basin' or 'divide'
     tolerance: 0.05  # tolerance for the summary score 
 
