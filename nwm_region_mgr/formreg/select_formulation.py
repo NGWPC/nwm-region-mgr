@@ -364,9 +364,10 @@ def _get_formulation_costs(
 
 def _select_formulation_given_score(
     df: pd.DataFrame,
-    method: str = "basin",
-    type: str = "total_score",
-    id_col: dict[str, str] = {"gage": "gage_id", "divide": "div_id"},
+    method: str = "average_score",
+    score_type: str = "basin",
+    gage_col: str = "gage_id",
+    div_col: str = "div_id",
 ) -> pd.DataFrame:
     """Compute total or average score for each spatial unit based on the method specified.
 
@@ -374,12 +375,13 @@ def _select_formulation_given_score(
         df : pd.DataFrame
             DataFrame containing summary scores for each formulation and calibrated basin.
         method : str, optional
-            Method to compute total score, either 'basin' or 'divide', by default 'basin'.
-        type : str, optional
-            Type of total score to compute, either 'total_score' or 'average_score', by default 'total_score'.
-        id_col : dict[str, str], optional
-            Dictionary mapping spatial unit type to its identifier column name,
-            by default {"gage": "gage_id", "divide": "div_id"}.
+            Method to compute total or average score, either 'total_score' or 'average_score', by default 'average_score'.
+        score_type : str, optional
+            Type of score to compute, either 'basin' or 'divide', by default 'basin'.
+        gage_col : str, optional
+            Column name for gage ID in the DataFrame, by default "gage_id".
+        div_col : str, optional
+            Column name for divide ID in the DataFrame, by default "div_id".
 
     Returns:
         pd.DataFrame
@@ -387,11 +389,17 @@ def _select_formulation_given_score(
 
     """
     # determine the column name for the type of subdivision to compute total/average score
-    col1 = (
-        id_col.get("gage", "gage_id")
-        if type == "basin" and "gage_id" in df.columns
-        else id_col.get("divide", "div_id")
-    )
+    if score_type == "basin" and gage_col in df.columns:
+        col1 = gage_col
+    elif score_type == "divide" and div_col in df.columns:
+        col1 = div_col
+    else:
+        msg = (
+            f"Invalid best_formulation type '{score_type}' or missing required columns in the DataFrame. "
+            f"Expected '{gage_col}' for type='basin' or '{div_col}' for type='divide'."
+        )
+        logger.error(msg)
+        raise ValueError(msg)
 
     df1 = df[[col1, "formulation", "summary_score", "cost"]].copy()
 
@@ -410,8 +418,8 @@ def _select_formulation_given_score(
 
     elif method == "average_score":
         # Average summary_score per formulation
-        df1.loc[:, method] = df1.groupby(["formulation"])["summary_score"].transform(
-            "mean"
+        df1.loc[:, method] = (
+            df1.groupby(["formulation"])["summary_score"].transform("mean").round(2)
         )
 
     else:
@@ -736,9 +744,9 @@ def select_formulation_all(
             cost_dict=cost_dict,
         )
 
-        # select the best formulation for each huc_id based on the total score or average score
+        # select the best formulation for each huc_id based on the score method and type specified in the configuration
         best_formulation = _select_formulation_given_score(
-            df_huc, method=score_method, type=score_type
+            df_huc, score_method, score_type, gage_col, div_col
         )
 
         # append the selected formulation to the list
