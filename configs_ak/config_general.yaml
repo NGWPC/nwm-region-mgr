@@ -7,8 +7,8 @@ general:
   vpu: '19' # VPU to process.
   n_procs: 18  # Number of processors to use
 
-  base_dir: '${WORK_DIR}' # Path to the base directory, with WORK_DIR & REPOS_COMMON_ROOT__HOST set via docker run to the current working directory (e.g., /ngen-dev/$USER_NAME/run_region) and common NGWPC repos root (e.g.,/ngencer-app) on host, respectively 
-  static_data_dir: '${REPOS_COMMON_ROOT__HOST}/nwm-region-mgr/data/inputs'  # Path to the static data directory (where all sample inputs for regionalization are stored) 
+  base_dir: '~/run_region' # Path to the base (working) directory  
+  static_data_dir: '~/repos/nwm-region-mgr/data/inputs'  # Path to the static data directory (where all static & sample inputs for regionalization are stored)
   ngen_hydrofabric_file: '{static_data_dir}/region/hydrofabric/gpkg_vpu/vpu_{vpu}.gpkg'
   gage_divide_cwt_file: '{static_data_dir}/region/cwt_divide_gage/calib_gage_divide_{domain}.parquet'
   donor_gage_file: '{static_data_dir}/region/gages_nwm4_calib_all.csv'
