@@ -43,8 +43,8 @@ cat_grp_file = {pair_file}
 forcing_provider = bmi
 
 # Forcing engine template file directory
-#forcing_template_dir = /ngen-app/ngen-forcing/NextGen_Forcings_Engine_BMI/BMI_NextGen_Configs/config_templates/
-forcing_template_dir = /ngencerf-app/forcing_config_templates
+forcing_template_dir = /ngen-app/ngen-forcing/NextGen_Forcings_Engine_BMI/BMI_NextGen_Configs/config_templates/
+#forcing_template_dir = /ngencerf-app/forcing_config_templates
 
 # Forcing engine root directory (used to specify root location of forecast files)
 root_dir = /ngencerf-app/runtime_data
