@@ -291,8 +291,8 @@ echo
 echo "Replace placeholders in configs/config_general.yaml and configs/config_eval.yaml ..."
 
 # Update <N_PROCS> in the general configuration file
-sed -i "s|<N_PROCS>|${NPROCS}|g" configs/config_general.yaml
-echo "  <N_PROCS> ->  ${NPROCS}"
+sed -i "s|<NPROCS>|${NPROCS}|g" configs/config_general.yaml
+echo "  <NPROCS> ->  ${NPROCS}"
 
 # Update <WORK_DIR> in the general and evaluation configuration files
 sed -i "s|<WORK_DIR>|${WORK_DIR}|g" configs/config_general.yaml
