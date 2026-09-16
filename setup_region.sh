@@ -307,10 +307,20 @@ echo "  <STATIC_DATA_DIR> ->  ${STATIC_DIR}"
 echo
 echo "***************************************************************************"
 echo "Setup completed."
+echo
 echo "Check n_procs, base_dir, and static_data_dir in configs/config_general.yaml"
+echo "  and base_dir, crosswalk_file, and calib_param_file in configs/config_eval.yaml"
 echo "  to ensure they are correctly set."
+echo 
+echo "Adjust each configuration file under configs/ as needed for your specific setup ..."
+echo 
 echo "Run the regionalization application using 'rte_scripts/run_region.sh', e.g., "
 echo "  ./rte_scripts/run_region.sh -p"
+echo
+echo "For Slurm-based execution, use 'rte_scripts/sbatch_run_region.sh', e.g.,"
+echo "  ./rte_scripts/sbatch_run_region.sh configs --parreg --walltime 02:00:00"
+echo
 echo "For help and more options, run:"
 echo "  ./rte_scripts/run_region.sh -h"
+echo "  ./rte_scripts/sbatch_run_region.sh --help"
 echo "***************************************************************************"
