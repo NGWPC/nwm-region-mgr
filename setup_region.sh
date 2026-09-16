@@ -263,20 +263,20 @@ echo "Downloading RTE scripts for regionalization from $ORG repo nwm-rte"
 download_github_file \
     "nwm-rte" \
     "bin_mounted/ngen_rte/run_regionalization.py" \
-    "rte_scripts/run_regionalization.py"
+    "nwm-rte/bin_mounted/ngen_rte/run_regionalization.py"
 
 download_github_file \
     "nwm-rte" \
     "run_region.sh" \
-    "rte_scripts/run_region.sh"
+    "nwm-rte/run_region.sh"
 
 download_github_file \
     "nwm-rte" \
     "sbatch_run_region.sh" \
-    "rte_scripts/sbatch_run_region.sh"
+    "nwm-rte/sbatch_run_region.sh"
 
-chmod +x rte_scripts/run_region.sh
-chmod +x rte_scripts/sbatch_run_region.sh
+chmod +x nwm-rte/run_region.sh
+chmod +x nwm-rte/sbatch_run_region.sh
 
 echo
 if [ "$DOWNLOAD_S3" = true ]; then
@@ -321,15 +321,15 @@ echo "Check n_procs, base_dir, and static_data_dir in configs/config_general.yam
 echo "  and base_dir, crosswalk_file, and calib_param_file in configs/config_eval.yaml"
 echo "  to ensure they are correctly set."
 echo 
-echo "Adjust each configuration file under configs/ as needed for your specific setup ..."
+echo "Adjust each configuration file under configs/ as needed for your specific application"
 echo 
-echo "Run the regionalization application using 'rte_scripts/run_region.sh', e.g., "
-echo "  ./rte_scripts/run_region.sh -p"
+echo "Run the regionalization application using 'nwm-rte/run_region.sh', e.g., "
+echo "  ./nwm-rte/run_region.sh -p"
 echo
-echo "For Slurm-based execution, use 'rte_scripts/sbatch_run_region.sh', e.g.,"
-echo "  ./rte_scripts/sbatch_run_region.sh configs --parreg --walltime 02:00:00"
+echo "For Slurm-based execution, use 'nwm-rte/sbatch_run_region.sh', e.g.,"
+echo "  ./nwm-rte/sbatch_run_region.sh configs parreg --walltime 02:00:00"
 echo
 echo "For help and more options, run:"
-echo "  ./rte_scripts/run_region.sh -h"
-echo "  ./rte_scripts/sbatch_run_region.sh --help"
+echo "  ./nwm-rte/run_region.sh -h"
+echo "  ./nwm-rte/sbatch_run_region.sh --help"
 echo "***************************************************************************"
