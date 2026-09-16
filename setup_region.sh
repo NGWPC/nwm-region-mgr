@@ -186,6 +186,15 @@ if [ -n "${ALT_DATA_SOURCE:-}" ]; then
     fi
 
     ALT_DATA_SOURCE="$(realpath "$ALT_DATA_SOURCE")"
+    STATIC_DIR="$(realpath "$STATIC_DIR")"
+
+    if [[ "$ALT_DATA_SOURCE" == "$STATIC_DIR" ||
+        "$ALT_DATA_SOURCE" == "$STATIC_DIR/"* ]]; then
+        echo "ERROR: Alternative data source cannot be the static data directory or a directory inside it:" >&2
+        echo "  STATIC_DIR:     $STATIC_DIR" >&2
+        echo "  ALT_DATA_SOURCE: $ALT_DATA_SOURCE" >&2
+        exit 1
+    fi
 
     if [ -d "$STATIC_DIR" ] || [ -L "$STATIC_DIR" ]; then
         if [ -e "${STATIC_DIR}.bak" ] || [ -L "${STATIC_DIR}.bak" ]; then
