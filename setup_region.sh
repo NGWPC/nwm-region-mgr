@@ -10,7 +10,7 @@ set -euo pipefail
 ## \details
 ## Downloads sample configuration files from nwm-region-mgr and regionalization
 ## scripts from nwm-rte. Static and sample data can be downloaded from S3 or an
-## existing local data source can be specified using --alt_data_source.
+## existing local data source can be specified using --alt-data-source.
 ##
 ## The downloaded configuration files contain placeholders for environment-
 ## specific values, including the number of processors, working directory, and
@@ -18,7 +18,7 @@ set -euo pipefail
 ## values during setup.
 ##
 ## By default, static and sample data are downloaded from S3. Use
-## --no-download-s3 to skip the download. Alternatively, --alt_data_source can
+## --no-download-s3 to skip the download. Alternatively, --alt-data-source can
 ## be used to specify an existing local data source, in which case a symbolic
 ## link is created and the S3 download is skipped.
 ##
@@ -67,7 +67,7 @@ set -euo pipefail
 ## ./setup_region.sh --nprocs 8
 ##
 ## \example
-## ./setup_region.sh --alt_data_source /data/shared/regionalization
+## ./setup_region.sh --alt-data-source /data/shared/regionalization
 ##
 # -----------------------------------------------------------------------------
 
@@ -186,7 +186,7 @@ if [ -n "${ALT_DATA_SOURCE:-}" ]; then
     fi
 
     ALT_DATA_SOURCE="$(realpath "$ALT_DATA_SOURCE")"
-    STATIC_DIR="$(realpath "$STATIC_DIR")"
+    STATIC_DIR="$(realpath -m "$STATIC_DIR")"
 
     if [[ "$ALT_DATA_SOURCE" == "$STATIC_DIR" ||
         "$ALT_DATA_SOURCE" == "$STATIC_DIR/"* ]]; then
@@ -304,13 +304,17 @@ sed -i "s|<NPROCS>|${NPROCS}|g" configs/config_general.yaml
 echo "  <NPROCS> ->  ${NPROCS}"
 
 # Update <WORK_DIR> in the general and evaluation configuration files
-sed -i "s|<WORK_DIR>|${WORK_DIR}|g" configs/config_general.yaml
-sed -i "s|<WORK_DIR>|${WORK_DIR}|g" configs/config_eval.yaml
+escape_sed_replacement() {
+    printf '%s' "$1" | sed 's/[\\&|]/\\&/g'
+}
+    
+sed -i "s|<WORK_DIR>|$(escape_sed_replacement "$WORK_DIR")|g" configs/config_general.yaml
+sed -i "s|<WORK_DIR>|$(escape_sed_replacement "$WORK_DIR")|g" configs/config_eval.yaml
 echo "  <WORK_DIR> ->  ${WORK_DIR}"
 
 # Update <STATIC_DATA_DIR> in the general and evaluation configuration files
-sed -i "s|<STATIC_DATA_DIR>|${STATIC_DIR}|g" configs/config_general.yaml
-sed -i "s|<STATIC_DATA_DIR>|${STATIC_DIR}|g" configs/config_eval.yaml
+sed -i "s|<STATIC_DATA_DIR>|$(escape_sed_replacement "$STATIC_DIR")|g" configs/config_general.yaml
+sed -i "s|<STATIC_DATA_DIR>|$(escape_sed_replacement "$STATIC_DIR")|g" configs/config_eval.yaml
 echo "  <STATIC_DATA_DIR> ->  ${STATIC_DIR}"
 
 echo
