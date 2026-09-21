@@ -1,5 +1,5 @@
 sample_file_path|inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg
-title|NGEN Hydrofabric for a VPU.
+title|The divides layer of NGEN Hydrofabric for a VPU.
 div_id|Unique identifier for each catchment.
 vpu_id|VPU identifier.
 bexp_mode|Beta exponent on Clapp-Hornberger (1978) soil water relations.
