@@ -3,34 +3,94 @@
 ## Overview of regionalization workflow
 
 The regionalization workflow includes the following steps:
- - **STEP 0**: run calibration and collect formulation prameters and calibration/validation statistics
  - **STEP 1**: formulation & parameter regionalization (via nwm-region-mgr)
  - **STEP 2**: regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
  - **STEP 3**: evaluation of regionalized simulations (via nwm-eval-mgr)
 
+Prior to running the regionalization workflow, ensure that you have completed the necessary calibration steps and have properly assembled the calibration parameters and statistics and stored them in the appropriate format (see the sample file and schema for [parameters](tech_reference/input_data.rst#calib-param-file) and [statistics](tech_reference/input_data.rst#calval-stats-file))
+
 ![Regionalization Workflow](_images/regionalization_workflow.jpeg)
 
-## Run regionalization with NWM-RTE in INT/EA/UAT Clusters
+## Run regionalization in docker
 
-In the INT/EA/UAT clusters, all software dependencies for regionalization are installed and managed through 
-NWM-RTE (Run Time Environment, `/ngencerf-app/nwm-rte`). Regionalization workflows are executed via docker containers using an 
-[nwm-rte image](https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte).
+To ensure consistent and reproducible environment, it is recommended that the above end-to-end regionalization workflow 
+be executed within containers using an nwm-rte image that is built locally or pulled from a registry (e.g., {{ '[GHCR](https://github.com/{}/nwm-rte/pkgs/container/nwm-rte)'.format(github_org) }}).
 
-Note prior to running the regionalization workflow, make sure your user account has permissions to access the docker socket and pull images from the registry. Refer to the [Docker permissions](#docker-permissions) subsection below for details.
+To build the RTE Docker image locally, follow the NWM-RTE User Guide {{ '[here](https://github.com/{}/nwm-rte/blob/development/docs/user-guide/get-started.md)'.format(github_org) }}. Note you can skip the download of sample data since it is handled by the setup script `setup_region.sh` discussed below.
+
+Prior to running the regionalization workflow, make sure `docker` is installed on your system and your user account has permissions to access the docker socket. Refer to the [Docker permissions](#docker-permissions) subsection below for details.
+
+### Set up the working environment
+
+The portable script `setup_region.sh` in `nwm-region-mgr`can be used to set up the working environment for running the regionalization workflow in the container.
+
+```bash
+# Create and switch to your preferred working directory
+mkdir -p ~/test_region
+cd ~/test_region
+```
+
+{{ setup_script }}
+
+```bash
+# Run the setup script to configure the environment for the CONUS domain
+chmod +x setup_region.sh
+./setup_region.sh
+
+# Display help and available options
+./setup_region.sh --help
+
+# Run the setup script to configure the environment for an oCONUS domain
+./setup_region.sh --domain ak
+./setup_region.sh -d hi
+./setup_region.sh -d prvi
+```
+
+Running the setup script:
+
+* downloads sample configuration files from `nwm-region-mgr` to the `configs/` subdirectory and replaces the configured placeholder values as needed. These include:
+  * `config_general.yaml`: the main configuration file containing general settings for the regionalization workflow.
+  * `config_formreg.yaml`: the configuration file containing settings specific to formulation regionalization.  
+  * `config_parreg.yaml`: the configuration file containing settings specific to parameter regionalization.
+  * `config_ngen.yaml`: the configuration file containing settings specific to running the regionalized NGEN simulation.
+  * `config_eval.yaml`: the configuration file containing settings specific to evaluating the regionalized simulation..
+* downloads the regionalization scripts from `nwm-rte` to the `nwm-rte/` subdirectory. These include:
+  * `run_region.sh` for running the regionalization workflow locally.
+  * `sbatch_run_region.sh` for submitting regionalization jobs to compute nodes via Slurm, invoking `run_region.sh` to execute the workflow.
+  * `bin_mounted/ngen_rte/run_regionalization.py`, the main Python script for executing the regionalization workflow steps, invoked by `run_region.sh` through `docker run`.
+* downloads static and sample data from S3 to the `static_data/` subdirectory, or links `static_data/` to an existing local data source.
+
+#### Set up in INT/EA/UAT clusters
+
+In the INT, EA, and UAT clusters, use the following commands to set up the working environment.
+
+```bash
+# Create and switch to the working directory (or another directory where you have read and write permissions)
+mkdir -p /ngen-oe/$USER/run_region
+cd /ngen-oe/$USER/run_region
+```
+{{ setup_script }}
+
+```bash
+# Set up the working environment for the CONUS domain using an existing local data source
+# Note here 18 processes is specified for parallel execution based on available CPU cores in these clusters.
+./setup_region.sh --alt-data-source /ngencerf-app/nwm-region-mgr/data/inputs --nprocs 18
+
+# Or use the short options
+./setup_region.sh -a /ngencerf-app/nwm-region-mgr/data/inputs -p 18
+
+# Set up the working environment for an oCONUS domain (e.g., ak, hi, prvi)
+./setup_region.sh -d ak -a /ngencerf-app/nwm-region-mgr/data/inputs -p 18
+./setup_region.sh -d hi -a /ngencerf-app/nwm-region-mgr/data/inputs -p 18
+./setup_region.sh -d prvi -a /ngencerf-app/nwm-region-mgr/data/inputs -p 18
+```
 
 ### Test the sample regionalization workflow
 
-- Navigate to your preferred working directory (e.g., `/ngen-oe/$USER/run_region`, `/ngen-dev/$USER/run_region`, 
-or `~/run_region`). 
-- Copy sample config files from `/ngencerf-app/nwm-region-mgr/configs/` to your working directory., e.g.,
-```bash
-cd /ngen-oe/$USER/run_region  # or your preferred working directory
-cp -r /ngencerf-app/nwm-region-mgr/configs .
-```
-- Run the three regionalization steps below sequentially using one of the two scripts in **nwm-rte**.
-  - (RECOMMENDED) `sbatch_run_region.sh`: submitting jobs to compute nodes in INT/EA/UAT via SBATCH. See RTE 
-    documentation [here](https://ngwpc.github.io/nwm-rte/reference/shell/#sbatch_run_region.sh) for details on usage and available options.
-  - (TEST ONLY) `run_region.sh`: running jobs directly in the controller node or local AWS workspace for small regions or testing purposes. See RTE documentation [here](https://ngwpc.github.io/nwm-rte/reference/shell/#run_region.sh) for details on usage and available options.
+From the working directory, run the three regionalization steps below sequentially using one of the two scripts.
+- `sbatch_run_region.sh`: submitting jobs to compute nodes via SBATCH (e.g., on INT/EA/UAT). See RTE 
+  documentation {{ '[here](https://{}.github.io/nwm-rte/reference/shell/#sbatch_run_region.sh)'.format(github_org) }} for details on usage and available options.
+- `run_region.sh`: running jobs directly in the controller node or workspace. See RTE documentation {{ '[here](https://{}.github.io/nwm-rte/reference/shell/#run_region.sh)'.format(github_org) }} for details on usage and available options.
 
 #### Step 1. Run regionalization
 
@@ -38,67 +98,73 @@ a) Run formulation regionalization alone (no parreg):
 Typically this step can be skipped since parameter regionalization also runs formulation regionalization as a prerequisite. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_formreg.yaml`. 
 
 ```bash
-# submit to compute nodes on INT/EA/UAT
-/ngencerf-app/nwm-rte/sbatch_run_region.sh configs formreg
+# submit to compute nodes (e.g., in INT/EA/UAT clusters)
+./nwm-rte/sbatch_run_region.sh configs formreg
 
-# or run directly in controller node or local AWS workspace
-time /ngencerf-app/nwm-rte/run_region.sh -c configs --formreg
+# or run directly in controller node or workspace
+time ./nwm-rte/run_region.sh -c configs --formreg
 ```
 
 b) Run parameter regionalization (formreg is also run as a prerequisite):
 Prior to running, configure the settings in `configs/config_general.yaml`, `configs/config_formreg.yaml` and `configs/config_parreg.yaml`.
-```bash
-# submit to compute nodes on INT/EA/UAT
-/ngencerf-app/nwm-rte/sbatch_run_region.sh configs parreg
 
-# or run directly in controller node or local AWS workspace
-time /ngencerf-app/nwm-rte/run_region.sh -c configs --parreg
+```bash
+# submit to compute nodes (e.g., in INT/EA/UAT clusters)
+./nwm-rte/sbatch_run_region.sh configs parreg
+
+# or run directly in controller node or workspace
+time ./nwm-rte/run_region.sh -c configs --parreg
 ```
 #### Step 2. Run NGEN
 Run NGEN simulations. Prior to running, configure the settings in `configs/config_general.yaml` and `configs/config_ngen.yaml`.
-```bash
-# submit to compute nodes on INT/EA/UAT
-/ngencerf-app/nwm-rte/sbatch_run_region.sh configs ngen
 
-# or run directly in controller node or local AWS workspace
-time /ngencerf-app/nwm-rte/run_region.sh -c configs --ngen
+
+```bash
+# submit to compute nodes (e.g., in INT/EA/UAT clusters)
+./nwm-rte/sbatch_run_region.sh configs ngen
+
+# or run directly in controller node or workspace
+time ./nwm-rte/run_region.sh -c configs --ngen
 ```
 
 #### Step 3. Run Evaluation
 Run an evaluation. Prior to running, configure the settings in `configs/config_eval.yaml`.
 ```bash
-# submit to compute nodes on INT/EA/UAT
-/ngencerf-app/nwm-rte/sbatch_run_region.sh configs eval
+# submit to compute nodes (e.g., in INT/EA/UAT clusters)
+./nwm-rte/sbatch_run_region.sh configs eval
 
-# or run directly in controller node or local AWS workspace
-time /ngencerf-app/nwm-rte/run_region.sh -c configs --eval
+# or run directly in controller node or workspace
+time ./nwm-rte/run_region.sh -c configs --eval
 ``` 
 
 #### Run all steps in one command
-Users may prefer running the above steps sequencially so they can inspect the outputs from each step before 
-proceeding to the next step. However, it is possible to run all three steps in one command as shown below:
+Users may prefer running the above steps sequentially in separate jobs so they can inspect the outputs from each step before proceeding to the next step. However, it is possible to run all three steps in one command as shown below:
 
 ```bash
-# submit to compute nodes on INT/EA/UAT
-/ngencerf-app/nwm-rte/sbatch_run_region.sh configs parreg ngen eval
+# submit to compute nodes (e.g., in INT/EA/UAT clusters)
+./nwm-rte/sbatch_run_region.sh configs parreg ngen eval
 
-# or run directly in controller node or local AWS workspace
-time /ngencerf-app/nwm-rte/run_region.sh -c configs --parreg --ngen --eval
+# or run directly in controller node or workspace
+time ./nwm-rte/run_region.sh -c configs --parreg --ngen --eval
 ```
 Note: When using `run_region.sh`, the short flags `-f`, `-p`, `-n`, and `-e` can also be used in place of `--formreg`,
-`--parreg`, `--ngen`, and `--eval`, respectively. The short flags are not supported when using `sbatch_run_region.sh`.
+`--parreg`, `--ngen`, and `--eval`, respectively. The short flags for these workflow steps are not supported when using `sbatch_run_region.sh`.
+
 ```bash
 # run all steps with short flags (only for run_region.sh)
-time /ngencerf-app/nwm-rte/run_region.sh -c configs -f -p -n -e
+time ./nwm-rte/run_region.sh -c configs -p -n -e
 ``` 
-#### Run regionalization with a specific RTE image tag
-By default, the nwm-rte image with tag `latest` will be used to run the regionalization workflow. To use a specific 
-image tag (e.g., for testing with a new image), set the variable `image_tag` in the script as shown below:
-```bash
-# run all steps with sample configle and a specific image tag
-/ngencerf-app/nwm-rte/sbatch_run_region.sh /ngencerf-app/nwm-region-mgr/configs parreg ngen eval --image-tag pr-22-build
-```
+#### Run regionalization with a custom image/tag
+By default, the workflow uses the nwm-rte image at {{ '`ghcr.io/{}/nwm-rte`'.format(github_org) }} with the tag `latest`. To use a specific image or image tag (e.g., for testing with a new image), specify the `--image` and `--image-tag` options when running the workflow, as shown below:
 
+```bash
+# run all steps with custom image and image tag
+./nwm-rte/sbatch_run_region.sh ./configs parreg ngen eval --image nwm-rte --image-tag debug
+# or
+./nwm-rte/sbatch_run_region.sh ./configs parreg ngen eval -i nwm-rte -t debug
+# or 
+./nwm-rte/run_region.sh -c configs -p -n -e -i nwm-rte -t debug
+```
 
 ### Customize and run your own regionalization workflow
  - Prior to running your own regionalization workflow, it is hightly recommded to review documentation on [Technical Reference](tech_reference/index.md) and [Configuration](config_builder/index.md), as well as the [Notes and best practices](#notes-and-best-practices) below, to understand the available configuration options and how to customize the workflow for your specific application.
@@ -162,7 +228,9 @@ Run the regionalization step as in Step 1 above, using the updated configuration
 
 
 ```bash
-/ngencerf-app/nwm-rte/sbatch_run_region.sh test1_configs parreg
+./nwm-rte/sbatch_run_region.sh test1_configs parreg
+# or
+./nwm-rte/run_region.sh -c test1_configs -p
 ```
 
 Execution time will take 10-20 minutes depending on available computational resources. While running,
@@ -193,7 +261,9 @@ First, update the `test1_configs/config_ngen.yaml` file as follows:
 
 Run the NGEN simulation step as in Step 2 above.
 ```bash
-/ngencerf-app/nwm-rte/sbatch_run_region.sh test1_configs ngen
+./nwm-rte/sbatch_run_region.sh test1_configs ngen
+# or
+./nwm-rte/run_region.sh -c test1_configs -n
 ```
 
 After completion, the simulation outputs will be saved in the folder
@@ -225,12 +295,12 @@ Update the `configs/config_eval.yaml` file as follows:
  - Set **file_paths.output_dir** to point to the directory where evaluation outputs should be saved. Here we add the **run_name** from regionalization `test1` (e.g., `'{base_dir}/outputs/eval/test1/{location_set_name}'`), to ensure evaluation outputs are also organized by regionalization runs.
  - Update fields in metics and plotting sections as desired. Here we will compute and plot a set of default evaluation metrics: KGE (Kling-Gupta Efficiency), NSE (Nash-Sutcliffe Efficiency), NNSE (Normalized NSE), and Correlation (CORR). Note the **lead_times** fields are not applicable here since we are evaluating simulations.
 
-Note: if you would like to explore other configuration options for evaluation, refer to [nwm-eval-mgr documentation](
-https://ngwpc.github.io/nwm-eval-mgr/index.html) for details.
+Note: if you would like to explore other configuration options for evaluation, refer to {{ '[nwm-eval-mgr documentation](https://{}.github.io/nwm-eval-mgr/index.html)'.format(github_org) }} for details.
 
 Run the evaluation step as in Step 3 above.
 ```bash
-/ngencerf-app/nwm-rte/sbatch_run_region.sh test1_configs eval
+./nwm-rte/sbatch_run_region.sh test1_configs eval
+./nwm-rte/run_region.sh -c test1_configs -e
 ```
 After completion, evaluation results will be saved in the folder `data/outputs/eval/test1/vpu_09/`, including
  - `joined/`: combined observed and simulated streamflow data for all locations in parquet format; each file corresponds to one dataset (i.e., algorithm)
@@ -245,6 +315,109 @@ After completion, evaluation results will be saved in the folder `data/outputs/e
  - `nwm_eval_config_expanded.yaml`: the final (expanded) configuration file used in this run.
 
 Check the metrics and plots to compare/analyze the performance of the two algorithms in parameter regionalization.
+
+## Run regionalization in local environment
+
+From a developer's perspective, running, testing, and debugging the regionalization workflow in a local environment requires installing the necessary dependencies and setting up the required configuration files on the local machine. The steps below describe how to install the package and configure the workflow for a local, non-containerized environment.
+
+### Installing nwm_region_mgr
+
+Installing nwm_region_mgr requires
+
+ - Python 3.11
+ - Python venv (typically included with Python)
+ - git
+
+Since nwm_region_mgr is not currently on PyPI, it must be installed from source. To download this repository, run
+
+{{ clone_region_mgr }}
+
+To get the most up-to-date code, switch to the development branch.
+
+```bash
+cd nwm-region-mgr
+git checkout development
+```
+
+Next, create a virtual environment to isolate the dependencies of this library from your base Python environment.
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+```
+
+You can then install `nwm-region-mgr`. The following installation options cover the most common use cases:
+
+```bash
+# Install the package with the dependencies required for formulation regionalization only
+pip install .
+
+# Install the package in editable mode for development
+pip install -e .
+
+# Install the package with the additional dependencies required for parameter regionalization
+pip install -e .[parreg]
+
+# Install the package with all dependencies, including formulation and parameter regionalization, development, and documentation tools
+pip install -e .[parreg,docs,dev]
+```
+
+### STEP 1: Run regionalization to produce regionalized formulations and parameters
+
+#### 1) Set up configuration yaml files
+
+Three yaml config files are needed to run regionalization
+- **config_general.yaml**: general settings for the overall regionalization process.
+- **config_formreg.yaml**: specific settings for the formulation regionalization process.
+- **config_parreg.yaml**: specific settings for the parameter regionalization process.
+
+Follow the sample config files ([config_general.yaml](../../configs/config_general.yaml), [config_formreg.yaml](../../configs/config_formreg.yaml), [config_parreg.yaml](../../configs/config_parreg.yaml)) to set up the configurations
+for your regionalization application as needed.
+
+Sample input data can be downloaded from {{ '**s3://{}-dev/nwm-tools-data/regionalization/inputs/region**'.format(github_org_lower) }}
+
+
+#### 2) Run the regionalization
+
+```bash
+python -m nwm_region_mgr [CONFIG_DIR] [REG_TYPE]
+```
+Where:
+- [CONFIG_DIR] refers to the directory containing the config files as noted in 1)
+- [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'parreg' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'parreg'.
+
+```bash
+python -m nwm_region_mgr configs formreg # to run formulation regionalization only
+python -m nwm_region_mgr configs parreg # to run parameter regionalization (and formulation regionalization if not done already)
+```
+
+### STEP 2: Run NGEN simulation with regionalized parameters
+
+To avoid complications from building ngen and its submodules locally, we recommend you always run NGEN simulation
+with regionalized parameters and formulations from a Docker container. Follow relevant instructions in running NGEN simulation in Docker as noted in the **Run regionalization in Docker** section above. 
+
+Configure NGEN simulation by following the sample config file [config_ngen.yaml](../../configs/config_ngen.yaml)
+
+Sample input data can be downloaded from {{ '**s3://{}-dev/nwm-tools-data/regionalization/data/inputs/ngen**'.format(github_org_lower) }}
+
+### STEP 3: Evaluate NGEN simulation with nwm-eval-mgr
+
+#### 1) Install {{ '[nwm-eval-mgr](https://github.com/{}/nwm-eval-mgr)'.format(github_org) }}
+Follow the instructions in the nwm-eval-mgr repository to set up the virtual environment for running evaluations.
+
+#### 2) Set up configurations for evaluation
+Configure evaluation by following the sample config file [config_eval.yaml](../../configs/config_eval.yaml)
+
+Sample input data can be downloaded from {{ '**s3://{}-dev/nwm-tools-data/regionalization/data/inputs/eval**'.format(github_org_lower) }}
+
+#### 3) Run evaluation
+```bash
+source <path_to_nwm_eval_mgr_venv>/bin/activate
+python -m nwm_eval configs/config_eval.yaml
+```
+#### 4) Check outputs
+Outputs from evaluation can be found in `file_paths.output_dir` as specified in **config_eval.yaml**
+
 
 ## Notes and best practices
 
@@ -279,12 +452,11 @@ Check the metrics and plots to compare/analyze the performance of the two algori
   * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
   * [HydroATLAS attributes](<hhttps://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
 
-   Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
+  Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
 
 - Parameter regionalization is carried out separately for each individual VPU, to avoid potential memory issues and
-  algorithm inefficiency. An VPU is equivalent to a HUC2 region, except for HUC-03 and HUC-10 that are divided into 
-  multiple VPUs. The image below shows all the VPUs in the CONUS domain. Each oCONUS domain (Alaska, Hawaii, Puerto Rico) is 
-  treated as a single VPU.
+  algorithm inefficiency. A VPU is equivalent to a HUC2 region, except for HUC-03 and HUC-10 that are divided into 
+  multiple VPUs. The image below shows all the VPUs in the CONUS domain. Each oCONUS domain (Alaska, Hawaii, Puerto Rico) is treated as a single VPU.
 
 ```{figure} _images/conus_vpu_map.jpeg
 :alt: VPUs in the CONUS domain
@@ -302,8 +474,6 @@ Check the metrics and plots to compare/analyze the performance of the two algori
 - Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
 
-### Running regionalization in INT/EA/UAT clusters
-
 #### Docker permissions
 When first running the regionalization workflow in INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs. 
 ```bash
@@ -312,28 +482,26 @@ sudo systemctl start docker # start docker service if not already running
 sudo usermod -aG docker $USER # add user to docker group
 newgrp docker # apply group change without logout/login
 ```
-#### Input/output file paths
-The current working directory `WORK_DIR` and the root directory of all repositories on the host (`REPOS_COMMON_ROOT__HOST`) 
-are defined as environment variables and will be mounted to the same paths in the container. The run script `run_region.sh` 
-will automatically handle the volume mounting and path mapping between the host and the container. 
 
-In `config_general.yaml`, `WORK_DIR` and `REPOS_COMMON_ROOT__HOST` are used by the placeholders `{base_dir}` and 
-`{static_data_dir}`, respectively, which will be automatically replaced with the correct paths when the workflow is run.
-As long as you specify file paths for all inputs and outputs in the configuration files  using these placeholders, the 
+### Running regionalization in INT/EA/UAT clusters
+
+#### Input/output file paths
+
+The current working directory is mounted to the same path in the container during runtime. In `config_general.yaml`, the placeholders `{base_dir}` and `{static_data_dir}` are automatically replaced with the correct paths when the workflow is run. As long as you specify file paths for all inputs and outputs in the configuration files using these placeholders, the 
 workflow will be able to correctly locate the files in the container regardless of where your working directory is on the host.
 
 There is a caveat. The placeholders `{base_dir}` and `{static_data_dir}` defined in `config_general.yaml` are used by 
 `config_formreg.yaml`, `config_parreg.yaml`, and `config_ngen.yaml`, but not `config_eval.yaml`, which is processed 
 separately by `nwm-eval-mgr` using its own Pydantic model for configuration. However, you can redefine `{base_dir}` 
-in `config_eval.yaml` and use the two environment variables `WORK_DIR` and `REPOS_COMMON_ROOT__HOST` to specify file paths.
+in `config_eval.yaml` and use it to specify file paths.
 
 By default, `{static_data_dir}` is set to the input data folder installed on the host (e.g., `/ngencerf-app/nwm-region-mgr/data/inputs/`), which is the root directory for all static input data for regionalization (e.g., hydrofabric, catchment 
 attributes, crosswalk file between calibration gages and NextGen catchments, pseudo calibration/validation statistics 
 for testing, etc). In INT/EA/UAT clusters, the user will not have write access to this directory. If you would like to 
 use custom input data (e.g., your own calibration statistics), you can copy the data to your working directory and 
 update the relevant file paths in the configuration files to point to the new location. For example, if you have your 
-own calibration statistics and parameters saved in your working directory in `inputs/my_stats.csv` and `inputs/my_params.csv`, 
-you can update the file path in `config_general.yaml` as follows:
+own calibration statistics and parameters saved in your working directory in `inputs/my_stats.csv` and `inputs/my_params.csv`, you can update the file path in `config_general.yaml` as follows:
+
 ```bash
 general.calib_stats_file: '{base_dir}/inputs/my_stats.csv'
 general.calib_params_file: '{base_dir}/inputs/my_params.csv'
@@ -364,7 +532,7 @@ To fully utilize available computational resources, it is recommended to set n_p
 Note the partition configuration in these clusters may change in the future (use `sinfo` to check the current configuration).
 
 #### Job submission
-Regionalization jobs are submitted via the `/ngencerf-app/nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
+Regionalization jobs are submitted via the `./nwm-rte/sbatch_run_region.sh` script. There are multiple options to 
 customize the job submission (see the header of the script for usage details). You can adapt the following bash script
 for your needs:
 
@@ -375,14 +543,14 @@ for your needs:
 CONFIG_DIR="./configs_test"
 
 # Optional arguments to override the defaults
-image_tag="pr-22-build" # default: latest. Check available image tags at: https://github.com/NGWPC/nwm-rte/pkgs/container/nwm-rte
+image_tag="pr-22-build" # default: latest. 
 pull_image=false #default: false
 workflow_options=(parreg ngen eval) #default: parreg. Valid options: formreg, parreg, ngen, eval
 dry_run=false #default: false
 delete_runtime_dir=false #default: false
 
 # ==== Typically no need to modify lines below ====
-SCRIPT_TO_RUN="/ngencerf-app/nwm-rte/sbatch_run_region.sh"
+SCRIPT_TO_RUN="./nwm-rte/sbatch_run_region.sh"
 
 # Build optional arguments
 extra_args=()
@@ -444,11 +612,10 @@ There are a couple of options for users to view the outputs:
 output.pairs.format: 'csv'
 output.params.format: 'csv'
 ``` 
-- Option 2: use the utility script `view_parquet.sh` in nwm-region-mgr to view parquet files. You can copy 
-this script to your working directory, e.g.,:
-```bash
-cp /ngencerf-app/nwm-region-mgr/util_scripts/view_parquet.sh .
-```
+- Option 2: use the utility script `view_parquet.sh` in `nwm-region-mgr` to view parquet files. 
+
+{{ view_parquet_script }}
+
 The script allows you to:
 - preview the parquet file
 - query the file with SQL commands
@@ -463,7 +630,7 @@ Check the header of the script for usage instructions.
   due to differences in data availability and formatting across domains, some adjustments may be needed in the 
   configuration files for different domains.
 
-  Sample configuration files for different domains can be found at `/ngencerf-app/nwm-region-mgr/`:
+  Sample configuration files for different domains can be found at the root of the `nwm-region-mgr` repository:
   - **conus**: `configs`
   - **hi**: `configs_hi`
   - **prvi**: `configs_prvi`
@@ -509,11 +676,11 @@ s
 #### Pair files from regionalization
   In the first step of the workflow (regionalization), the program will first check if the required pair file already 
   exists for a given run_name, algorithm, and VPU (e.g., `outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet`). 
-  If the file exists, the program will skip the regionalization process (as indicated in the log file) and use the existing pair file for subsequent steps (e.g., NGEN simulation). This allows users to keep the outputs from previous runs of regionalization and reuse them for NGEN simulations or evaluation, without needing to rerun the regionalization step. However, if you want to 
-  rerun regionalization for a given run_name/VPU/algorithm/ with different settings, you can simply delete or archive the existing pair file, and the workflow will run regionalization again.
+  If the file exists, the program will skip the regionalization process (as indicated in the log file) and use the existing pair file for subsequent steps (e.g., NGEN simulation). This allows users to keep the outputs from previous runs of regionalization and reuse them for NGEN simulations or evaluation, without needing to rerun the regionalization step. However, if you want to rerun regionalization for a given run_name/VPU/algorithm/ with different settings, you can simply delete or archive the existing pair file, and the workflow will run regionalization again.
 
 #### Intermediate files from NGEN simulations
-  In the second step of the workflow (ngen simulation), each run of ngen over an VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv, nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. 
+  In the second step of the workflow (ngen simulation), each run of ngen over a VPU will generate many catchment and nexus csv files in the output folder (e.g., cat-\*.csv, nex-\*.csv), which can take up a lot of storage space. It is recommended to clean up these intermediate files after each run of regionalization, unless if you want to keep them for debugging or other purposes. The followup step `eval` only requires the **t-route** output file from NGEN simulations. The following bash script can be adapted to clean up the intermediate csv files while keeping the t-route files for evaluation. Note that you should run this script separately for each algorithm (e.g., gower and kmeans) if you have run parameter regionalization with multiple algorithms. 
+
   ```bash
   # update with your VPU, run name, and algorithm
   VPU=03S 
@@ -534,7 +701,7 @@ s
   delete the runtime folder immediately after the run is completed, e.g.,
 
   ```bash
-  /ngencerf-app/nwm-rte/sbatch_run_region.sh configs parreg ngen eval --delete-runtime-dir
+  ./nwm-rte/sbatch_run_region.sh configs parreg ngen eval --delete-runtime-dir
   ```
 
   Note this will delete the entire runtime folder containing the detailed log files, which may be useful for debugging if 
@@ -562,16 +729,16 @@ s
   set the field `manual_pairs_file` to point to a comma-delimited csv file containing the manual pairings, with 
   one of the following columns pairs: 
   
-  * receiver_divide_id, donor_divide_id
-  * receiver_divide_id, donor_gage_id
+  * receiver_div_id, donor_div_id
+  * receiver_div_id, donor_gage_id
   * receiver_gage_id, donor_gage_id
-  * receiver_gage_id, donor_divide_id
+  * receiver_gage_id, donor_div_id
   
   Each row in the file should be populated with exactly one valid receiver column and one valid donor column. 
   See sample files in `nwm_region_mgr/data/inputs/region/manual_pairs/` for examples of formatting the manual pairings
   file. The following examples are all valid formats for the manual pairings file:
   ```bash
-  receiver_divide_id,receiver_gage_id,donor_divide_id,donor_gage_id
+  receiver_div_id,receiver_gage_id,donor_div_id,donor_gage_id
   cat-410687,,cat-423550,
   cat-410688,,cat-423550,
   cat-423248,,,023177483
@@ -579,7 +746,7 @@ s
   ,02217475,cat-412526,
   ```
   ```bash
-  receiver_divide_id,donor_divide_id
+  receiver_div_id,donor_div_id
   cat-410687,cat-423550
   cat-410688,cat-423550
   ```
@@ -592,108 +759,10 @@ s
   spatial distance between the donor and receiver catchments for each manual pair, and a `tag` column will be added to 
   indicate that these pairs are manually specified. The original pair and parameter files will be saved to backup files 
   with `_original` added to the filename. Specifically, the following files will be updated with manual pairings:
-  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU].parquet`: the `receiver catchment/divide` vs `donor catchment/divide` pair file
-  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU]_mswm.csv`: the `donor gage` vs `receiver catchment/divide` pair file required
+  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU].parquet`: the `receiver div_id` vs `donor div_id` pair file
+  - `pairs/pairs_[ALGORITHM]_[DOMAIN]_[VPU]_mswm.csv`: the `donor gage` vs `receiver div_id` pair file required
     by MSWM in the ngen simulation step.
   - `params/formulation_params_[ALGORITHM]_[DOMAIN]_[VPU].csv`: the donor gage formulation and parameter file required 
     by MSWM in the ngen simulation step. 
-
-
-## Run nwm_region_mgr in local environment
-The steps below walk through package installation and workflow configuration in local (non-containerized) environments.
-
-### Installation
-
-Installing nwm_region_mgr requires
-
- - Python 3.11
- - Python venv (typically included with Python)
- - git
-
-Since nwm_region_mgr is not currently on PyPI, it must be installed from source. To download this repository, run
-
-```bash
-git clone https://github.com/NGWPC/nwm-region-mgr.git
-cd nwm-region-mgr
-```
-
-To get the most up-to-date code, switch to the development branch.
-
-```bash
-git checkout development
-```
-
-Next, create a virtual environment to isolate the dependencies of this library from your base Python environment.
-
-```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-```
-
-You will then be able to install nwm_region_mgr. There are a few download variants that users may be interested in.
-
-```bash
-# Regular package install
-pip install .
-# Install the package in edit mode (for development)
-pip install -e .
-# Install the additional dependencies for parameter regionalization
-pip install .[parreg]
-```
-
-### STEP 1: Run regionalization to produce regionalized parameters and formulations
-
-#### 1) Set up configuration yaml files
-
-Three yaml config files are needed to run regionalization
-- **config_general.yaml**: general settings for the overall regionalization process.
-- **onfig_formreg.yaml**: specific settings for the formulation regionalization process.
-- **config_parreg.yaml**: specific settings for the parameter regionalization process.
-
-Follow the sample config files (nwm_region_mgr/configs) to set up the configurations
-for your regionalization application as needed.
-
-Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/inputs**
-
-
-#### 2) Run the regionalization script
-
-```bash
-python -m nwm_region_mgr [COFIG_DIR] [REG_TYPE]
-```
-Where:
-- [COFIG_DIR] refers to the directory containing the config files as noted in 1)
-- [REG_TYPE] refers to the type of regionalization to run, either 'formreg' (formulation regionalization only) or 'parreg' (parameter regionalization, which also runs formulation regionalization first if not done already). If not specified, the default is 'parreg'.
-
-```bash
-python -m nwm_region_mgr configs formreg # to run formulation regionalization only
-python -m nwm_region_mgr configs parreg # to run parameter regionalization (and formulation regionalization if not done already)
-```
-
-### STEP 2: Run NGEN simulation with regionalized parameters
-
-To avoid complications from building ngen and its submodules locally, we recommend you always run NGEN simulation
-with regionalized parameters and formulations from a Docker container. Follow instructions from the **Docker Run Time Environment (RTE)** section above. 
-
-### STEP 3: Evaluate NGEN simulation with nwm-eval-mgr
-
-#### 1) Download and install [nwm-eval-mgr](https://github.com/NGWPC/nwm-eval-mgr)
-It is recommended you install nwm-eval-mgr in its own venv. 
-
-#### 2) Set up configurations for evaluation
-Follow example config at [config_eval.yaml](https://github.com/NGWPC/nwm-region-mgr/blob/development/configs/config_eval.yaml)
-
-Sample input data can be downloaded from **s3://ngwpc-dev/regionalization/data/inputs/eval** 
-
-#### 3) Activate venv for nwm-eval-mgr
-```bash
-source ~/repos/nwm-eval-mgr/venv/bin/activate
-```
-#### 4) Run evaluation
-```bash
-python -m nwm_eval config_eval.yaml
-```
-#### 5) Check outputs
-Outputs from evaluation can be found in *[output_dir]* as specified in **config_eval.yaml**
 
 

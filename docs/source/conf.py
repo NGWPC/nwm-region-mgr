@@ -46,6 +46,7 @@ myst_enable_extensions = [
     "deflist",
     "dollarmath",
     "amsmath",
+    "substitution",
 ]
 
 autosummary_generate = True
@@ -87,3 +88,21 @@ html_sidebars = {
 
 # Substitutions
 version = str(nwm_region_mgr.__version__)
+
+GITHUB_ORG = os.getenv("GITHUB_ORG", "NGWPC")
+
+myst_substitutions = {
+    "github_org": GITHUB_ORG,
+    "github_org_lower": GITHUB_ORG.lower(),
+    "setup_script": f"""```bash
+# Download the setup script from the repository
+wget https://raw.githubusercontent.com/{GITHUB_ORG}/nwm-region-mgr/development/setup_region.sh
+```""",
+    "view_parquet_script": f"""```bash
+wget https://raw.githubusercontent.com/{GITHUB_ORG}/nwm-region-mgr/development/util_scripts/view_parquet.sh
+chmod +x view_parquet.sh
+```""",
+    "clone_region_mgr": f"""```bash
+git clone https://github.com/{GITHUB_ORG}/nwm-region-mgr.git
+```""",
+}

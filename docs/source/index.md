@@ -25,11 +25,14 @@ h3:not(#hero h3) {
 (homepage)=
 # NWM Regionalization
 
-# Formulation and Parameter Regionalization for NextGen
-
-![overview](_images/overview.png)
-
+# Regionalization for NextGen
 The National Water Model (NWM) NextGen framework is a modular hydrologic modeling system that links compatible models into flexible formulations for different spatial domains. This flexibility makes it challenging to determine which formulations and parameters perform best across regions, particularly in ungauged basins. `nwm_region_mgr` is a Python package that automates this process by using calibration/validation data and various catchment attributes to identify optimal model formulations and parameter sets at the regional scale.
+
+:::{image} _images/overview.png
+:width: 70%
+:alt: overview
+:align: center
+:::
 
 ----
 
@@ -38,15 +41,15 @@ The National Water Model (NWM) NextGen framework is a modular hydrologic modelin
 
 ![framework](_images/framework.png)
 
-## A critical tool for forecast skill
+
 Hydrologic models benefit strongly from calibration. Tools in this repository
 make the most out of limited observational data to intelligently transfer optimal
-parameter sets beyond calibrated catchments. This tool depends on data from a calibration and validation
-run of NextGen, as well as various catchment attributes characterizing local climate, topography, landcover, 
+parameter sets beyond calibrated catchments. This tool depends on data from calibration and validation
+runs of NextGen formulations, as well as various catchment attributes characterizing local climate, topography, landcover, 
 soil, geology, and anthropogenic influence. Once the tool has been run, the optimal formulation and 
 parameter sets may be used by
-the [Model Setup Workflow Manager](https://github.com/NGWPC/nwm-msw-mgr) to set up NextGen simulation runs 
-and performance may be assessed with [NWM Evaluation Manager](https://github.com/NGWPC/nwm-verf).
+the {{ '[Model Setup Workflow Manager](https://github.com/{}/nwm-msw-mgr)'.format(github_org) }} to set up NextGen simulation runs 
+and performance may be assessed with {{ '[NWM Evaluation Manager](https://github.com/{}/nwm-eval-mgr)'.format(github_org) }}.
 
 ----
 
@@ -133,28 +136,15 @@ Generates plots and maps that explain why specific formulations and parameters w
 Gives users full control over every step through easily editable configuration files.
 :::
 ::::
-
-::::{grid-item-card}
-:shadow: none
-:class-card: sd-border-0
-
-:::{image} _static/index/scale.svg
-:::
-
-:::{div} key-features-text
-<strong>Scalable</strong><br/>
-Efficiently allocates computational resources to handle workflows from small watersheds up to CONUS-wide analyses.
-:::
-::::
 :::::
 
 :::{toctree}
 :maxdepth: 1
 :hidden:
 
-User Guide<user_guide.rst>
+User Guide<user_guide.md>
 FAQ<faq.rst>
-Configuration<config_builder/index.rst>
-Technical Reference <tech_reference/index.md>
-API </API/index.rst>
+Configuration<config_builder/index.md>
+Technical Reference<tech_reference/index.md>
+API<API/index.rst>
 :::
