@@ -23,14 +23,16 @@ general:
   eval_start_date: ['2012-10-01 03:00:00'] # start date for evaluation period
   eval_end_date: ['2012-10-01 10:00:00'] # end date for evaluation period
   separate_calibrated: True # whether to distinguish calibrated and regionalized locations in the evaluation
+  log_level: INFO # logging level (case insensitive); options are DEBUG, INFO, WARNING, SEVERE, FATAL, CRITICAL, ERROR
 
 #### configurations for various file paths
 file_paths:
-  base_dir: '${WORK_DIR}'  # root directory to store inputs/outputs for verification
-  crosswalk_file: '${REPOS_COMMON_ROOT__HOST}/nwm-region-mgr/data/inputs/eval/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
-  calib_param_file: '${REPOS_COMMON_ROOT__HOST}/nwm-region-mgr/data/inputs/region/pseudo_calib_params/sampled_params_{domain}.csv' # calibration parameters file (used when separate_calibrated is True); must have column 'gage_id'
+  base_dir: '<WORK_DIR>'  # root directory to store inputs/outputs for verification
+  crosswalk_file: '<STATIC_DATA_DIR>/eval/usgs_{nwm_version}_crosswalk_{domain}.parquet' # crosswalk file mapping gage IDs to NWM/ngen link IDs
+  calib_param_file: '<STATIC_DATA_DIR>/region/pseudo_calib_params/sampled_params_{domain}.csv' # calibration parameters file (used when separate_calibrated is True); must have column 'gage_id'
   fcst_data_file: '{base_dir}/outputs/ngen/regionalization/{dataset_name}/{location_set_name}/Output/troute_output_201210010000.nc' # forecast data directory (must be specified when nwm_forecast.data_source is set to ngenCERF)
   output_dir: '{base_dir}/outputs/eval/{location_set_name}' # output directory to store logs, all output datasets, metrics and plots
+  log_file: '{base_dir}/outputs/eval.log'
 
 nwm_forecast:
   data_source: ngenSIM   # Specifies the remote location from which to fetch the data ("GCS", "NOMADS", "DSTOR", "ngenCERF")

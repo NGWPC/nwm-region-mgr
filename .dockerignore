@@ -43,3 +43,6 @@ docker-compose.yml
 
 data/**
 sample_files/**
+
+# Temporary files
+tbd/*

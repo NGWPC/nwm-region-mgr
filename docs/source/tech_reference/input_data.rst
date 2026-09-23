@@ -113,7 +113,7 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
      - float64
 
    * - Klf
-     - CFE parameter: Nash Config param - primary reservoir 
+     - CFE parameter: Nash Config param - primary reservoir
      - float64
 
    * - refkdt
@@ -245,7 +245,7 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
      - float64
 
    * - a_Xinanjiang_inflection_point_parameter
-     - CFE-X parameter: Xinanjiang 'a' coefficient when surface_water_partitioning_scheme=Xinanjiang 
+     - CFE-X parameter: Xinanjiang 'a' coefficient when surface_water_partitioning_scheme=Xinanjiang
      - float64
 
    * - b_Xinanjiang_shape_parameter
@@ -253,7 +253,7 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
      - float64
 
    * - x_Xinanjiang_shape_parameter
-     - CFE-X parameter: Xinanjiang 'x' coefficient when surface_water_partitioning_scheme=Xinanjiang 
+     - CFE-X parameter: Xinanjiang 'x' coefficient when surface_water_partitioning_scheme=Xinanjiang
      - float64
 
    * - uztwm
@@ -315,7 +315,6 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
    * - side
      - sac-sma parameter: Portion of the baseflow which does not go to the stream
      - float64
-
 
 
 
@@ -420,7 +419,6 @@ Sample file path: ``inputs/region/calval_stats/stat_calval_all_conus.parquet``
 
 
 
-
 .. _divide_huc12_cwt_file:
 
 divide_huc12_cwt_file
@@ -475,7 +473,6 @@ Sample file path: ``inputs/region/cwt_divide_huc12/cwt_huc12_divide_conus.csv``
    * - nearest_dist_m
      - Nearest distance in meters between the catchment and the HUC12 watershed, when there is no overlap.
      - float64
-
 
 
 
@@ -548,7 +545,6 @@ Sample file path: ``inputs/region/gages_nwm4_calib_all.csv``
 
 
 
-
 .. _formulation_cost:
 
 formulation_cost
@@ -583,7 +579,6 @@ Sample file path: ``inputs/region/formulation_costs_secs_per_catchment.csv``
    * -  cost
      -  cost
      - int64
-
 
 
 
@@ -633,7 +628,6 @@ Sample file path: ``inputs/region/cwt_divide_gage/calib_gage_divide_conus.parque
    * - type
      - Type of catchment (e.g., connector, aggregate, independent).
      - object
-
 
 
 
@@ -718,7 +712,6 @@ Sample file path: ``inputs/region/attr_datasets/hlr/attr_hlr_conus.parquet``
 
 
 
-
 .. _hlr-attr_select_file:
 
 hlr.attr_select_file
@@ -757,7 +750,6 @@ Sample file path: ``inputs/region/attr_config/attr_selection_hlr.csv``
    * - description
      - Description of the HLR attribute.
      - object
-
 
 
 
@@ -1910,7 +1902,6 @@ Sample file path: ``inputs/region/attr_datasets/hydroatlas/attr_hydroatlas_conus
 
 
 
-
 .. _hydroatlas-attr_select_file:
 
 hydroatlas.attr_select_file
@@ -1952,7 +1943,6 @@ Sample file path: ``inputs/region/attr_config/attr_selection_hydroatlas.csv``
 
 
 
-
 .. _manual_pairings:
 
 manual_pairings
@@ -1968,9 +1958,8 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S_nhf.csv``
    :header-rows: 1
 
    "receiver_div_id", "receiver_gage_id", "donor_div_id", "donor_gage_id"
-   "164565.0", "nan", "635016.0", "nan"
-   "164568.0", "nan", "nan", "02245500"
-   "nan", "02207385", "nan", "02314500"
+   "1270722761765509", "nan", "nan", "02215100"
+   "1270720284062617", "nan", "nan", "02231342"
 
 **Schema:**
 
@@ -1982,7 +1971,7 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S_nhf.csv``
      - Type
    * - receiver_div_id
      - Unique identifier for the receiver catchment (i.e., divide).
-     - float64
+     - int64
 
    * - receiver_gage_id
      - Unique identifier for the receiver gage.
@@ -1995,7 +1984,6 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S_nhf.csv``
    * - donor_gage_id
      - Unique identifier for the donor gage.
      - object
-
 
 
 
@@ -2296,7 +2284,6 @@ Sample file path: ``inputs/region/attr_datasets/ngen/attr_ngen_conus.parquet``
 
 
 
-
 .. _ngen-attr_select_file:
 
 ngen.attr_select_file
@@ -2338,176 +2325,12 @@ Sample file path: ``inputs/region/attr_config/attr_selection_ngen.csv``
 
 
 
+.. _ngen_hydrofabric_file:
 
-.. _ngen_hydrofabric_file-layer-flowpaths:
+ngen_hydrofabric_file
+---------------------
 
-ngen_hydrofabric_file (layer: flowpaths)
-----------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-.. note:: Geometry column omitted from preview table for brevity.
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "fp_id", "dn_nex_id", "up_nex_id", "div_id", "vpu_id", "length_km", "area_sqkm", "total_da_sqkm", "mainstem_lp", "path_length", "dn_hydroseq", "hydroseq", "stream_order", "mean_elevation", "slope", "n", "r", "y", "ncc", "btmwdth", "chslp", "musx", "musk", "topwdth", "topwdthcc", "topwdthcc_ml", "topwdth_ml", "y_ml", "r_ml", "fp_to_id", "gid", "terminalpa"
-   "1073625600290331", "1073625600265387", "nan", "1073625600290331", "03S", "0.12622339396322607", "0.239849982001549", "0.239849982001549", "4985", "0.0", "0", "11015", "1", "-0.5811592638492584", "0.0024175001668526115", "0.096", "nan", "nan", "0.192", "1.6", "0.03", "0.2", "3600", "1.5016520766156676", "4.504956229847003", "133.4000587463379", "44.4666862487793", "1.3400835990905762", "3.4363529682159424", "nan", "76RWG223+R7RH", "11015"
-   "1073625637040207", "1073601250260032", "1073626944871078.0", "1073625637040207", "03S", "9.941883006906545", "92.58839979749507", "3736.578157487904", "4986", "0.0", "0", "11016", "3", "-1.011073738336563", "5.7858849160222174e-05", "0.06", "nan", "nan", "0.12", "3.5", "0.03", "0.2", "3600", "39.99733084683427", "119.99199254050279", "1579.2822875976562", "526.4274291992188", "3.6210639476776123", "2.7048046588897705", "nan", "76RWG2HH+G2G9", "11016"
-   "1073626961303593", "1073626944871078", "1073626974848275.0", "1073626961303593", "03S", "3.1062795495062994", "10.963349810997265", "3643.9897576904086", "4986", "9.941883006906545", "11016", "11017", "3", "-0.5244999974966049", "0.0001624473698308016", "0.06", "nan", "nan", "0.12", "3.5", "0.03", "0.2", "3600", "39.657566077514765", "118.9726982325443", "4069.064208984375", "1356.354736328125", "4.895653247833252", "3.4849252700805664", "1073625637040207.0", "76RWH37C+4WXM", "11016"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - fp_id
-     - Unique identifier for the flowpath. Shares the same value with the corresponding catchment's div_id.
-     - int64
-
-   * - dn_nex_id
-     - Unique identifier for the downstream nexus that the catchment flows to.
-     - int64
-
-   * - up_nex_id
-     - Unique identifier for the upstream nexus that flows to the catchment.
-     - float64
-
-   * - div_id
-     - Unique identifier for each catchment.
-     - int64
-
-   * - vpu_id
-     - VPU identifier.
-     - object
-
-   * - length_km
-     - flowpath length in kilometers.
-     - float64
-
-   * - area_sqkm
-     - Area in square kilometers.
-     - float64
-
-   * - total_da_sqkm
-     - total_da_sqkm
-     - float64
-
-   * - mainstem_lp
-     - mainstem_lp
-     - int64
-
-   * - path_length
-     - path_length
-     - float64
-
-   * - dn_hydroseq
-     - dn_hydroseq
-     - int64
-
-   * - hydroseq
-     - hydroseq
-     - int64
-
-   * - stream_order
-     - stream_order
-     - int64
-
-   * - mean_elevation
-     - mean_elevation
-     - float64
-
-   * - slope
-     - slope
-     - float64
-
-   * - n
-     - n
-     - float64
-
-   * - r
-     - r
-     - float32
-
-   * - y
-     - y
-     - float32
-
-   * - ncc
-     - ncc
-     - float64
-
-   * - btmwdth
-     - btmwdth
-     - float64
-
-   * - chslp
-     - chslp
-     - float64
-
-   * - musx
-     - musx
-     - float64
-
-   * - musk
-     - musk
-     - int64
-
-   * - topwdth
-     - topwdth
-     - float64
-
-   * - topwdthcc
-     - topwdthcc
-     - float64
-
-   * - topwdthcc_ml
-     - topwdthcc_ml
-     - float64
-
-   * - topwdth_ml
-     - topwdth_ml
-     - float64
-
-   * - y_ml
-     - y_ml
-     - float32
-
-   * - r_ml
-     - r_ml
-     - float32
-
-   * - fp_to_id
-     - fp_to_id
-     - float64
-
-   * - gid
-     - gid
-     - object
-
-   * - terminalpa
-     - terminalpa
-     - int64
-
-   * - geometry
-     - geometry
-     - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-nexus:
-
-ngen_hydrofabric_file (layer: nexus)
-------------------------------------
-
-NGEN Hydrofabric for a VPU.
+The divides layer of NGEN Hydrofabric for a VPU.
 
 Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
 
@@ -2518,61 +2341,10 @@ Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
 .. csv-table::
    :header-rows: 1
 
-   "nex_id", "dn_fp_id", "vpu_id", "gid"
-   "1073625600265387", "nan", "03S", "76RWG223+M5F9"
-   "1073601250260032", "nan", "03S", "76RVGXGP+4G3J"
-   "1073626944871078", "1073625637040207.0", "03S", "76RWH327+CVMW"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - nex_id
-     - nex_id
-     - int64
-
-   * - dn_fp_id
-     - dn_fp_id
-     - float64
-
-   * - vpu_id
-     - VPU identifier.
-     - object
-
-   * - gid
-     - gid
-     - object
-
-   * - geometry
-     - geometry
-     - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-divides:
-
-ngen_hydrofabric_file (layer: divides)
---------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-.. note:: Geometry column omitted from preview table for brevity.
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "div_id", "vpu_id", "type", "area_sqkm", "bexp_mode", "isltyp_mode", "ivgtyp_mode", "dksat_geomean", "psisat_geomean", "cwpvt_mean", "mp_mean", "mfsno_mean", "quartz_mean", "refkdt_mean", "slope1km_mean", "smcmax_mean", "smcwlt_mean", "vcmx_mean", "imperv_mean", "twi_q25", "twi_q50", "twi_q75", "twi_q100", "twi_q10", "twi_q20", "twi_q30", "twi_q40", "twi_q60", "twi_q70", "twi_q80", "twi_q90", "elevation_mean", "slope250m_mean", "aspect_circmean", "lzfpm_mean", "lzpk_mean", "lztwm_mean", "rexp_mean", "uzk_mean", "zperc_mean", "lzfsm_mean", "lzsk_mean", "pfree_mean", "uzfwm_mean", "uztwm_mean", "mfmin_mean", "mfmax_mean", "uadj_mean", "a_xinanjiang_inflection_point_parameter", "b_xinanjiang_shape_parameter", "x_xinanjiang_shape_parameter", "temp_delta_jan_mean", "temp_delta_feb_mean", "temp_delta_mar_mean", "temp_delta_apr_mean", "temp_delta_may_mean", "temp_delta_jun_mean", "temp_delta_jul_mean", "temp_delta_aug_mean", "temp_delta_sep_mean", "temp_delta_oct_mean", "temp_delta_nov_mean", "temp_delta_dec_mean", "lat", "lon", "glacier_percent", "cgw", "expon", "max_gw_storage", "gid"
-   "1073625600290331", "03S", "aggregate", "0.239849982001549", "3.818035364151001", "1.0", "1.0", "3.6914939498829117e-06", "0.09338372026720441", "0.0928061231970787", "12.360313415527344", "2.0", "0.7845002490817423", "2.0", "0.012976297708553007", "0.4200838979884917", "0.02566716016949276", "69.99994659423828", "0.15954700840730673", "5.972740173339844", "6.26715612411499", "6.371448993682861", "7.470083713531494", "5.796090602874756", "5.9138569831848145", "6.031623363494873", "6.149389743804932", "6.371435642242432", "6.371444225311279", "6.371453285217285", "6.632567882537842", "0.06030126203576657", "0.08029816577959442", "236.4273452993607", "214.25912164943603", "0.05888670554283108", "123.76491332175843", "1.4380440872773759", "0.7630407749297897", "20.150517400395312", "11.805358714058677", "0.270208988512994", "0.0942817413303882", "25.912842136563075", "12.990550240619662", "0.7099999785423279", "1.3899999856948853", "0.03298269957304001", "-0.018742965534329414", "0.538235980192303", "0.001675244529961307", "11.930000000000001", "12.016666666666662", "12.07333333333334", "12.263333333333318", "11.919999999999998", "10.196666666666669", "9.68333333333333", "9.769999999999982", "9.31666666666666", "10.116666666666653", "11.193333333333328", "11.49666666666666", "26.504135073101544", "-81.99470405488476", "0.0", "0.004999999888241291", "2.460475206375122", "0.24713890075683592", "76RWG223+R7RH"
-   "1073625637040207", "03S", "aggregate", "92.58839979749507", "3.818035364151001", "1.0", "1.0", "7.1393186012168985e-06", "0.0757241496505964", "0.09355893014858675", "12.35240330332629", "2.0", "0.8249747435334212", "2.0", "0.013506275137727657", "0.3873380562165833", "0.014742980032647488", "69.3113811175164", "0.2681815689814034", "6.775866508483887", "7.436667442321777", "8.163203239440918", "12.75737190246582", "6.083558559417725", "6.371192932128906", "6.776295185089111", "6.776730060577393", "7.469760417938232", "7.875497817993164", "8.567959785461426", "9.578204154968262", "1.1705845839469562", "0.05471055200576598", "182.69958537368797", "251.65506707996698", "0.06720892995085322", "148.33030455580314", "1.3785512409541387", "0.763481840972403", "18.812386270792654", "12.661191360208207", "0.269209957312484", "0.08560360420629382", "25.860781478713143", "12.946150439572325", "0.7030492082268506", "1.383298338570957", "0.032967794448183006", "-0.0017540666718045658", "0.437571486362854", "0.0021546517341892", "11.998111802156364", "12.139404828168265", "12.206548282167693", "12.33347787200574", "12.074152164902452", "10.247593100152574", "9.758970181127765", "9.747677996871822", "9.313428885197439", "10.09069742805398", "11.347756611342497", "11.479379267979002", "26.551327278187205", "-81.96011228766315", "0.0", "0.004999999888241293", "2.627503925111515", "0.23326157123771907", "76RWG2HH+G2G9"
-   "1073626961303593", "03S", "connectors", "10.963349810997265", "6.486554145812988", "14.0", "1.0", "1.5567018469057003e-06", "0.1238224889323819", "0.0928061231970787", "12.360313415527344", "2.0", "0.6293138658206437", "2.0", "0.012976297708553004", "0.46162880639818954", "0.04027407602415274", "nan", "0.178267505207074", "6.371095657348633", "6.776533126831055", "7.959933757781982", "12.87630844116211", "6.083254337310791", "6.083381652832031", "6.776321887969971", "6.776401042938232", "7.4695611000061035", "7.874942779541016", "8.532188415527344", "12.224349021911621", "0.6238719058729318", "0.07445809437180916", "208.92124239877825", "294.9365238032896", "0.07723051736761308", "184.40320436674781", "1.2951377429691782", "0.7627148096328631", "18.080432273768118", "15.053886229353582", "0.2665620886809283", "0.06611827004643328", "20.963326896424032", "10.506909830539314", "0.7064571040959576", "1.3899999856948853", "0.03298269957304001", "-0.01047828084825627", "0.6652115741821025", "0.0020704525690610803", "12.013345092080874", "12.2246578546686", "12.265492475311806", "12.42468378000156", "12.139542226608636", "10.23062167957686", "9.714505240720483", "9.726972564304162", "9.286588200926168", "10.077415800915151", "11.340210066017368", "11.536120300517457", "26.562789199487746", "-81.92652525723875", "0.0", "0.004999999888241292", "2.4604752063751216", "0.24713890075683687", "76RWH37C+4WXM"
+   "div_id", "vpu_id", "type", "area_sqkm", "bexp_mode", "isltyp_mode", "ivgtyp_mode", "dksat_geomean", "psisat_geomean", "cwpvt_mean", "mp_mean", "mfsno_mean", "quartz_mean", "refkdt_mean", "slope1km_mean", "smcmax_mean", "smcwlt_mean", "vcmx_mean", "imperv_mean", "twi_q25", "twi_q50", "twi_q75", "twi_q100", "twi_q10", "twi_q20", "twi_q30", "twi_q40", "twi_q60", "twi_q70", "twi_q80", "twi_q90", "elevation_mean", "slope250m_mean", "aspect_circmean", "lzfpm_mean", "lzpk_mean", "lztwm_mean", "rexp_mean", "uzk_mean", "zperc_mean", "lzfsm_mean", "lzsk_mean", "pfree_mean", "uzfwm_mean", "uztwm_mean", "mfmin_mean", "mfmax_mean", "uadj_mean", "a_xinanjiang_inflection_point_parameter", "b_xinanjiang_shape_parameter", "x_xinanjiang_shape_parameter", "temp_delta_jan_mean", "temp_delta_feb_mean", "temp_delta_mar_mean", "temp_delta_apr_mean", "temp_delta_may_mean", "temp_delta_jun_mean", "temp_delta_jul_mean", "temp_delta_aug_mean", "temp_delta_sep_mean", "temp_delta_oct_mean", "temp_delta_nov_mean", "temp_delta_dec_mean", "lat", "lon", "glacier_percent", "cgw", "expon", "max_gw_storage", "vegetation_height", "zero_plane_displacement_height", "momentum_transfer_roughness_length", "heat_transfer_roughness_length", "surface_longwave_emissivity", "surface_shortwave_albedo", "gid"
+   "1073625600290331", "03S", "aggregate", "0.239849982001549", "3.818035364151001", "1.0", "1.0", "3.6914939498829117e-06", "0.09338372026720441", "0.0928061231970787", "12.360313415527344", "2.0", "0.7845002490817423", "2.0", "0.012976297708553007", "0.4200838979884917", "0.02566716016949276", "69.99994659423828", "0.15954700840730673", "5.972740173339844", "6.26715612411499", "6.371448993682861", "7.470083713531494", "5.796090602874756", "5.9138569831848145", "6.031623363494873", "6.149389743804932", "6.371435642242432", "6.371444225311279", "6.371453285217285", "6.632567882537842", "0.06030126203576657", "0.08029816577959442", "236.4273452993607", "214.25912164943603", "0.05888670554283108", "123.76491332175843", "1.4380440872773759", "0.7630407749297897", "20.150517400395312", "11.805358714058677", "0.270208988512994", "0.0942817413303882", "25.912842136563075", "12.990550240619662", "0.7099999785423279", "1.3899999856948853", "0.03298269957304001", "-0.018742965534329414", "0.538235980192303", "0.001675244529961307", "11.930000000000001", "12.016666666666662", "12.07333333333334", "12.263333333333318", "11.919999999999998", "10.196666666666669", "9.68333333333333", "9.769999999999982", "9.31666666666666", "10.116666666666653", "11.193333333333328", "11.49666666666666", "26.504135073101544", "-81.99470405488476", "0.0", "0.004999999888241291", "2.460475206375122", "0.24713890075683592", "4.349680475734058", "3.0390107008462217", "0.6254210363886579", "0.05677647147124748", "0.3540620699429014", "0.2076563216761831", "76RWG223+R7RH"
+   "1073625637040207", "03S", "aggregate", "92.58839979749507", "3.818035364151001", "1.0", "1.0", "7.1393186012168985e-06", "0.0757241496505964", "0.09355893014858675", "12.35240330332629", "2.0", "0.8249747435334212", "2.0", "0.013506275137727657", "0.3873380562165833", "0.014742980032647488", "69.3113811175164", "0.2681815689814034", "6.775866508483887", "7.436667442321777", "8.163203239440918", "12.75737190246582", "6.083558559417725", "6.371192932128906", "6.776295185089111", "6.776730060577393", "7.469760417938232", "7.875497817993164", "8.567959785461426", "9.578204154968262", "1.1705845839469562", "0.05471055200576598", "182.69958537368797", "251.65506707996698", "0.06720892995085322", "148.33030455580314", "1.3785512409541387", "0.763481840972403", "18.812386270792654", "12.661191360208207", "0.269209957312484", "0.08560360420629382", "25.860781478713143", "12.946150439572325", "0.7030492082268506", "1.383298338570957", "0.032967794448183006", "-0.0017540666718045658", "0.437571486362854", "0.0021546517341892", "11.998111802156364", "12.139404828168265", "12.206548282167693", "12.33347787200574", "12.074152164902452", "10.247593100152574", "9.758970181127765", "9.747677996871822", "9.313428885197439", "10.09069742805398", "11.347756611342497", "11.479379267979002", "26.551327278187205", "-81.96011228766315", "0.0", "0.004999999888241293", "2.627503925111515", "0.23326157123771907", "0.7714905344052788", "0.5306021713426768", "0.1982064558745283", "0.010407025056909354", "0.13518542030301434", "0.24421311723848965", "76RWG2HH+G2G9"
+   "1073626961303593", "03S", "connectors", "10.963349810997265", "6.486554145812988", "14.0", "1.0", "1.5567018469057003e-06", "0.1238224889323819", "0.0928061231970787", "12.360313415527344", "2.0", "0.6293138658206437", "2.0", "0.012976297708553004", "0.46162880639818954", "0.04027407602415274", "nan", "0.178267505207074", "6.371095657348633", "6.776533126831055", "7.959933757781982", "12.87630844116211", "6.083254337310791", "6.083381652832031", "6.776321887969971", "6.776401042938232", "7.4695611000061035", "7.874942779541016", "8.532188415527344", "12.224349021911621", "0.6238719058729318", "0.07445809437180916", "208.92124239877825", "294.9365238032896", "0.07723051736761308", "184.40320436674781", "1.2951377429691782", "0.7627148096328631", "18.080432273768118", "15.053886229353582", "0.2665620886809283", "0.06611827004643328", "20.963326896424032", "10.506909830539314", "0.7064571040959576", "1.3899999856948853", "0.03298269957304001", "-0.01047828084825627", "0.6652115741821025", "0.0020704525690610803", "12.013345092080874", "12.2246578546686", "12.265492475311806", "12.42468378000156", "12.139542226608636", "10.23062167957686", "9.714505240720483", "9.726972564304162", "9.286588200926168", "10.077415800915151", "11.340210066017368", "11.536120300517457", "26.562789199487746", "-81.92652525723875", "0.0", "0.004999999888241292", "2.4604752063751216", "0.24713890075683687", "0.2", "0.13000000000000003", "0.13000000000000003", "0.003", "0.1", "0.25", "76RWH37C+4WXM"
 
 **Schema:**
 
@@ -2591,7 +2363,7 @@ Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
      - object
 
    * - type
-     -  Type of catchment (e.g., independent, connector, aggregate).
+     - Type of catchment (e.g., independent, connector, aggregate).
      - object
 
    * - area_sqkm
@@ -2858,217 +2630,28 @@ Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
      - max_gw_storage
      - float64
 
-   * - gid
-     - gid
-     - object
-
-   * - geometry
-     - geometry
-     - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-virtual_nexus:
-
-ngen_hydrofabric_file (layer: virtual_nexus)
---------------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-.. note:: Geometry column omitted from preview table for brevity.
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "virtual_nex_id", "dn_virtual_fp_id", "vpu_id", "gid"
-   "1073625603369834", "1073625600290348.0", "03S", "76RWG233+36HP"
-   "1073625600265404", "nan", "03S", "76RWG223+M5G6"
-   "1073625638488751", "1073601254009571.0", "03S", "76RWG2J2+H3VH"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - virtual_nex_id
-     - virtual_nex_id
-     - int64
-
-   * - dn_virtual_fp_id
-     - dn_virtual_fp_id
+   * - vegetation_height
+     - vegetation_height
      - float64
 
-   * - vpu_id
-     - VPU identifier.
-     - object
-
-   * - gid
-     - gid
-     - object
-
-   * - geometry
-     - geometry
-     - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-virtual_flowpaths:
-
-ngen_hydrofabric_file (layer: virtual_flowpaths)
-------------------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-.. note:: Geometry column omitted from preview table for brevity.
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "virtual_fp_id", "dn_virtual_nex_id", "up_virtual_nex_id", "segment_order", "length_km", "area_sqkm", "percentage_area_contribution", "vpu_id", "gid"
-   "1073625603433989", "1073625603369834", "nan", "0", "0.22945766942412782", "0.024299959500044346", "0.10131315957275082", "03S", "76RWG233+F6XF"
-   "1073625600290348", "1073625600265404", "1073625603369834.0", "0", "0.12622339396322607", "0.21555002250150465", "0.8986868404272491", "03S", "76RWG223+R7VC"
-   "1073625648634080", "1073625638488751", "nan", "0", "2.8547755376581905", "4.12830031049159", "0.044587662380177334", "03S", "76RWG2Q5+X762"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - virtual_fp_id
-     - virtual_fp_id
-     - int64
-
-   * - dn_virtual_nex_id
-     - dn_virtual_nex_id
-     - int64
-
-   * - up_virtual_nex_id
-     - up_virtual_nex_id
+   * - zero_plane_displacement_height
+     - zero_plane_displacement_height
      - float64
 
-   * - segment_order
-     - segment_order
-     - int64
-
-   * - length_km
-     - flowpath length in kilometers.
+   * - momentum_transfer_roughness_length
+     - momentum_transfer_roughness_length
      - float64
 
-   * - area_sqkm
-     - Area in square kilometers.
+   * - heat_transfer_roughness_length
+     - heat_transfer_roughness_length
      - float64
 
-   * - percentage_area_contribution
-     - percentage_area_contribution
+   * - surface_longwave_emissivity
+     - surface_longwave_emissivity
      - float64
 
-   * - vpu_id
-     - VPU identifier.
-     - object
-
-   * - gid
-     - gid
-     - object
-
-   * - geometry
-     - geometry
-     - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-gages:
-
-ngen_hydrofabric_file (layer: gages)
-------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-.. note:: Geometry column omitted from preview table for brevity.
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "site_no", "status", "hy_id", "USGS_basin_km2", "ref_fp_id", "method_fp_to_gage", "fp_id", "virtual_fp_id", "div_id", "dn_nex_id", "dn_virtual_nex_id", "mainstem_virtual_fp_id", "segment_order", "gid"
-   "02228500", "USGS-active", "4692", "560.6082270794653", "18258887", "nldi_area", "1270208980455354.0", "1270208980455355.0", "1270208980455354.0", "1270208968180698.0", "1270208968180716.0", "1270208980455355.0", "0.0", "862VGQ89+RW9P"
-   "02229000", "USGS-discontinued", "4693", "302.88413106308013", "18260281", "nldi_area", "1270206365122818.0", "1270206365122819.0", "1270206365122818.0", "1270206391622231.0", "1270206391622568.0", "1270206365122819.0", "0.0", "862VCPF4+292W"
-   "02229250", "USGS-discontinued", "4694", "484.1818008805909", "18260257", "nldi_area", "1270206433877251.0", "1270206433877268.0", "1270206433877251.0", "1270206428314545.0", "1270206428314546.0", "1270206433877268.0", "0.0", "862VCQGH+PM4H"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - site_no
-     - USGS gage ID.
-     - object
-
-   * - status
-     - Status of the gage (e.g., active, discontinued).
-     - object
-
-   * - hy_id
-     - hy_id
-     - int64
-
-   * - USGS_basin_km2
-     - USGS_basin_km2
-     - float64
-
-   * - ref_fp_id
-     - ref_fp_id
-     - int64
-
-   * - method_fp_to_gage
-     - method_fp_to_gage
-     - object
-
-   * - fp_id
-     - Unique identifier for the flowpath. Shares the same value with the corresponding catchment's div_id.
-     - float64
-
-   * - virtual_fp_id
-     - virtual_fp_id
-     - float64
-
-   * - div_id
-     - Unique identifier for each catchment.
-     - float64
-
-   * - dn_nex_id
-     - Unique identifier for the downstream nexus that the catchment flows to.
-     - float64
-
-   * - dn_virtual_nex_id
-     - dn_virtual_nex_id
-     - float64
-
-   * - mainstem_virtual_fp_id
-     - mainstem_virtual_fp_id
-     - float64
-
-   * - segment_order
-     - segment_order
+   * - surface_shortwave_albedo
+     - surface_shortwave_albedo
      - float64
 
    * - gid
@@ -3078,279 +2661,6 @@ Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
    * - geometry
      - geometry
      - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-lakes:
-
-ngen_hydrofabric_file (layer: lakes)
-------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-.. note:: Geometry column omitted from preview table for brevity.
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "nhf_lake_id", "ref_fp_id", "hy_id", "fp_id", "virtual_fp_id", "dn_nex_id", "dn_virtual_nex_id", "div_id", "lake_id", "res_id", "LkArea", "LkMxE", "WeirC", "WeirL", "WeirE", "OrificeC", "OrificeA", "OrificeE", "Dam_Length", "ifd", "reservoir_index_AnA", "reservoir_index_Extended_AnA", "reservoir_index_GDL_AK", "reservoir_index_Medium_Range", "reservoir_index_Short_Range", "dam_id", "nidid"
-   "1271727565918156", "6331632", "27535", "1271727562255298.0", "1271727562255299", "1271727569480461.0", "1271727569480462", "1271727562255298", "9954464.0", "None", "0.3132413923740387", "244.04933166503906", "0.4000000059604645", "563.0", "242.44932556152344", "0.10000000149011612", "0.8999999761581421", "236.89999389648438", "563.0", "0.8989999890327454", "nan", "nan", "nan", "nan", "nan", "ls-52374", "GA06854"
-   "1271730275961252", "24110441", "27537", "1271730275923486.0", "1271730285118559", "1271730260650685.0", "1271730275952754", "1271730275923486", "1048623.0", "None", "0.7542736530303955", "263.0191345214844", "0.4000000059604645", "1068.0", "263.0191345214844", "0.10000000149011612", "0.8999999761581421", "263.0191345214844", "1068.0", "0.8989999890327454", "nan", "nan", "nan", "nan", "nan", "ls-52503", "GA01921"
-   "1271692424907145", "6338198", "27560", "1271692421891217.0", "1271692421891218", "1271692427966886.0", "1271692427966887", "1271692421891217", "6337132.0", "None", "0.2783222198486328", "263.54998779296875", "0.4000000059604645", "746.0", "263.54998779296875", "0.10000000149011612", "1.5", "263.54998779296875", "746.0", "0.8989999890327454", "nan", "nan", "nan", "nan", "nan", "ls-51655", "GA04532"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - nhf_lake_id
-     - nhf_lake_id
-     - int64
-
-   * - ref_fp_id
-     - ref_fp_id
-     - int64
-
-   * - hy_id
-     - hy_id
-     - int64
-
-   * - fp_id
-     - Unique identifier for the flowpath. Shares the same value with the corresponding catchment's div_id.
-     - float64
-
-   * - virtual_fp_id
-     - virtual_fp_id
-     - int64
-
-   * - dn_nex_id
-     - Unique identifier for the downstream nexus that the catchment flows to.
-     - float64
-
-   * - dn_virtual_nex_id
-     - dn_virtual_nex_id
-     - int64
-
-   * - div_id
-     - Unique identifier for each catchment.
-     - int64
-
-   * - lake_id
-     - lake_id
-     - float64
-
-   * - res_id
-     - res_id
-     - object
-
-   * - LkArea
-     - LkArea
-     - float64
-
-   * - LkMxE
-     - LkMxE
-     - float64
-
-   * - WeirC
-     - WeirC
-     - float64
-
-   * - WeirL
-     - WeirL
-     - float64
-
-   * - WeirE
-     - WeirE
-     - float64
-
-   * - OrificeC
-     - OrificeC
-     - float64
-
-   * - OrificeA
-     - OrificeA
-     - float64
-
-   * - OrificeE
-     - OrificeE
-     - float64
-
-   * - Dam_Length
-     - Dam_Length
-     - float64
-
-   * - ifd
-     - ifd
-     - float64
-
-   * - reservoir_index_AnA
-     - reservoir_index_AnA
-     - float64
-
-   * - reservoir_index_Extended_AnA
-     - reservoir_index_Extended_AnA
-     - float64
-
-   * - reservoir_index_GDL_AK
-     - reservoir_index_GDL_AK
-     - float64
-
-   * - reservoir_index_Medium_Range
-     - reservoir_index_Medium_Range
-     - float64
-
-   * - reservoir_index_Short_Range
-     - reservoir_index_Short_Range
-     - float64
-
-   * - dam_id
-     - dam_id
-     - object
-
-   * - nidid
-     - nidid
-     - object
-
-   * - geometry
-     - geometry
-     - geometry
-
-
-
-.. _ngen_hydrofabric_file-layer-reference_flowpaths:
-
-ngen_hydrofabric_file (layer: reference_flowpaths)
---------------------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "ref_fp_id", "fp_id", "virtual_fp_id", "div_id", "mainstem_virtual_fp_id", "segment_order", "gid"
-   "10245973", "1073625600290331.0", "1073625600290348", "1073625600290331", "1073625600290348", "0", "76RWG223+R7RH"
-   "10247857", "nan", "1073625603433989", "1073625600290331", "1073625600290348", "0", "None"
-   "10249847", "1073625637040207.0", "1073601254009571", "1073625637040207", "1073601254009571", "1", "76RWG2HH+G2G9"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - ref_fp_id
-     - ref_fp_id
-     - int64
-
-   * - fp_id
-     - Unique identifier for the flowpath. Shares the same value with the corresponding catchment's div_id.
-     - float64
-
-   * - virtual_fp_id
-     - virtual_fp_id
-     - int64
-
-   * - div_id
-     - Unique identifier for each catchment.
-     - int64
-
-   * - mainstem_virtual_fp_id
-     - mainstem_virtual_fp_id
-     - int64
-
-   * - segment_order
-     - segment_order
-     - int64
-
-   * - gid
-     - gid
-     - object
-
-
-
-.. _ngen_hydrofabric_file-layer-hydrolocations:
-
-ngen_hydrofabric_file (layer: hydrolocations)
----------------------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-**Example rows:**
-
-.. csv-table::
-   :header-rows: 1
-
-   "hy_id", "dn_nex_id", "dn_virtual_nex_id"
-   "4692.0", "1270208968180698.0", "1270208968180716.0"
-   "4693.0", "1270206391622231.0", "1270206391622568.0"
-   "4694.0", "1270206428314545.0", "1270206428314546.0"
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - hy_id
-     - hy_id
-     - int64
-
-   * - dn_nex_id
-     - Unique identifier for the downstream nexus that the catchment flows to.
-     - float64
-
-   * - dn_virtual_nex_id
-     - dn_virtual_nex_id
-     - float64
-
-
-
-.. _ngen_hydrofabric_file-layer-nhd:
-
-ngen_hydrofabric_file (layer: nhd)
-----------------------------------
-
-NGEN Hydrofabric for a VPU.
-
-Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
-
-**Schema:**
-
-.. list-table::
-   :header-rows: 1
-
-   * - Column
-     - Description
-     - Type
-   * - nhd_feature_id
-     - nhd_feature_id
-     - int64
-
-   * - ref_id
-     - ref_id
-     - int64
-
-   * - percent_inside
-     - percent_inside
-     - float64
-
 
 
 
@@ -3543,7 +2853,6 @@ Sample file path: ``inputs/region/attr_datasets/streamcat/attr_streamcat_conus.p
 
 
 
-
 .. _streamcat-attr_select_file:
 
 streamcat.attr_select_file
@@ -3582,7 +2891,6 @@ Sample file path: ``inputs/region/attr_config/attr_selection_streamcat.csv``
    * - description
      - Description of the StreamCat attribute.
      - object
-
 
 
 

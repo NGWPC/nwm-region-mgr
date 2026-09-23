@@ -198,7 +198,6 @@ Sample file path: ``outputs/region/test/attr_data_final/attr_conus_vpu03S.parque
 
 
 
-
 .. _formulations:
 
 formulations
@@ -264,15 +263,14 @@ Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S.parquet``
 
 
 
-
 .. _formulations_pars:
 
 formulations_pars
 -----------------
 
-Formulations selected for each catchment from formulation regionalization.
+Formulations selected for each calibration basin from formulation regionalization.
 
-Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S.parquet``
+Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S_pars.parquet``
 
 **Example rows:**
 
@@ -293,11 +291,11 @@ Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S.parquet``
      - Description
      - Type
    * - gage_id
-     - gage_id
+     - Unique identifier for each calibration basin.
      - object
 
    * - formulation
-     - Formulation assigned to the catchment.
+     - Formulation assigned to the calibration basin. Modules within the formulation are separated by commas.
      - object
 
    * - calibration_run_id
@@ -309,277 +307,276 @@ Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S.parquet``
      - int64
 
    * - MFSNO
-     - MFSNO
+     - NOM parameter: Melt factor for snow depletion curve
      - float64
 
    * - CWP
-     - CWP
+     - NOM parameter: Canopy water capacity
      - float64
 
    * - VCMX25
-     - VCMX25
+     - NOM parameter: Maximum canopy storage
      - float64
 
    * - MP
-     - MP
+     - NOM parameter: MP
      - float64
 
    * - RSURF_SNOW
-     - RSURF_SNOW
+     - NOM parameter: Snow surface roughness
      - float64
 
    * - RSURF_EXP
-     - RSURF_EXP
+     - NOM parameter: Snow surface roughness exponent
      - float64
 
    * - SCAMAX
-     - SCAMAX
+     - NOM parameter: SCAMAX
      - float64
 
    * - b
-     - b
+     - CFE parameter: b
      - float64
 
    * - satdk
-     - satdk
+     - CFE parameter: satdk
      - float64
 
    * - satpsi
-     - satpsi
+     - CFE parameter: satpsi
      - float64
 
    * - slope
-     - slope
+     - CFE parameter: slope
      - float64
 
    * - maxsmc
-     - maxsmc
+     - CFE parameter: maxsmc
      - float64
 
    * - wltsmc
-     - wltsmc
+     - CFE parameter: wltsmc
      - float64
 
    * - max_gw_storage
-     - max_gw_storage
+     - CFE parameter: max_gw_storage
      - float64
 
    * - Cgw
-     - Cgw
+     - CFE parameter: Cgw
      - float64
 
    * - expon
-     - expon
+     - CFE parameter: expon
      - float64
 
    * - Kn
-     - Kn
+     - CFE parameter: Kn
      - float64
 
    * - Klf
-     - Klf
+     - CFE parameter: Klf
      - float64
 
    * - refkdt
-     - refkdt
+     - CFE parameter: refkdt
      - float64
 
    * - mfmax
-     - mfmax
+     - snow-17 parameter: mfmax
      - float64
 
    * - uadj
-     - uadj
+     - snow-17 parameter: uadj
      - float64
 
    * - si
-     - si
+     - snow-17 parameter: si
      - float64
 
    * - mfmin
-     - mfmin
+     - snow-17 parameter: mfmin
      - float64
 
    * - scf
-     - scf
+     - snow-17 parameter: scf
      - float64
 
    * - nmf
-     - nmf
+     - snow-17 parameter: nmf
      - float64
 
    * - tipm
-     - tipm
+     - snow-17 parameter: tipm
      - float64
 
    * - pxtemp
-     - pxtemp
+     - snow-17 parameter: pxtemp
      - float64
 
    * - plwhc
-     - plwhc
+     - snow-17 parameter: plwhc
      - float64
 
    * - daygm
-     - daygm
+     - snow-17 parameter: daygm
      - float64
 
    * - smcmin
-     - smcmin
+     - lasam parameter: smcmin
      - float64
 
    * - smcmax
-     - smcmax
+     - lasam parameter: smcmax
      - float64
 
    * - van_genuchten_alpha
-     - van_genuchten_alpha
+     - lasam parameter: van_genuchten_alpha
      - float64
 
    * - van_genuchten_n
-     - van_genuchten_n
+     - lasam parameter: van_genuchten_n
      - float64
 
    * - hydraulic_conductivity
-     - hydraulic_conductivity
+     - lasam parameter: hydraulic_conductivity
      - float64
 
    * - ponded_depth_max
-     - ponded_depth_max
+     - lasam parameter: ponded_depth_max
      - float64
 
    * - field_capacity
-     - field_capacity
+     - lasam parameter: field_capacity
      - float64
 
    * - df
-     - df
+     - UEB parameter: df
      - float64
 
    * - cc
-     - cc
+     - UEB parameter: cc
      - float64
 
    * - hcan
-     - hcan
+     - UEB parameter: hcan
      - float64
 
    * - lai
-     - lai
+     - UEB parameter: lai
      - float64
 
    * - subalb
-     - subalb
+     - UEB parameter: subalb
      - float64
 
    * - ems
-     - ems
+     - UEB parameter: ems
      - float64
 
    * - cg
-     - cg
+     - UEB parameter: cg
      - float64
 
    * - zo
-     - zo
+     - UEB parameter: zo
      - float64
 
    * - rho
-     - rho
+     - UEB parameter: rho
      - float64
 
    * - rhog
-     - rhog
+     - UEB parameter: rhog
      - float64
 
    * - Ks
-     - Ks
+     - UEB parameter: Ks
      - float64
 
    * - de
-     - de
+     - UEB parameter: de
      - float64
 
    * - avo
-     - avo
+     - UEB parameter: avo
      - float64
 
    * - apr
-     - apr
+     - UEB parameter: apr
      - float64
 
    * - a_Xinanjiang_inflection_point_parameter
-     - a_Xinanjiang_inflection_point_parameter
+     - CFE-X parameter: a_Xinanjiang_inflection_point_parameter
      - float64
 
    * - b_Xinanjiang_shape_parameter
-     - b_Xinanjiang_shape_parameter
+     - CFE-X parameter: b_Xinanjiang_shape_parameter
      - float64
 
    * - x_Xinanjiang_shape_parameter
-     - x_Xinanjiang_shape_parameter
+     - CFE-X parameter: x_Xinanjiang_shape_parameter
      - float64
 
    * - uztwm
-     - uztwm
+     - sac-sma parameter: uztwm
      - float64
 
    * - uzfwm
-     - uzfwm
+     - sac-sma parameter: uzfwm
      - float64
 
    * - lztwm
-     - lztwm
+     - sac-sma parameter: lztwm
      - float64
 
    * - lzfsm
-     - lzfsm
+     - sac-sma parameter: lzfsm
      - float64
 
    * - lzfpm
-     - lzfpm
+     - sac-sma parameter: lzfpm
      - float64
 
    * - adimp
-     - adimp
+     - sac-sma parameter: adimp
      - float64
 
    * - uzk
-     - uzk
+     - sac-sma parameter: uzk
      - float64
 
    * - lzpk
-     - lzpk
+     - sac-sma parameter: lzpk
      - float64
 
    * - lzsk
-     - lzsk
+     - sac-sma parameter: lzsk
      - float64
 
    * - zperc
-     - zperc
+     - sac-sma parameter: zperc
      - float64
 
    * - rexp
-     - rexp
+     - sac-sma parameter: rexp
      - float64
 
    * - pctim
-     - pctim
+     - sac-sma parameter: pctim
      - float64
 
    * - pfree
-     - pfree
+     - sac-sma parameter: pfree
      - float64
 
    * - riva
-     - riva
+     - sac-sma parameter: riva
      - float64
 
    * - side
-     - side
+     - sac-sma parameter: side
      - float64
-
 
 
 
@@ -611,7 +608,7 @@ Sample file path: ``outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet`
      - Description
      - Type
    * - div_id
-     - Unique identifier for each receiver catchment.  
+     - Unique identifier for each receiver catchment.
      - object
 
    * - tag
@@ -636,13 +633,12 @@ Sample file path: ``outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet`
 
 
 
-
 .. _pairs_distance_algorithms:
 
 pairs_distance_algorithms
 -------------------------
 
-Receiver-donor pairs generated from parameter regionalization using distance-based algorithms (currently Gower and URF). 
+Receiver-donor pairs generated from parameter regionalization using distance-based algorithms (currently Gower and URF).
 
 Sample file path: ``outputs/region/test/pairs/pairs_gower_conus_vpu03S.parquet``
 
@@ -665,7 +661,7 @@ Sample file path: ``outputs/region/test/pairs/pairs_gower_conus_vpu03S.parquet``
      - Description
      - Type
    * - div_id
-     - Unique identifier for each receiver catchment.  
+     - Unique identifier for each receiver catchment.
      - object
 
    * - tag
@@ -695,7 +691,6 @@ Sample file path: ``outputs/region/test/pairs/pairs_gower_conus_vpu03S.parquet``
    * - distAttrs
      - Attribute distances corresponding to the final set of donors (unitless).
      - object
-
 
 
 
@@ -733,7 +728,6 @@ Sample file path: ``outputs/region/test/pairs/pairs_kmeans_conus_vpu03S_mswm.csv
    * - div_id
      - Unique identifier for each receiver catchment in the VPU.
      - int64
-
 
 
 
@@ -849,7 +843,7 @@ Sample file path: ``outputs/region/test/params/formulation_params_kmeans_conus_v
      - float64
 
    * - Klf
-     - CFE parameter: Nash Config param - primary reservoir 
+     - CFE parameter: Nash Config param - primary reservoir
      - float64
 
    * - refkdt
@@ -981,7 +975,7 @@ Sample file path: ``outputs/region/test/params/formulation_params_kmeans_conus_v
      - float64
 
    * - a_Xinanjiang_inflection_point_parameter
-     - CFE-X parameter: Xinanjiang 'a' coefficient when surface_water_partitioning_scheme=Xinanjiang 
+     - CFE-X parameter: Xinanjiang 'a' coefficient when surface_water_partitioning_scheme=Xinanjiang
      - float64
 
    * - b_Xinanjiang_shape_parameter
@@ -989,7 +983,7 @@ Sample file path: ``outputs/region/test/params/formulation_params_kmeans_conus_v
      - float64
 
    * - x_Xinanjiang_shape_parameter
-     - CFE-X parameter: Xinanjiang 'x' coefficient when surface_water_partitioning_scheme=Xinanjiang 
+     - CFE-X parameter: Xinanjiang 'x' coefficient when surface_water_partitioning_scheme=Xinanjiang
      - float64
 
    * - uztwm
@@ -1054,7 +1048,6 @@ Sample file path: ``outputs/region/test/params/formulation_params_kmeans_conus_v
 
 
 
-
 .. _spatial_distance:
 
 spatial_distance
@@ -1065,7 +1058,6 @@ Spatial distances between donor and receiver catchments within the VPU. Columns 
 Sample file path: ``outputs/region/test/spatial_distance/donor_receiver_dist_conus_vpu03S.parquet``
 
 .. warning:: Schema table omitted for spatial_distance files due to large number of columns.
-
 
 
 .. _summary_score:
@@ -1106,7 +1098,6 @@ Sample file path: ``outputs/region/test/summary_score/score_conus_vpu03S.parquet
    * - summary_score
      - Summary score for the calibrated formulation and basin.
      - float64
-
 
 
 

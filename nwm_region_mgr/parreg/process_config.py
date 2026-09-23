@@ -1281,6 +1281,7 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             form_config.get_file_path(vpu=vpu, use_stem_suffix=True)
             for vpu in self.donor_vpus
         ]
+
         df_param_all = pd.DataFrame()
         for param_file in param_files:
             if not param_file.exists():
@@ -1320,8 +1321,11 @@ class ParameterRegionalizationProcessor(BaseConfigProcessor):
             )
             donor_gages = df_pairs[self.gage_col].unique().tolist()
 
-        # filter the parameter data to only include donors for the current algorithm and VPU
+        # filter the parameter data to only include donors in the pairs file
         df_param_all = df_param_all[df_param_all[self.gage_col].isin(donor_gages)]
+
+        # remove duplicated rows if any
+        df_param_all = df_param_all.drop_duplicates()
 
         if df_param_all.empty:
             msg = "No formulation parameter data found. Please run the formulation regionalization first."

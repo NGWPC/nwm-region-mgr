@@ -497,6 +497,10 @@ class ManualPairer:
             # save the updated pairs file with manual pairings
             prp.save_pairing_results(df_updated, algorithm)
 
+            # expand the configuration to include formulation regionalization output for all donor VPUs
+            for vpu1 in prp.donor_vpus:
+                frp.expand_config_for_vpu(vpu1)
+
             # save the updated params files
             prp.create_formulation_parameter_file(
                 getattr(frp.config.output, "formulation", None), algorithm
