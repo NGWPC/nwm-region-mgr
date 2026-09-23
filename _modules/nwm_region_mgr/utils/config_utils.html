@@ -1,0 +1,1675 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nwm_region_mgr.utils.config_utils &#8212; nwm_region_mgr  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=cb8930eaaf36d9849b67" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=d1833e3e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=cb8930eaaf36d9849b67"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67" />
+
+    <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/nwm_region_mgr/utils/config_utils';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../../../_static/form2yaml.js?v=4b298b11"></script>
+    <script src="../../../_static/components/form-field.js?v=f85f97bb"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item"><a class="navbar-brand logo" href="../../../index.html">
+    <span class="logo" style="font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: bold; font-size: 24px; color: var(--pst-color-secondary);">
+        nwm_region_mgr
+      </span>
+  </a></div>
+    
+      <div class="navbar-item">0.1.0</div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../config_builder/index.html">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tech_reference/index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide.html">
+    User Guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../config_builder/index.html">
+    Configuration
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../tech_reference/index.html">
+    Technical Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../API/index.html">
+    API
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">nwm_region_mgr.utils.config_utils</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for nwm_region_mgr.utils.config_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Utility functions for loading and validating configuration files using Pydantic and YAML.</span>
+
+<span class="sd">config_utils.py</span>
+
+<span class="sd">Classes/Functions:</span>
+<span class="sd">    - LoggingConfig: Pydantic model for logging configuration.</span>
+<span class="sd">    - BaseGeneralConfig: Pydantic model for general settings of the application.</span>
+<span class="sd">    - BaseOutputConfig: Pydantic model for output settings of the application.</span>
+<span class="sd">    - BaseConfig: Pydantic model for the base configuration of the application.</span>
+<span class="sd">    - BaseConfigProcessor: base class for processing and validating configurations</span>
+<span class="sd">    - _deep_merge_configs: Recursively merge two dictionaries, with values from dict #2 overwriting those in dict #1.</span>
+<span class="sd">    - _load_and_validate_config: Load a YAML file, validate its structure using Pydantic</span>
+<span class="sd">    - _substitute_placeholders: Substitute placeholders in the config with actual values.</span>
+<span class="sd">    - load_and_process_config: Load, validate, process, and save the configuration files.</span>
+<span class="sd">    - _validate_paths: Validate that all file and directory paths exist.</span>
+<span class="sd">    - _assemble_file_paths: Assemble file paths from the configuration.</span>
+<span class="sd">    - _required_columns_calval_stats: Return a set of required columns for calibration/validation statistics.</span>
+<span class="sd">    - _file_required_column_map: Return a dictionary mapping files to required columns.</span>
+<span class="sd">    - PydanticDictLike: Stand-in for dictionary-like behavior when you want specificity of a pydantic model.</span>
+<span class="sd">    - FieldCrosswalk: Mapping of column names for unique identifiers in all require files for regionalization.</span>
+<span class="sd">    - LayerCrosswalk: Dictionary mapping layer names for hydrofabric files.</span>
+
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span><span class="p">,</span> <span class="n">reduce</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">model_validator</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nwm_region_mgr.utils.dict_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">flatten_dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nwm_region_mgr.utils.io_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_table</span><span class="p">,</span> <span class="n">save_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nwm_region_mgr.utils.plot_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_histogram</span><span class="p">,</span> <span class="n">plot_spatial_map</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nwm_region_mgr.utils.string_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">recursive_substitute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nwm_region_mgr.utils.validation_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">check_columns_dataframe</span><span class="p">,</span>
+    <span class="n">check_columns_hydrofabric</span><span class="p">,</span>
+    <span class="n">check_options</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LoggingConfig">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.LoggingConfig.html#nwm_region_mgr.utils.config_utils.LoggingConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoggingConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Logging configuration for the application."""</span>
+
+    <span class="n">level</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"debug"</span><span class="p">,</span> <span class="s2">"info"</span><span class="p">,</span> <span class="s2">"warning"</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">,</span> <span class="s2">"critical"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Logging level."</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="s2">"debug"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"info"</span>
+    <span class="p">)</span>
+
+    <span class="n">log_to_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Whether to log to a file. If set to True, logging messages will be written to "</span>
+            <span class="s2">"the specified log file, in addition to the console."</span>
+        <span class="p">),</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Path to the log file. If not provided, logging will be written to console only."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"logfile.log"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_log_level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"LoggingConfig"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Ensure that the log level is valid."""</span>
+        <span class="n">valid_levels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"DEBUG"</span><span class="p">,</span>
+            <span class="s2">"INFO"</span><span class="p">,</span>
+            <span class="s2">"WARNING"</span><span class="p">,</span>
+            <span class="s2">"SEVERE"</span><span class="p">,</span>
+            <span class="s2">"FATAL"</span><span class="p">,</span>
+        <span class="p">]</span>  <span class="c1"># use standard Python log levels</span>
+        <span class="n">check_options</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">level</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">valid_levels</span><span class="p">,</span> <span class="s2">"log level"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_log_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"LoggingConfig"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Ensure that the log file path is valid if logging to a file."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_to_file</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"If 'log_to_file' is True, 'file' must be specified."</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+
+<div class="viewcode-block" id="PydanticDictLike">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.PydanticDictLike.html#nwm_region_mgr.utils.config_utils.PydanticDictLike">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PydanticDictLike</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Stand-in for dictionary-like behavior when you want specificity of a pydantic model."""</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return the model as a dictionary."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get a value from the model by key, with an optional default."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">"""Return an iterator over the model's (key, value) pairs."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return an iterator over the model's keys."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return an iterator over the model's values."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">lower_case</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"PydanticDictLike"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return a new instance with all string fields lowercased."""</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="FieldCrosswalk">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.FieldCrosswalk.html#nwm_region_mgr.utils.config_utils.FieldCrosswalk">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FieldCrosswalk</span><span class="p">(</span><span class="n">PydanticDictLike</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Mapping of column names for unique identifiers in all require files for regionalization."""</span>
+
+    <span class="n">divide</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Column name for divide (catchment) ID."</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"div_id"</span>
+    <span class="p">)</span>
+
+    <span class="n">gage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Column name for gage (basin) ID."</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"gage_id"</span><span class="p">)</span>
+
+    <span class="n">huc12</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Column name for HUC12 ID."</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"huc_12"</span><span class="p">)</span>
+
+    <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Column name for VPU ID."</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"vpu_id"</span><span class="p">)</span>
+
+    <span class="n">drainage_area</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Column name for drainage area."</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"area_sqkm"</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LayerCrosswalk">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.LayerCrosswalk.html#nwm_region_mgr.utils.config_utils.LayerCrosswalk">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LayerCrosswalk</span><span class="p">(</span><span class="n">PydanticDictLike</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Dictionary mapping layer names for hydrofabric files."""</span>
+
+    <span class="n">huc12</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Layer name for HUC12 hydrofabric file."</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"WBDSnapshot_National"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ngen</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Layer name for NextGen hydrofabric file."</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"divides"</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BaseGeneralConfig">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.BaseGeneralConfig.html#nwm_region_mgr.utils.config_utils.BaseGeneralConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseGeneralConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Base general settings for the formulation regionalization application."""</span>
+
+    <span class="n">run_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Name of the run, used to create output folders and files."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">domain</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"conus"</span><span class="p">,</span> <span class="s2">"ak"</span><span class="p">,</span> <span class="s2">"hi"</span><span class="p">,</span> <span class="s2">"prvi"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Which National Water Model Domain this run uses."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"conus"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"conus"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Vector processing unit (VPU) to be processed within the domain. "</span>
+            <span class="s2">"Valid VPUs for conus include 01,02,03N,03S,03W,04,05,06,07,08,09,10L,10U,11,12,13,14,15,16,17,18. "</span>
+            <span class="s2">"Valid VPUs for ak, hi, prvi are 19, 20, 21, respectively."</span>
+        <span class="p">),</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"03S"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"03S"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">n_procs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Number of processors to use for parallel processing. Set to -1 to use all available processors."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">base_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Path to base directory for input/output files."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"~/run_region"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">static_data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Path to static data directory containing hydrofabric and other static input files."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"/ngencerf-app/nwm-region-mgr/data/inputs"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ngen_hydrofabric_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Path to NextGen hydrofabric file. Can be: 1) a single file path (Path or str), e.g., 'vpu_01.gpkg' "</span>
+            <span class="s2">"or 2) a dictionary mapping VPU strings to file paths, e.g., {'01': 'vpu_01.gpkg'}."</span>
+            <span class="s2">"If providing a string with placeholders like </span><span class="si">{vpu}</span><span class="s2">, they will be substituted accordingly and "</span>
+            <span class="s2">"expanded to a dictionary mapping each VPU to its corresponding file."</span>
+            <span class="s2">" This file must include columns 'div_id', 'vpu_id' and 'geometry'."</span>
+        <span class="p">),</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"</span><span class="si">{static_data_dir}</span><span class="s2">/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">gage_divide_cwt_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Path to CSV or parquet file with gage divide CWTs, with columns 'div_id' and 'gage_id'."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">[</span>
+            <span class="s2">"</span><span class="si">{static_data_dir}</span><span class="s2">/region/cwt_divide_gage/calib_gage_divide_</span><span class="si">{domain}</span><span class="s2">.parquet"</span>
+        <span class="p">],</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">donor_gage_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Path to CSV file with donor gage information, including 'gage_id', 'longitude', and 'latitude'."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"</span><span class="si">{static_data_dir}</span><span class="s2">/region/gages_nwm4_calib_all.csv"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">calval_stats_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Path to CSV or parquet file with calibration/validation statistics for all calibration gages "</span>
+            <span class="s2">"and formulations, e.g., 'stat_calval_all_conus.parquet', 'stat_calval_all_conus.csv'. "</span>
+            <span class="s2">"Must include columns for 'gage_id', 'formulation', and relevant metrics to be used for formulation "</span>
+            <span class="s2">"and parameter regionalization."</span>
+        <span class="p">),</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"</span><span class="si">{static_data_dir}</span><span class="s2">/region/calval_stats/stat_calval_all_</span><span class="si">{domain}</span><span class="s2">.parquet"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">calib_param_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Path to CSV or parquet file containing calibrated parameters for all calibration gages "</span>
+            <span class="s2">"and formulations in the domain. Must include columns for 'gage_id', 'formulation', and "</span>
+            <span class="s2">"calibrated parameters."</span>
+        <span class="p">),</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"</span><span class="si">{static_data_dir}</span><span class="s2">/region/pseudo_calib_params/sampled_params_</span><span class="si">{domain}</span><span class="s2">.csv"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">approach_calib_basins</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"regionalization"</span><span class="p">,</span> <span class="s2">"summary_score"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Strategy for assigning formulations to calibrated basins. Valid options are 'regionalization' "</span>
+            <span class="s2">"(assign the formulation chosen for the region) or 'summary_score' (assign based on formulation "</span>
+            <span class="s2">"summary scores for the calibrated basin)."</span>
+        <span class="p">),</span>
+        <span class="n">examples</span><span class="o">=</span><span class="s2">"summary_score"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"summary_score"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">id_col</span><span class="p">:</span> <span class="n">FieldCrosswalk</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Dictionary mapping column names for unique identifiers in all applicable files."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">"divide"</span><span class="p">:</span> <span class="s2">"div_id"</span><span class="p">,</span>
+            <span class="s2">"gage"</span><span class="p">:</span> <span class="s2">"gage_id"</span><span class="p">,</span>
+            <span class="s2">"huc12"</span><span class="p">:</span> <span class="s2">"huc_12"</span><span class="p">,</span>
+            <span class="s2">"vpu"</span><span class="p">:</span> <span class="s2">"vpu_id"</span><span class="p">,</span>
+            <span class="s2">"drainage_area"</span><span class="p">:</span> <span class="s2">"area_sqkm"</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">FieldCrosswalk</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">layer_name</span><span class="p">:</span> <span class="n">LayerCrosswalk</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Dictionary mapping layer names for hydrofabric files. "</span>
+            <span class="s2">"Identifies the layer in each hydrofabric file to be used during regionalization."</span>
+        <span class="p">),</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">"huc12"</span><span class="p">:</span> <span class="s2">"WBDSnapshot_National"</span><span class="p">,</span>
+            <span class="s2">"ngen"</span><span class="p">:</span> <span class="s2">"divides"</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">LayerCrosswalk</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">logging</span><span class="p">:</span> <span class="n">LoggingConfig</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Logging configuration for the application."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">"level"</span><span class="p">:</span> <span class="s2">"info"</span><span class="p">,</span>
+            <span class="s2">"log_to_file"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">"file"</span><span class="p">:</span> <span class="s2">"logs/</span><span class="si">{run_name}</span><span class="s2">.log"</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">LoggingConfig</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_hydrofabric_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"BaseGeneralConfig"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Normalize the hydrofabric file path to a dictionary mapping VPU to file paths."""</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="c1"># If it's a single path, create a dictionary with the current VPU</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span><span class="p">)}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># If it's a dict, ensure all keys are strings and values are strings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"ngen_hydrofabric_file must be a string, Path, or dictionary mapping VPU to file paths."</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lower_case_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"BaseGeneralConfig"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Ensure that all ID columns are in lower case."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_col</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id_col</span><span class="o">.</span><span class="n">lower_case</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">layer_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">lower_case</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_vpu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"BaseGeneralConfig"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Ensure that the VPU is valid."""</span>
+        <span class="c1"># fmt: off</span>
+        <span class="n">valid_vpus</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"conus"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">"01"</span><span class="p">,</span> <span class="s2">"02"</span><span class="p">,</span> <span class="s2">"03N"</span><span class="p">,</span> <span class="s2">"03S"</span><span class="p">,</span> <span class="s2">"03W"</span><span class="p">,</span> <span class="s2">"04"</span><span class="p">,</span> <span class="s2">"05"</span><span class="p">,</span> <span class="s2">"06"</span><span class="p">,</span> <span class="s2">"07"</span><span class="p">,</span> <span class="s2">"08"</span><span class="p">,</span> <span class="s2">"09"</span><span class="p">,</span>
+                <span class="s2">"10L"</span><span class="p">,</span> <span class="s2">"10U"</span><span class="p">,</span> <span class="s2">"11"</span><span class="p">,</span> <span class="s2">"12"</span><span class="p">,</span> <span class="s2">"13"</span><span class="p">,</span> <span class="s2">"14"</span><span class="p">,</span> <span class="s2">"15"</span><span class="p">,</span> <span class="s2">"16"</span><span class="p">,</span> <span class="s2">"17"</span><span class="p">,</span> <span class="s2">"18"</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="s2">"ak"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"19"</span><span class="p">],</span>
+            <span class="s2">"hi"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"20"</span><span class="p">],</span>
+            <span class="s2">"prvi"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"21"</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="c1"># fmt: on</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpu</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_vpus</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">]:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid VPU '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">vpu</span><span class="si">}</span><span class="s2">' for domain '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="si">}</span><span class="s2">'. Valid options are: </span><span class="si">{</span><span class="n">valid_vpus</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+
+<div class="viewcode-block" id="BaseOutputConfig">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.BaseOutputConfig.html#nwm_region_mgr.utils.config_utils.BaseOutputConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseOutputConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Base Output Manager."""</span>
+
+    <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Whether to save output files"</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Path to save output file or files. If a directory, the 'stem' and 'format' must be specified."</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">stem</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"File stem for output files, used to create unique file names based on the path."</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">stem_suffix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Suffix for the file stem, used to create unique file names based on the path for specific needs."</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file."</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Configuration for output plots, if applicable."</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plot_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Path to save output plots, if applicable. If not specified, plots will be saved "</span>
+            <span class="s2">"in a subfolder 'plots' in the defined output path."</span>
+        <span class="p">),</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_plot_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if plot path is valid."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="o">.</span><span class="n">plot_path</span><span class="p">:</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">plot_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">/plots"</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Plot path not specified, using default: </span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">plot_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">values</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_plot_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if plot configuration is valid."""</span>
+        <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">plots</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">plots</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"'plots' must be a dictionary, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">plots</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="c1"># only "histogram" and "spatial_map" are supported, currently</span>
+            <span class="n">check_options</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                <span class="p">[</span><span class="s2">"histogram"</span><span class="p">,</span> <span class="s2">"spatial_map"</span><span class="p">,</span> <span class="s2">"columns_to_plot"</span><span class="p">],</span>
+                <span class="s2">"plot keys"</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">values</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_file_path</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_stem_suffix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get the file path for saving the output."""</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">plot_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_path</span><span class="p">)</span>
+
+        <span class="c1"># If the path is a directory, construct the file name using 'stem' and 'format'</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"File 'stem' and 'format' must be specified if 'path' is a directory: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1"># if stem is a dict (for different algorithms or vpus), find the stem for current algorithm and/or vpu</span>
+                <span class="k">if</span> <span class="n">vpu</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">algorithm</span><span class="p">:</span>
+                    <span class="n">file_stem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">vpu</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">vpu</span> <span class="ow">and</span> <span class="n">algorithm</span><span class="p">:</span>
+                    <span class="n">file_stem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">vpu</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">algorithm</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">algorithm</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">vpu</span><span class="p">:</span>
+                    <span class="n">file_stem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">algorithm</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_stem</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">file_stem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid 'stem' type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must be str or dict."</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">file_stem</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"File stem not found for VPU </span><span class="si">{</span><span class="n">vpu</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">"</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">use_stem_suffix</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem_suffix</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"File stem suffix not specified: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stem_suffix</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_stem</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem_suffix</span>
+
+            <span class="c1"># make sure plot_type is supported</span>
+            <span class="k">if</span> <span class="n">plot_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"map"</span><span class="p">,</span> <span class="s2">"hist"</span><span class="p">]:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Unsupported plot type: </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">. Supported types are None, 'map', 'hist'."</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">file_format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="k">if</span> <span class="n">plot_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"png"</span>
+            <span class="n">file_prefix</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">plot_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2">_"</span>
+
+            <span class="c1"># Construct the full file path</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">file_prefix</span><span class="si">}{</span><span class="n">file_stem</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">file_format</span><span class="si">}</span><span class="s2">"</span>
+
+        <span class="c1"># create the directory if it does not exist</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">file_path</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_to_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_stem_suffix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Save output data to the specified path and format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Data to save, can be a DataFrame or Pydantic model.</span>
+<span class="sd">            vpu: VPU identifier for the output file name.</span>
+<span class="sd">            algorithm: Algorithm identifier for the output file name.</span>
+<span class="sd">            data_str: String representation of the data being saved.</span>
+<span class="sd">            use_stem_suffix: Whether to use the stem suffix for the file name.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the output path is a directory and no file name is provided.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># get the file path to save the output</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_path</span><span class="p">(</span>
+            <span class="n">vpu</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">use_stem_suffix</span><span class="o">=</span><span class="n">use_stem_suffix</span>
+        <span class="p">)</span>
+
+        <span class="c1"># save the output data</span>
+        <span class="n">save_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved output to </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved </span><span class="si">{</span><span class="n">data_str</span><span class="si">}</span><span class="s2"> output to </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_from_file</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_stem_suffix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">data_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Read output data from the specified path and format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            vpu: VPU identifier for the output file name.</span>
+<span class="sd">            algorithm: Algorithm identifier for the output file name.</span>
+<span class="sd">            use_stem_suffix: Whether to use the stem suffix for the file name.</span>
+<span class="sd">            data_str: String representation of the data being read.</span>
+<span class="sd">            data_type: Optional dictionary specifying the data types for specific columns.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataFrame or GeoDataFrame containing the loaded data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If the file does not exist.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># get the file path to read the output</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_path</span><span class="p">(</span>
+            <span class="n">vpu</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">use_stem_suffix</span><span class="o">=</span><span class="n">use_stem_suffix</span>
+        <span class="p">)</span>
+
+        <span class="c1"># read the output data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">read_table</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">data_type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">data_str</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Read output from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Read </span><span class="si">{</span><span class="n">data_str</span><span class="si">}</span><span class="s2"> output from </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_valid_columns</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Get the list of valid columns that exist and are not entirely NaN in the data for plotting.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: DataFrame or GeoDataFrame containing the data to plot.</span>
+<span class="sd">            columns: List of columns specified for plotting.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List of valid columns that exist in the data for plotting.</span>
+<span class="sd">        """</span>
+        <span class="n">cols_exist</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">cols_missing</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols_exist</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cols_missing</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Excluding missing columns: </span><span class="si">{</span><span class="n">cols_missing</span><span class="si">}</span><span class="s2"> from plotting."</span><span class="p">)</span>
+
+        <span class="n">cols_non_nan</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols_exist</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">()]</span>
+        <span class="n">cols_all_nan</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols_exist</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols_non_nan</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cols_all_nan</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Excluding columns with all NaN values: </span><span class="si">{</span><span class="n">cols_all_nan</span><span class="si">}</span><span class="s2"> from plotting."</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cols_non_nan</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+        <span class="n">plot_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Plot the data and save png to the specified path.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: DataFrame or GeoDataFrame containing the data to plot.</span>
+<span class="sd">            plot_dict: Dictionary containing plot configuration, including:</span>
+<span class="sd">                var_str: String representation of the variable being plotted.</span>
+<span class="sd">                columns: list of columns in the data to plot.</span>
+<span class="sd">                vpu: VPU identifier for the output file name.</span>
+<span class="sd">                plot_type: Type of plot being saved (e.g., 'map', 'hist').</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># if columns_to_plot is specified by the user, use it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"columns_to_plot"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plot_dict</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">[</span><span class="s2">"columns_to_plot"</span><span class="p">]</span>
+
+        <span class="n">plot_dict</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_valid_columns</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">plot_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"columns"</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plot_dict</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"No valid columns to plot after validation. Skipping plotting."</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># replace "noah-owp-modular" in formulation column to "NOM" for better readability in plots</span>
+        <span class="k">if</span> <span class="s2">"formulation"</span> <span class="ow">in</span> <span class="n">plot_dict</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"formulation"</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"formulation"</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s2">"noah-owp-modular"</span><span class="p">,</span> <span class="s2">"NOM"</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+        <span class="c1"># additionally replace "noah-owp-modular" in column names (required for plotting) to "NOM"</span>
+        <span class="n">plot_dict</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">c1</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"noah-owp-modular"</span><span class="p">,</span> <span class="s2">"NOM"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">c1</span>
+            <span class="k">for</span> <span class="n">c1</span> <span class="ow">in</span> <span class="n">plot_dict</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]</span>
+        <span class="p">]</span>
+
+        <span class="c1"># correspondingly replace "noah-owp-modular" in data.columns to "NOM"</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">c1</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"noah-owp-modular"</span><span class="p">,</span> <span class="s2">"NOM"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">c1</span>
+            <span class="k">for</span> <span class="n">c1</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+        <span class="p">]</span>
+
+        <span class="n">vpu_dict</span> <span class="o">=</span> <span class="n">plot_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"vpu"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">vpu_file</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stem</span>
+            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">vpu_dict</span>
+            <span class="ow">and</span> <span class="n">vpu_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stem</span>
+        <span class="p">):</span>
+            <span class="n">vpu_file</span> <span class="o">=</span> <span class="n">vpu_dict</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"histogram"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">path1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_path</span><span class="p">(</span>
+                <span class="n">vpu_file</span><span class="p">,</span>
+                <span class="n">algorithm</span><span class="o">=</span><span class="n">plot_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"algorithm"</span><span class="p">),</span>
+                <span class="n">plot_type</span><span class="o">=</span><span class="s2">"hist"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">plot_dict1</span> <span class="o">=</span> <span class="n">plot_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">plot_dict1</span><span class="p">[</span><span class="s2">"outfile"</span><span class="p">]</span> <span class="o">=</span> <span class="n">path1</span>
+
+            <span class="c1"># remove non-numeric columns from data from histogram plotting</span>
+            <span class="n">numeric_columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">"number"</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">plot_dict1</span><span class="p">[</span><span class="s2">"columns"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">plot_dict1</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"columns"</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span>
+            <span class="p">]</span>
+
+            <span class="n">plot_histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_dict1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"spatial_map"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">path2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_file_path</span><span class="p">(</span>
+                <span class="n">vpu_file</span><span class="p">,</span>
+                <span class="n">algorithm</span><span class="o">=</span><span class="n">plot_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"algorithm"</span><span class="p">),</span>
+                <span class="n">plot_type</span><span class="o">=</span><span class="s2">"map"</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">plot_dict2</span> <span class="o">=</span> <span class="n">plot_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">plot_dict2</span><span class="p">[</span><span class="s2">"outfile"</span><span class="p">]</span> <span class="o">=</span> <span class="n">path2</span>
+            <span class="n">plot_spatial_map</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">plot_dict2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="BaseConfig">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.BaseConfig.html#nwm_region_mgr.utils.config_utils.BaseConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Base configuration for the application."""</span>
+
+    <span class="n">general</span><span class="p">:</span> <span class="n">BaseGeneralConfig</span>
+<span class="w">    </span><span class="sd">"""Base general settings for the regionalization application."""</span>
+
+    <span class="n">output</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseOutputConfig</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">"""Base output settings for the regionalization application."""</span></div>
+
+
+
+<div class="viewcode-block" id="BaseConfigProcessor">
+<a class="viewcode-back" href="../../../API/_autosummary/nwm_region_mgr.utils.config_utils.BaseConfigProcessor.html#nwm_region_mgr.utils.config_utils.BaseConfigProcessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseConfigProcessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Base configuration processor."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
+        <span class="n">config_schema</span><span class="p">:</span> <span class="n">BaseModel</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
+        <span class="n">sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Initialize regionalization processor."""</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="p">[</span><span class="n">config_file</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="n">config_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_schema</span> <span class="o">=</span> <span class="n">config_schema</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_and_process_config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_size</span> <span class="o">=</span> <span class="n">sample_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_files</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_deep_merge_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Recursively merge two configuration dictionaries, with values from `b` overwriting those in `a`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: The base dictionary.</span>
+<span class="sd">            b: The dictionary whose values will overwrite those in `a`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A new dictionary that is the result of merging `a` and `b`.</span>
+
+<span class="sd">        """</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">b</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">key</span> <span class="ow">in</span> <span class="n">result</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deep_merge_configs</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_and_validate_config</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">config_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">config_schema</span><span class="p">:</span> <span class="n">BaseModel</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Load a YAML file, validate its structure using Pydantic, and substitute placeholders in the config.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config_paths: list of paths to the config files</span>
+<span class="sd">            config_schema: Pydantic model to validate the config structure</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Config object with validated structure</span>
+
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">configs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">config_paths</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">configs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+            <span class="n">merged_config</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deep_merge_configs</span><span class="p">,</span> <span class="n">configs</span><span class="p">)</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">config_schema</span><span class="p">(</span><span class="o">**</span><span class="n">merged_config</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">config</span>
+
+        <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error loading YAML file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_recursive_substitute_until_fixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
+            <span class="n">new_config</span> <span class="o">=</span> <span class="n">recursive_substitute</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_config</span> <span class="o">==</span> <span class="n">config</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">new_config</span>
+        <span class="k">return</span> <span class="n">config</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_substitute_placeholders</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Substitute placeholders in the config with actual values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: Config object with placeholders</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Config object with placeholders substituted</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># Create a context dictionary with general config parameters</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"domain"</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">domain</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="s2">"domain"</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"run_name"</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">run_name</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="s2">"run_name"</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"static_data_dir"</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">static_data_dir</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="s2">"static_data_dir"</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"base_dir"</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">base_dir</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="s2">"base_dir"</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"vpu"</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">vpu</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="s2">"vpu"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"algorithm_list"</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">algorithm_list</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="s2">"algorithm_list"</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># remove items with None values from context</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+        <span class="c1"># substitute placeholders in the config</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recursive_substitute_until_fixed</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expand_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Expand user home directory and environment variables in a file path."""</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="n">user</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"LOGNAME"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"USER"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">user</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"@"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\$USER\b"</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expandvars</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expand_user_file_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_user_file_paths</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">new_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">new_val</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">new_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_user_file_paths</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">new_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_v</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+                <span class="n">new_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_user_file_paths</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">new_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="n">obj</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_v</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expand_user_file_paths</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"~"</span><span class="p">,</span> <span class="s2">"$"</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_user</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_required_columns_calval_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return a set of required columns for calibration/validation statistics."""</span>
+        <span class="n">required_fields</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gage_col</span><span class="p">,</span> <span class="s2">"formulation"</span><span class="p">}</span>
+
+        <span class="c1"># required fields for summary score configuration (for formulation regionalization)</span>
+        <span class="n">sc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">"summary_score"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sc</span><span class="p">:</span>
+            <span class="n">mp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">"metric_eval_period"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">eval_col</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mp</span><span class="p">,</span> <span class="s2">"col_name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">mp</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">eval_col</span><span class="p">:</span>
+                <span class="n">required_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eval_col</span><span class="p">)</span>
+
+            <span class="n">metrics</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">"metrics"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">required_fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+        <span class="c1"># required fields for parameter regionalization</span>
+        <span class="n">donor</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">"donor"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">donor</span><span class="p">:</span>
+            <span class="n">eval_pd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">donor</span><span class="p">,</span> <span class="s2">"metric_eval_period"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">eval_pd</span><span class="p">:</span>
+                <span class="n">eval_col</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">eval_pd</span><span class="p">,</span> <span class="s2">"col_name"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">eval_col</span><span class="p">:</span>
+                    <span class="n">required_fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eval_col</span><span class="p">)</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">donor</span><span class="p">,</span> <span class="s2">"metric_threshold"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">required_fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">required_fields</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_file_required_column_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return a dictionary mapping files to required columns."""</span>
+        <span class="n">file_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"gage_divide_cwt_file"</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gage_col</span><span class="p">},</span>
+            <span class="s2">"donor_gage_file"</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gage_col</span><span class="p">,</span> <span class="s2">"longitude"</span><span class="p">,</span> <span class="s2">"latitude"</span><span class="p">},</span>
+            <span class="s2">"calval_stats_file"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_required_columns_calval_stats</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+            <span class="s2">"calib_param_file"</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gage_col</span><span class="p">,</span> <span class="s2">"formulation"</span><span class="p">},</span>
+            <span class="s2">"ngen_hydrofabric_file"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vpu_col</span><span class="p">,</span>
+                <span class="s2">"geometry"</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">"huc12_hydrofabric_file"</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">huc12_col</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">},</span>
+            <span class="s2">"divide_huc12_cwt_file"</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">huc12_col</span><span class="p">},</span>
+            <span class="s2">"formulation_file"</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">,</span> <span class="s2">"formulation"</span><span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="c1"># add snow cover file if it exists in the config</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">nwm_region_mgr.parreg</span><span class="w"> </span><span class="kn">import</span> <span class="n">config_schema</span> <span class="k">as</span> <span class="n">pcs</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">pcs</span><span class="o">.</span><span class="n">Config</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">"snow_cover"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">snow_cover</span><span class="o">.</span><span class="n">consider_snowness</span><span class="p">:</span>
+                <span class="n">snow_cover_file</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">snow_cover</span><span class="p">,</span> <span class="s2">"snow_cover_file"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">snow_frac_col</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">snow_cover</span><span class="p">,</span> <span class="s2">"column"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">snow_cover_file</span> <span class="ow">and</span> <span class="n">snow_frac_col</span><span class="p">:</span>
+                    <span class="n">file_dict</span><span class="p">[</span><span class="s2">"snow_cover_file"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">,</span> <span class="n">snow_frac_col</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">file_dict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_assemble_file_paths</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">exclude</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">include</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Assemble file paths from the configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: The configuration object.</span>
+<span class="sd">            exclude: Optional set of fields to exclude from the list of paths.</span>
+<span class="sd">            include: Optional set of fields to include in the list of paths.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary mapping path names to their Path objects.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># all input file paths to be checked in the config</span>
+        <span class="n">path_fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_required_column_map</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">exclude</span><span class="p">:</span>
+            <span class="c1"># exclude specified fields from the list</span>
+            <span class="n">path_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">path_fields</span> <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">include</span><span class="p">:</span>
+            <span class="c1"># include specified fields in the list</span>
+            <span class="n">path_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">path_fields</span> <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">include</span><span class="p">]</span>
+
+        <span class="c1"># create a dictionary to hold the paths</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">path1</span> <span class="ow">in</span> <span class="n">path_fields</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="p">,</span> <span class="n">path1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">"snow_cover"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">path1</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+                    <span class="n">paths</span><span class="p">[</span><span class="n">path1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">paths</span><span class="p">[</span><span class="n">path1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">k</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported type for </span><span class="si">{</span><span class="n">path1</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="c1"># Remove any None values and return the paths dictionary</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">paths</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_paths</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Validate that all file and directory paths exist.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            paths: A string, Path, list, or dict of strings/Paths to validate.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: If any path does not exist.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flatten_dict</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">missing_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">missing_paths</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Missing paths: </span><span class="si">{</span><span class="n">missing_paths</span><span class="si">}</span><span class="s2">"</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_file_columns</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">,</span>
+        <span class="n">dict_path</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Check if the required columns are present in the files in the configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config: The configuration object to check.</span>
+<span class="sd">            dict_path: Optional dictionary of file paths to check.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If any required columns are missing in the files.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">dict_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"No file paths provided for checking columns."</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">dict_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_required_column_map</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Required columns for files: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">dict_cols</span><span class="p">)</span>
+
+        <span class="c1"># loop through the required files and check their columns</span>
+        <span class="k">for</span> <span class="n">file_key</span><span class="p">,</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">dict_path</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">file_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dict_cols</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"No required columns defined for </span><span class="si">{</span><span class="n">file_key</span><span class="si">}</span><span class="s2">. Skipping column check."</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                <span class="p">]</span>  <span class="c1"># Ensure file_path is a list of Path objects</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">file_path</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid type for file path '</span><span class="si">{</span><span class="n">file_key</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="si">}</span><span class="s2">. Must be str, Path, or dict."</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">required_columns</span> <span class="o">=</span> <span class="n">dict_cols</span><span class="p">[</span><span class="n">file_key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">required_columns</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"No required columns defined for </span><span class="si">{</span><span class="n">file_key</span><span class="si">}</span><span class="s2">. Skipping column check."</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">"geometry"</span> <span class="ow">in</span> <span class="n">required_columns</span><span class="p">:</span>
+                    <span class="n">layer</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">layer_name</span><span class="p">,</span> <span class="s2">"ngen"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="s2">"ngen"</span> <span class="ow">in</span> <span class="n">file_key</span>
+                        <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">layer_name</span><span class="p">,</span> <span class="s2">"huc12"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">check_columns_hydrofabric</span><span class="p">(</span>
+                        <span class="n">file</span><span class="p">,</span> <span class="n">required_columns</span><span class="p">,</span> <span class="n">layer_name</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">check_columns_dataframe</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">required_columns</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@lru_cache</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_and_process_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseModel</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Load, validate, and process the configuration files.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Config object with validated structure and substituted placeholders.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># Load and validate the configuration</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_and_validate_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_schema</span><span class="p">)</span>
+
+        <span class="c1"># Expand user home directory and environment variables in file paths. This needs to be done before</span>
+        <span class="c1"># substituting placeholders to work properly for paths that contain both environment variables and placeholders.</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_user_file_paths</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># Substitute placeholders in the configuration</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_substitute_placeholders</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Validate that all file paths exist and required columns are present in the files."""</span>
+        <span class="c1"># Assemble file paths from the configuration</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assemble_file_paths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">"formulation_file"</span><span class="p">})</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"Input file paths from configuration: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">paths</span><span class="p">)</span>
+
+        <span class="c1"># Validate that all file paths exist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_paths</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
+
+        <span class="c1"># Check if the required columns are present in the files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_file_columns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">paths</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Successfully validated and processed the configurations."</span><span class="p">)</span>
+
+        <span class="c1"># Save the final configuration</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s2">"config_final"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cc</span><span class="o">.</span><span class="n">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">data_str</span><span class="o">=</span><span class="s2">"Final Configuration"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_vpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Set the vpu."""</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vpu</span> <span class="o">=</span> <span class="n">vpu</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"vpu_gdf"</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"vpu_gdf"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_vpu_gdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Set the GeoDataFrame for the current vpu."""</span>
+        <span class="n">layer_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">layer_name</span><span class="p">,</span> <span class="s2">"ngen"</span><span class="p">,</span> <span class="s2">"divides"</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span>
+            <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vpu</span><span class="p">]),</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">layer_name</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">"geometry"</span><span class="p">]]</span>
+
+        <span class="c1"># ensure div_col is always string</span>
+        <span class="n">gdf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">div_col</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"string"</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vpu_gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_vpu_gdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Get the GeoDataFrame for the current vpu."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"vpu_gdf"</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_vpu_gdf</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vpu_gdf</span>
+
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">timing_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Context manager for timing code execution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            step_str: Description of the step being timed.</span>
+
+<span class="sd">        """</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="k">yield</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Execution time for </span><span class="si">{</span><span class="n">step_str</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2"> seconds"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">div_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Id_name for divide from the config."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"divide"</span><span class="p">,</span> <span class="s2">"div_id"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gage_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Id_name for gage from the config."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"gage"</span><span class="p">,</span> <span class="s2">"gage_id"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">drainage_area_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Id_name for drainage_area from the config."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"drainage_area"</span><span class="p">,</span> <span class="s2">"area_sqkm"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">huc12_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Id_name for huc12 from the config."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"huc12"</span><span class="p">,</span> <span class="s2">"huc_12"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vpu_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Id_name for vpu from the config."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"vpu"</span><span class="p">,</span> <span class="s2">"vpu_id"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">donor_col</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Id_name for donor gage from the config."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">id_col</span><span class="p">,</span> <span class="s2">"donor"</span><span class="p">,</span> <span class="s2">"donor"</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gage_crosswalk_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get the gage crosswalk file path from the configuration."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">gage_divide_cwt_file</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gage_crosswalk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get the gage crosswalk DataFrame."""</span>
+        <span class="k">return</span> <span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gage_crosswalk_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gage_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">donor_gage_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get the donor gage file path from the configuration."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">donor_gage_file</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">donor_gages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get the donor gage DataFrame."""</span>
+        <span class="k">return</span> <span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">donor_gage_file</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gage_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">expand_config_for_vpu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Expand the config to include VPUs (e.g., needed for all donors).</span>
+
+<span class="sd">        Some donors may come from nearby VPUs, so we need to make sure that the</span>
+<span class="sd">        configuration includes all donor VPUs.</span>
+
+<span class="sd">        For example, if the current VPU '03S' uses donor gages from '03W','03N', and '06', then</span>
+<span class="sd">        this function will expand the config to include those VPUs as well for the ngen_hydrofabric_file</span>
+<span class="sd">        and output files.</span>
+
+<span class="sd">        --- Before expansion---</span>
+<span class="sd">        ngen_hydrofabric_file:</span>
+<span class="sd">            '03S': '/path/to/ngen_hydro_03S.gpkg'</span>
+
+<span class="sd">        --- After expansion---</span>
+<span class="sd">        ngen_hydrofabric_file:</span>
+<span class="sd">            '03S': '/path/to/ngen_hydro_03S.gpkg'</span>
+<span class="sd">            '03W': '/path/to/ngen_hydro_03W.gpkg'</span>
+<span class="sd">            '03N': '/path/to/ngen_hydro_03N.gpkg'</span>
+<span class="sd">            '06':  '/path/to/ngen_hydro_06.gpkg'</span>
+
+<span class="sd">        """</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">add_entry_if_missing</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">vpu_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vpu_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+                <span class="n">first_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">vpu_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">first_key</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">first_key</span><span class="p">,</span> <span class="n">vpu_key</span><span class="p">)</span>
+
+        <span class="n">add_entry_if_missing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">ngen_hydrofabric_file</span><span class="p">,</span> <span class="n">vpu</span><span class="p">)</span>
+
+        <span class="c1"># expand the output configuration for summary_score and formulation because the results from neighboring VPUs</span>
+        <span class="c1"># may be needed for the current VPU</span>
+        <span class="n">co</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s2">"summary_score"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">co</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">co</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">co</span><span class="o">.</span><span class="n">stem</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">vpu</span><span class="p">:</span> <span class="n">co</span><span class="o">.</span><span class="n">stem</span><span class="p">}</span>
+            <span class="n">add_entry_if_missing</span><span class="p">(</span><span class="n">co</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">vpu</span><span class="p">)</span>
+
+        <span class="n">co</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s2">"formulation"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">co</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">co</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">co</span><span class="o">.</span><span class="n">stem</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">vpu</span><span class="p">:</span> <span class="n">co</span><span class="o">.</span><span class="n">stem</span><span class="p">}</span>
+            <span class="n">add_entry_if_missing</span><span class="p">(</span><span class="n">co</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">vpu</span><span class="p">)</span>
+
+        <span class="c1"># save the expanded configuration</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s2">"config_final"</span><span class="p">):</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s2">"config_final"</span><span class="p">)</span><span class="o">.</span><span class="n">save_to_file</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">data_str</span><span class="o">=</span><span class="s2">"final configuration"</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_output_file_path</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_section</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">vpu</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_stem_suffix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Get the output file name from the output configuration."""</span>
+        <span class="n">output_config</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">output_section</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Output section '</span><span class="si">{</span><span class="n">output_section</span><span class="si">}</span><span class="s2">' not found in configuration for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">."</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output_config</span><span class="o">.</span><span class="n">get_file_path</span><span class="p">(</span>
+            <span class="n">vpu</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">use_stem_suffix</span><span class="o">=</span><span class="n">use_stem_suffix</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=cb8930eaaf36d9849b67"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=cb8930eaaf36d9849b67"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, RTX.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.0.4.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.21.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

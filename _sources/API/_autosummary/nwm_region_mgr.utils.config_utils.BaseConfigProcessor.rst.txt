@@ -1,0 +1,82 @@
+nwm\_region\_mgr.utils.config\_utils.BaseConfigProcessor
+========================================================
+
+.. currentmodule:: nwm_region_mgr.utils.config_utils
+
+.. autoclass:: BaseConfigProcessor
+
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+        ~BaseConfigProcessor.div_col
+      
+      
+        ~BaseConfigProcessor.donor_col
+      
+      
+        ~BaseConfigProcessor.donor_gage_file
+      
+      
+        ~BaseConfigProcessor.donor_gages
+      
+      
+        ~BaseConfigProcessor.drainage_area_name
+      
+      
+        ~BaseConfigProcessor.gage_col
+      
+      
+        ~BaseConfigProcessor.gage_crosswalk
+      
+      
+        ~BaseConfigProcessor.gage_crosswalk_file
+      
+      
+        ~BaseConfigProcessor.huc12_col
+      
+      
+        ~BaseConfigProcessor.load_and_process_config
+      
+      
+        ~BaseConfigProcessor.vpu_col
+      
+
+   
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+      
+        ~BaseConfigProcessor.expand_config_for_vpu
+      
+      
+        ~BaseConfigProcessor.get_output_file_path
+      
+      
+        ~BaseConfigProcessor.get_vpu_gdf
+      
+      
+        ~BaseConfigProcessor.set_vpu
+      
+      
+        ~BaseConfigProcessor.set_vpu_gdf
+      
+      
+        ~BaseConfigProcessor.timing_block
+      
+      
+        ~BaseConfigProcessor.validate_files
+      
+
+   
+   
