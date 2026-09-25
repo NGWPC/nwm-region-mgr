@@ -14,11 +14,11 @@ inputs/region/manual_pairs,sample manual pairs to be applied on top of the autom
 inputs/region/NHDPlusV21,NHDPlusV21 hydrofabric data required by formulation regionalization
 outputs/region,outputs from the regionalization step
 outputs/region/test/attr_data_final,final attribute data used in parameter regionalization
-outputs/region/test/summary_cores,summary scores of calibration basins computed during formulation regionalization
-outputs/region/test/formulation,formulation selection results from formulation regionalization
+outputs/region/test/summary_score,summary scores of calibration basins computed during formulation regionalization
+outputs/region/test/formulations,formulation selection results from formulation regionalization
 outputs/region/test/pairs,donor-receiver pairing results from parameter regionalization
 outputs/region/test/params,parameter values for the calibration basins included in the final pairs
-outputs/region/test/spatail_distance,spatial distance between donor and receiver catchments for the VP U
+outputs/region/test/spatial_distance,spatial distance between donor and receiver catchments for the VPU
 outputs/ngen,outputs from the ngen simulation step
 outputs/ngen/regionalization/test_kmeans/vpu_03S/Input,inputs for running NGEN for the specified regionalization algorithm and VPU
 outputs/ngen/regionalization/test_kmeans/vpu_03S/Output,outputs from running NGEN for the specified regionalization algorithm and VPU

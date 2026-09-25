@@ -87,7 +87,7 @@ DOCS_TO_CREATE = {
         },
     },
     "Parameter Regionalization": {
-        "description": "`config_parreg.yaml: specific configurations for parameter regionalization (parreg)",
+        "description": "`config_parreg.yaml`: specific configurations for parameter regionalization (parreg)",
         "example_file_class": (ParConf,),
         "schemas": {
             "general": GeneralConfig,
