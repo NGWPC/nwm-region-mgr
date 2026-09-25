@@ -72,6 +72,9 @@ cd /ngen-oe/$USER/run_region
 {{ setup_script }}
 
 ```bash
+# Make the setup script executable
+chmod +x setup_region.sh
+
 # Set up the working environment for the CONUS domain using an existing local data source
 # Note here 18 processes is specified for parallel execution based on available CPU cores in these clusters.
 ./setup_region.sh --alt-data-source /ngencerf-app/nwm-region-mgr/data/inputs --nprocs 18
@@ -418,6 +421,146 @@ python -m nwm_eval configs/config_eval.yaml
 #### 4) Check outputs
 Outputs from evaluation can be found in `file_paths.output_dir` as specified in **config_eval.yaml**
 
+## Develop and build documentation
+
+The project documentation is built with Sphinx and MyST. Several helper scripts under `docs/scripts/` generate content 
+used by the documentation, including data schemas, configuration schema documentation, and input/output directory trees.
+
+### Generate documentation content
+
+Run the following scripts from the repository root when updating the corresponding documentation sections.
+
+#### Generate data schemas
+
+`docs/scripts/data_schemas.py` generates input and output data schema documentation in two steps.
+
+First, create draft data description CSV files from sample files stored in S3:
+
+```bash
+python docs/scripts/data_schemas.py --step draft
+```
+
+Existing description CSV files are preserved, while missing files are created. The draft files are stored under:
+
+```text
+docs/scripts/data_desc/inputs/
+docs/scripts/data_desc/outputs/
+```
+
+Manually update the draft CSV files to provide dataset and variable/column descriptions.
+
+Then generate the RST schema documentation:
+
+```bash
+python docs/scripts/data_schemas.py --step schema
+```
+
+This reads the sample files from S3 together with the manually updated description CSV files and generates:
+
+```text
+docs/source/tech_reference/input_data.rst
+docs/source/tech_reference/output_data.rst
+```
+
+AWS credentials must be available through environment variables or a `.env` file before running the script.
+
+#### Generate configuration documentation
+
+`docs/scripts/config_schemas.py` generates documentation for the configuration schemas and sample configuration files. It creates example YAML configuration files and Markdown tables describing configuration fields, including their types, descriptions, default values, and examples.
+
+Run:
+
+```bash
+python docs/scripts/config_schemas.py
+```
+
+The generated documentation is saved to:
+
+```text
+docs/source/config_builder/index.md
+```
+
+#### Generate S3 directory trees
+
+`docs/scripts/create_dir_tree.py` generates Markdown directory trees for the input and output data stored in S3. The script also adds descriptions to selected files and directories using the `path` and `comment` entries in a CSV file.
+
+By default, it processes the following S3 prefixes:
+
+```text
+nwm-tools-data/regionalization/data/inputs/
+nwm-tools-data/esmf/
+nwm-tools-data/regionalization/data/outputs/
+```
+
+and reads comments from:
+
+```text
+folder_file_desc.csv
+```
+
+Run:
+
+```bash
+python docs/scripts/create_dir_tree.py
+```
+
+The script generates:
+
+```text
+docs/source/tech_reference/input_tree.md
+docs/source/tech_reference/output_tree.md
+```
+
+To use a different S3 bucket:
+
+```bash
+python docs/scripts/create_dir_tree.py --bucket <bucket>
+```
+
+To specify different S3 prefixes:
+
+```bash
+python docs/scripts/create_dir_tree.py \
+    --input-region-prefix <input-region-prefix> \
+    --input-ngen-prefix <input-ngen-prefix> \
+    --output-prefix <output-prefix>
+```
+
+To use a different comments file:
+
+```bash
+python docs/scripts/create_dir_tree.py --comments <comments-file>
+```
+
+To control number of files displayed per directory:
+
+```bash
+python docs/scripts/create_dir_tree.py --max-files-per-dir 5
+```
+
+The comments CSV must contain the following columns:
+
+```text
+path,comment
+```
+
+### Build the documentation
+
+After generating or updating the documentation content, build the Sphinx documentation from the repository root:
+
+```bash
+make -C docs html
+```
+
+The generated HTML documentation will be available under:
+
+```text
+docs/build/
+```
+
+Open `docs/build/index.html` in a browser to review the documentation locally.
+
+When developing documentation, regenerate the affected content first, then rebuild the html to verify that generated pages, cross-references, images, and formatting render correctly.
 
 ## Notes and best practices
 
@@ -450,7 +593,7 @@ Outputs from evaluation can be found in `file_paths.output_dir` as specified in 
   * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
   * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
   * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
-  * [HydroATLAS attributes](<hhttps://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
+  * [HydroATLAS attributes](<https://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
 
   Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
 
