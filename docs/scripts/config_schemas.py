@@ -9,7 +9,7 @@ The generated markdown file is saved to `docs/source/config_builder/index.md`.
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Literal, get_args, get_origin
+from typing import Any, Literal, get_args, get_origin
 
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
@@ -24,6 +24,11 @@ from nwm_region_mgr.formreg.config_schema import (
     MetricConfig,
 )
 from nwm_region_mgr.formreg.config_schema import Config as FormConf
+from nwm_region_mgr.ngen.config_schema import Config as NgenConf
+from nwm_region_mgr.ngen.config_schema import (
+    NgenGeneralSettings,
+    NgenOutputConfig,
+)
 from nwm_region_mgr.parreg.config_schema import (
     HDBSCAN,
     URF,
@@ -55,7 +60,8 @@ INDENT_LEVEL = 2
 YAML_COMMENT_BUFFER = 5
 NO_DESCRIPTION_STR = "No description provided"
 DOCS_TO_CREATE = {
-    "config_general.yaml": {
+    "General Configuration": {
+        "description": "`config_general.yaml`: General configurations (shared by formulation & parameter regionalizations)",
         "example_file_class": (BaseGeneralConfig, "general"),
         "schemas": {
             "general": BaseGeneralConfig,
@@ -64,40 +70,59 @@ DOCS_TO_CREATE = {
             "logging": LoggingConfig,
         },
     },
-    "config_formreg.yaml": {
+    "Formulation Regionalization": {
+        "description": "`config_formreg.yaml`: specific configurations for formulation regionalization (formreg)",
         "example_file_class": (FormConf,),
         "schemas": {
             "general": FormulationGeneralSettings,
+            "general.logging": LoggingConfig,
             "spatial_unit": FormulationSpatialUnitConfig,
-            "best_formulation": BestFormulation,
+            "spatial_unit.best_formulation": BestFormulation,
             "summary_score": FormulationSummaryScoreConfig,
-            "metric_eval_period": MetricEvalPeriod,
-            "metrics": MetricConfig,
+            "summary_score.metric_eval_period": MetricEvalPeriod,
+            "summary_score.metrics": MetricConfig,
             "formulation_cost": FormulationCostConfig,
             "output": FormulationOutputConfig,
-            "BaseOutputConfig": BaseOutputConfig,
+            "Type: BaseOutputConfig": BaseOutputConfig,
         },
     },
-    "config_parreg.yaml": {
-        "example_file_class": (ParConf, "general"),
+    "Parameter Regionalization": {
+        "description": "`config_parreg.yaml`: specific configurations for parameter regionalization (parreg)",
+        "example_file_class": (ParConf,),
         "schemas": {
             "general": GeneralConfig,
+            "general.logging": LoggingConfig,
             "donor": DonorConfig,
-            "metric_eval_period": MetricEvalPeriod,
-            "metric_threshold": MetricThreshold,
-            "attr_datasets_config": AttrDatasetConfig,
+            "donor.metric_eval_period": MetricEvalPeriod,
+            "donor.metric_threshold": MetricThreshold,
             "attr_datasets": AvailableAttrsConfig,
+            "Class: AttrDatasetConfig": AttrDatasetConfig,
             "snow_cover": SnowCoverConfig,
             "algorithms": AlgorithmConfig,
-            "algo_general": AlgoGeneral,
-            "gower": Gower,
-            "kmeans": KMeans,
-            "kmedoids": KMedoids,
-            "birch": Birch,
-            "hdbscan": HDBSCAN,
+            "algorithms.algo_general": AlgoGeneral,
+            "algorithms.gower": Gower,
+            "algorithms.kmeans": KMeans,
+            "algorithms.kmedoids": KMedoids,
+            "algorithms.birch": Birch,
+            "algorithms.hdbscan": HDBSCAN,
             "output": ParameterOutputConfig,
-            "BaseOutputConfig": BaseOutputConfig,
+            "Class: BaseOutputConfig": BaseOutputConfig,
         },
+    },
+    "NGEN Simulation": {
+        "description": "`config_ngen.yaml`: specific configurations for NGEN simulation",
+        "example_file_class": (NgenConf,),
+        "schemas": {
+            "general": NgenGeneralSettings,
+            "general.logging": LoggingConfig,
+            "output": NgenOutputConfig,
+            "Type: BaseOutputConfig": BaseOutputConfig,
+        },
+    },
+    "Evaluation": {
+        "description": "{{ '`config_eval.yaml`: specific configurations for evaluation. See details at [nwm-eval-mgr configuration](https://ngwpc.github.io/nwm-eval-mgr/config.html#)'.format(github_org) }}",
+        "example_file_class": (),
+        "schemas": {},
     },
 }
 
@@ -109,11 +134,11 @@ def type_to_str(tp):
 
     if origin is None:  # Simple case e.g., str
         return getattr(tp, "__name__", str(tp))
-    elif origin in (list, List):
-        return f"List[{type_to_str(args[0])}]" if args else "List"
-    elif origin in (dict, Dict):
+    elif origin in (list, list):
+        return f"list[{type_to_str(args[0])}]" if args else "list"
+    elif origin in (dict, dict):
         return (
-            f"Dict[{type_to_str(args[0])}, {type_to_str(args[1])}]" if args else "Dict"
+            f"dict[{type_to_str(args[0])}, {type_to_str(args[1])}]" if args else "dict"
         )
     elif origin is Literal:
         return "str = " + " \\| ".join(map(str, args))
@@ -159,11 +184,11 @@ def field_to_dict(field: FieldInfo, value: Any = None, omit_none: bool = True) -
     elif isinstance(type_, type) and issubclass(type_, BaseModel):
         sub_dict = pydantic_to_dict(type_, type_, outer_examples=example)
     else:
-        # Dict[str, BaseModel]
+        # dict[str, BaseModel]
         origin = get_origin(type_)
         args = get_args(type_)
         if (
-            origin in (dict, Dict)
+            origin in (dict, dict)
             and len(args) == 2
             and isinstance(args[1], type)
             and issubclass(args[1], BaseModel)
@@ -223,11 +248,11 @@ def pydantic_to_dict(
             continue
         field = model_cls.model_fields[name]
 
-        # Handle 'general' section: only child-only fields
+        # Handle 'general' section: only child-only fields (except "logging")
         if name == "general" and model_cls != base_cls:
             general_sub_dict = {}
             for sub_name, sub_field in field.annotation.model_fields.items():
-                if sub_name not in base_fields:
+                if sub_name not in base_fields or sub_name == "logging":
                     # Pass instance value if present
                     value = (
                         getattr(instance.general, sub_name, None) if instance else None
@@ -265,14 +290,14 @@ def dict_to_yaml(dict_rep: dict, indent: int = 0) -> list[str]:
 
 
 def is_dict_of_basemodel(field_dict: dict) -> bool:
-    """Check if a field dict represents a Dict[str, BaseModel]-like field."""
+    """Check if a field dict represents a dict[str, BaseModel]-like field."""
     type_ = field_dict.get("type")
     if type_ is None:
         return False
     origin = get_origin(type_)
     args = get_args(type_)
     return (
-        origin in (dict, Dict)
+        origin in (dict, dict)
         and len(args) == 2
         and isinstance(args[1], type)
         and issubclass(args[1], BaseModel)
@@ -361,7 +386,7 @@ def generate_markdown_table(model_cls: type[BaseModel]) -> str:
     dict_rep = pydantic_to_dict(model_cls, BaseGeneralConfig)
 
     # remove those fields that are not child-only in 'general' section
-    if model_cls in (FormulationGeneralSettings, GeneralConfig):
+    if model_cls in (FormulationGeneralSettings, GeneralConfig, NgenGeneralSettings):
         base_fields = set(BaseGeneralConfig.model_fields.keys())
         for k in list(dict_rep.keys()):
             if k in base_fields:
@@ -401,7 +426,7 @@ def myst_anchor(title: str) -> str:
 
 def generate_toc_from_markdown(md_text: str) -> str:
     """Scan generated markdown, find headings, and return a TOC block (markdown)."""
-    toc_lines = ["### Schema Reference and Sample YAML Config Files", ""]
+    toc_lines = ["## Table of Contents", ""]
 
     for line in md_text.splitlines():
         m = re.match(r"^(#{2,6})\s+(.*)", line)
@@ -424,7 +449,7 @@ def main(docs_to_create: dict) -> None:
     """Create markdown file documentation for the specified pydantic models."""
     # Static intro paragraph
     intro_block = ["# Regionalization Configuration\n"]
-    intro_block.append("### Introduction\n")
+    intro_block.append("## Introduction\n")
     intro_block.append(
         "This section provides detailed documentation for the configuration files used "
         "in the NWM Regionalization Manager (nwm-region-mgr) tool. The configuration "
@@ -436,6 +461,7 @@ def main(docs_to_create: dict) -> None:
         "You can navigate to each config file or schema section using the tabs on the right or the "
         "table of contents below.\n"
     )
+    intro_block.append(":::{note}\n")
     intro_block.append(
         "The tabs on the left will take you to the builder for each of the specific config files. "
         "Currently, only the general configuration builder is available. The builders "
@@ -444,36 +470,47 @@ def main(docs_to_create: dict) -> None:
         "can scroll to the bottom to fill in default values. Once done, hit 'download' to save "
         "the generated configuration YAML file to your local system.\n"
     )
+    intro_block.append(":::\n")
 
     intro_block = "\n".join(intro_block)
 
-    # Describe each config file
-    config_desc = {
-        "config_general.yaml": "General configurations (shared by formulation & parameter regionalizations)",
-        "config_formreg.yaml": "Specific configurations for formulation regionalization (formreg)",
-        "config_parreg.yaml": "Specific configurations for parameter regionalization (parreg)",
-    }
-
-    config_short = {
-        "config_general.yaml": "general",
-        "config_formreg.yaml": "formreg",
-        "config_parreg.yaml": "parreg",
-    }
     # Generate sections for each config file
     lines = []
-    for i in docs_to_create:
-        lines.append(f"### {config_desc.get(i, '')}\n")
+    for i, value in docs_to_create.items():
+        # lines.append(f"### {config_desc.get(i, '')}\n")
+        lines.append(f"## {i}\n")
+        lines.append(f"{value.get('description', '')}\n")
+        if i == "Evaluation":
+            continue
 
-        lines.append("#### Example File")
+        lines.append("### Example File")
         lines.append("```yaml")
-        lines.append(generate_yaml_template(*docs_to_create[i]["example_file_class"]))
+        lines.append(generate_yaml_template(*value["example_file_class"]))
         lines.append("```")
 
-        for j in docs_to_create[i]["schemas"]:
+        lines.append("### Schemas\n")
+
+        for j, model_cls in value["schemas"].items():
             lines.append("")  # blank line before heading
-            lines.append(f"#### {config_short.get(i, i)} Schema ({j})")
-            lines.append("")  # blank line before heading
-            lines.append(generate_markdown_table(docs_to_create[i]["schemas"][j]))
+            lines.append(f"#### {j}\n")
+
+            # append class information
+            class_info = f"Class `{model_cls.__name__}`."
+
+            parent_cls = [
+                c
+                for c in model_cls.__bases__
+                if issubclass(c, BaseModel) and c not in (BaseModel, object)
+            ]
+            if parent_cls:
+                class_info += (
+                    f" Inherits `{', '.join(c.__name__ for c in parent_cls)}`."
+                )
+            lines.append(class_info)
+
+            lines.append("")  # blank line before the table
+
+            lines.append(generate_markdown_table(value["schemas"][j]))
 
     # Append toctree block (for left menu) at the end
     lines.append("")  # blank line before block

@@ -1,6 +1,30 @@
 path,comment
+inputs/eval,inputs for the evaluation step including the crosswalk between evaluation sites and NextGen catchments
+inputs/ngen,inputs for the ngen simulation step
+inputs/ngen/esmf_mesh/NWM/domain,geogrid for different NWM domains required by ngen-forcing
 inputs/region,inputs for the regionalization step
-inputs/eval,inputs for the evaluation step
+inputs/region/attr_config,attribute selection for parameter regionalization
+inputs/region/attr_datasets,attribute datasets for parameter regionalization
+inputs/region/calval_stats,pseudo calibration and validation statistics
+inputs/region/pseudo_calib_params,pseudo calibration parameters
+inputs/region/cwt_divide_gage,crosswalk between NextGen catchments and calibration gages
+inputs/region/cwt_divide_huc12, crosswalk between NextGen catchments and HUC12 watersheds
+inputs/region/hydrofabric,hydrofabric data for each VPU
+inputs/region/manual_pairs,sample manual pairs to be applied on top of the automatically generated pairs
+inputs/region/NHDPlusV21,NHDPlusV21 hydrofabric data required by formulation regionalization
 outputs/region,outputs from the regionalization step
+outputs/region/test/attr_data_final,final attribute data used in parameter regionalization
+outputs/region/test/summary_score,summary scores of calibration basins computed during formulation regionalization
+outputs/region/test/formulations,formulation selection results from formulation regionalization
+outputs/region/test/pairs,donor-receiver pairing results from parameter regionalization
+outputs/region/test/params,parameter values for the calibration basins included in the final pairs
+outputs/region/test/spatial_distance,spatial distance between donor and receiver catchments for the VPU
 outputs/ngen,outputs from the ngen simulation step
+outputs/ngen/regionalization/test_kmeans/vpu_03S/Input,inputs for running NGEN for the specified regionalization algorithm and VPU
+outputs/ngen/regionalization/test_kmeans/vpu_03S/Output,outputs from running NGEN for the specified regionalization algorithm and VPU
 outputs/eval,outputs from the evaluation step
+outputs/eval/vpu_03S/test_kmeans,simulation data for the specified regionalization algorithm and VPU
+outputs/eval/vpu_03S/usgs,USGS observation data for gages in the specified VPU
+outputs/eval/vpu_03S/joined,paired simulation and observation data
+outputs/eval/vpu_03S/metrics,performance metrics for the specified regionalization algorithm and VPU
+outputs/eval/vpu_03S/plots,visualizations of the evaluation results
