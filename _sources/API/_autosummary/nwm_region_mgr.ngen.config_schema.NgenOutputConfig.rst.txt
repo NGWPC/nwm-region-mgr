@@ -1,0 +1,114 @@
+nwm\_region\_mgr.ngen.config\_schema.NgenOutputConfig
+=====================================================
+
+.. currentmodule:: nwm_region_mgr.ngen.config_schema
+
+.. autoclass:: NgenOutputConfig
+
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      
+        ~NgenOutputConfig.model_computed_fields
+      
+      
+        ~NgenOutputConfig.model_config
+      
+      
+        ~NgenOutputConfig.model_extra
+      
+      
+        ~NgenOutputConfig.model_fields
+      
+      
+        ~NgenOutputConfig.model_fields_set
+      
+      
+      
+
+   
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      
+      
+        ~NgenOutputConfig.construct
+      
+      
+        ~NgenOutputConfig.copy
+      
+      
+        ~NgenOutputConfig.dict
+      
+      
+        ~NgenOutputConfig.from_orm
+      
+      
+        ~NgenOutputConfig.json
+      
+      
+        ~NgenOutputConfig.model_construct
+      
+      
+        ~NgenOutputConfig.model_copy
+      
+      
+        ~NgenOutputConfig.model_dump
+      
+      
+        ~NgenOutputConfig.model_dump_json
+      
+      
+        ~NgenOutputConfig.model_json_schema
+      
+      
+        ~NgenOutputConfig.model_parametrized_name
+      
+      
+        ~NgenOutputConfig.model_post_init
+      
+      
+        ~NgenOutputConfig.model_rebuild
+      
+      
+        ~NgenOutputConfig.model_validate
+      
+      
+        ~NgenOutputConfig.model_validate_json
+      
+      
+        ~NgenOutputConfig.model_validate_strings
+      
+      
+        ~NgenOutputConfig.parse_file
+      
+      
+        ~NgenOutputConfig.parse_obj
+      
+      
+        ~NgenOutputConfig.parse_raw
+      
+      
+        ~NgenOutputConfig.schema
+      
+      
+        ~NgenOutputConfig.schema_json
+      
+      
+        ~NgenOutputConfig.update_forward_refs
+      
+      
+        ~NgenOutputConfig.validate
+      
+
+   
+   

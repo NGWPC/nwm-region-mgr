@@ -1,0 +1,6 @@
+nwm\_region\_mgr.utils.hydrofabric\_utils.dissolve\_polygons
+============================================================
+
+.. currentmodule:: nwm_region_mgr.utils.hydrofabric_utils
+
+.. autofunction:: dissolve_polygons

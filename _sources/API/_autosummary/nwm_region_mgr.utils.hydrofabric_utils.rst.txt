@@ -1,0 +1,37 @@
+nwm\_region\_mgr.utils.hydrofabric\_utils
+=========================================
+
+.. automodule:: nwm_region_mgr.utils.hydrofabric_utils
+
+    
+        
+    
+
+    
+        
+    
+
+    
+        
+            .. rubric:: Functions
+
+            .. autosummary::
+                :toctree:
+                :nosignatures:
+                :template: autosummary/base.rst
+                
+                    area_weighted_average
+                    dissolve_polygons
+                    find_gages_within_buffer
+
+        
+    
+
+    
+        
+    
+
+
+    
+
+
