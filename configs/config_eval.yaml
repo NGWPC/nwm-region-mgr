@@ -1,5 +1,7 @@
-#### Configuration for evaluation. See Confluence page for details on each configuration item:
-#### https://confluence.nextgenwaterprediction.com/spaces/NGWPC/pages/54132769/Forecast+Verification+nwm-verf+Configuration
+# Configuration for evaluation. 
+# See instructions on evaluation configuration at: https://ngwpc.github.io/nwm-eval-mgr/config.html
+# Replace <WORK_DIR> and <STATIC_DATA_DIR> with appropriate paths for your environment prior to running
+
 general:   
   steps: # define which of the 5 steps to run; each step can be run independently,
     fetch_fcst_data: true

@@ -1,7 +1,7 @@
 Schemas
 =======
 
-.. _attr_data_final:
+.. _attr-data-final:
 
 attr_data_final
 ---------------
@@ -263,7 +263,7 @@ Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S.parquet``
 
 
 
-.. _formulations_pars:
+.. _formulations-pars:
 
 formulations_pars
 -----------------
@@ -580,7 +580,7 @@ Sample file path: ``outputs/region/test/formulations/form_conus_vpu03S_pars.parq
 
 
 
-.. _pairs_cluster_algorithms:
+.. _pairs-cluster-algorithms:
 
 pairs_cluster_algorithms
 ------------------------
@@ -633,7 +633,7 @@ Sample file path: ``outputs/region/test/pairs/pairs_kmeans_conus_vpu03S.parquet`
 
 
 
-.. _pairs_distance_algorithms:
+.. _pairs-distance-algorithms:
 
 pairs_distance_algorithms
 -------------------------
@@ -694,7 +694,7 @@ Sample file path: ``outputs/region/test/pairs/pairs_gower_conus_vpu03S.parquet``
 
 
 
-.. _pairs_mswm:
+.. _pairs-mswm:
 
 pairs_mswm
 ----------
@@ -1048,7 +1048,7 @@ Sample file path: ``outputs/region/test/params/formulation_params_kmeans_conus_v
 
 
 
-.. _spatial_distance:
+.. _spatial-distance:
 
 spatial_distance
 ----------------
@@ -1060,7 +1060,7 @@ Sample file path: ``outputs/region/test/spatial_distance/donor_receiver_dist_con
 .. warning:: Schema table omitted for spatial_distance files due to large number of columns.
 
 
-.. _summary_score:
+.. _summary-score:
 
 summary_score
 -------------

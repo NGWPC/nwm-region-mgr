@@ -1,7 +1,7 @@
 Schemas
 =======
 
-.. _calib_param_file:
+.. _calib-param-file:
 
 calib_param_file
 ----------------
@@ -318,7 +318,7 @@ Sample file path: ``inputs/region/pseudo_calib_params/sampled_params_conus.csv``
 
 
 
-.. _calval_stats_file:
+.. _calval-stats-file:
 
 calval_stats_file
 -----------------
@@ -419,7 +419,7 @@ Sample file path: ``inputs/region/calval_stats/stat_calval_all_conus.parquet``
 
 
 
-.. _divide_huc12_cwt_file:
+.. _divide-huc12-cwt-file:
 
 divide_huc12_cwt_file
 ---------------------
@@ -476,7 +476,7 @@ Sample file path: ``inputs/region/cwt_divide_huc12/cwt_huc12_divide_conus.csv``
 
 
 
-.. _donor_gage_file:
+.. _donor-gage-file:
 
 donor_gage_file
 ---------------
@@ -545,7 +545,7 @@ Sample file path: ``inputs/region/gages_nwm4_calib_all.csv``
 
 
 
-.. _formulation_cost:
+.. _formulation-cost:
 
 formulation_cost
 ----------------
@@ -582,7 +582,7 @@ Sample file path: ``inputs/region/formulation_costs_secs_per_catchment.csv``
 
 
 
-.. _gage_divide_cwt_file:
+.. _gage-divide-cwt-file:
 
 gage_divide_cwt_file
 --------------------
@@ -631,7 +631,7 @@ Sample file path: ``inputs/region/cwt_divide_gage/calib_gage_divide_conus.parque
 
 
 
-.. _hlr-attr_data_file:
+.. _hlr-attr-data-file:
 
 hlr.attr_data_file
 ------------------
@@ -712,7 +712,7 @@ Sample file path: ``inputs/region/attr_datasets/hlr/attr_hlr_conus.parquet``
 
 
 
-.. _hlr-attr_select_file:
+.. _hlr-attr-select-file:
 
 hlr.attr_select_file
 --------------------
@@ -753,7 +753,7 @@ Sample file path: ``inputs/region/attr_config/attr_selection_hlr.csv``
 
 
 
-.. _hydroatlas-attr_data_file:
+.. _hydroatlas-attr-data-file:
 
 hydroatlas.attr_data_file
 -------------------------
@@ -1902,7 +1902,7 @@ Sample file path: ``inputs/region/attr_datasets/hydroatlas/attr_hydroatlas_conus
 
 
 
-.. _hydroatlas-attr_select_file:
+.. _hydroatlas-attr-select-file:
 
 hydroatlas.attr_select_file
 ---------------------------
@@ -1943,7 +1943,7 @@ Sample file path: ``inputs/region/attr_config/attr_selection_hydroatlas.csv``
 
 
 
-.. _manual_pairings:
+.. _manual-pairings:
 
 manual_pairings
 ---------------
@@ -1987,7 +1987,7 @@ Sample file path: ``inputs/region/manual_pairs/manual_pairs_vpu03S_nhf.csv``
 
 
 
-.. _ngen-attr_data_file:
+.. _ngen-attr-data-file:
 
 ngen.attr_data_file
 -------------------
@@ -2284,7 +2284,7 @@ Sample file path: ``inputs/region/attr_datasets/ngen/attr_ngen_conus.parquet``
 
 
 
-.. _ngen-attr_select_file:
+.. _ngen-attr-select-file:
 
 ngen.attr_select_file
 ---------------------
@@ -2325,7 +2325,7 @@ Sample file path: ``inputs/region/attr_config/attr_selection_ngen.csv``
 
 
 
-.. _ngen_hydrofabric_file:
+.. _ngen-hydrofabric-file:
 
 ngen_hydrofabric_file
 ---------------------
@@ -2664,7 +2664,7 @@ Sample file path: ``inputs/region/hydrofabric/gpkg_vpu/vpu_03S.gpkg``
 
 
 
-.. _streamcat-attr_data_file:
+.. _streamcat-attr-data-file:
 
 streamcat.attr_data_file
 ------------------------
@@ -2853,7 +2853,7 @@ Sample file path: ``inputs/region/attr_datasets/streamcat/attr_streamcat_conus.p
 
 
 
-.. _streamcat-attr_select_file:
+.. _streamcat-attr-select-file:
 
 streamcat.attr_select_file
 --------------------------

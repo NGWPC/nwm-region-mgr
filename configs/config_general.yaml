@@ -2,6 +2,7 @@
 # Settings here are applicable to config_formreg.yaml, config_parreg.yaml, and config_ngen.yaml (but not config_eval.yaml) 
 # and can be overridden by specific settings in each of those files as needed.
 # See instructions on configuration at: https://ngwpc.github.io/nwm-region-mgr/config_builder/index.html
+# Replace <NPROCS>, <WORK_DIR> and <STATIC_DATA_DIR> with appropriate paths for your environment prior to running
 
 general:
   run_name: test  # Name of the run, used to create output folders and files

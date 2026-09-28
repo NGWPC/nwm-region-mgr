@@ -7,7 +7,7 @@ The regionalization workflow includes the following steps:
  - **STEP 2**: regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
  - **STEP 3**: evaluation of regionalized simulations (via nwm-eval-mgr)
 
-Prior to running the regionalization workflow, ensure that you have completed the necessary calibration steps and have properly assembled the calibration parameters and statistics and stored them in the appropriate format (see the sample file and schema for [parameters](tech_reference/input_data.rst#calib-param-file) and [statistics](tech_reference/input_data.rst#calval-stats-file))
+Prior to running the regionalization workflow, ensure that you have completed the necessary calibration steps and have properly assembled the calibration parameters and statistics and stored them in the appropriate format (see the sample file and schema for {ref}`parameters <calib-param-file>`and {ref}`statistics <calval-stats-file>`)
 
 ![Regionalization Workflow](_images/regionalization_workflow.jpeg)
 
@@ -72,6 +72,9 @@ cd /ngen-oe/$USER/run_region
 {{ setup_script }}
 
 ```bash
+# Make the setup script executable
+chmod +x setup_region.sh
+
 # Set up the working environment for the CONUS domain using an existing local data source
 # Note here 18 processes is specified for parallel execution based on available CPU cores in these clusters.
 ./setup_region.sh --alt-data-source /ngencerf-app/nwm-region-mgr/data/inputs --nprocs 18
@@ -246,9 +249,9 @@ After completion, check the output folder `outputs/region/test1/`, which contain
  - `summary_score/`: summary score for all donor candidates
  - `config_formreg_final.yaml` and `config_parreg_final.yaml`: the final (expanded) configuration files used in this run.
 
-See the **Output Directory Structure** subsection in the [Technical Reference](tech_reference/index.md#output-directory-structure) tab for details on the output directory structure.
+See {doc}`Output Directory Structure <tech_reference/output_tree>`.
 
-See the [Output Tables](tech_reference/output_data.rst) and [Output Plots](tech_reference/output_plot.rst) subsections in the [Technical Reference](tech_reference/index.md) tab for details on output files and plots.
+See {doc}`Output Tables <tech_reference/output_data>` and {doc}`Output Plots <tech_reference/output_plot>` subsections in the {doc}`Technical Reference <tech_reference/index>` tab for details on output files and plots.
 
 #### 2. Run NGEN simulations
 
@@ -418,6 +421,148 @@ python -m nwm_eval configs/config_eval.yaml
 #### 4) Check outputs
 Outputs from evaluation can be found in `file_paths.output_dir` as specified in **config_eval.yaml**
 
+## Develop and build documentation
+
+The project documentation is built with Sphinx and MyST. Several helper scripts under `docs/scripts/` generate content 
+used by the documentation, including data schemas, configuration schema documentation, and input/output directory trees.
+
+### Generate documentation content
+
+Run the following scripts from the repository root when updating the corresponding documentation sections.
+
+#### Generate data schemas
+
+`docs/scripts/data_schemas.py` generates input and output data schema documentation in two steps.
+
+First, create draft data description CSV files from sample files stored in S3:
+
+```bash
+python docs/scripts/data_schemas.py --step draft
+```
+
+Existing description CSV files are preserved, while missing files are created. The draft files are stored under:
+
+```text
+docs/scripts/data_desc/inputs/
+docs/scripts/data_desc/outputs/
+```
+
+Manually update the draft CSV files to provide dataset and variable/column descriptions.
+
+Then generate the RST schema documentation:
+
+```bash
+python docs/scripts/data_schemas.py --step schema
+```
+
+This reads the sample files from S3 together with the manually updated description CSV files and generates:
+
+```text
+docs/source/tech_reference/input_data.rst
+docs/source/tech_reference/output_data.rst
+```
+
+AWS credentials must be available through environment variables or a `.env` file before running the script.
+
+#### Generate configuration documentation
+
+`docs/scripts/config_schemas.py` generates documentation for the configuration schemas and sample configuration files. It creates example YAML configuration files and Markdown tables describing configuration fields, including their types, descriptions, default values, and examples.
+
+Run:
+
+```bash
+python docs/scripts/config_schemas.py
+```
+
+The generated documentation is saved to:
+
+```text
+docs/source/config_builder/index.md
+```
+
+#### Generate S3 directory trees
+
+`docs/scripts/create_dir_tree.py` generates Markdown directory trees for the input and output data stored in S3. The script also adds descriptions to selected files and directories using the `path` and `comment` entries in a CSV file.
+
+By default, it processes the following S3 prefixes:
+
+```text
+nwm-tools-data/regionalization/data/inputs/
+nwm-tools-data/esmf/
+nwm-tools-data/regionalization/data/outputs/
+```
+
+and reads comments from:
+
+```text
+folder_file_desc.csv
+```
+
+Run:
+
+```bash
+python docs/scripts/create_dir_tree.py
+```
+
+The script generates:
+
+```text
+docs/source/tech_reference/input_tree.md
+docs/source/tech_reference/output_tree.md
+```
+
+To use a different S3 bucket:
+
+```bash
+python docs/scripts/create_dir_tree.py --bucket <bucket>
+```
+
+To specify different S3 prefixes:
+
+```bash
+python docs/scripts/create_dir_tree.py \
+    --input-region-prefix <input-region-prefix> \
+    --input-ngen-prefix <input-ngen-prefix> \
+    --output-prefix <output-prefix>
+```
+
+To use a different comments file:
+
+```bash
+python docs/scripts/create_dir_tree.py --comments <comments-file>
+```
+
+To control number of files displayed per directory:
+
+```bash
+python docs/scripts/create_dir_tree.py --max-files-per-dir 5
+```
+
+The comments CSV must contain the following columns:
+
+```text
+path,comment
+```
+
+### Build the documentation
+
+After generating or updating the documentation content, build the Sphinx documentation from the repository root:
+
+```bash
+make -C docs html
+```
+
+The generated HTML documentation will be available under:
+
+```text
+docs/build/
+```
+
+Open `docs/build/index.html` in a browser to review the documentation locally.
+
+When developing documentation, regenerate the affected content first, then rebuild the html to verify that generated pages, cross-references, images, and formatting render correctly.
+
+(notes-and-best-practices)=
 
 ## Notes and best practices
 
@@ -450,7 +595,7 @@ Outputs from evaluation can be found in `file_paths.output_dir` as specified in 
   * [NextGen attributes](<https://lynker-spatial.s3-us-west-2.amazonaws.com/hydrofabric/v2.2/hfv2.2-data_model.html>) (available for all domains)
   * [Hydrologic Landscape Regions (HLR) attributes](<https://www.usgs.gov/publications/hydrologic-landscape-regions-united-states>)(only available for conus, ak, and hi domains)
   * [StreamCat attributes](<https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset>) (only available for conus)
-  * [HydroATLAS attributes](<hhttps://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
+  * [HydroATLAS attributes](<https://www.hydrosheds.org/hydroatlas>) (available for all domains except hi)
 
   Users can choose to use any combination of these datasets for regionalization, depending on their availability and relevance to the region of interest. For example, for the AK domain, since HLR and StreamCat attributes are not available, users can choose to use NextGen and HydroATLAS attributes for regionalization.
 
@@ -473,6 +618,8 @@ Outputs from evaluation can be found in `file_paths.output_dir` as specified in 
 
 - Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
+
+(docker-permissions)=
 
 #### Docker permissions
 When first running the regionalization workflow in INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs. 
@@ -596,7 +743,7 @@ scancel 12345678
 ``` 
 
 #### Viewing regionalization outputs
-Sample regionalization outputs can be found in {ref}`Output Plots <output-plots>` and {ref}`Output Tables <output-data>`.
+Sample regionalization outputs can be found in {doc}`Output Plots <tech_reference/output_plot>` and {doc}`Output Tables <tech_reference/output_data>`.
 
 Graphic regionalization outputs are typically saved in png format, which can be easily viewed via a Desktop or 
 VS Code session on INT/EA/UAT.
