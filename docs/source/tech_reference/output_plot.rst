@@ -15,7 +15,7 @@ Summary Scores Map
 
 Description: These maps visualize the summary scores for different formulations across all calibration basins 
 within the VPU. It helps in understanding the performance of each formulation spatially. The higher the summary
-score, the better the formulation performance. Plot created using data from :ref:`summary_score`.
+score, the better the formulation performance. Plot created using data from :ref:`summary-score`.
 
 
 .. figure:: ../_images/output/map_score_conus_vpu03S.png
@@ -30,7 +30,7 @@ Summary Score Histogram
 Description: These histograms display the distribution of summary scores for the different formulations 
 across all calibration basins within the VPU. It provides insights into how many basins achieved certain 
 score ranges for each formulation. The higher the summary score, the better the formulation performance.
-Plot created using data from :ref:`summary_score`.
+Plot created using data from :ref:`summary-score`.
 
 .. figure:: ../_images/output/hist_score_conus_vpu03S.png
    :alt: Histogram of summary scores for different formulations for all calibration basins across the VPU
@@ -53,7 +53,7 @@ Plot created using data from :ref:`formulations`.
 
 
 Formulation Selection Histogram
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Description: These histograms display the distribution of total score, summary score, and cost given the formulation 
 selection across all catchments within the VPU. It provides insights into how many catchments achieved certain 
@@ -69,11 +69,11 @@ Parameter Regionalization Plots
 ---------------------------------
 
 Pairs Distance Map (distance-based algorithms)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Description: These maps display the spatial distribution of spatial and attribute distances (km and unitless, 
 respectively) between donor and receiver catchments within the VPU. It helps in understanding how far donor 
 catchments are, both geographyically and hydrologically, from their corresponding receiver catchments. 
-Plot created using data from :ref:`pairs_distance_algorithms`. 
+Plot created using data from :ref:`pairs-distance-algorithms`. 
 Currently supported distance-based algorithms include: gower and URF.
 
 .. figure:: ../_images/output/map_pairs_gower_conus_vpu03S.png
@@ -83,10 +83,10 @@ Currently supported distance-based algorithms include: gower and URF.
 
 
 Pairs Distance Map (clustering-based algorithms)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Description: These maps display the spatial distribution of spatial distances (km) between donor and receiver 
 catchments within the VPU. It helps in understanding how far donor catchments are geographyically from their 
-corresponding receiver catchments. Plot created using data from :ref:`pairs_cluster_algorithms`. Currently 
+corresponding receiver catchments. Plot created using data from :ref:`pairs-cluster-algorithms`. Currently 
 supported clustering algorithms include: KMeans, KMedoids, HDBSCAN, and BRICH. For clustering-based algorithms, 
 only spatial distance is calculated.
 
@@ -96,11 +96,11 @@ only spatial distance is calculated.
    :align: center
 
 Pairs Distance Histogram (distance-based algorithms)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Description: These histograms display the distribution of spatial and attribute distances (km and unitless, 
 respectively) between donor and receiver catchments within the VPU. It helps in understanding how far donor 
 catchments are, both geographyically and hydrologically, from their corresponding receiver catchments. 
-Plot created using data from :ref:`pairs_distance_algorithms`. Currently supported distance-based algorithms 
+Plot created using data from :ref:`pairs-distance-algorithms`. Currently supported distance-based algorithms 
 include: gower and URF.
 
 .. figure:: ../_images/output/hist_pairs_gower_conus_vpu03S.png
@@ -109,10 +109,10 @@ include: gower and URF.
    :align: center
 
 Pairs Distance Histogram (clustering-based algorithms)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Description: These histograms display the distribution of spatial distances (km) between donor and receiver catchments 
 within the VPU. It helps in understanding how far donor catchments are geographyically from their corresponding 
-receiver catchments. Plot created using data from :ref:`pairs_cluster_algorithms`. Currently supported clustering
+receiver catchments. Plot created using data from :ref:`pairs-cluster-algorithms`. Currently supported clustering
 algorithms include: KMeans, KMedoids, HDBSCAN, and BRICH. For clustering-based algorithms, only spatial distance 
 is calculated.
 
@@ -140,7 +140,7 @@ Attribute Spatial Maps
 
 Description: These maps display the spatial distribution of attribute values across all catchments in the VPU. 
 It helps in understanding the variability of attributes used in parameter regionalization. Only attributes configured
-for plotting (in the output section of the configuration) are shown. Plot created using data from :ref:`attr_data_final`.
+for plotting (in the output section of the configuration) are shown. Plot created using data from :ref:`attr-data-final`.
 
 
 .. figure:: ../_images/output/map_attr_conus_vpu03S.png
@@ -154,7 +154,7 @@ Attribute Histogram
 
 Description: These histograms display the distribution of attribute values across all catchments in the VPU. 
 It helps in understanding the variability of attributes used in parameter regionalization. Only attributes configured
-for plotting (in the output section of the configuration) are shown. Plot created using data from :ref:`attr_data_final`.
+for plotting (in the output section of the configuration) are shown. Plot created using data from :ref:`attr-data-final`.
 
 
 .. figure:: ../_images/output/hist_attr_conus_vpu03S.png
@@ -183,7 +183,7 @@ Missing Attribute Barchart
 Description: This bar chart visualizes the count of catchments in the VPU with missing attributes. 
 It helps in understanding the data gaps that may affect parameter regionalization. Missing attributes are
 excluded from the parameter regionalization process for affected catchments. 
-Plot created using data from :ref:`attr_data_final`.
+Plot created using data from :ref:`attr-data-final`.
 
 .. figure:: ../_images/output/bar_attr_missing_count_conus_vpu03S.png
    :alt: Bar chart of count of catchments with missing attributes in the VPU

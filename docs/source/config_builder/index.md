@@ -14,59 +14,64 @@ The tabs on the left will take you to the builder for each of the specific confi
 ## Table of Contents
 
 - [General Configuration](#general-configuration)
-  - [Example File](#example-file)
-  - [Schemas](#schemas)
-    - [general](#general)
-    - [id_col](#id-col)
-    - [layer_name](#layer-name)
-    - [logging](#logging)
+  - [Example File](#general-configuration-example-file)
+  - [Schemas](#general-configuration-schemas)
+    - [general](#general-configuration-schemas-general)
+    - [id_col](#general-configuration-schemas-id-col)
+    - [layer_name](#general-configuration-schemas-layer-name)
+    - [logging](#general-configuration-schemas-logging)
 - [Formulation Regionalization](#formulation-regionalization)
-  - [Example File](#example-file)
-  - [Schemas](#schemas)
-    - [general](#general)
-    - [general.logging](#general-logging)
-    - [spatial_unit](#spatial-unit)
-    - [spatial_unit.best_formulation](#spatial-unit-best-formulation)
-    - [summary_score](#summary-score)
-    - [summary_score.metric_eval_period](#summary-score-metric-eval-period)
-    - [summary_score.metrics](#summary-score-metrics)
-    - [formulation_cost](#formulation-cost)
-    - [output](#output)
-    - [Type: BaseOutputConfig](#type-baseoutputconfig)
+  - [Example File](#formulation-regionalization-example-file)
+  - [Schemas](#formulation-regionalization-schemas)
+    - [general](#formulation-regionalization-schemas-general)
+    - [general.logging](#formulation-regionalization-schemas-general-logging)
+    - [spatial_unit](#formulation-regionalization-schemas-spatial-unit)
+    - [spatial_unit.best_formulation](#formulation-regionalization-schemas-spatial-unit-best-formulation)
+    - [summary_score](#formulation-regionalization-schemas-summary-score)
+    - [summary_score.metric_eval_period](#formulation-regionalization-schemas-summary-score-metric-eval-period)
+    - [summary_score.metrics](#formulation-regionalization-schemas-summary-score-metrics)
+    - [formulation_cost](#formulation-regionalization-schemas-formulation-cost)
+    - [output](#formulation-regionalization-schemas-output)
+    - [Type: BaseOutputConfig](#formulation-regionalization-schemas-type-baseoutputconfig)
 - [Parameter Regionalization](#parameter-regionalization)
-  - [Example File](#example-file)
-  - [Schemas](#schemas)
-    - [general](#general)
-    - [general.logging](#general-logging)
-    - [donor](#donor)
-    - [donor.metric_eval_period](#donor-metric-eval-period)
-    - [donor.metric_threshold](#donor-metric-threshold)
-    - [attr_datasets](#attr-datasets)
-    - [Class: AttrDatasetConfig](#class-attrdatasetconfig)
-    - [snow_cover](#snow-cover)
-    - [algorithms](#algorithms)
-    - [algorithms.algo_general](#algorithms-algo-general)
-    - [algorithms.gower](#algorithms-gower)
-    - [algorithms.kmeans](#algorithms-kmeans)
-    - [algorithms.kmedoids](#algorithms-kmedoids)
-    - [algorithms.birch](#algorithms-birch)
-    - [algorithms.hdbscan](#algorithms-hdbscan)
-    - [output](#output)
-    - [Class: BaseOutputConfig](#class-baseoutputconfig)
+  - [Example File](#parameter-regionalization-example-file)
+  - [Schemas](#parameter-regionalization-schemas)
+    - [general](#parameter-regionalization-schemas-general)
+    - [general.logging](#parameter-regionalization-schemas-general-logging)
+    - [donor](#parameter-regionalization-schemas-donor)
+    - [donor.metric_eval_period](#parameter-regionalization-schemas-donor-metric-eval-period)
+    - [donor.metric_threshold](#parameter-regionalization-schemas-donor-metric-threshold)
+    - [attr_datasets](#parameter-regionalization-schemas-attr-datasets)
+    - [Class: AttrDatasetConfig](#parameter-regionalization-schemas-class-attrdatasetconfig)
+    - [snow_cover](#parameter-regionalization-schemas-snow-cover)
+    - [algorithms](#parameter-regionalization-schemas-algorithms)
+    - [algorithms.algo_general](#parameter-regionalization-schemas-algorithms-algo-general)
+    - [algorithms.gower](#parameter-regionalization-schemas-algorithms-gower)
+    - [algorithms.kmeans](#parameter-regionalization-schemas-algorithms-kmeans)
+    - [algorithms.kmedoids](#parameter-regionalization-schemas-algorithms-kmedoids)
+    - [algorithms.birch](#parameter-regionalization-schemas-algorithms-birch)
+    - [algorithms.hdbscan](#parameter-regionalization-schemas-algorithms-hdbscan)
+    - [output](#parameter-regionalization-schemas-output)
+    - [Class: BaseOutputConfig](#parameter-regionalization-schemas-class-baseoutputconfig)
 - [NGEN Simulation](#ngen-simulation)
-  - [Example File](#example-file)
-  - [Schemas](#schemas)
-    - [general](#general)
-    - [general.logging](#general-logging)
-    - [output](#output)
-    - [Type: BaseOutputConfig](#type-baseoutputconfig)
+  - [Example File](#ngen-simulation-example-file)
+  - [Schemas](#ngen-simulation-schemas)
+    - [general](#ngen-simulation-schemas-general)
+    - [general.logging](#ngen-simulation-schemas-general-logging)
+    - [output](#ngen-simulation-schemas-output)
+    - [Type: BaseOutputConfig](#ngen-simulation-schemas-type-baseoutputconfig)
 - [Evaluation](#evaluation)
+
+(general-configuration)=
 
 ## General Configuration
 
 `config_general.yaml`: General configurations (shared by formulation & parameter regionalizations)
 
+(general-configuration-example-file)=
+
 ### Example File
+
 ```yaml
 general:
   run_name: 'test'     # Name of the run, used to create output folders and files.
@@ -95,8 +100,12 @@ general:
     log_to_file: True     # Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console.
     file: 'logs/{run_name}.log'     # Path to the log file. If not provided, logging will be written to console only.
 ```
+(general-configuration-schemas)=
+
 ### Schemas
 
+
+(general-configuration-schemas-general)=
 
 #### general
 
@@ -120,6 +129,8 @@ Class `BaseGeneralConfig`.
 | layer_name | LayerCrosswalk | Dictionary mapping layer names for hydrofabric files. Identifies the layer in each hydrofabric file to be used during regionalization. | huc12='WBDSnapshot_National' ngen='divides' | {'huc12': 'WBDSnapshot_National', 'ngen': 'divides'} |
 | logging | LoggingConfig | Logging configuration for the application. | level='info' log_to_file=False file=None | {'level': 'info', 'log_to_file': True, 'file': 'logs/{run_name}.log'} |
 
+(general-configuration-schemas-id-col)=
+
 #### id_col
 
 Class `FieldCrosswalk`. Inherits `PydanticDictLike`.
@@ -132,6 +143,8 @@ Class `FieldCrosswalk`. Inherits `PydanticDictLike`.
 | vpu | str | Column name for VPU ID. | vpu_id | vpu_id |
 | drainage_area | str | Column name for drainage area. | area_sqkm | area_sqkm |
 
+(general-configuration-schemas-layer-name)=
+
 #### layer_name
 
 Class `LayerCrosswalk`. Inherits `PydanticDictLike`.
@@ -140,6 +153,8 @@ Class `LayerCrosswalk`. Inherits `PydanticDictLike`.
 | --- | --- | --- | --- | --- |
 | huc12 | str | Layer name for HUC12 hydrofabric file. | WBDSnapshot_National | WBDSnapshot_National |
 | ngen | str | Layer name for NextGen hydrofabric file. | divides | divides |
+
+(general-configuration-schemas-logging)=
 
 #### logging
 
@@ -150,11 +165,16 @@ Class `LoggingConfig`.
 | level | str = debug \| info \| warning \| error \| critical | Logging level. | info | debug |
 | log_to_file | bool | Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console. | False | False |
 | file | str \| NoneType | Path to the log file. If not provided, logging will be written to console only. | None | logfile.log |
+(formulation-regionalization)=
+
 ## Formulation Regionalization
 
 `config_formreg.yaml`: specific configurations for formulation regionalization (formreg)
 
+(formulation-regionalization-example-file)=
+
 ### Example File
+
 ```yaml
 general:     # General settings for formulation regionalization
   logging:     # Logging configuration for the application.
@@ -220,8 +240,12 @@ output:     # Output configuration for formulation regionalization.
       spatial_map: True
     plot_path: '{base_dir}/outputs/{run_name}/summary_score/plots'     # Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path.
 ```
+(formulation-regionalization-schemas)=
+
 ### Schemas
 
+
+(formulation-regionalization-schemas-general)=
 
 #### general
 
@@ -236,6 +260,8 @@ Class `FormulationGeneralSettings`. Inherits `BaseGeneralConfig`.
 | formulation_to_exclude | list[str] \| NoneType | List of formulations to exclude. If None, no formulations are excluded from available options. | None | ['noah-owp-modular cfe-s t-route'] |
 | consider_cost | bool | Whether to consider computational costs of formulations in the regionalization process. | True | False |
 
+(formulation-regionalization-schemas-general-logging)=
+
 #### general.logging
 
 Class `LoggingConfig`.
@@ -245,6 +271,8 @@ Class `LoggingConfig`.
 | level | str = debug \| info \| warning \| error \| critical | Logging level. | info | debug |
 | log_to_file | bool | Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console. | False | False |
 | file | str \| NoneType | Path to the log file. If not provided, logging will be written to console only. | None | logfile.log |
+
+(formulation-regionalization-schemas-spatial-unit)=
 
 #### spatial_unit
 
@@ -257,6 +285,8 @@ Class `FormulationSpatialUnitConfig`.
 | basin_fill_method | str = upscaling \| nearest-neighbor | Method to handle spatial units with too few calibration basins. Options: 'upscaling' (by upscaling to a coarser spatial unit), and 'nearest-neighbor' (by pooling basins from neighboring units). | upscaling | upscaling |
 | best_formulation | BestFormulation | Strategy to determine the best formulation for each spatial unit. | <factory> | {'method': 'total_score', 'type': 'divide', 'tolerance': 0.05} |
 
+(formulation-regionalization-schemas-spatial-unit-best-formulation)=
+
 #### spatial_unit.best_formulation
 
 Class `BestFormulation`.
@@ -267,6 +297,8 @@ Class `BestFormulation`.
 | type | str = basin \| divide | Type of subdivision to use for computing total or average score, options: 'basin', 'divide'. | PydanticUndefined | basin |
 | tolerance | float | Tolerance (on scale of 0.0 to 1.0) for the summary score. Formulations within this tolerance of the best score are considered equally good. | 0.05 | 0.05 |
 
+(formulation-regionalization-schemas-summary-score)=
+
 #### summary_score
 
 Class `FormulationSummaryScoreConfig`.
@@ -276,6 +308,8 @@ Class `FormulationSummaryScoreConfig`.
 | metric_eval_period | MetricEvalPeriod \| NoneType | Evaluation period of metrics to be used for screening donors. | None | {'col_name': 'evalPeriod', 'value': 'valid'} |
 | metrics | dict[str, MetricConfig] | Dictionary of metrics used in the summary score, keyed by metric name. Metric names must match columns in the calibration/validation stats file (case sensitive). Weights must sum to 1.0. Refer to schema of MetricConfig for individual metric settings. | PydanticUndefined | {'cor': {'upper': 1.0, 'lower': -0.5, 'orientation': 'positive', 'weight': 0.5}, 'kge': {'upper': 1.0, 'lower': -0.5, 'orientation': 'positive', 'weight': 0.5}} |
 
+(formulation-regionalization-schemas-summary-score-metric-eval-period)=
+
 #### summary_score.metric_eval_period
 
 Class `MetricEvalPeriod`.
@@ -284,6 +318,8 @@ Class `MetricEvalPeriod`.
 | --- | --- | --- | --- | --- |
 | col_name | str \| NoneType | Name of the column in the donor stats file that contains the evaluation period. No filtering by evaluation period if None. | None | evalPeriod |
 | value | str \| NoneType | Value of the evaluation period to filter donor stats. No filtering by evaluation period if None. | None | full |
+
+(formulation-regionalization-schemas-summary-score-metrics)=
 
 #### summary_score.metrics
 
@@ -297,6 +333,8 @@ Class `MetricConfig`.
 | weight | float | Weight of the metric in the summary score, must be between 0.0 and 1.0. If 0.0, the metric is ignored. | 0.0 | 0.25 |
 | absolute | bool | Whether to use the absolute value of the metric (e.g., for bias) for normalization. | False | False |
 
+(formulation-regionalization-schemas-formulation-cost)=
+
 #### formulation_cost
 
 Class `FormulationCostConfig`.
@@ -305,6 +343,8 @@ Class `FormulationCostConfig`.
 | --- | --- | --- | --- | --- |
 | file | str \| NoneType | Path to CSV file with formulation costs. If provided, costs will be read from this file. | None | {static_data_dir}/region/formulation_costs_secs_per_catchment.csv |
 | costs | dict[str, float] \| NoneType | Dictionary of formulation costs, keyed by formulation name. If `file` is provided, this is ignored. | None | {'noah-owp-modular ueb cfe-x t-route': 10, 'noah-owp-modular snow-17 sac-sma t-route': 5} |
+
+(formulation-regionalization-schemas-output)=
 
 #### output
 
@@ -315,6 +355,8 @@ Class `FormulationOutputConfig`.
 | formulation | BaseOutputConfig | Output configurations for the selected formulations. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/formulations', 'stem': 'form_{domain}_vpu{vpu}', 'stem_suffix': '_pars', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True}, 'plot_path': '{base_dir}/outputs/{run_name}/formulations/plots'} |
 | config_final | BaseOutputConfig | Output configuration for the final configuration file after processing, with placeholders resolved. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_formreg_final.yaml'} |
 | summary_score | BaseOutputConfig | Output configurations for the summary score. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/summary_score', 'stem': 'score_{domain}_vpu{vpu}', 'stem_suffix': '_all_gages', 'format': 'parquet', 'plots': {'histogram': True, 'spatial_map': True}, 'plot_path': '{base_dir}/outputs/{run_name}/summary_score/plots'} |
+
+(formulation-regionalization-schemas-type-baseoutputconfig)=
 
 #### Type: BaseOutputConfig
 
@@ -329,11 +371,16 @@ Class `BaseOutputConfig`.
 | format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | None | None |
 | plots | dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | None |
 | plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | None |
+(parameter-regionalization)=
+
 ## Parameter Regionalization
 
-`config_parreg.yaml: specific configurations for parameter regionalization (parreg)
+`config_parreg.yaml`: specific configurations for parameter regionalization (parreg)
+
+(parameter-regionalization-example-file)=
 
 ### Example File
+
 ```yaml
 general:     # General configuration settings specific to parameter regionalization.
   logging:     # Logging configuration for the application.
@@ -470,8 +517,12 @@ algorithms:     # Algorithm configuration class.  See specific algorithms for ad
     max_thresh: 4.0     # Maximum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds between min_thresh and max_thresh to identify a suitable threshold.
     max_resample: 20     # Maximum number of resamples.
 ```
+(parameter-regionalization-schemas)=
+
 ### Schemas
 
+
+(parameter-regionalization-schemas-general)=
 
 #### general
 
@@ -483,6 +534,8 @@ Class `GeneralConfig`. Inherits `BaseGeneralConfig`.
 | algorithm_list | list[str = gower \| urf \| kmeans \| kmedoids \| hdbscan \| birch \| proximity] | Algorithms to use. Valid options ('gower', 'urf', 'kmeans', 'kmedoids', 'hdbscan', 'birch', 'proximity'). | ['gower'] | ['gower', 'kmeans'] |
 | manual_pairings_file | Path \| str \| dict[str, Path] \| dict[str, str] \| NoneType | Path to the manual pairings file. If provided, this file will be used to specify manual donor-receiver pairings, overriding the algorithmic selections. | None | {static_data_dir}/region/manual_pairings/manual_pairs_{vpu}.csv |
 
+(parameter-regionalization-schemas-general-logging)=
+
 #### general.logging
 
 Class `LoggingConfig`.
@@ -492,6 +545,8 @@ Class `LoggingConfig`.
 | level | str = debug \| info \| warning \| error \| critical | Logging level. | info | debug |
 | log_to_file | bool | Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console. | False | False |
 | file | str \| NoneType | Path to the log file. If not provided, logging will be written to console only. | None | logfile.log |
+
+(parameter-regionalization-schemas-donor)=
 
 #### donor
 
@@ -503,6 +558,8 @@ Class `DonorConfig`.
 | metric_eval_period | MetricEvalPeriod \| NoneType | Evaluation period of metrics to be used for screening donors. | None | {'col_name': 'eval_period', 'value': 'full'} |
 | metric_threshold | dict[str, MetricThreshold] | Dictionary of metric thresholds to be used for screening donors. Each key is a metric name, and metric names must match columns in the calibration/validation stats file (case sensitive). The value is a MetricThreshold object specifying the min, max, and absolute settings. Refer to schema of MetricThreshold for details. | None | {'cor': {'min': 0.4, 'max': None, 'absolute': False}, 'kge': {'min': 0.2, 'max': None, 'absolute': False}} |
 
+(parameter-regionalization-schemas-donor-metric-eval-period)=
+
 #### donor.metric_eval_period
 
 Class `MetricEvalPeriod`.
@@ -511,6 +568,8 @@ Class `MetricEvalPeriod`.
 | --- | --- | --- | --- | --- |
 | col_name | str \| NoneType | Name of the column in the donor stats file that contains the evaluation period. No filtering by evaluation period if None. | None | evalPeriod |
 | value | str \| NoneType | Value of the evaluation period to filter donor stats. No filtering by evaluation period if None. | None | full |
+
+(parameter-regionalization-schemas-donor-metric-threshold)=
 
 #### donor.metric_threshold
 
@@ -521,6 +580,8 @@ Class `MetricThreshold`.
 | min | float \| NoneType | Minimum threshold for the metric. If None, no minimum threshold is applied. | None | None |
 | max | float \| NoneType | Maximum threshold for the metric. If None, no maximum threshold is applied. | None | None |
 | absolute | bool \| NoneType | If True, apply the absolute value of the metric before applying the thresholds. | False | False |
+
+(parameter-regionalization-schemas-attr-datasets)=
 
 #### attr_datasets
 
@@ -533,6 +594,8 @@ Class `AvailableAttrsConfig`.
 | streamcat | AttrDatasetConfig | Configuration for StreamCat attribute dataset (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{static_data_dir}/inputs/attr_config/attr_selection_streamcat.csv', 'attr_data_file': '{static_data_dir}/inputs/attr_datasets/streamcat/attr_streamcat_{domain}.parquet', 'base_attr_list': ['Precip_Minus_EVT', 'Elev', 'BFI']} |
 | hydroatlas | AttrDatasetConfig | Configuration for HydroATLAS attribute dataset (https://www.hydrosheds.org/hydroatlas). | PydanticUndefined | {'attr_list': None, 'attr_select_file': '{static_data_dir}/inputs/attr_config/attr_selection_hydroatlas.csv', 'attr_data_file': '{static_data_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet', 'base_attr_list': ['ele_mt_sav', 'dis_m3_pyr', 'run_mm_syr', 'pre_mm_syr']} |
 
+(parameter-regionalization-schemas-class-attrdatasetconfig)=
+
 #### Class: AttrDatasetConfig
 
 Class `AttrDatasetConfig`.
@@ -544,6 +607,8 @@ Class `AttrDatasetConfig`.
 | attr_data_file | Path \| str \| NoneType | Path to file where attribute data may be found. | None | ['attr_ngen_{domain}.parquet'] |
 | base_attr_list | list \| NoneType | Small list of basic attributes during a 2nd round of pairing if no donor is found using the full set of selected attributes during the first round. | None | ['elevation', 'slope', 'aspect'] |
 
+(parameter-regionalization-schemas-snow-cover)=
+
 #### snow_cover
 
 Class `SnowCoverConfig`.
@@ -554,6 +619,8 @@ Class `SnowCoverConfig`.
 | snow_cover_file | Path \| str \| dict[str, Path \| str] \| NoneType | Path to the snow cover data file, or a dictionary with VPU as keys and file paths as values. | None | {base_dir}/inputs/attr_datasets/hydroatlas/attr_hydroatlas_{domain}.parquet |
 | column | str \| NoneType | Column name in the snow cover data file that contains the snow cover percentage. | snw_pc_syr | snw_pc_syr |
 | threshold | float \| NoneType | Threshold value for snow cover percentage to determine if a catchment is considered snow-driven. | None | 20 |
+
+(parameter-regionalization-schemas-algorithms)=
 
 #### algorithms
 
@@ -569,6 +636,8 @@ Class `AlgorithmConfig`.
 | hdbscan | HDBSCAN | ('Configurations for the clustering algorithm Hierarchical Density Based Spatial Clustering of Applications with Noise (HDBSCAN)',) | max_spa_dist=1000.0 n_donor_max=20 min_var_pca=0.9 min_cluster_size=3 | max_spa_dist=1000.0 n_donor_max=20 min_var_pca=0.9 min_cluster_size=3 |
 | birch | Birch | ('Configurations for the clustering algorithm Balanced Iterative Reducing and Clustering using Hierarchies (BIRCH)',) | max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 branching_factor=50 min_thresh=1.5 max_thresh=4.0 max_resample=20 | max_spa_dist=1000.0 n_donor_max=3 min_var_pca=0.9 branching_factor=50 min_thresh=1.5 max_thresh=4.0 max_resample=20 |
 
+(parameter-regionalization-schemas-algorithms-algo-general)=
+
 #### algorithms.algo_general
 
 Class `AlgoGeneral`.
@@ -578,6 +647,8 @@ Class `AlgoGeneral`.
 | max_spa_dist | float \| NoneType | Maximum spatial distance (km) to consider a donor suitable | 1000.0 | 1500.0 |
 | n_donor_max | int \| NoneType | Maximum number of donors to keep that satisfy all criteria | 3 | 3 |
 | min_var_pca | float \| NoneType | Minimum total variance explained by chosen PCA components | 0.9 | 0.8 |
+
+(parameter-regionalization-schemas-algorithms-gower)=
 
 #### algorithms.gower
 
@@ -593,6 +664,8 @@ Class `Gower`. Inherits `AlgoGeneral`.
 | min_spa_dist | float \| NoneType | Starting distance (km) to iteratively search for donors in the neighborhood | 100.0 | 200.0 |
 | zero_spa_dist | float \| NoneType | Distance threshold (in km) where receiver adopts a donor directly (i.e., donor/receiver are considered overlapping each other) | 1.0 | 1.0 |
 
+(parameter-regionalization-schemas-algorithms-kmeans)=
+
 #### algorithms.kmeans
 
 Class `KMeans`. Inherits `AlgoGeneral`.
@@ -606,6 +679,8 @@ Class `KMeans`. Inherits `AlgoGeneral`.
 | init | str = k-means++ \| random \| NoneType | Method for initialization. | k-means++ | k-means++ |
 | n_init | int \| NoneType | Number of times the k-means algorithm will be run with different centroid seeds. | None | 3 |
 
+(parameter-regionalization-schemas-algorithms-kmedoids)=
+
 #### algorithms.kmedoids
 
 Class `KMedoids`. Inherits `AlgoGeneral`.
@@ -617,6 +692,8 @@ Class `KMedoids`. Inherits `AlgoGeneral`.
 | min_var_pca | float \| NoneType | Minimum total variance explained by chosen PCA components | 0.9 | 0.8 |
 | n_iter_max | int \| NoneType | Maximum number of iterations for the algorithm. | None | 100 |
 | init | str = random \| heuristic \| k-medoids++ \| build \| NoneType | Method for initialization. | heuristic | heuristic |
+
+(parameter-regionalization-schemas-algorithms-birch)=
 
 #### algorithms.birch
 
@@ -632,6 +709,8 @@ Class `Birch`. Inherits `AlgoGeneral`.
 | max_thresh | float \| NoneType | Maximum threshold for the BIRCH algorithm. The algorithm will iterate through thresholds between min_thresh and max_thresh to identify a suitable threshold. | 4.0 | 4.0 |
 | max_resample | int \| NoneType | Maximum number of resamples. | 20 | 20 |
 
+(parameter-regionalization-schemas-algorithms-hdbscan)=
+
 #### algorithms.hdbscan
 
 Class `HDBSCAN`. Inherits `AlgoGeneral`.
@@ -642,6 +721,8 @@ Class `HDBSCAN`. Inherits `AlgoGeneral`.
 | n_donor_max | int \| NoneType | Maximum number of donors to keep that satisfy all criteria. | 20 | 20 |
 | min_var_pca | float \| NoneType | Minimum total variance explained by chosen PCA components | 0.9 | 0.8 |
 | min_cluster_size | int \| NoneType | Minimum size of clusters (to avoid being considered noise) | 3 | 3 |
+
+(parameter-regionalization-schemas-output)=
 
 #### output
 
@@ -654,6 +735,8 @@ Class `ParameterOutputConfig`.
 | attr_data_final | BaseOutputConfig | Configuration for saving and plotting final attribute data used in regionalization. Note only selected attributes are saved, and attribute names are prefixed with the name of the corresponding attribute source (e.g., 'Elev' in StreamCat becomes 'streamcat_Elev'). | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/attr_data_final', 'stem': 'attr_{domain}_vpu{vpu}', 'format': 'parquet', 'plots': {'spatial_map': True, 'histogram': True, 'columns_to_plot': ['streamcat_Elev', 'streamcat_BFI', 'streamcat_Precip_Minus_EVT', 'hlr_PMPE', 'hlr_SAND', 'hlr_TAVE']}, 'plot_path': '{base_dir}/outputs/{run_name}/attr_data_final/plots'} |
 | config_final | BaseOutputConfig | Configuration for saving final configuration file used in regionalization. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_parreg_final.yaml'} |
 | spatial_distance | BaseOutputConfig | Configuration for saving spatial distance data. | save=True path=None stem=None stem_suffix=None format=None plots=None plot_path='None/plots' | {'save': True, 'path': '{base_dir}/outputs/{run_name}/spatial_distance', 'format': 'parquet'} |
+
+(parameter-regionalization-schemas-class-baseoutputconfig)=
 
 #### Class: BaseOutputConfig
 
@@ -668,11 +751,16 @@ Class `BaseOutputConfig`.
 | format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | None | None |
 | plots | dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | None |
 | plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | None |
+(ngen-simulation)=
+
 ## NGEN Simulation
 
 `config_ngen.yaml`: specific configurations for NGEN simulation
 
+(ngen-simulation-example-file)=
+
 ### Example File
+
 ```yaml
 general:     # General settings for NGEN simulation
   logging:     # Logging configuration for the application.
@@ -693,8 +781,12 @@ output:     # Output configuration for NGEN simulation.
     save: True     # Whether to save output files
     path: '{base_dir}/outputs/{run_name}/config_ngen_final.yaml'     # Path to save output file or files. If a directory, the 'stem' and 'format' must be specified.
 ```
+(ngen-simulation-schemas)=
+
 ### Schemas
 
+
+(ngen-simulation-schemas-general)=
 
 #### general
 
@@ -709,6 +801,8 @@ Class `NgenGeneralSettings`. Inherits `BaseGeneralConfig`.
 | pair_file | Path \| str \| dict[str, Path] \| dict[str, str] | Path to the pairing file for NGEN simulation. | PydanticUndefined | outputs/region/{run_name}/pairs/pairs_{algorithm_list}_conus_vpu{vpu}_mswm.csv |
 | config_template | Path \| str | Path to the MSWM configuration template file for NGEN simulation. | default_mswm_template.txt | ['default_mswm_template.txt'] |
 
+(ngen-simulation-schemas-general-logging)=
+
 #### general.logging
 
 Class `LoggingConfig`.
@@ -719,6 +813,8 @@ Class `LoggingConfig`.
 | log_to_file | bool | Whether to log to a file. If set to True, logging messages will be written to the specified log file, in addition to the console. | False | False |
 | file | str \| NoneType | Path to the log file. If not provided, logging will be written to console only. | None | logfile.log |
 
+(ngen-simulation-schemas-output)=
+
 #### output
 
 Class `NgenOutputConfig`.
@@ -727,6 +823,8 @@ Class `NgenOutputConfig`.
 | --- | --- | --- | --- | --- |
 | ngen | BaseOutputConfig | ("Root directory for the NGEN simulation inputs and outputs, under which sub-directories 'regionalization/{run_name}_{algorithm}/vpu_{vpu}/' will be created for each algorithm and VPU.",) | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/ngen'} |
 | config_final | BaseOutputConfig | Output configuration for the final configuration file after processing, with placeholders resolved. | PydanticUndefined | {'save': True, 'path': '{base_dir}/outputs/{run_name}/config_ngen_final.yaml'} |
+
+(ngen-simulation-schemas-type-baseoutputconfig)=
 
 #### Type: BaseOutputConfig
 
@@ -741,6 +839,8 @@ Class `BaseOutputConfig`.
 | format | str \| NoneType | File format for output files, e.g., 'parquet', 'csv', 'yaml'. If not specified, the path must be a file. | None | None |
 | plots | dict[str, Any] \| NoneType | Configuration for output plots, if applicable. | None | None |
 | plot_path | str \| NoneType | Path to save output plots, if applicable. If not specified, plots will be saved in a subfolder 'plots' in the defined output path. | None | None |
+(evaluation)=
+
 ## Evaluation
 
 {{ '`config_eval.yaml`: specific configurations for evaluation. See details at [nwm-eval-mgr configuration](https://ngwpc.github.io/nwm-eval-mgr/config.html#)'.format(github_org) }}

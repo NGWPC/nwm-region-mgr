@@ -220,6 +220,13 @@ def get_sample_data_files(desc_dir: Path, base_prefix: str = "") -> dict[str, st
 
 
 def make_anchor(title: str) -> str:
+    """Convert title to a safe, hyphenated anchor ID."""
+    anchor = title.strip().lower()
+    anchor = re.sub(r"[^a-z0-9]+", "-", anchor)
+    return anchor.strip("-")
+
+
+def old_make_anchor(title: str) -> str:
     """Convert title to a safe RST anchor ID."""
     anchor = title.strip().lower()
     anchor = re.sub(r"[^\w\-]+", "-", anchor)

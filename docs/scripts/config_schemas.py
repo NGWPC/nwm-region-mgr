@@ -425,8 +425,9 @@ def myst_anchor(title: str) -> str:
 
 
 def generate_toc_from_markdown(md_text: str) -> str:
-    """Scan generated markdown, find headings, and return a TOC block (markdown)."""
+    """Scan generated markdown, find headings, and return a TOC block."""
     toc_lines = ["## Table of Contents", ""]
+    heading_stack = []
 
     for line in md_text.splitlines():
         m = re.match(r"^(#{2,6})\s+(.*)", line)
@@ -436,8 +437,12 @@ def generate_toc_from_markdown(md_text: str) -> str:
         level = len(m.group(1))
         title = m.group(2).strip()
 
-        # Generate MyST-compatible anchor
-        anchor = myst_anchor(title)
+        # Remove headings deeper than the current heading level.
+        heading_stack = heading_stack[: level - 2]
+
+        # Build a hierarchical anchor from the current heading path.
+        heading_stack.append(title)
+        anchor = myst_anchor("-".join(heading_stack))
 
         indent = "  " * (level - 2)
         toc_lines.append(f"{indent}- [{title}](#{anchor})")
@@ -476,25 +481,50 @@ def main(docs_to_create: dict) -> None:
 
     # Generate sections for each config file
     lines = []
+
     for i, value in docs_to_create.items():
-        # lines.append(f"### {config_desc.get(i, '')}\n")
+        # Generate a unique anchor for the config file section.
+        doc_anchor = (
+            i.replace("_", "-")
+            .replace(".", "-")
+            .replace(": ", "-")
+            .replace(" ", "-")
+            .lower()
+        )
+
+        lines.append(f"({doc_anchor})=\n")
         lines.append(f"## {i}\n")
         lines.append(f"{value.get('description', '')}\n")
+
         if i == "Evaluation":
             continue
 
-        lines.append("### Example File")
+        # Example file section
+        example_anchor = f"{doc_anchor}-example-file"
+        lines.append(f"({example_anchor})=\n")
+        lines.append("### Example File\n")
+
         lines.append("```yaml")
         lines.append(generate_yaml_template(*value["example_file_class"]))
         lines.append("```")
 
+        # Schemas section
+        schemas_anchor = f"{doc_anchor}-schemas"
+        lines.append(f"({schemas_anchor})=\n")
         lines.append("### Schemas\n")
 
         for j, model_cls in value["schemas"].items():
-            lines.append("")  # blank line before heading
+            # Generate a unique anchor using the parent config section.
+            schema_anchor = (
+                f"{schemas_anchor}-"
+                f"{j.replace('_', '-').replace('.', '-').replace(': ', '-').lower()}"
+            )
+
+            lines.append("")
+            lines.append(f"({schema_anchor})=\n")
             lines.append(f"#### {j}\n")
 
-            # append class information
+            # Append class information
             class_info = f"Class `{model_cls.__name__}`."
 
             parent_cls = [
@@ -502,18 +532,18 @@ def main(docs_to_create: dict) -> None:
                 for c in model_cls.__bases__
                 if issubclass(c, BaseModel) and c not in (BaseModel, object)
             ]
+
             if parent_cls:
                 class_info += (
                     f" Inherits `{', '.join(c.__name__ for c in parent_cls)}`."
                 )
+
             lines.append(class_info)
-
-            lines.append("")  # blank line before the table
-
+            lines.append("")
             lines.append(generate_markdown_table(value["schemas"][j]))
 
     # Append toctree block (for left menu) at the end
-    lines.append("")  # blank line before block
+    lines.append("")
     lines.append(":::{toctree}")
     lines.append(":maxdepth: 2")
     lines.append(":hidden:")

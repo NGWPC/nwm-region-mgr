@@ -7,7 +7,7 @@ The regionalization workflow includes the following steps:
  - **STEP 2**: regionalized NGEN simulation setup (via nwm-mswm-mgr) and execution
  - **STEP 3**: evaluation of regionalized simulations (via nwm-eval-mgr)
 
-Prior to running the regionalization workflow, ensure that you have completed the necessary calibration steps and have properly assembled the calibration parameters and statistics and stored them in the appropriate format (see the sample file and schema for [parameters](tech_reference/input_data.rst#calib-param-file) and [statistics](tech_reference/input_data.rst#calval-stats-file))
+Prior to running the regionalization workflow, ensure that you have completed the necessary calibration steps and have properly assembled the calibration parameters and statistics and stored them in the appropriate format (see the sample file and schema for {ref}`parameters <calib-param-file>`and {ref}`statistics <calval-stats-file>`)
 
 ![Regionalization Workflow](_images/regionalization_workflow.jpeg)
 
@@ -249,9 +249,9 @@ After completion, check the output folder `outputs/region/test1/`, which contain
  - `summary_score/`: summary score for all donor candidates
  - `config_formreg_final.yaml` and `config_parreg_final.yaml`: the final (expanded) configuration files used in this run.
 
-See the **Output Directory Structure** subsection in the [Technical Reference](tech_reference/index.md#output-directory-structure) tab for details on the output directory structure.
+See {doc}`Output Directory Structure <tech_reference/output_tree>`.
 
-See the [Output Tables](tech_reference/output_data.rst) and [Output Plots](tech_reference/output_plot.rst) subsections in the [Technical Reference](tech_reference/index.md) tab for details on output files and plots.
+See {doc}`Output Tables <tech_reference/output_data>` and {doc}`Output Plots <tech_reference/output_plot>` subsections in the {doc}`Technical Reference <tech_reference/index>` tab for details on output files and plots.
 
 #### 2. Run NGEN simulations
 
@@ -562,6 +562,8 @@ Open `docs/build/index.html` in a browser to review the documentation locally.
 
 When developing documentation, regenerate the affected content first, then rebuild the html to verify that generated pages, cross-references, images, and formatting render correctly.
 
+(notes-and-best-practices)=
+
 ## Notes and best practices
 
 ### Formulation regionalization
@@ -616,6 +618,8 @@ When developing documentation, regenerate the affected content first, then rebui
 
 - Parameter regionalization for a given VPU may also rely on formulation-regionalization outputs from neighboring VPUs,
   depending on whether calibration basins from those VPUs fall within the buffer distance specified in the configuration.
+
+(docker-permissions)=
 
 #### Docker permissions
 When first running the regionalization workflow in INT/EA/UAT clusters, you may encounter permission issues when pulling the nwm-rte image or running the container. This is because your user account may not have permissions to access the docker socket or pull images from the registry. To resolve theses issues, run the following commands from the terminal before submitting your first regionalization job. You only need to do this once, and it will grant the necessary permissions for all future runs. 
@@ -739,7 +743,7 @@ scancel 12345678
 ``` 
 
 #### Viewing regionalization outputs
-Sample regionalization outputs can be found in {ref}`Output Plots <output-plots>` and {ref}`Output Tables <output-data>`.
+Sample regionalization outputs can be found in {doc}`Output Plots <tech_reference/output_plot>` and {doc}`Output Tables <tech_reference/output_data>`.
 
 Graphic regionalization outputs are typically saved in png format, which can be easily viewed via a Desktop or 
 VS Code session on INT/EA/UAT.
